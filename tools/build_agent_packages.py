@@ -30,6 +30,7 @@ def build(out_dir, source_revision):
     results = []
     for role, tier in ROLES.items():
         package_version = project["framework_version"]
+        role_files = [f"roles/{role}.md", f"bootstrap/{role}.md"]
         manifest = {
             "schema": "org-agent-mesh/agent-package-manifest/v1",
             "project_id": project["project_id"],
@@ -39,7 +40,7 @@ def build(out_dir, source_revision):
             "protocol_version": project["protocol_version"],
             "package_version": package_version,
             "source_revision": source_revision,
-            "included_components": SHARED + [f"roles/{role}.md"]
+            "included_components": SHARED + role_files
         }
         path = out / f"{project['project_id']}-{role.lower()}-{package_version}.zip"
         with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
