@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Project Lifecycle Registry Record",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "project_id": {"type": "string", "minLength": 1},
+    "repository_identity": {"type": "string", "minLength": 1},
+    "status": {"enum": ["ACTIVE", "DRAINING", "PAUSED"]},
+    "version": {"type": "integer", "minimum": 1},
+    "updated_at_utc": {"type": "string", "minLength": 1}
+  },
+  "required": ["project_id", "repository_identity", "status", "version", "updated_at_utc"]
+}

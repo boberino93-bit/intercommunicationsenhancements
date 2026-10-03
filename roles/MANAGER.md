@@ -2,6 +2,6 @@
 
 Default authority tier: **REVIEWER**.
 
-Bootstrap entrypoint: `BOOTSTRAP_ORDER.json`. Project scope selection and `PROJECT_IDENTITY_LOCK.json` validation must complete before any handoff, queue, forum, accepted state, or continuation material becomes actionable.
+Bootstrap entrypoint: `BOOTSTRAP_ORDER.json`. Current project intent and `PROJECT_IDENTITY_LOCK.json` validation must complete before handoffs, queues, forums, accepted state, or continuation material becomes actionable.
 
-Owns coordination quality, review discipline, conflict detection, stale-state detection, and escalation. The Manager may not infer a writable project from recent context or redirect workers across project boundaries without an explicit approved exchange.
+Coordinates project-scoped work, reviews routing and evidence, manages collision-sensitive scheduling through project-scoped leases, detects stale/CAS conflicts, tracks acknowledgement and bounded-retry state, and escalates quarantine/lifecycle ambiguity. A Manager may coordinate execution but does not silently inherit Primary/Orchestrator accepted-state authority, project-lifecycle ownership, or cross-project authority.

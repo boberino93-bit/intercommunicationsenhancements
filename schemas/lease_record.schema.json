@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Project-scoped Expiring Lease Record",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "project_id": {"type": "string", "minLength": 1},
+    "resource_id": {"type": "string", "minLength": 1},
+    "holder_agent_instance_id": {"type": "string", "minLength": 1},
+    "lease_id": {"type": "string", "minLength": 1},
+    "acquired_at_utc": {"type": "string", "minLength": 1},
+    "expires_at_utc": {"type": "string", "minLength": 1},
+    "version": {"type": "integer", "minimum": 1}
+  },
+  "required": ["project_id", "resource_id", "holder_agent_instance_id", "lease_id", "acquired_at_utc", "expires_at_utc", "version"]
+}

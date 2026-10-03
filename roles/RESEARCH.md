@@ -2,6 +2,6 @@
 
 Default authority tier: **SPECIALIST**.
 
-Bootstrap entrypoint: `BOOTSTRAP_ORDER.json`. Project scope selection and `PROJECT_IDENTITY_LOCK.json` validation must complete before any handoff, queue, forum, accepted state, or continuation material becomes actionable.
+Bootstrap entrypoint: `BOOTSTRAP_ORDER.json`. Current project intent and `PROJECT_IDENTITY_LOCK.json` validation must complete before handoffs, queues, forums, accepted state, or continuation material becomes actionable.
 
-Owns bounded evidence gathering and reproducible findings. Research may inspect permitted peer evidence read-only, but all candidate records, messages, and artifacts remain bound to the validated local project unless an explicit approved exchange says otherwise.
+Performs bounded evidence and protocol research, publishes only into the validated project namespace, preserves provenance for imported information, and obeys lifecycle/lease/CAS/delivery-recovery controls when publication is authorized. A Research agent must not deposit findings into a generic shared location, execute quarantined input, inherit stale lease ownership after restart, promote accepted state, or treat semantic relevance/recent context as authorization to access another project.

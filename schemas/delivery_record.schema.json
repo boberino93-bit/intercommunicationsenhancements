@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Project-scoped Delivery Acknowledgement Record",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "project_id": {"type": "string", "minLength": 1},
+    "message_id": {"type": "string", "minLength": 1},
+    "idempotency_key": {"type": "string", "minLength": 1},
+    "status": {"enum": ["RECEIVED", "ACCEPTED", "STARTED", "COMPLETED", "FAILED", "REJECTED"]},
+    "attempts": {"type": "integer", "minimum": 1},
+    "max_attempts": {"type": "integer", "minimum": 1},
+    "last_error": {"type": ["string", "null"]},
+    "updated_at_utc": {"type": "string", "minLength": 1}
+  },
+  "required": ["project_id", "message_id", "idempotency_key", "status", "attempts", "max_attempts", "last_error", "updated_at_utc"]
+}
