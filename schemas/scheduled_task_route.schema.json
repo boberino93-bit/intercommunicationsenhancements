@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "org-agent-mesh/scheduled-task-route/v1",
+  "title": "Scheduled Task Route",
+  "type": "object",
+  "required": [
+    "schema",
+    "project_id",
+    "task_id",
+    "execution_scheduler",
+    "delivery_transport",
+    "delivery_events"
+  ],
+  "properties": {
+    "schema": {"const": "org-agent-mesh/scheduled-task-route/v1"},
+    "project_id": {"type": "string", "minLength": 1},
+    "task_id": {"type": "string", "minLength": 1},
+    "execution_scheduler": {"enum": ["AUTOMATION", "NONE_STATIC_SLACK"]},
+    "delivery_transport": {"enum": ["NONE", "SLACK"]},
+    "slack_workspace_id": {"type": ["string", "null"]},
+    "slack_destination_id": {"type": ["string", "null"], "pattern": "^[CDGUW][A-Z0-9]+$"},
+    "slack_thread_ts": {"type": ["string", "null"], "pattern": "^[0-9]+\\.[0-9]+$"},
+    "delivery_events": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"enum": ["START", "BLOCKER", "COMPLETE", "FAILURE", "DIGEST"]}
+    },
+    "slack_input_mode": {"enum": ["NONE", "READ_ONLY_CONTEXT", "EXPLICIT_HUMAN_APPROVAL"]},
+    "canonical_state_required_before_completion_post": {"const": true},
+    "idempotency_key": {"type": ["string", "null"]}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"delivery_transport": {"const": "SLACK"}}},
+      "then": {"required": ["slack_destination_id"]}
+    }
+  ],
+  "additionalProperties": false
+}
