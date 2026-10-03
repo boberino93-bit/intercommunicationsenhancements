@@ -17,7 +17,7 @@ SHARED = [
     "PROJECT_MANIFEST.json", "PROJECT_CHARTER.md", "ARCHITECTURE.md", "START_HERE.md", "VERSION",
     "protocols/project_isolation.md", "protocols/cross_project_exchange.md", "protocols/deployment_package_sync.md",
     "protocols/recursive_self_enhancement.md", "protocols/slack_scheduled_tasks.md", "protocols/multi_project_capacity.md",
-    "protocols/control_plane_recovery.md",
+    ".interagent/capacity/freshness_policy.json", "protocols/control_plane_recovery.md",
     "schemas/message.schema.json", "schemas/agent_record.schema.json", "schemas/presence_frame.schema.json",
     "schemas/agent_package_manifest.schema.json", "schemas/cross_project_exchange.schema.json",
     "schemas/enhancement_candidate.schema.json", "schemas/scheduled_task_route.schema.json",
