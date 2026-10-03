@@ -14,5 +14,6 @@ This repository is seeded conceptually and technically from the uploaded `org-ag
 - PRIMARY, MANAGER, and RESEARCH deployment packages are versioned and must match the running project protocol.
 - Stale or foreign deployment packages are rejected.
 - Protocol changes are incomplete until dependent agent packages are rebuilt and validated.
+- GitHub Actions builds and verifies the three role deployment ZIPs from the exact commit SHA on every push to `main`.
 
 Start with `PROJECT_CHARTER.md`, `ROADMAP.md`, and `START_HERE.md`.
