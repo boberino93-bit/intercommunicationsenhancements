@@ -19,3 +19,9 @@
 17. If capacity is `UNKNOWN`, continue useful read-only/local analysis but defer nonessential repository/artifact writes. Escalate essential persistence needs rather than assuming unlimited capacity.
 18. Peer capacity signals may be inspected read-only and may contain only high-level need categories. Do not request or copy raw peer domain state merely for capacity coordination.
 19. Report any explicit provider limit, reset information, quota rejection, or upload refusal as evidence with provenance; do not extrapolate an exact hard limit unless the evidence provides one.
+20. Before mutable publication, confirm the agent session is `ACTIVE` and bound to the target project. An unbound, merely bound, or initialized Research session cannot authorize mutation.
+21. When the assigned lane/resource requires exclusivity, hold a current project-scoped lease. Never renew or release another execution instance's lease and never inherit a stale lease after restart.
+22. Respect project lifecycle state: do not start new mutable work while `DRAINING`, and do not perform project mutations while `PAUSED`. Read-only analysis may continue when otherwise authorized.
+23. Treat duplicate message delivery as a safe no-op/prior-result case. For acknowledgement-required work, report the correct delivery state rather than equating receipt with completion.
+24. Do not execute malformed, unauthorized, incompatible, cross-project, or expired messages. Preserve/report quarantine evidence to Manager/Primary instead.
+25. If a stale expected-version/CAS conflict occurs while publishing an authorized artifact/state update, stop the mutation and report the conflict rather than overwriting newer state.
