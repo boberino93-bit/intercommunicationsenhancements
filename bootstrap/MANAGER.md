@@ -15,3 +15,8 @@
 13. For Slack-enabled scheduled tasks, verify the bound project, task ID, explicit Slack destination ID, permitted delivery events, and external-communication authority before posting.
 14. Surface configured blockers/failures to Slack when useful, but keep canonical state and accepted decisions in the project record. Fold material human decisions from Slack back into canonical state before treating them as project truth.
 15. Do not create noisy per-step Slack chatter for routine scheduled work; prefer one blocker/failure message when needed and one completion/digest message with canonical references.
+16. Aggregate local pending write demand by `ESSENTIAL_CANONICAL`, `COALESCED_CHECKPOINT`, and `DISCRETIONARY`; recommend batching or deferral according to the capacity state.
+17. In `PRESERVE`, `RESERVE_ONLY`, or `UNKNOWN`, prefer read-only assignments and consolidate nonurgent outputs. Never interpret `UNKNOWN` as spare capacity.
+18. Read peer capacity signals only as advisory high-level metadata. Validate their freshness under an explicit local freshness policy; stale or absent peer data becomes `UNKNOWN`.
+19. Escalate reserve consumption, `PRIMARY_DECISION`, `BLOCKED`, or material `CAPACITY_PRESSURE` to Primary. Manager cannot create a hard-limit value from guesswork.
+20. Avoid standalone capacity heartbeat commits; include materially changed capacity state in the next required canonical checkpoint when practical.

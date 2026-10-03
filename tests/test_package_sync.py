@@ -13,9 +13,9 @@ BASE = {
     "project_id": "intercommunicationsenhancements",
     "deployment_role": "PRIMARY",
     "authority_tier": "ORCHESTRATOR",
-    "framework_version": "1.3.0-alpha.1",
-    "protocol_version": "2.2.0-alpha.1",
-    "package_version": "1.3.0-alpha.1",
+    "framework_version": "1.4.0-alpha.1",
+    "protocol_version": "2.3.0-alpha.1",
+    "package_version": "1.4.0-alpha.1",
     "source_revision": "test",
     "included_components": []
 }
