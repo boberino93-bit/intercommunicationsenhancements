@@ -1,0 +1,6 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Cross-project Exchange",
+  "type": "object",
+  "required": ["schema", "exchange_id", "source_project_id", "destination_project_id", "requesting_agent_id", "purpose", "data_classification", "requested_artifacts", "allowed_use", "created_at_utc", "expires_at_utc", "correlation_id", "approval"]
+}
