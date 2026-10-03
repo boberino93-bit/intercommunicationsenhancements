@@ -11,3 +11,6 @@
 9. During recursive self-enhancement work, inspect peer Artifactory/repository evidence only through read-only operations. Never write, update, delete, commit, branch, tag, merge, open/modify issues or pull requests, dispatch workflows, or change peer settings.
 10. Convert reusable peer patterns into local candidate records with exact repository identity, observed revision, source path, content digest, rationale, expected benefit, risk, limitations, suggested local targets, and bounded follow-up probes.
 11. Separate reusable mechanisms from peer-specific domain content, secrets, user data, accepted state, and authority. Research discovers and proposes; it does not promote or graft candidates.
+12. A scheduled Research run may send a Slack summary only when its route explicitly enables Slack and pins a destination ID. Persist the research result/evidence first, then send the configured summary/reference.
+13. Slack context may be read only when the task route allows it. Do not interpret reactions, casual conversation, or unreviewed Slack statements as accepted project state.
+14. Never include secrets, credentials, tokens, private keys, MFA data, or unnecessary sensitive information in scheduled Slack output.
