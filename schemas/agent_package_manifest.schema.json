@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Agent Deployment Package Manifest",
+  "type": "object",
+  "properties": {
+    "project_id": {"type": "string", "minLength": 1},
+    "deployment_role": {"enum": ["PRIMARY", "MANAGER", "RESEARCH"]},
+    "authority_tier": {"enum": ["ORCHESTRATOR", "REVIEWER", "SPECIALIST"]},
+    "framework_version": {"type": "string"},
+    "protocol_version": {"type": "string"},
+    "package_version": {"type": "string"},
+    "source_revision": {"type": "string"},
+    "included_components": {"type": "array"}
+  },
+  "required": ["schema", "project_id", "deployment_role", "authority_tier", "framework_version", "protocol_version", "package_version", "source_revision", "included_components"]
+}
