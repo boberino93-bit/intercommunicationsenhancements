@@ -1,0 +1,18 @@
+{
+  "schema": "org-agent-mesh/local-directive/v1",
+  "directive_id": "2026-10-03-project-identity-recovery",
+  "project_id": "intercommunicationsenhancements",
+  "status": "ACTIVE",
+  "scope": "PROJECT_LOCAL",
+  "lesson": "Recent context is not project authority.",
+  "required_order": [
+    "current_human_project_intent",
+    "project_identity_lock",
+    "package_and_role_validation",
+    "project_continuation_state",
+    "task_execution"
+  ],
+  "cross_project_write_default": "DENY",
+  "package_propagation_required": true,
+  "source_incident_state_imported": false
+}
