@@ -1,0 +1,2 @@
+# intercommunicationsenhancements
+intercommunicationsenhancements for swarm agents via artifactory message form
