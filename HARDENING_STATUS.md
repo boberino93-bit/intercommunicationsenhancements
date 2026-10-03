@@ -63,7 +63,7 @@ The 1.5.0-alpha.1 package dependency map includes:
 - updated Primary/Manager/Research bootstrap contracts;
 - all prior shared protocol layers (isolation, cross-project exchange, recursive self-enhancement, Slack scheduled tasks, capacity coordination).
 
-The current branch is **NOT release-complete until exact-source CI has rebuilt and verified all three 1.5.0-alpha.1 ZIPs**. The final release evidence must identify the exact source revision, workflow result, package filenames, and archive hashes. Do not substitute the hashes of an older package generation.
+A source revision is release-complete only after exact-source CI has rebuilt and verified all three 1.5.0-alpha.1 ZIPs. Release evidence must identify the exact source revision, workflow result, package filenames, and archive hashes. An unbuilt revision is incomplete, and hashes from an older package generation are not evidence for a newer source revision.
 
 ## Partially enforced / remaining risks
 
@@ -72,6 +72,6 @@ The current branch is **NOT release-complete until exact-source CI has rebuilt a
 - **PARTIALLY ENFORCED:** cross-project exchange has a fail-closed capability/approval validator; a full sanitized export/import bridge service remains future work.
 - **NOT IMPLEMENTED AS A GLOBAL SERVICE:** organization-wide observability/telemetry aggregation. Project-scoped evidence and identifiers exist, but a durable global query service is still a next layer.
 
-## Release status
+## Release status rule
 
-`HARDENING STATUS = INCOMPLETE` until the branch test/build/package workflow succeeds for the final source revision and the coordinated PRIMARY/MANAGER/RESEARCH artifacts are verified. After that evidence exists, the source-level hardening in this release may be marked complete for the current alpha scope while the distributed-backend risks above remain explicitly open.
+For any revision, `HARDENING STATUS = COMPLETE FOR CURRENT ALPHA SCOPE` only when that exact revision's test/build/package workflow succeeds and the coordinated PRIMARY/MANAGER/RESEARCH artifacts are verified. Otherwise `HARDENING STATUS = INCOMPLETE`. Distributed-backend and global-service risks listed above remain explicitly open even when the source/package release gate passes.
