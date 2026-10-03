@@ -11,12 +11,14 @@ SHARED = [
     "PROJECT_MANIFEST.json", "PROJECT_CHARTER.md", "ARCHITECTURE.md", "START_HERE.md", "VERSION",
     "protocols/project_isolation.md", "protocols/cross_project_exchange.md", "protocols/deployment_package_sync.md",
     "protocols/recursive_self_enhancement.md", "protocols/slack_scheduled_tasks.md",
+    "protocols/multi_project_capacity.md",
     "schemas/message.schema.json", "schemas/agent_record.schema.json", "schemas/presence_frame.schema.json",
     "schemas/agent_package_manifest.schema.json", "schemas/cross_project_exchange.schema.json",
     "schemas/enhancement_candidate.schema.json", "schemas/scheduled_task_route.schema.json",
+    "schemas/capacity_signal.schema.json",
     "org_agent_mesh/constants.py", "org_agent_mesh/project_scope.py", "org_agent_mesh/message_bus.py",
     "org_agent_mesh/cross_project.py", "org_agent_mesh/package_manifest.py", "org_agent_mesh/self_enhancement.py",
-    "org_agent_mesh/scheduled_tasks.py"
+    "org_agent_mesh/scheduled_tasks.py", "org_agent_mesh/capacity.py"
 ]
 
 

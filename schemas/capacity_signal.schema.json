@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "org-agent-mesh/capacity-signal/v1",
+  "title": "Organization Agent Mesh Capacity Signal",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "project_id",
+    "repository_identity",
+    "observed_revision",
+    "measured_at_utc",
+    "overall_state",
+    "resources",
+    "high_level_needs",
+    "pending_writes",
+    "batching_recommended",
+    "discretionary_writes_blocked",
+    "essential_writes_blocked"
+  ],
+  "properties": {
+    "schema": {"const": "org-agent-mesh/capacity-signal/v1"},
+    "project_id": {"type": "string", "minLength": 1},
+    "repository_identity": {"type": "string", "minLength": 1},
+    "observed_revision": {"type": "string", "minLength": 1},
+    "measured_at_utc": {"type": "string", "format": "date-time"},
+    "overall_state": {"enum": ["GREEN", "AMBER", "PRESERVE", "RESERVE_ONLY", "EXHAUSTED", "UNKNOWN"]},
+    "resources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["resource_kind", "hard_limit", "used", "source", "reserve_fraction", "safe_ceiling", "remaining_safe_budget", "state", "measurement_window", "reset_at_utc"],
+        "properties": {
+          "resource_kind": {"enum": ["COMMITS", "UPLOADS", "BYTES", "ARTIFACTS", "API_WRITES"]},
+          "hard_limit": {"type": ["integer", "null"], "minimum": 1},
+          "used": {"type": ["integer", "null"], "minimum": 0},
+          "source": {"enum": ["EXPLICIT_CONFIG", "PROVIDER_OBSERVED", "ERROR_DERIVED", "UNKNOWN"]},
+          "reserve_fraction": {"type": "number", "exclusiveMinimum": 0, "exclusiveMaximum": 1},
+          "safe_ceiling": {"type": ["integer", "null"], "minimum": 0},
+          "remaining_safe_budget": {"type": ["integer", "null"], "minimum": 0},
+          "state": {"enum": ["GREEN", "AMBER", "PRESERVE", "RESERVE_ONLY", "EXHAUSTED", "UNKNOWN"]},
+          "measurement_window": {"type": ["string", "null"]},
+          "reset_at_utc": {"type": ["string", "null"], "format": "date-time"}
+        }
+      }
+    },
+    "high_level_needs": {"type": "array", "uniqueItems": true, "items": {"enum": ["REVIEW_REQUIRED", "PRIMARY_DECISION", "RELEASE_PENDING", "CAPACITY_PRESSURE", "BLOCKED"]}},
+    "pending_writes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ESSENTIAL_CANONICAL", "COALESCED_CHECKPOINT", "DISCRETIONARY"],
+      "properties": {
+        "ESSENTIAL_CANONICAL": {"type": "integer", "minimum": 0},
+        "COALESCED_CHECKPOINT": {"type": "integer", "minimum": 0},
+        "DISCRETIONARY": {"type": "integer", "minimum": 0}
+      }
+    },
+    "batching_recommended": {"type": "boolean"},
+    "discretionary_writes_blocked": {"type": "boolean"},
+    "essential_writes_blocked": {"type": "boolean"}
+  }
+}

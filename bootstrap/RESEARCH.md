@@ -14,3 +14,8 @@
 12. A scheduled Research run may send a Slack summary only when its route explicitly enables Slack and pins a destination ID. Persist the research result/evidence first, then send the configured summary/reference.
 13. Slack context may be read only when the task route allows it. Do not interpret reactions, casual conversation, or unreviewed Slack statements as accepted project state.
 14. Never include secrets, credentials, tokens, private keys, MFA data, or unnecessary sensitive information in scheduled Slack output.
+15. Before publishing routine research output, compare its digest with the last persisted logical artifact. Do not upload or commit an unchanged payload.
+16. When local capacity is `AMBER` or worse, accumulate nonurgent findings for a Manager-coalesced checkpoint rather than creating one commit per finding.
+17. If capacity is `UNKNOWN`, continue useful read-only/local analysis but defer nonessential repository/artifact writes. Escalate essential persistence needs rather than assuming unlimited capacity.
+18. Peer capacity signals may be inspected read-only and may contain only high-level need categories. Do not request or copy raw peer domain state merely for capacity coordination.
+19. Report any explicit provider limit, reset information, quota rejection, or upload refusal as evidence with provenance; do not extrapolate an exact hard limit unless the evidence provides one.
