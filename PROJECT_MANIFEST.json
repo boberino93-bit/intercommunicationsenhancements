@@ -1,7 +1,7 @@
 {
   "schema": "org-agent-mesh/project-manifest/v1",
-  "framework_version": "1.4.0-alpha.1",
-  "protocol_version": "2.3.0-alpha.1",
+  "framework_version": "1.5.0-alpha.1",
+  "protocol_version": "2.4.0-alpha.1",
   "project_id": "intercommunicationsenhancements",
   "project_name": "Intercommunications Enhancements",
   "project_slug": "intercommunicationsenhancements",
@@ -12,17 +12,17 @@
   "desired_outcome": "A reusable, fail-closed, project-scoped communication and deployment control plane suitable for autonomous multi-project operation.",
   "deliverable_types": ["protocols", "reference implementation", "adversarial tests", "agent deployment packages"],
   "stakeholders": ["framework maintainers", "project primary agents", "manager agents", "research agents"],
-  "constraints": ["Do not modify peer project repositories from this project", "Deny cross-project access by default", "Preserve evidence and auditability", "Do not silently elevate agent authority", "Recursive learning may observe peers read-only but may graft changes only into this project after local review", "Slack is an optional scheduled-task transport and not canonical project state", "Preserve at least 20 percent verified repository/artifact capacity for essential writes when a hard limit is known", "Unknown repository/artifact capacity must never be interpreted as unlimited"],
+  "constraints": ["Do not modify peer project repositories from this project", "Deny cross-project access by default", "Preserve evidence and auditability", "Do not silently elevate agent authority", "Recursive learning may observe peers read-only but may graft changes only into this project after local review", "Slack is an optional scheduled-task transport and not canonical project state", "Preserve at least 20 percent verified repository/artifact capacity for essential writes when a hard limit is known", "Unknown repository/artifact capacity must never be interpreted as unlimited", "Durable persistence adapters must preserve atomic lease and compare-and-set semantics or fail closed"],
   "non_goals": ["Implement domain logic for Duo Open", "Implement domain logic for BenefitFlow", "Create shared mutable state between projects", "Use Slack as canonical accepted state", "Create a central controller that may mutate peer projects"],
   "assumptions": ["The uploaded Organization Agent Mesh v1.0.0 package is the seed baseline."],
   "authoritative_sources": ["uploaded org-agent-mesh-framework-v1.0.0 package", "this repository after accepted integration"],
   "source_systems": ["GitHub", "Slack"],
-  "validation_methods": ["unit tests", "integration tests", "adversarial isolation tests", "package bootstrap validation", "scheduled-task route validation", "capacity reserve and unknown-limit tests"],
-  "approval_gates": ["Cross-project exchange remains denied unless explicitly approved/capability-granted", "Recursive self-enhancement candidates require local evidence review and Primary acceptance before grafting", "Outbound Slack delivery requires an explicit configured destination and external-communication authority", "Consumption of reserved repository/artifact capacity is limited to essential canonical writes under local Primary authority"],
+  "validation_methods": ["unit tests", "integration tests", "adversarial isolation tests", "package bootstrap validation", "scheduled-task route validation", "capacity reserve and unknown-limit tests", "lease contention and expiry tests", "compare-and-set stale-write tests", "project pause/drain isolation tests", "delivery acknowledgement/retry/quarantine tests"],
+  "approval_gates": ["Cross-project exchange remains denied unless explicitly approved/capability-granted", "Recursive self-enhancement candidates require local evidence review and Primary acceptance before grafting", "Outbound Slack delivery requires an explicit configured destination and external-communication authority", "Consumption of reserved repository/artifact capacity is limited to essential canonical writes under local Primary authority", "Project lifecycle transitions and accepted-state mutations remain scoped to the owning project"],
   "security_classification": "INTERNAL_DESIGN",
-  "data_handling_rules": ["No peer-project secrets or project-instance private state in shared framework packages", "Peer improvement snapshots retain provenance but must separate reusable mechanisms from domain-instance state", "Do not publish secrets, credentials, MFA data, private keys, tokens, or unnecessary sensitive data to Slack", "Cross-project capacity signals contain only high-level capacity metadata and enumerated need categories"],
+  "data_handling_rules": ["No peer-project secrets or project-instance private state in shared framework packages", "Peer improvement snapshots retain provenance but must separate reusable mechanisms from domain-instance state", "Do not publish secrets, credentials, MFA data, private keys, tokens, or unnecessary sensitive data to Slack", "Cross-project capacity signals contain only high-level capacity metadata and enumerated need categories", "Quarantine records preserve rejected-message evidence but are never executable input"],
   "allowed_tools": ["GitHub", "Python", "Slack", "Automations"],
-  "prohibited_actions": ["Write to Duo Open repository", "Write to BenefitFlow repository", "Write to any peer repository during self-enhancement observation", "Guess project identity for mutating operations", "Guess a Slack destination for scheduled-task delivery", "Invent a provider hard limit or treat an unknown capacity limit as unlimited", "Use a peer capacity signal as authority to mutate that peer"],
+  "prohibited_actions": ["Write to Duo Open repository", "Write to BenefitFlow repository", "Write to any peer repository during self-enhancement observation", "Guess project identity for mutating operations", "Guess a Slack destination for scheduled-task delivery", "Invent a provider hard limit or treat an unknown capacity limit as unlimited", "Use a peer capacity signal as authority to mutate that peer", "Allow an unbound agent to mutate project state", "Silently accept a stale state version", "Allow a restarted execution instance to inherit an earlier instance-owned lease"],
   "integration_authority": "ORCHESTRATOR",
   "review_authority": "REVIEWER",
   "agent_roles": [
@@ -33,8 +33,8 @@
   "parallelism_limits": {"max_active_specialists": 8, "status": "INITIAL"},
   "human_required_actions": [],
   "external_dependencies": ["Optional connected Slack workspace for Slack-enabled scheduled-task delivery"],
-  "success_criteria": ["Concurrent projects cannot accidentally route or mutate across namespaces", "Agent packages fail validation when stale or foreign", "Adversarial tests pass", "A third project can adopt the protocol without code changes to the core", "Peer Artifactory improvements can be recursively discovered without any peer mutation authority", "Scheduled tasks can publish project-bound Slack summaries without making Slack canonical state", "Projects preserve a 20 percent verified capacity reserve and fail closed when capacity is unknown", "Projects can exchange compact high-level capacity and need signals without shared mutable state", "Routine agent writes are coalesced and unchanged artifact uploads are suppressed by digest"],
-  "completion_definition": "Protocol controls, deployment packages, tests, documentation, and capacity coordination are synchronized and release-gate validated.",
+  "success_criteria": ["Concurrent projects cannot accidentally route or mutate across namespaces", "Agent packages fail validation when stale or foreign", "Adversarial tests pass", "A third project can adopt the protocol without code changes to the core", "Peer Artifactory improvements can be recursively discovered without any peer mutation authority", "Scheduled tasks can publish project-bound Slack summaries without making Slack canonical state", "Projects preserve a 20 percent verified capacity reserve and fail closed when capacity is unknown", "Projects can exchange compact high-level capacity and need signals without shared mutable state", "Routine agent writes are coalesced and unchanged artifact uploads are suppressed by digest", "Unbound agents cannot authorize mutation", "Child agents inherit project identity and receive fresh execution-instance identity", "Project-scoped leases expire and recover without allowing a stale execution instance to renew them", "Compare-and-set rejects stale mutations", "One project can pause or drain without stopping unrelated projects", "Duplicate deliveries are safe no-ops", "Acknowledgements distinguish transport receipt from accepted/started/completed execution", "Retries are bounded", "Malformed, unauthorized, incompatible, or expired messages do not enter normal execution and retain quarantine evidence"],
+  "completion_definition": "Protocol controls, deployment packages, tests, documentation, capacity coordination, project lifecycle, lease/CAS controls, and delivery recovery are synchronized and release-gate validated.",
   "artifact_policy": {
     "immutability": true,
     "canonical_detail_home": "artifact",
@@ -57,6 +57,14 @@
     "messages_point_to_evidence": true,
     "project_identity_required": true,
     "cross_project_default": "DENY",
+    "delivery_recovery": {
+      "acknowledgement_states": ["RECEIVED", "ACCEPTED", "STARTED", "COMPLETED", "FAILED", "REJECTED"],
+      "duplicate_policy": "SAFE_NOOP_OR_PRIOR_RESULT",
+      "retry_policy": "BOUNDED",
+      "invalid_message_policy": "QUARANTINE",
+      "expired_command_policy": "EXPIRED_NO_EXECUTION",
+      "quarantine_is_executable": false
+    },
     "capacity_signals": {
       "cross_project_mode": "READ_ONLY_ADVISORY",
       "allowed_need_categories": ["REVIEW_REQUIRED", "PRIMARY_DECISION", "RELEASE_PENDING", "CAPACITY_PRESSURE", "BLOCKED"],
@@ -71,6 +79,18 @@
       "dynamic_execution_scheduler": "AUTOMATION",
       "static_message_scheduler": "SLACK_NATIVE_ALLOWED"
     }
+  },
+  "control_plane_policy": {
+    "agent_lifecycle": ["UNBOUND", "BOUND", "INITIALIZED", "ACTIVE", "DRAINING", "TERMINATED"],
+    "unbound_mutation": "DENY",
+    "child_project_binding": "INHERIT_PARENT",
+    "child_execution_instance": "FRESH",
+    "project_lifecycle": ["ACTIVE", "DRAINING", "PAUSED"],
+    "project_pause_scope": "PROJECT_ONLY",
+    "lease_scope": "PROJECT_RESOURCE_AND_EXECUTION_INSTANCE",
+    "lease_expiry_recovery": true,
+    "stale_write_policy": "COMPARE_AND_SET_REJECT",
+    "durable_adapter_policy": "PRESERVE_ATOMICITY_OR_FAIL_CLOSED"
   },
   "learning_policy": {
     "review_required": true,
