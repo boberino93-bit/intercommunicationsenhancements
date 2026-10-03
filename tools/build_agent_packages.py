@@ -13,7 +13,7 @@ IDENTITY_LOCK = "PROJECT_IDENTITY_LOCK.json"
 BOOTSTRAP_ORDER = "BOOTSTRAP_ORDER.json"
 COORDINATION_SNAPSHOT = ".interagent/directives/2026-10-03-project-identity-recovery.json"
 SHARED = [
-    IDENTITY_LOCK, BOOTSTRAP_ORDER, COORDINATION_SNAPSHOT, "bootstrap/RECOVERY.md",
+    IDENTITY_LOCK, BOOTSTRAP_ORDER, COORDINATION_SNAPSHOT, "bootstrap/IDENTITY_GATE.md", "bootstrap/RECOVERY.md",
     "PROJECT_MANIFEST.json", "PROJECT_CHARTER.md", "ARCHITECTURE.md", "START_HERE.md", "VERSION",
     "protocols/project_isolation.md", "protocols/cross_project_exchange.md", "protocols/deployment_package_sync.md",
     "protocols/recursive_self_enhancement.md", "protocols/slack_scheduled_tasks.md",
