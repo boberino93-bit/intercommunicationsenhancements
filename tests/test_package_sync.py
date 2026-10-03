@@ -21,9 +21,9 @@ BASE = {
     "agent_spawn_policy": {"status": "BOUND_ONLY"},
     "deployment_role": "PRIMARY",
     "authority_tier": "ORCHESTRATOR",
-    "framework_version": "1.4.0-alpha.1",
-    "protocol_version": "2.3.0-alpha.1",
-    "package_version": "1.4.0-alpha.1",
+    "framework_version": "1.5.0-alpha.1",
+    "protocol_version": "2.4.0-alpha.1",
+    "package_version": "1.5.0-alpha.1",
     "source_revision": "0" * 40,
     "identity_artifact_sha256": {"PROJECT_IDENTITY_LOCK.json": "a"},
     "component_sha256": {"PROJECT_IDENTITY_LOCK.json": "a"},
@@ -50,7 +50,11 @@ class PackageTest(unittest.TestCase):
 
     def test_stale_protocol_rejected(self):
         with self.assertRaises(ValueError):
-            validate_agent_package_manifest(dict(BASE, protocol_version="1.0"), expected_project_id="intercommunicationsenhancements")
+            validate_agent_package_manifest(dict(BASE, protocol_version="2.3.0-alpha.1"), expected_project_id="intercommunicationsenhancements")
+
+    def test_stale_framework_rejected(self):
+        with self.assertRaises(ValueError):
+            validate_agent_package_manifest(dict(BASE, framework_version="1.4.0-alpha.1"), expected_project_id="intercommunicationsenhancements")
 
 
 if __name__ == "__main__":
