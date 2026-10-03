@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Quarantined Message Evidence Record",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema": {"const": "org-agent-mesh/quarantine-record/v1"},
+    "local_project_id": {"type": "string", "minLength": 1},
+    "claimed_project_id": {"type": ["string", "null"]},
+    "message_id": {"type": ["string", "null"]},
+    "reason": {"type": "string", "minLength": 1},
+    "payload_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "quarantined_at_utc": {"type": "string", "minLength": 1},
+    "payload": {}
+  },
+  "required": ["schema", "local_project_id", "claimed_project_id", "message_id", "reason", "payload_sha256", "quarantined_at_utc", "payload"]
+}
