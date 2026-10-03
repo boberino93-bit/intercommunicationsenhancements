@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Project-scoped Append-only Message",
+  "type": "object",
+  "properties": {
+    "protocol_version": {"type": "string"},
+    "project_id": {"type": "string", "minLength": 1},
+    "destination_project_id": {"type": "string", "minLength": 1},
+    "from_agent_instance_id": {"type": "string", "minLength": 1},
+    "correlation_id": {"type": ["string", "null"]},
+    "causation_id": {"type": ["string", "null"]},
+    "idempotency_key": {"type": ["string", "null"]},
+    "expires_at_utc": {"type": ["string", "null"]},
+    "kind": {"enum": ["CLAIM", "FINDING", "BLOCKER", "REQUEST", "REVIEW_REQUEST", "REVIEW_DISPOSITION", "CONTRADICTION", "HANDOFF", "DECISION", "SUPERSESSION", "SERVICE_CHECKPOINT", "RELEASE_CLOSE"]},
+    "priority": {"enum": ["normal", "high", "critical"]},
+    "supersedes": {"type": "array"}
+  },
+  "required": ["schema", "protocol_version", "id", "project_id", "destination_project_id", "timestamp_utc", "from_agent", "from_agent_instance_id", "from_role", "to", "kind", "priority", "subject", "summary", "applies_to_state", "evidence", "artifacts", "reply_to", "supersedes", "requires_ack", "tags", "correlation_id", "causation_id", "idempotency_key", "expires_at_utc"]
+}
