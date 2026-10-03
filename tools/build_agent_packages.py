@@ -8,7 +8,7 @@ import zipfile
 ROOT = Path(__file__).resolve().parents[1]
 ROLES = {"PRIMARY": "ORCHESTRATOR", "MANAGER": "REVIEWER", "RESEARCH": "SPECIALIST"}
 SHARED = [
-    "PROJECT_MANIFEST.json", "PROJECT_CHARTER.md", "START_HERE.md", "VERSION",
+    "PROJECT_MANIFEST.json", "PROJECT_CHARTER.md", "ARCHITECTURE.md", "START_HERE.md", "VERSION",
     "protocols/project_isolation.md", "protocols/cross_project_exchange.md", "protocols/deployment_package_sync.md",
     "schemas/message.schema.json", "schemas/agent_record.schema.json", "schemas/presence_frame.schema.json",
     "schemas/agent_package_manifest.schema.json", "schemas/cross_project_exchange.schema.json",
