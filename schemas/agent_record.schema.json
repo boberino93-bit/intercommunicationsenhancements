@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Project-scoped Agent Record",
+  "type": "object",
+  "properties": {
+    "project_id": {"type": "string", "minLength": 1},
+    "agent_instance_id": {"type": "string", "minLength": 1},
+    "authority_tier": {"enum": ["ORCHESTRATOR", "REVIEWER", "SPECIALIST"]},
+    "capabilities": {"type": "object"}
+  },
+  "required": ["project_id", "agent_id", "agent_instance_id", "authority_tier", "role_profile", "capabilities", "status"]
+}
