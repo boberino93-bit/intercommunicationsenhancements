@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "org-agent-mesh/enhancement-candidate/v1",
+  "type": "object",
+  "required": ["schema", "candidate_id", "source", "title", "pattern", "rationale", "expected_benefit", "risk", "suggested_targets", "depth", "status"],
+  "properties": {
+    "schema": {"const": "org-agent-mesh/enhancement-candidate/v1"},
+    "candidate_id": {"type": "string", "minLength": 12},
+    "source": {
+      "type": "object",
+      "required": ["repository", "revision", "path", "sha256"],
+      "properties": {
+        "repository": {"type": "string", "minLength": 1},
+        "revision": {"type": "string", "minLength": 1},
+        "path": {"type": "string", "minLength": 1},
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      },
+      "additionalProperties": false
+    },
+    "title": {"type": "string", "minLength": 1},
+    "pattern": {"type": "string", "minLength": 1},
+    "rationale": {"type": "string", "minLength": 1},
+    "expected_benefit": {"type": "string", "minLength": 1},
+    "risk": {"enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"]},
+    "suggested_targets": {"type": "array", "items": {"type": "string"}},
+    "depth": {"type": "integer", "minimum": 0},
+    "parent_candidate_id": {"type": ["string", "null"]},
+    "status": {"enum": ["DISCOVERED", "EVIDENCE_REVIEWED", "VALIDATED", "PRIMARY_ACCEPTED", "GRAFTED", "REJECTED", "SUPERSEDED", "BLOCKED"]}
+  },
+  "additionalProperties": false
+}

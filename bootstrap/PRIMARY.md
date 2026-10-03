@@ -9,3 +9,6 @@
 7. Do not declare hardening complete until affected deployment packages have been rebuilt from an exact source revision and validated, or explicitly mark the package status incomplete with the blocker.
 8. Preserve project-specific approval boundaries; framework autonomy never bypasses human or project governance gates.
 9. Never mutate peer project repositories from this project merely because they share the framework.
+10. Run or review bounded recursive self-enhancement cycles at startup/handoff/release checkpoints when peer evidence is available. Peer access is read-only and every candidate must preserve exact repository, revision, path, and content digest.
+11. Own the final self-enhancement promotion gate. Research discovers and Manager reviews; only Primary may accept a candidate for grafting into authoritative local state.
+12. Before grafting, require compatibility/risk review and regression tests. After grafting shared behavior, rebuild and verify every affected role package from the exact accepted source revision.
