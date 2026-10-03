@@ -11,7 +11,7 @@ from org_agent_mesh.project_scope import ProjectBinding, ProjectScopeError, requ
 
 BASE = {
     "schema": "org-agent-mesh/message/v2",
-    "protocol_version": "2.3.0-alpha.1",
+    "protocol_version": "2.4.0-alpha.1",
     "id": "m1",
     "project_id": "project-a",
     "destination_project_id": "project-a",
@@ -50,7 +50,7 @@ class IsolationTest(unittest.TestCase):
             validate_message(message)
 
     def test_binding_rejects_foreign_target(self):
-        binding = ProjectBinding("project-a", "repo-a", "/tmp/a", "primary", "p-1", "2.3.0-alpha.1")
+        binding = ProjectBinding("project-a", "repo-a", "/tmp/a", "primary", "p-1", "2.4.0-alpha.1")
         with self.assertRaises(ProjectScopeError):
             binding.assert_target("project-b", "repository write")
 
