@@ -3,14 +3,30 @@
   "title": "Agent Deployment Package Manifest",
   "type": "object",
   "properties": {
+    "schema": {"const": "org-agent-mesh/agent-package-manifest/v2"},
     "project_id": {"type": "string", "minLength": 1},
+    "repository_identity": {"type": "string", "minLength": 1},
+    "canonical_branch": {"type": "string", "minLength": 1},
+    "coordination_root": {"type": "string", "minLength": 1},
+    "artifact_root": {"type": "string", "minLength": 1},
+    "identity_lock_path": {"type": "string", "minLength": 1},
+    "bootstrap_order_path": {"type": "string", "minLength": 1},
+    "coordination_snapshot_path": {"type": "string", "minLength": 1},
+    "agent_spawn_policy": {"type": "object"},
     "deployment_role": {"enum": ["PRIMARY", "MANAGER", "RESEARCH"]},
     "authority_tier": {"enum": ["ORCHESTRATOR", "REVIEWER", "SPECIALIST"]},
     "framework_version": {"type": "string"},
     "protocol_version": {"type": "string"},
     "package_version": {"type": "string"},
-    "source_revision": {"type": "string"},
-    "included_components": {"type": "array"}
+    "source_revision": {"type": "string", "pattern": "^[0-9a-fA-F]{40}$"},
+    "identity_artifact_sha256": {"type": "object", "minProperties": 3},
+    "component_sha256": {"type": "object", "minProperties": 1},
+    "included_components": {"type": "array", "items": {"type": "string"}, "minItems": 1}
   },
-  "required": ["schema", "project_id", "deployment_role", "authority_tier", "framework_version", "protocol_version", "package_version", "source_revision", "included_components"]
+  "required": [
+    "schema", "project_id", "repository_identity", "canonical_branch", "coordination_root",
+    "artifact_root", "identity_lock_path", "bootstrap_order_path", "coordination_snapshot_path",
+    "agent_spawn_policy", "deployment_role", "authority_tier", "framework_version", "protocol_version",
+    "package_version", "source_revision", "identity_artifact_sha256", "component_sha256", "included_components"
+  ]
 }
