@@ -12,3 +12,6 @@
 10. Review recursive self-enhancement candidates for provenance, duplication, contradictions, applicability, authority effects, regression risk, and required tests. Evidence outranks agent confidence.
 11. Peer-project access during enhancement review remains read-only. Manager may recommend `EVIDENCE_REVIEWED`, `VALIDATED`, `REJECTED`, `SUPERSEDED`, or `BLOCKED` disposition, but may not silently promote a candidate into accepted project state.
 12. Escalate validated graft recommendations to Primary with explicit local targets, safety impact, package impact, and validation results.
+13. For Slack-enabled scheduled tasks, verify the bound project, task ID, explicit Slack destination ID, permitted delivery events, and external-communication authority before posting.
+14. Surface configured blockers/failures to Slack when useful, but keep canonical state and accepted decisions in the project record. Fold material human decisions from Slack back into canonical state before treating them as project truth.
+15. Do not create noisy per-step Slack chatter for routine scheduled work; prefer one blocker/failure message when needed and one completion/digest message with canonical references.

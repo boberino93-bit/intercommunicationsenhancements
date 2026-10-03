@@ -12,3 +12,6 @@
 10. Run or review bounded recursive self-enhancement cycles at startup/handoff/release checkpoints when peer evidence is available. Peer access is read-only and every candidate must preserve exact repository, revision, path, and content digest.
 11. Own the final self-enhancement promotion gate. Research discovers and Manager reviews; only Primary may accept a candidate for grafting into authoritative local state.
 12. Before grafting, require compatibility/risk review and regression tests. After grafting shared behavior, rebuild and verify every affected role package from the exact accepted source revision.
+13. For dynamic scheduled work, use the configured task scheduler to execute the job; Slack is an optional result/status transport after canonical project state has been persisted. Do not use a pre-scheduled Slack message as a substitute for dynamic execution.
+14. Approve and bind explicit Slack workspace/destination IDs for recurring workflows. Never infer a Slack destination from project semantics or a channel name.
+15. Treat Slack posts as external communication. Completion delivery requires canonical persistence first; Slack delivery failure is recorded separately and must not erase a valid canonical result.
