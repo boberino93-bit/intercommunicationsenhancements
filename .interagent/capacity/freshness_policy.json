@@ -1,0 +1,10 @@
+{
+  "schema": "org-agent-mesh/capacity-freshness-policy/v1",
+  "project_id": "intercommunicationsenhancements",
+  "mode": "EXPLICIT_PER_CONSUMER_MAX_AGE",
+  "global_max_age_seconds": null,
+  "consumer_must_supply_max_age_seconds": true,
+  "missing_max_age_behavior": "UNKNOWN",
+  "absent_signal_behavior": "UNKNOWN",
+  "stale_signal_behavior": "UNKNOWN"
+}
