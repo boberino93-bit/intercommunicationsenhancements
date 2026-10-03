@@ -22,9 +22,10 @@ class CapacityTest(unittest.TestCase):
         self.assertEqual(resource.remaining_safe_budget, 20)
         self.assertEqual(resource.state, "AMBER")
 
-    def test_preserve_and_reserve_only_states(self):
+    def test_preserve_reserve_only_and_exhausted_states(self):
         self.assertEqual(CapacityResource("UPLOADS", 100, 79, "PROVIDER_OBSERVED").state, "PRESERVE")
         self.assertEqual(CapacityResource("UPLOADS", 100, 80, "PROVIDER_OBSERVED").state, "RESERVE_ONLY")
+        self.assertEqual(CapacityResource("UPLOADS", 100, 100, "PROVIDER_OBSERVED").state, "EXHAUSTED")
 
     def test_unknown_is_not_unlimited(self):
         resource = CapacityResource("COMMITS", hard_limit=None, used=None)

@@ -1,0 +1,20 @@
+{
+  "schema": "org-agent-mesh/capacity-signal/v1",
+  "project_id": "intercommunicationsenhancements",
+  "repository_identity": "boberino93-bit/intercommunicationsenhancements",
+  "observed_revision": "fb668804972590c68687a05f9074bbbadec6ab96",
+  "measured_at_utc": "2026-10-03T23:53:22Z",
+  "overall_state": "UNKNOWN",
+  "resources": [
+    {"resource_kind":"COMMITS","hard_limit":null,"used":null,"source":"UNKNOWN","reserve_fraction":0.2,"safe_ceiling":null,"remaining_safe_budget":null,"state":"UNKNOWN","measurement_window":null,"reset_at_utc":null},
+    {"resource_kind":"UPLOADS","hard_limit":null,"used":null,"source":"UNKNOWN","reserve_fraction":0.2,"safe_ceiling":null,"remaining_safe_budget":null,"state":"UNKNOWN","measurement_window":null,"reset_at_utc":null},
+    {"resource_kind":"BYTES","hard_limit":null,"used":null,"source":"UNKNOWN","reserve_fraction":0.2,"safe_ceiling":null,"remaining_safe_budget":null,"state":"UNKNOWN","measurement_window":null,"reset_at_utc":null},
+    {"resource_kind":"ARTIFACTS","hard_limit":null,"used":null,"source":"UNKNOWN","reserve_fraction":0.2,"safe_ceiling":null,"remaining_safe_budget":null,"state":"UNKNOWN","measurement_window":null,"reset_at_utc":null},
+    {"resource_kind":"API_WRITES","hard_limit":null,"used":null,"source":"UNKNOWN","reserve_fraction":0.2,"safe_ceiling":null,"remaining_safe_budget":null,"state":"UNKNOWN","measurement_window":null,"reset_at_utc":null}
+  ],
+  "high_level_needs": ["CAPACITY_PRESSURE"],
+  "pending_writes": {"ESSENTIAL_CANONICAL":0,"COALESCED_CHECKPOINT":0,"DISCRETIONARY":0},
+  "batching_recommended": true,
+  "discretionary_writes_blocked": true,
+  "essential_writes_blocked": false
+}
