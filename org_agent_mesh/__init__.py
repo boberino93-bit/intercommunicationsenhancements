@@ -1,0 +1,1 @@
+"""Intercommunications hardening reference implementation."""
