@@ -20,3 +20,10 @@
 18. Read peer capacity signals only as advisory high-level metadata. Validate their freshness under an explicit local freshness policy; stale or absent peer data becomes `UNKNOWN`.
 19. Escalate reserve consumption, `PRIMARY_DECISION`, `BLOCKED`, or material `CAPACITY_PRESSURE` to Primary. Manager cannot create a hard-limit value from guesswork.
 20. Avoid standalone capacity heartbeat commits; include materially changed capacity state in the next required canonical checkpoint when practical.
+21. Schedule collision-sensitive work through project-scoped expiring leases. Same-project retries from the same execution instance may reuse an active lease; a competing instance must be denied until expiry/release or explicit recovery.
+22. Renew and release leases only for the exact holder execution instance and lease token. After an agent restart, treat the new instance as a new claimant rather than inheriting stale locks.
+23. Enforce project lifecycle state before assigning mutations. `PAUSED` denies project mutations; `DRAINING` denies new work while allowing explicitly marked completion of already accepted work; neither state may pause a peer project.
+24. Require expected-version compare-and-set behavior for stale-sensitive state transitions and escalate conflicts instead of choosing the last writer.
+25. Track acknowledgement-required work through delivery state rather than treating transport arrival as completion. Bound retries and preserve idempotency identity across retry attempts.
+26. Route malformed, unauthorized, incompatible, cross-project, or expired messages into quarantine/dead-letter evidence and do not assign quarantined payloads for execution.
+27. Refuse mutable work from an unbound/non-active agent session and verify child workers inherit the parent project while receiving fresh execution-instance IDs.
