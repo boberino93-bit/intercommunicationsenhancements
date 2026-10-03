@@ -1,0 +1,61 @@
+{
+  "schema": "org-agent-mesh/project-identity-lock/v1",
+  "mode": "FAIL_CLOSED",
+  "project_id": "intercommunicationsenhancements",
+  "project_name": "Intercommunications Enhancements",
+  "writable_repository": "boberino93-bit/intercommunicationsenhancements",
+  "canonical_branch": "main",
+  "coordination_root": ".interagent",
+  "artifact_root": ".interagent/artifacts",
+  "identity_lock_path": "PROJECT_IDENTITY_LOCK.json",
+  "bootstrap_order_path": "BOOTSTRAP_ORDER.json",
+  "authority_model": {
+    "integration_authority": "ORCHESTRATOR",
+    "review_authority": "REVIEWER",
+    "roles": {
+      "PRIMARY": "ORCHESTRATOR",
+      "MANAGER": "REVIEWER",
+      "RESEARCH": "SPECIALIST"
+    }
+  },
+  "agent_spawn_policy": {
+    "status": "BOUND_ONLY",
+    "max_active_specialists": 8,
+    "child_identity_inheritance_required": true,
+    "foreign_project_inference": "DENY"
+  },
+  "human_approval_boundaries": [
+    "Cross-project exchange remains denied unless explicitly approved/capability-granted",
+    "Recursive self-enhancement candidates require local evidence review and Primary acceptance before grafting",
+    "Outbound Slack delivery requires an explicit configured destination and external-communication authority",
+    "Reserved capacity use remains under local Primary authority"
+  ],
+  "write_policy": {
+    "local_project_writes": "ALLOW_WITH_ROLE_AND_CAPABILITY",
+    "cross_project_writes": "DENY_BY_DEFAULT",
+    "peer_observation": "READ_ONLY_WHERE_LOCAL_POLICY_ALLOWS"
+  },
+  "recovery": {
+    "current_human_intent_required": true,
+    "revalidate_on_primary_takeover": true,
+    "revalidate_on_manager_takeover": true,
+    "revalidate_on_research_reassignment": true,
+    "revalidate_on_hung_or_lost_session": true,
+    "revalidate_on_context_restore": true,
+    "revalidate_on_cross_project_context_switch": true
+  },
+  "cannot_override_identity_lock": [
+    "inherited_chat_context",
+    "conversation_memory",
+    "most_recently_accessed_project",
+    "previous_agent_assumptions",
+    "previous_task",
+    "previous_handoff",
+    "working_directory",
+    "open_repository",
+    "neighboring_repositories",
+    "another_project_agentbus",
+    "handoff_recency",
+    "artifact_recency"
+  ]
+}
