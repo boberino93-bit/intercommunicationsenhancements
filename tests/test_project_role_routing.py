@@ -9,7 +9,6 @@ from org_agent_mesh.project_role_routing import (
     validate_registry,
 )
 
-
 ROOT = Path(__file__).resolve().parents[1]
 REGISTRY = {
     "schema": "org-agent-mesh/project-role-routing-registry/v1",
@@ -19,50 +18,64 @@ REGISTRY = {
             "repository": "owner/alpha",
             "repository_id": 101,
             "forum_namespace": "alpha::messages",
+            "forum_locator": {
+                "authority": "INTERNAL_ARTIFACTORY",
+                "namespace": "alpha::messages",
+                "repository_view": {"mode": "SNAPSHOT_BACKUP", "path": "agentbus/messages"},
+            },
             "artifact_namespace": "alpha::artifacts",
-            "handoff_paths": [".interagent/messages", "PROJECT_MANIFEST.json"],
+            "handoff_paths": ["START_HERE.md", "state"],
             "local_contract_path": "AGENT_BOOTSTRAP.json",
-            "routing_contract_version": "1.1.0",
+            "routing_contract_version": "1.2.0",
             "roles": ["primary", "manager", "research"],
         }
     },
 }
 LOCAL_CONTRACT = {
     "schema": "org-agent-mesh/local-agent-bootstrap/v1",
-    "routing_contract_version": "1.1.0",
+    "routing_contract_version": "1.2.0",
     "mode": "FAIL_CLOSED",
     "project_id": "alpha",
     "repository": {"full_name": "owner/alpha", "id": 101},
-    "forum": {"namespace": "alpha::messages", "preferred_path": ".interagent/messages"},
+    "forum": {
+        "authority": "INTERNAL_ARTIFACTORY",
+        "namespace": "alpha::messages",
+        "repository_view": {"mode": "SNAPSHOT_BACKUP", "path": "agentbus/messages"},
+    },
     "artifact_namespace": "alpha::artifacts",
-    "handoff_paths": [".interagent/messages", "PROJECT_MANIFEST.json"],
+    "handoff_paths": ["START_HERE.md", "state"],
     "authorized_roles": ["primary", "manager", "research"],
 }
 
-
 class ProjectRoleRoutingTests(unittest.TestCase):
     def test_valid_route_resolves_and_acknowledges(self):
-        route = resolve_route(
-            REGISTRY,
-            project_id="alpha",
-            role_id="research",
-            current_repository="owner/alpha",
-            current_repository_id=101,
-        )
+        route = resolve_route(REGISTRY, project_id="alpha", role_id="research", current_repository="owner/alpha", current_repository_id=101)
         self.assertEqual(route.repository, "owner/alpha")
-        self.assertEqual(route.repository_id, 101)
-        self.assertEqual(route.forum_namespace, "alpha::messages")
-        self.assertEqual(route.local_contract_path, "AGENT_BOOTSTRAP.json")
+        self.assertEqual(route.forum_authority, "INTERNAL_ARTIFACTORY")
+        self.assertEqual(route.forum_repository_view_mode, "SNAPSHOT_BACKUP")
+        self.assertEqual(route.forum_repository_view_path, "agentbus/messages")
         self.assertIn("IDENTITY RESOLVED: project=alpha; role=research", route.acknowledgement("handoff-7"))
 
     def test_local_contract_matches_registry(self):
         validate_local_contract(REGISTRY, project_id="alpha", contract=LOCAL_CONTRACT)
 
-    def test_local_contract_drift_fails_closed(self):
+    def test_local_contract_forum_drift_fails_closed(self):
         contract = json.loads(json.dumps(LOCAL_CONTRACT))
-        contract["forum"]["namespace"] = "beta::messages"
-        with self.assertRaisesRegex(RoutingError, "local_contract_forum_mismatch"):
+        contract["forum"]["repository_view"]["mode"] = "LIVE_MIRROR"
+        with self.assertRaisesRegex(RoutingError, "local_contract_forum_repository_view_mismatch"):
             validate_local_contract(REGISTRY, project_id="alpha", contract=contract)
+
+    def test_forum_namespace_and_locator_must_agree(self):
+        registry = json.loads(json.dumps(REGISTRY))
+        registry["projects"]["alpha"]["forum_locator"]["namespace"] = "beta::messages"
+        with self.assertRaisesRegex(RoutingError, "forum_locator_namespace_mismatch"):
+            validate_registry(registry)
+
+    def test_none_repository_view_requires_null_path(self):
+        registry = json.loads(json.dumps(REGISTRY))
+        registry["projects"]["alpha"]["forum_locator"]["repository_view"] = {"mode": "NONE", "path": "fake/messages"}
+        with self.assertRaisesRegex(RoutingError, "forum_repository_view_path_must_be_null"):
+            validate_registry(registry)
 
     def test_unknown_project_fails_closed(self):
         with self.assertRaisesRegex(RoutingError, "unknown_project"):
@@ -78,13 +91,7 @@ class ProjectRoleRoutingTests(unittest.TestCase):
 
     def test_stable_repository_id_mismatch_fails_closed(self):
         with self.assertRaisesRegex(RoutingError, "repository_stable_id_mismatch"):
-            resolve_route(
-                REGISTRY,
-                project_id="alpha",
-                role_id="primary",
-                current_repository="owner/alpha",
-                current_repository_id=999,
-            )
+            resolve_route(REGISTRY, project_id="alpha", role_id="primary", current_repository="owner/alpha", current_repository_id=999)
 
     def test_non_fail_closed_registry_is_rejected(self):
         registry = dict(REGISTRY)
@@ -94,12 +101,8 @@ class ProjectRoleRoutingTests(unittest.TestCase):
 
     def test_duplicate_repository_binding_is_rejected(self):
         registry = json.loads(json.dumps(REGISTRY))
-        registry["projects"]["beta"] = {
-            **registry["projects"]["alpha"],
-            "repository_id": 202,
-            "forum_namespace": "beta::messages",
-            "artifact_namespace": "beta::artifacts",
-        }
+        registry["projects"]["beta"] = {**registry["projects"]["alpha"], "repository_id": 202, "forum_namespace": "beta::messages", "artifact_namespace": "beta::artifacts"}
+        registry["projects"]["beta"]["forum_locator"]["namespace"] = "beta::messages"
         with self.assertRaisesRegex(RoutingError, "duplicate_repository_binding"):
             validate_registry(registry)
 
@@ -115,13 +118,10 @@ class ProjectRoleRoutingTests(unittest.TestCase):
         for project in registry["projects"].values():
             self.assertIsInstance(project.get("repository_id"), int)
             self.assertEqual(project.get("local_contract_path"), "AGENT_BOOTSTRAP.json")
-            self.assertEqual(project.get("routing_contract_version"), "1.1.0")
+            self.assertEqual(project.get("routing_contract_version"), "1.2.0")
+            self.assertEqual(project["forum_locator"]["authority"], "INTERNAL_ARTIFACTORY")
         local_contract = json.loads((ROOT / "AGENT_BOOTSTRAP.json").read_text())
-        validate_local_contract(
-            registry,
-            project_id="intercommunicationsenhancements",
-            contract=local_contract,
-        )
+        validate_local_contract(registry, project_id="intercommunicationsenhancements", contract=local_contract)
 
     def test_routing_contract_is_dependency_closed_for_role_packages(self):
         dependency_map = json.loads((ROOT / "packaging" / "agent_package_dependencies.json").read_text())
@@ -131,7 +131,6 @@ class ProjectRoleRoutingTests(unittest.TestCase):
         self.assertIn("bootstrap/PROJECT_ROLE_DISCOVERY.md", shared)
         self.assertIn("bootstrap/IDENTITY_GATE.md", shared)
         self.assertIn("org_agent_mesh/*.py", shared)
-
 
 if __name__ == "__main__":
     unittest.main()
