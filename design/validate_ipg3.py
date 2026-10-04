@@ -7,7 +7,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parent
 REPO = ROOT.parent
 
@@ -18,7 +17,6 @@ def validate_json_schemas() -> list[str]:
         from jsonschema.validators import Draft202012Validator
     except ImportError as exc:
         return [f"jsonschema dependency unavailable: {exc}"]
-
     for path in sorted(ROOT.glob("*.draft.schema.json")):
         try:
             schema = json.loads(path.read_text(encoding="utf-8"))
@@ -43,7 +41,7 @@ def validate_isolation() -> list[str]:
 
 def run_unittests() -> list[str]:
     failures = []
-    for name in ("test_shadow_projection.py", "test_ipg3_validators.py"):
+    for name in ("test_shadow_projection.py", "test_ipg3_validators.py", "test_ipg3_reference_state.py"):
         completed = subprocess.run([sys.executable, name], cwd=ROOT, capture_output=True, text=True)
         if completed.returncode != 0:
             failures.append(f"{name} failed:\n{completed.stdout}\n{completed.stderr}")
@@ -61,7 +59,7 @@ def main() -> int:
             print(f"- {failure}")
         return 1
     print("IPG3 DESIGN VALIDATION: PASS")
-    print(f"Validated {len(list(ROOT.glob('*.draft.schema.json')))} draft schemas plus shadow/relational tests.")
+    print(f"Validated {len(list(ROOT.glob('*.draft.schema.json')))} draft schemas plus shadow, relational, and atomic-state tests.")
     print("Confirmed design/ remains outside authoritative deployment dependency closure.")
     return 0
 
