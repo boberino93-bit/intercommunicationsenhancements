@@ -252,6 +252,60 @@ class DurableStateTest(unittest.TestCase):
         with self.assertRaises(CorruptDurableRecord):
             DurableVersionedStateStore(self.backend()).read("a", "accepted")
 
+    def test_corrupt_record_cannot_be_overwritten_or_deleted(self):
+        session = active_session("a", "worker", "a-worker-1")
+        backend = self.backend()
+        store = DurableVersionedStateStore(backend)
+        store.initialize(session, "a", "accepted", {"safe": True})
+
+        connection = sqlite3.connect(self.db)
+        try:
+            connection.execute(
+                """
+                UPDATE mesh_records
+                SET payload_json = ?
+                WHERE namespace = ? AND project_id = ? AND resource_id = ?
+                """,
+                ('{"safe":false}', "accepted_state", "a", "accepted"),
+            )
+            connection.commit()
+        finally:
+            connection.close()
+
+        with self.assertRaises(CorruptDurableRecord):
+            store.compare_and_set(
+                session,
+                "a",
+                "accepted",
+                expected_version=1,
+                value={"safe": "rewritten"},
+            )
+        with self.assertRaises(CorruptDurableRecord):
+            backend.delete_if_version(
+                "accepted_state", "a", "accepted", expected_version=1
+            )
+
+        connection = sqlite3.connect(self.db)
+        try:
+            row = connection.execute(
+                """
+                SELECT version, payload_json
+                FROM mesh_records
+                WHERE namespace = ? AND project_id = ? AND resource_id = ?
+                """,
+                ("accepted_state", "a", "accepted"),
+            ).fetchone()
+        finally:
+            connection.close()
+        self.assertEqual((1, '{"safe":false}'), row)
+
+    def test_non_finite_json_is_rejected(self):
+        session = active_session("a", "worker", "a-worker-1")
+        with self.assertRaises(TypeError):
+            DurableVersionedStateStore(self.backend()).initialize(
+                session, "a", "accepted", {"value": float("nan")}
+            )
+
     def test_unknown_schema_version_fails_closed(self):
         self.backend()
         connection = sqlite3.connect(self.db)
