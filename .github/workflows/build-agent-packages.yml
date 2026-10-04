@@ -24,15 +24,23 @@ jobs:
       - name: Run intercommunications hardening tests
         run: python tests/run_all.py
 
-      - name: Build role deployment ZIPs from this commit
-        run: python tools/build_agent_packages.py --source-revision "$GITHUB_SHA"
+      - name: Build coordinated role release set from this commit
+        run: python tools/build_agent_packages.py --source-revision "$GITHUB_SHA" --out dist
 
-      - name: Verify role deployment ZIPs
+      - name: Verify role deployment ZIPs and dependency closure
         run: python tools/verify_agent_packages.py
+
+      - name: Rebuild independently for reproducibility check
+        run: python tools/build_agent_packages.py --source-revision "$GITHUB_SHA" --out dist-repro
+
+      - name: Verify deterministic package reproduction
+        run: python tools/check_reproducible_packages.py dist dist-repro
 
       - name: Publish synchronized deployment packages
         uses: actions/upload-artifact@v4
         with:
           name: agent-deployment-packages-${{ github.sha }}
-          path: dist/*.zip
+          path: |
+            dist/*.zip
+            dist/release-set.json
           if-no-files-found: error

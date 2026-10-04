@@ -9,7 +9,8 @@ from .project_scope import (
     new_instance_id,
     qualify,
     require_project_id,
-    require_same_project,
+    require_repository_identity,
+    require_resource_id,
 )
 
 PROJECT_STATES = ("ACTIVE", "DRAINING", "PAUSED")
@@ -51,9 +52,7 @@ class AgentSession:
     """Fail-closed agent lifecycle. Only ACTIVE bound sessions may authorize mutation."""
 
     def __init__(self, agent_id):
-        if not agent_id:
-            raise ValueError("agent_id is required")
-        self.agent_id = agent_id
+        self.agent_id = require_resource_id(agent_id, field="agent_id")
         self.state = "UNBOUND"
         self.binding = None
 
@@ -90,18 +89,30 @@ class AgentSession:
         self.state = "TERMINATED"
         return self
 
-    def assert_mutation(self, target_project_id, operation="mutation"):
+    def assert_mutation(self, target_project_id, operation="mutation", capability=None):
         if self.state != "ACTIVE" or self.binding is None:
             raise AgentLifecycleError("agent must be ACTIVE and project-bound before mutation")
-        return self.binding.assert_target(target_project_id, operation)
+        self.binding.assert_target(target_project_id, operation)
+        if capability is not None:
+            self.binding.assert_capability(capability)
+        return True
 
 
-def inherit_child_binding(parent_binding, child_agent_id):
-    """Children inherit project/repository/root/protocol; only execution identity is fresh."""
+def require_active_session(session, target_project_id, *, operation="mutation", capability=None):
+    if not isinstance(session, AgentSession):
+        raise AgentLifecycleError("mutation requires an AgentSession, not caller-supplied identity")
+    session.assert_mutation(target_project_id, operation, capability)
+    return session.binding
+
+
+def inherit_child_binding(parent_binding, child_agent_id, *, capabilities=None):
     if not isinstance(parent_binding, ProjectBinding):
         raise TypeError("parent_binding must be a ProjectBinding")
-    if not child_agent_id:
-        raise ValueError("child_agent_id is required")
+    child_agent_id = require_resource_id(child_agent_id, field="child_agent_id")
+    inherited = set(parent_binding.capabilities)
+    requested = inherited if capabilities is None else set(capabilities)
+    if not requested.issubset(inherited):
+        raise ProjectScopeError("child capability escalation is denied")
     return ProjectBinding(
         project_id=parent_binding.project_id,
         repository_identity=parent_binding.repository_identity,
@@ -109,6 +120,7 @@ def inherit_child_binding(parent_binding, child_agent_id):
         agent_id=child_agent_id,
         agent_instance_id=new_instance_id(parent_binding.project_id, child_agent_id),
         protocol_version=parent_binding.protocol_version,
+        capabilities=tuple(sorted(requested)),
     )
 
 
@@ -127,17 +139,17 @@ class LeaseRecord:
 
 
 class LeaseRegistry:
-    """Thread-safe project-scoped expiring leases with instance ownership and retry-safe claims."""
+    """Thread-safe project-scoped leases authorized by bound execution sessions."""
 
     def __init__(self):
         self._leases = {}
         self._lock = RLock()
 
-    def claim(self, requester_project_id, target_project_id, resource_id, holder_agent_instance_id, *, ttl_seconds=300, now=None):
-        require_same_project(requester_project_id, target_project_id, operation="lease claim")
-        require_project_id(target_project_id)
-        if not holder_agent_instance_id:
-            raise ValueError("holder_agent_instance_id is required")
+    def claim(self, session, target_project_id, resource_id, *, ttl_seconds=300, now=None):
+        binding = require_active_session(
+            session, target_project_id, operation="lease claim", capability="CLAIM_TASK"
+        )
+        resource_id = require_resource_id(resource_id)
         if ttl_seconds <= 0:
             raise ValueError("ttl_seconds must be positive")
         now = _utc_now(now)
@@ -145,14 +157,14 @@ class LeaseRegistry:
         with self._lock:
             existing = self._leases.get(key)
             if existing and not existing.expired(now):
-                if existing.holder_agent_instance_id == holder_agent_instance_id:
+                if existing.holder_agent_instance_id == binding.agent_instance_id:
                     return existing
                 raise LeaseConflict("resource already has an active lease")
             version = 1 if existing is None else existing.version + 1
             record = LeaseRecord(
                 project_id=target_project_id,
                 resource_id=resource_id,
-                holder_agent_instance_id=holder_agent_instance_id,
+                holder_agent_instance_id=binding.agent_instance_id,
                 lease_id=qualify(target_project_id, f"lease-{uuid.uuid4().hex}"),
                 acquired_at_utc=_utc_iso(now),
                 expires_at_utc=_utc_iso(now + timedelta(seconds=ttl_seconds)),
@@ -161,17 +173,19 @@ class LeaseRegistry:
             self._leases[key] = record
             return record
 
-    def renew(self, requester_project_id, target_project_id, resource_id, holder_agent_instance_id, lease_id, *, ttl_seconds=300, now=None):
-        require_same_project(requester_project_id, target_project_id, operation="lease renewal")
+    def renew(self, session, target_project_id, resource_id, lease_id, *, ttl_seconds=300, now=None):
+        binding = require_active_session(
+            session, target_project_id, operation="lease renewal", capability="CLAIM_TASK"
+        )
         if ttl_seconds <= 0:
             raise ValueError("ttl_seconds must be positive")
         now = _utc_now(now)
-        key = qualify(target_project_id, resource_id)
+        key = qualify(target_project_id, require_resource_id(resource_id))
         with self._lock:
             existing = self._leases.get(key)
             if existing is None or existing.expired(now):
                 raise LeaseConflict("lease is missing or expired")
-            if existing.holder_agent_instance_id != holder_agent_instance_id or existing.lease_id != lease_id:
+            if existing.holder_agent_instance_id != binding.agent_instance_id or existing.lease_id != lease_id:
                 raise ProjectScopeError("lease renewal denied for non-holder execution instance")
             renewed = LeaseRecord(
                 project_id=existing.project_id,
@@ -185,14 +199,16 @@ class LeaseRegistry:
             self._leases[key] = renewed
             return renewed
 
-    def release(self, requester_project_id, target_project_id, resource_id, holder_agent_instance_id, lease_id):
-        require_same_project(requester_project_id, target_project_id, operation="lease release")
-        key = qualify(target_project_id, resource_id)
+    def release(self, session, target_project_id, resource_id, lease_id):
+        binding = require_active_session(
+            session, target_project_id, operation="lease release", capability="CLAIM_TASK"
+        )
+        key = qualify(target_project_id, require_resource_id(resource_id))
         with self._lock:
             existing = self._leases.get(key)
             if existing is None:
                 return False
-            if existing.holder_agent_instance_id != holder_agent_instance_id or existing.lease_id != lease_id:
+            if existing.holder_agent_instance_id != binding.agent_instance_id or existing.lease_id != lease_id:
                 raise ProjectScopeError("lease release denied for non-holder execution instance")
             del self._leases[key]
             return True
@@ -228,21 +244,20 @@ class StateRecord:
 
 
 class VersionedStateStore:
-    """Thread-safe reference CAS store that rejects stale project-scoped mutations."""
-
     def __init__(self):
         self._records = {}
         self._lock = RLock()
 
-    def initialize(self, requester_project_id, target_project_id, resource_id, value, *, actor_agent_instance_id, now=None):
-        require_same_project(requester_project_id, target_project_id, operation="state initialize")
-        if not actor_agent_instance_id:
-            raise ValueError("actor_agent_instance_id is required")
+    def initialize(self, session, target_project_id, resource_id, value, *, now=None):
+        binding = require_active_session(
+            session, target_project_id, operation="state initialize", capability="WRITE_ACCEPTED_STATE"
+        )
+        resource_id = require_resource_id(resource_id)
         key = qualify(target_project_id, resource_id)
         with self._lock:
             if key in self._records:
                 raise StaleVersion("state already exists")
-            record = StateRecord(target_project_id, resource_id, 1, value, actor_agent_instance_id, _utc_iso(_utc_now(now)))
+            record = StateRecord(target_project_id, resource_id, 1, value, binding.agent_instance_id, _utc_iso(_utc_now(now)))
             self._records[key] = record
             return record
 
@@ -250,18 +265,18 @@ class VersionedStateStore:
         with self._lock:
             return self._records.get(qualify(project_id, resource_id))
 
-    def compare_and_set(self, requester_project_id, target_project_id, resource_id, *, expected_version, value, actor_agent_instance_id, now=None):
-        require_same_project(requester_project_id, target_project_id, operation="state mutation")
-        if not actor_agent_instance_id:
-            raise ValueError("actor_agent_instance_id is required")
-        key = qualify(target_project_id, resource_id)
+    def compare_and_set(self, session, target_project_id, resource_id, *, expected_version, value, now=None):
+        binding = require_active_session(
+            session, target_project_id, operation="state mutation", capability="WRITE_ACCEPTED_STATE"
+        )
+        key = qualify(target_project_id, require_resource_id(resource_id))
         with self._lock:
             current = self._records.get(key)
             if current is None:
                 raise StaleVersion("state does not exist")
             if current.version != expected_version:
                 raise StaleVersion(f"stale state version: expected {expected_version}, current {current.version}")
-            updated = StateRecord(target_project_id, resource_id, current.version + 1, value, actor_agent_instance_id, _utc_iso(_utc_now(now)))
+            updated = StateRecord(target_project_id, current.resource_id, current.version + 1, value, binding.agent_instance_id, _utc_iso(_utc_now(now)))
             self._records[key] = updated
             return updated
 
@@ -276,16 +291,23 @@ class ProjectRecord:
 
 
 class ProjectRegistry:
-    """Global-readable registry; each project may mutate only its own lifecycle record."""
+    """Global-readable registry; project lifecycle mutation requires bound lifecycle authority."""
 
     def __init__(self):
         self._records = {}
         self._lock = RLock()
 
-    def register(self, project_id, repository_identity, *, now=None):
-        project_id = require_project_id(project_id)
-        if not repository_identity:
-            raise ValueError("repository_identity is required")
+    def register(self, session, repository_identity=None, *, now=None):
+        if not isinstance(session, AgentSession) or session.binding is None:
+            raise AgentLifecycleError("project registration requires bound session")
+        project_id = session.binding.project_id
+        binding = require_active_session(
+            session, project_id, operation="project registration", capability="CONTROL_PROJECT_LIFECYCLE"
+        )
+        repository_identity = repository_identity or binding.repository_identity
+        repository_identity = require_repository_identity(repository_identity)
+        if repository_identity != binding.repository_identity:
+            raise ProjectScopeError("project registration repository does not match bound session")
         with self._lock:
             if project_id in self._records:
                 raise StaleVersion("project already registered")
@@ -297,8 +319,10 @@ class ProjectRegistry:
         with self._lock:
             return self._records.get(require_project_id(project_id))
 
-    def transition(self, requester_project_id, target_project_id, *, expected_version, status, now=None):
-        require_same_project(requester_project_id, target_project_id, operation="project lifecycle transition")
+    def transition(self, session, target_project_id, *, expected_version, status, now=None):
+        require_active_session(
+            session, target_project_id, operation="project lifecycle transition", capability="CONTROL_PROJECT_LIFECYCLE"
+        )
         if status not in PROJECT_STATES:
             raise ValueError("unsupported project lifecycle state")
         with self._lock:
@@ -311,8 +335,13 @@ class ProjectRegistry:
             self._records[target_project_id] = updated
             return updated
 
-    def assert_operation(self, requester_project_id, target_project_id, *, mutation, drain_completion=False):
-        require_same_project(requester_project_id, target_project_id, operation="project operation")
+    def assert_operation(self, session, target_project_id, *, mutation, drain_completion=False, required_capability=None):
+        require_active_session(
+            session,
+            target_project_id,
+            operation="project operation",
+            capability=required_capability if mutation else None,
+        )
         with self._lock:
             record = self._records.get(target_project_id)
             if record is None:

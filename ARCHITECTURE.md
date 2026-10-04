@@ -2,115 +2,58 @@
 
 ## Purpose
 
-This project hardens the Organization Agent Mesh control plane for simultaneous unrelated projects. It separates global infrastructure from project-owned execution state and makes project identity an enforceable authorization boundary.
+Intercommunications Enhancements is the reference hardening project for the Organization Agent Mesh. It makes simultaneous unrelated AI project teams safer by construction: project identity is an authorization boundary, ordinary execution state is isolated by default, and deployment packages are traceable to one exact source revision.
 
-## Bootstrap and identity authority
+Current target: **framework 1.6.0-alpha.1 / protocol 2.4.0-alpha.1**.
 
-Execution begins with `BOOTSTRAP_ORDER.json`, not with recent chat/task context. Current human project intent is validated first, then `PROJECT_IDENTITY_LOCK.json`. Package identity/readback and execution binding follow. Handoffs, queues, forums, accepted state, and continuation material are not authoritative until that gate succeeds.
+## Identity-first bootstrap
 
-Canonical operations carry enough identity to resolve:
+Execution begins with `BOOTSTRAP_ORDER.json`. Current human project intent is validated first, then `PROJECT_IDENTITY_LOCK.json`. Handoffs, queues, forums, accepted state, recent context, working-directory state, and semantic similarity are not authorization inputs.
 
-`organization → project_id → repository/workspace → agent_id → agent_instance_id → task/lane → resource`
+Canonical operations resolve `project_id -> repository/workspace -> agent_id -> agent_instance_id -> task/resource -> capability`.
 
-Human-readable aliases such as `researcher-01`, `task-001`, or `latest-analysis` may repeat in multiple projects. They are not global identifiers.
+`ProjectBinding` is immutable. Lifecycle is `UNBOUND -> BOUND -> INITIALIZED -> ACTIVE -> DRAINING -> TERMINATED`. Only an `ACTIVE` bound `AgentSession` may authorize mutation. Mutation APIs do not accept a caller-supplied project string as proof of identity; destination-side code revalidates the bound session.
 
-## Topology
+## Canonical identifiers
 
-```text
-GLOBAL / ORGANIZATIONAL CONTROL PLANE
-├── protocol definitions
-├── read-visible project registry contract
-├── capacity/advisory signals
-├── observability (future distributed service)
-└── explicit cross-project bridge (validator implemented; service remains future work)
+Project and resource IDs are validated canonical identifiers. The runtime does not lossily sanitize IDs into keys; invalid inputs are rejected instead of rewritten into potentially colliding aliases. Qualified keys are injective within the accepted identifier language: `project_id::resource_id`.
 
-PROJECT A                         PROJECT B
-├── identity lock                 ├── identity lock
-├── bound agent sessions          ├── bound agent sessions
-├── tasks / lanes / leases        ├── tasks / lanes / leases
-├── messages / delivery ledger    ├── messages / delivery ledger
-├── quarantine evidence           ├── quarantine evidence
-├── versioned state / artifacts   ├── versioned state / artifacts
-├── presence / lifecycle          ├── presence / lifecycle
-├── repository binding            ├── repository binding
-└── deployment packages           └── deployment packages
-```
+## Capabilities and child agents
 
-Global infrastructure may know that projects exist; ordinary project execution may not silently merge their state.
+Authority tier and capability set are separate. `PROJECT_IDENTITY_LOCK.json` is authoritative role-capability policy packaged with every role. Children inherit parent project/repository/root/protocol identity and receive a fresh execution-instance ID. A child may inherit the same capability set or a strict subset; escalation is rejected.
 
-## Agent lifecycle
+## Messaging and delivery
 
-After identity-lock validation, an execution instance proceeds through:
+Protocol 2.4 requires explicit source/destination project identity, sender agent/execution-instance identity, correlation/causation, idempotency and expiry. The internal bus has no cross-project override. Publication requires an `ACTIVE` session with `PUBLISH_MESSAGE`, and claimed sender identity must match it.
 
-`UNBOUND -> BOUND -> INITIALIZED -> ACTIVE -> DRAINING -> TERMINATED`
+Message persistence uses atomic exclusive creation keyed by SHA-256 of `(project_id, idempotency_key-or-message_id)`. Concurrent retries therefore cannot both become effective accepted messages. Delivery distinguishes `RECEIVED`, `ACCEPTED`, `STARTED`, `COMPLETED`, `FAILED`, and `REJECTED`; retries are bounded and unsafe/expired input is quarantined as non-executable evidence.
 
-Mutation is denied until the session is `ACTIVE` and its immutable `ProjectBinding` agrees with the validated project/repository context. Child agents inherit the parent's project/repository/workspace/protocol binding and receive a fresh execution-instance identity. Task semantics do not select or override project identity.
+## Tasks, artifacts, leases and state
 
-## Internal messaging
+`TaskRegistry` provides project-scoped task identity, execution-instance ownership and expected-version transitions. `ArtifactRegistry` records ownership/provenance/content hashes and expected-version replacement. `AuditLedger` records project, logical agent, execution instance, task/message/resource context, operation, result and before/after versions.
 
-Protocol `2.4.0-alpha.1` requires explicit source/destination project identity, sender execution-instance identity, correlation/causation, idempotency, and expiry fields. Ordinary AgentBus traffic requires matching source and destination project IDs. A mismatch is rejected rather than auto-routed.
+Collision-sensitive work uses project-qualified expiring leases owned by a specific execution instance. Claim/renew/release authority comes from the bound session; restarted instances cannot inherit stale locks. Stale-sensitive mutable state uses compare-and-set.
 
-Delivery state is separate from transport receipt. Acknowledgement-required work distinguishes `RECEIVED`, `ACCEPTED`, `STARTED`, `COMPLETED`, `FAILED`, and `REJECTED`. Retries are bounded and preserve project/idempotency identity. Unsafe or expired messages do not enter normal execution; they are retained as quarantine/dead-letter evidence.
+Projects have independent `ACTIVE`, `DRAINING`, and `PAUSED` lifecycle state. Pausing one project does not stop unrelated projects.
 
-## Concurrency and recovery
-
-Collision-sensitive work uses project-scoped expiring leases keyed by resource and owned by a specific agent execution instance. The same holder may retry a claim idempotently; competing instances are denied until release/expiry. Renew/release requires the holder instance and lease token. Expired leases are recoverable, and a restarted execution instance cannot silently inherit an old lock.
-
-Stale-sensitive state mutation uses expected-version compare-and-set. A stale writer fails rather than overwriting a newer state version.
-
-The reference runtime implements these primitives with thread-safe in-process registries. Durable multi-process or distributed persistence adapters must provide equivalent atomic semantics at their own storage boundary or fail closed.
-
-## Project lifecycle isolation
-
-Each project has an independently versioned lifecycle state:
-
-- `ACTIVE`: authorized mutation may proceed.
-- `DRAINING`: no new mutable work; explicitly marked completion of already accepted work may finish.
-- `PAUSED`: project mutation is denied.
-
-Pausing or draining one project does not suspend unrelated projects.
+The current registries are thread-safe in-process references. A distributed adapter is conformant only if it preserves equivalent atomicity, ownership, expiry/recovery and CAS semantics; otherwise it must fail closed.
 
 ## Cross-project exchange
 
-Cross-project communication is not a special case of the internal bus. It uses a separate exchange contract with explicit source/destination projects, purpose, classification, artifact scope, allowed use, expiry, correlation, capability, and approval. Default policy is DENY. Data should cross by value as a bounded sanitized snapshot with provenance.
+Ordinary internal channels never cross projects. Exchange requires an `ACTIVE` source-project session, `CROSS_PROJECT_EXCHANGE`, exact requesting-agent/session agreement, distinct projects, explicit approval, bounded artifact scope/purpose, and valid creation/expiry. The validator is implemented; a durable sanitized export/import bridge remains future production work.
 
-The current implementation contains the fail-closed exchange validator. A full durable cross-project bridge service remains future work.
+## Packaging and dependency closure
 
-## Deployment roles and authority
+`packaging/agent_package_dependencies.json` is authoritative package dependency closure. Shared inputs include all `org_agent_mesh/*.py`, `schemas/*.json`, and `protocols/*.md`, preventing new runtime components from silently escaping deployment ZIPs.
 
-Deployment role and authority tier are separate concepts:
+Each role ZIP contains manifest v3 with project/repository identity, role/tier, capabilities, framework/protocol/package versions, exact source commit, commit-derived deterministic build time, dependency-map hash, exact component inventory and SHA-256 hashes. Build emits PRIMARY, MANAGER and RESEARCH as one release set plus `release-set.json` archive hashes.
 
-- PRIMARY → ORCHESTRATOR by default
-- MANAGER → REVIEWER by default
-- RESEARCH → SPECIALIST by default
+Verification recomputes dependency closure from repository source, compares every packaged component to source, checks role isolation and one coordinated revision. ZIP metadata is deterministic; CI builds twice and rejects non-reproducible archives.
 
-Role naming never elevates authority. Each role ZIP carries the identity lock/bootstrap order, shared protocol/runtime, component hashes, and its role-specific bootstrap contract. Shared control-plane code therefore does not give Research or Manager Primary authority.
+## Release gate
 
-## Release consistency
+A revision is release-complete only after `tests -> exact-SHA build -> package verification -> independent rebuild -> reproducibility comparison -> coordinated artifact publication`.
 
-The Primary owns project-level release coherence. Changes to identity, routing, schemas, bootstrap, capabilities, artifact ownership, repository/workspace resolution, capacity, lifecycle, lease/CAS behavior, delivery recovery, or role responsibility trigger package dependency analysis. Affected role packages must be rebuilt from an exact source revision and validated before the change is considered complete.
+## Remaining production layers
 
-The CI release path checks out an exact source SHA, runs the repository test suite, builds all three role ZIPs from that SHA, validates identity readback and every component hash, checks role/package isolation, and publishes them as one coordinated artifact set.
-
-## Current enforcement status
-
-Implemented in the reference runtime:
-
-- identity-first bootstrap and fail-closed project identity lock;
-- package identity readback, exact source revision, and per-component hashes;
-- immutable project binding and same-project authorization;
-- child project-identity inheritance with fresh execution-instance IDs;
-- fail-closed internal message routing and explicit cross-project exchange validation;
-- project-scoped idempotency, expiry, delivery acknowledgements, bounded retries, and quarantine;
-- project-scoped expiring leases with expiry/recovery and execution-instance ownership;
-- compare-and-set stale-write rejection;
-- independent `ACTIVE` / `DRAINING` / `PAUSED` project lifecycle controls;
-- synchronized PRIMARY/MANAGER/RESEARCH build inputs with role-specific authority;
-- capacity reserve, recursive self-enhancement, and scheduled-task transport controls from prior protocol layers.
-
-Still requiring a stronger production layer:
-
-- durable multi-process/distributed lease and CAS storage adapter with equivalent atomicity;
-- persistent global registry/observability service rather than only the reference registry contract;
-- full cross-project bridge service beyond the existing validator;
-- destination-specific durable acknowledgement transport where a concrete message broker is introduced.
+The alpha still needs durable distributed state adapters, persistent organizational registry/global observability, a full sanitized cross-project bridge, and broker-specific durable acknowledgement transport. Those are future layers, not current enforcement claims.

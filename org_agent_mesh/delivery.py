@@ -4,10 +4,11 @@ from pathlib import Path
 from threading import RLock
 import hashlib
 import json
-import re
+import os
 
+from .control_plane import require_active_session
 from .message_bus import append_message, validate_message
-from .project_scope import ProjectScopeError, qualify, require_project_id, require_same_project
+from .project_scope import qualify, require_project_id
 
 ACK_STATES = ("RECEIVED", "ACCEPTED", "STARTED", "COMPLETED", "FAILED", "REJECTED")
 TERMINAL_ACK_STATES = {"COMPLETED", "REJECTED"}
@@ -30,10 +31,6 @@ def _utc_now(now=None):
 
 def _utc_iso(value):
     return value.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
-
-
-def _safe(value):
-    return re.sub(r"[^A-Za-z0-9_.-]+", "-", str(value)).strip("-") or "record"
 
 
 @dataclass(frozen=True)
@@ -59,14 +56,18 @@ _ALLOWED = {
 
 
 class DeliveryLedger:
-    """Thread-safe project-scoped acknowledgement and bounded-retry reference ledger."""
-
     def __init__(self):
         self._records = {}
         self._lock = RLock()
 
-    def register(self, message, *, expected_project_id=None, max_attempts=3, now=None):
-        validate_message(message, expected_project_id=expected_project_id, now=now)
+    def register(self, message, *, recipient_session, max_attempts=3, now=None):
+        binding = require_active_session(
+            recipient_session,
+            message.get("destination_project_id"),
+            operation="delivery registration",
+            capability="PUBLISH_MESSAGE",
+        )
+        validate_message(message, expected_project_id=binding.project_id, now=now)
         if max_attempts < 1:
             raise ValueError("max_attempts must be at least 1")
         project_id = require_project_id(message["project_id"])
@@ -76,16 +77,7 @@ class DeliveryLedger:
             existing = self._records.get(key)
             if existing is not None:
                 return existing
-            record = DeliveryRecord(
-                project_id=project_id,
-                message_id=message["id"],
-                idempotency_key=idempotency_key,
-                status="RECEIVED",
-                attempts=1,
-                max_attempts=max_attempts,
-                last_error=None,
-                updated_at_utc=_utc_iso(_utc_now(now)),
-            )
+            record = DeliveryRecord(project_id, message["id"], idempotency_key, "RECEIVED", 1, max_attempts, None, _utc_iso(_utc_now(now)))
             self._records[key] = record
             return record
 
@@ -93,8 +85,10 @@ class DeliveryLedger:
         with self._lock:
             return self._records.get(qualify(project_id, idempotency_key))
 
-    def transition(self, requester_project_id, target_project_id, idempotency_key, status, *, error=None, now=None):
-        require_same_project(requester_project_id, target_project_id, operation="delivery acknowledgement")
+    def transition(self, session, target_project_id, idempotency_key, status, *, error=None, now=None):
+        require_active_session(
+            session, target_project_id, operation="delivery acknowledgement", capability="PUBLISH_MESSAGE"
+        )
         if status not in ACK_STATES:
             raise ValueError("unsupported acknowledgement state")
         key = qualify(target_project_id, idempotency_key)
@@ -106,17 +100,14 @@ class DeliveryLedger:
                 return current
             if status not in _ALLOWED[current.status]:
                 raise DeliveryStateError(f"invalid acknowledgement transition: {current.status} -> {status}")
-            updated = replace(
-                current,
-                status=status,
-                last_error=error if status == "FAILED" else current.last_error,
-                updated_at_utc=_utc_iso(_utc_now(now)),
-            )
+            updated = replace(current, status=status, last_error=error if status == "FAILED" else current.last_error, updated_at_utc=_utc_iso(_utc_now(now)))
             self._records[key] = updated
             return updated
 
-    def retry(self, requester_project_id, target_project_id, idempotency_key, *, now=None):
-        require_same_project(requester_project_id, target_project_id, operation="delivery retry")
+    def retry(self, session, target_project_id, idempotency_key, *, now=None):
+        require_active_session(
+            session, target_project_id, operation="delivery retry", capability="PUBLISH_MESSAGE"
+        )
         key = qualify(target_project_id, idempotency_key)
         with self._lock:
             current = self._records.get(key)
@@ -126,24 +117,18 @@ class DeliveryLedger:
                 raise DeliveryStateError("only failed delivery may be retried")
             if current.attempts >= current.max_attempts:
                 raise RetryExhausted("delivery retry budget exhausted")
-            updated = replace(
-                current,
-                status="ACCEPTED",
-                attempts=current.attempts + 1,
-                updated_at_utc=_utc_iso(_utc_now(now)),
-            )
+            updated = replace(current, status="ACCEPTED", attempts=current.attempts + 1, updated_at_utc=_utc_iso(_utc_now(now)))
             self._records[key] = updated
             return updated
 
 
 def quarantine_message(quarantine_dir, message, reason, *, expected_project_id=None, now=None):
-    """Persist diagnostic evidence without executing an unsafe message."""
     local_project = expected_project_id or "unbound"
     try:
         local_project = require_project_id(local_project)
-    except ProjectScopeError:
+    except Exception:
         local_project = "unbound"
-    directory = Path(quarantine_dir) / _safe(local_project)
+    directory = Path(quarantine_dir) / local_project
     directory.mkdir(parents=True, exist_ok=True)
     encoded = json.dumps(message, sort_keys=True, default=str).encode("utf-8")
     digest = hashlib.sha256(encoded).hexdigest()
@@ -158,22 +143,39 @@ def quarantine_message(quarantine_dir, message, reason, *, expected_project_id=N
         "quarantined_at_utc": timestamp,
         "payload": message,
     }
-    path = directory / f"{_safe(timestamp)}__{digest[:20]}.json"
-    if not path.exists():
-        path.write_text(json.dumps(record, indent=2, sort_keys=True, default=str) + "\n", encoding="utf-8")
+    path = directory / f"{digest}.json"
+    payload = json.dumps(record, indent=2, sort_keys=True, default=str) + "\n"
+    try:
+        fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+    except FileExistsError:
+        return path
+    with os.fdopen(fd, "w", encoding="utf-8") as handle:
+        handle.write(payload)
+        handle.flush()
+        os.fsync(handle.fileno())
     return path
 
 
-def safe_append_message(messages_dir, quarantine_dir, message, *, expected_project_id=None, now=None):
-    """Fail closed: accepted messages append immutably; duplicates no-op; unsafe input is quarantined."""
+def safe_append_message(messages_dir, quarantine_dir, message, *, sender_session, expected_project_id=None, now=None):
     try:
-        validate_message(message, expected_project_id=expected_project_id, now=now)
+        validate_message(
+            message,
+            expected_project_id=expected_project_id,
+            sender_session=sender_session,
+            now=now,
+        )
     except Exception as exc:
         path = quarantine_message(quarantine_dir, message, exc, expected_project_id=expected_project_id, now=now)
         outcome = "EXPIRED" if "expired" in str(exc).lower() else "QUARANTINED"
         return {"outcome": outcome, "quarantine_path": path, "error": str(exc)}
     try:
-        path = append_message(messages_dir, message, expected_project_id=expected_project_id)
+        path = append_message(
+            messages_dir,
+            message,
+            sender_session=sender_session,
+            expected_project_id=expected_project_id,
+            now=now,
+        )
     except FileExistsError as exc:
         return {"outcome": "DUPLICATE", "error": str(exc)}
     return {"outcome": "ACCEPTED", "message_path": path}
