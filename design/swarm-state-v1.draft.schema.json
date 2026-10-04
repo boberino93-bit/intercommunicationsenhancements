@@ -1,0 +1,21 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"org-agent-mesh/swarm-state/v1-draft",
+  "title":"Swarm State v1 (draft)",
+  "type":"object","additionalProperties":false,
+  "required":["schema","swarm_id","project_id","task_id","allocation_decision_id","revision","research_agents","manager_agents","topology","status","authorized_by"],
+  "properties":{
+    "schema":{"const":"org-agent-mesh/swarm-state/v1-draft"},
+    "swarm_id":{"type":"string","minLength":1},
+    "project_id":{"type":"string","minLength":1},
+    "task_id":{"type":"string","minLength":1},
+    "allocation_decision_id":{"type":"string","minLength":1},
+    "revision":{"type":"integer","minimum":1},
+    "research_agents":{"type":"integer","minimum":0,"maximum":32},
+    "manager_agents":{"type":"integer","minimum":0,"maximum":8},
+    "topology":{"enum":["PRIMARY_DIRECT","SINGLE_MANAGER_CELL","MULTI_MANAGER_CELLS"]},
+    "status":{"enum":["AUTHORIZED","ACTIVE","SCALING","DRAINING","TERMINATED"]},
+    "resize_reason":{"type":["string","null"]},
+    "authorized_by":{"type":"object","required":["agent_id","agent_instance_id","role"],"properties":{"agent_id":{"type":"string"},"agent_instance_id":{"type":"string"},"role":{"const":"PRIMARY"}}}
+  }
+}
