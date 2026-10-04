@@ -35,19 +35,20 @@ def _extract_single_block(text: str) -> str:
     if not isinstance(text, str) or not text.strip():
         raise ScheduledLaunchContextParseError("scheduled launch text is required")
 
-    begin_count = text.count(BEGIN_MARKER)
-    end_count = text.count(END_MARKER)
-    if begin_count != 1 or end_count != 1:
+    lines = text.splitlines()
+    begin_indexes = [index for index, line in enumerate(lines) if line.strip() == BEGIN_MARKER]
+    end_indexes = [index for index, line in enumerate(lines) if line.strip() == END_MARKER]
+    if len(begin_indexes) != 1 or len(end_indexes) != 1:
         raise ScheduledLaunchContextParseError(
             "scheduled launch text must contain exactly one project launch context block"
         )
 
-    begin = text.index(BEGIN_MARKER) + len(BEGIN_MARKER)
-    end = text.index(END_MARKER, begin)
-    if end <= begin:
+    begin_index = begin_indexes[0]
+    end_index = end_indexes[0]
+    if end_index <= begin_index + 1:
         raise ScheduledLaunchContextParseError("scheduled launch context markers are malformed")
 
-    payload = text[begin:end].strip()
+    payload = "\n".join(lines[begin_index + 1:end_index]).strip()
     if not payload:
         raise ScheduledLaunchContextParseError("scheduled launch context payload is empty")
     return payload
