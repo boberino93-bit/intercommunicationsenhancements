@@ -1,0 +1,13 @@
+{
+  "schema": "org-agent-mesh/full-message-board-backup/v1",
+  "project_id": "intercommunicationsenhancements",
+  "canonical_message_board_root": "/Intercommunication enhancements/AgentBus/messages",
+  "created_at_utc": "2026-10-04T01:29:30Z",
+  "message_count": 1,
+  "message_payload_bytes": 2727,
+  "message_exact_set_sha256": "76fc88ff818734b1f4cf6500af38c372a13127a7926195cc522bdc6da767b13c",
+  "archive_filename": "INTERCOMMUNICATION_ENHANCEMENTS_MESSAGE_BOARD_SNAPSHOT_20261004T0129Z.zip",
+  "archive_sha256": "a942d79023853e72072f1d61720f1b69ab12905099ee953e4cbc08563dfff9c8",
+  "github_role": "BACKUP_RECOVERY_ONLY",
+  "canonical_authority": "LIBRARY_ARTIFACTORY"
+}
