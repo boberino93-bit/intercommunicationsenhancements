@@ -40,6 +40,30 @@ Projects have independent `ACTIVE`, `DRAINING`, and `PAUSED` lifecycle state. Pa
 
 The remaining task, artifact, audit, project-registry and delivery registries are thread-safe in-process references. A distributed or multi-node adapter is conformant only if it preserves equivalent atomicity, ownership, expiry/recovery, isolation and CAS semantics; otherwise it must fail closed. The SQLite backend is a single-node durability reference and is not presented as a distributed-consensus service.
 
+## Swarm learning and organizational memory
+
+The architecture treats each completed agent run as a potential source of **cumulative operational intelligence**, not as model-weight training. The swarm improves by persisting evidence, validating reusable conclusions, and selectively promoting high-confidence lessons into bootstrap-loadable operating doctrine. The normative rules are defined in `protocols/swarm_learning.md`.
+
+Learning has three authority layers:
+
+1. **Raw experience** — append-only run evidence, failures, measurements, experiments, diagnostics and candidate lessons. It is non-authoritative.
+2. **Validated knowledge** — reusable conclusions that survived an explicit validation method appropriate to their risk and scope.
+3. **Operating doctrine** — concise, versioned, reversible instructions and heuristics approved for routine inheritance by later agents.
+
+Candidate lessons move through `OBSERVED -> CANDIDATE -> VALIDATED -> DOCTRINE`, with `REJECTED`, `SUPERSEDED`, and `EXPIRED` as non-promoted terminal or replacement states. Repetition alone never promotes a lesson. Higher-risk lessons affecting identity, authorization, project boundaries, destructive mutation, security, cross-project exchange, or release gates require reviewer validation and cannot auto-promote. Doctrine integration remains an ORCHESTRATOR/PRIMARY responsibility unless a narrower project policy explicitly delegates a low-risk class.
+
+Every promoted lesson retains project/run/agent/task provenance, evidence references, scope, confidence semantics, validation method, reviewer/promoter identity and supersession/expiry metadata. Confidence never substitutes for evidence or promotion state. Contradictory validated lessons require reconciliation rather than last-writer-wins replacement.
+
+Runtime learning state is project-local and may be sharded under `.swarm/learning/<global_run_id>/{experience,candidates,validation}/...`. Cross-project learning remains observation-only unless the ordinary explicit exchange path is approved; a project may not write learning state or doctrine into a peer repository. Slack may carry notifications or pointers but is never canonical learning state.
+
+Bootstrap intentionally loads **doctrine first, scoped validated knowledge second, and raw history only on demand**. This prevents unvalidated history from becoming accidental policy and limits context growth as the swarm ages. Current human intent, identity/capability controls and newer authoritative protocols always outrank inherited doctrine.
+
+Before normal handoff or termination, agents should persist an idempotent learning checkpoint containing material outcomes, failures/retries, evidence-backed lesson candidates, doctrine confirmations or contradictions, efficiency observations where measurable, and unresolved validation needs. `NO_MATERIAL_LEARNING` is a valid checkpoint; agents must not invent lessons merely to satisfy the protocol.
+
+The system may measure success rate, first-pass completion, repeated-failure recurrence, rework, handoff defects, lease conflicts, candidate-validation yield, doctrine rollback/supersession and task latency where reliably observable. These metrics are diagnostic evidence only and never bypass review or authorization gates.
+
+The intended system property is that later agents begin with better validated procedures and fewer repeated mistakes than earlier agents while retaining auditability, reversibility, bounded context, project isolation, and explicit human/project authority.
+
 ## Cross-project exchange
 
 Ordinary internal channels never cross projects. Exchange requires an `ACTIVE` source-project session, `CROSS_PROJECT_EXCHANGE`, exact requesting-agent/session agreement, distinct projects, explicit approval, bounded artifact scope/purpose, and valid creation/expiry. The validator is implemented; a durable sanitized export/import bridge remains future production work.
@@ -56,6 +80,8 @@ Verification recomputes dependency closure from repository source, compares ever
 
 A revision is release-complete only after `tests -> exact-SHA build -> package verification -> independent rebuild -> reproducibility comparison -> coordinated artifact publication`.
 
+Doctrine changes that alter packaged agent behavior are subject to this same release gate before they are deployment-complete.
+
 ## Remaining production layers
 
-The alpha still needs distributed/multi-node durable adapters for the complete registry set, persistent organizational registry/global observability, a full sanitized cross-project bridge, and broker-specific durable acknowledgement transport. Those are future layers, not current enforcement claims.
+The alpha still needs distributed/multi-node durable adapters for the complete registry set, persistent organizational registry/global observability, a full sanitized cross-project bridge, broker-specific durable acknowledgement transport, and a concrete durable learning-registry implementation that enforces the promotion lifecycle described above. Those are future layers, not current enforcement claims.
