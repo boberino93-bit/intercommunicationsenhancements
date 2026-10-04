@@ -57,6 +57,42 @@ class NewProjectBootstrapKitTests(unittest.TestCase):
         self.assertEqual(bootstrap["authorized_roles"], ["primary", "manager", "research"])
         self.assertIn("recovery", bootstrap["execution_modes"])
 
+    def test_scheduled_launch_contract_propagates_to_new_projects(self):
+        bootstrap_template = json.loads(
+            (ROOT / "templates" / "new-project" / "AGENT_BOOTSTRAP.template.json").read_text()
+        )
+        scheduled = bootstrap_template["scheduled_launch_contract"]
+        self.assertEqual(
+            scheduled["context_schema"],
+            "org-agent-mesh/scheduled-launch-context/v1",
+        )
+        self.assertEqual(
+            scheduled["route_schema"],
+            "org-agent-mesh/scheduled-task-route/v2",
+        )
+        self.assertTrue(scheduled["capture_from_local_contract"])
+        self.assertTrue(scheduled["validate_against_local_contract_before_mutation"])
+        self.assertEqual(scheduled["task_state_advancement_before_bootstrap_ready"], "DENY")
+
+        order_template = json.loads(
+            (ROOT / "templates" / "new-project" / "BOOTSTRAP_ORDER.template.json").read_text()
+        )
+        self.assertTrue(order_template["pre_provider_admission"]["required_for_dynamic_scheduled_launches"])
+        self.assertEqual(
+            order_template["pre_provider_admission"]["task_state_advancement_before_bootstrap_ready"],
+            "DENY",
+        )
+        self.assertEqual(
+            order_template["launch_origin_rules"]["SCHEDULED_PROJECT_BOUND"],
+            "require machine-readable launch context captured from this project's local contract and verify it before mutation",
+        )
+
+        entrypoint = json.loads((ROOT / "GLOBAL_AGENT_ENTRYPOINT.json").read_text())
+        scheduled_branch = entrypoint["intent_branches"]["scheduled_project_bound_task"]
+        self.assertEqual(scheduled_branch["mode"], "PROJECT_BOUND_ROUTED")
+        self.assertTrue(scheduled_branch["local_contract_verification_required"])
+        self.assertEqual(scheduled_branch["topic_similarity_fallback"], "DENY")
+
 
 if __name__ == "__main__":
     unittest.main()
