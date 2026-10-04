@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Project Generation Head",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "generation_id": {"type": "string", "minLength": 1},
+    "parent_generation_id": {"type": ["string", "null"]},
+    "coordinator_epoch": {"type": "string", "minLength": 1},
+    "protocol_version": {"type": "string", "minLength": 1},
+    "package_version": {"type": "string", "minLength": 1},
+    "reason": {"type": "string", "minLength": 1},
+    "status": {"enum": ["ACTIVE"]},
+    "created_at_utc": {"type": "string", "minLength": 1},
+    "updated_at_utc": {"type": "string", "minLength": 1},
+    "updated_by_agent_instance_id": {"type": "string", "minLength": 1},
+    "history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "generation_id": {"type": "string", "minLength": 1},
+          "parent_generation_id": {"type": ["string", "null"]},
+          "coordinator_epoch": {"type": "string", "minLength": 1},
+          "protocol_version": {"type": "string", "minLength": 1},
+          "package_version": {"type": "string", "minLength": 1},
+          "reason": {"type": "string", "minLength": 1},
+          "created_at_utc": {"type": "string", "minLength": 1},
+          "status": {"enum": ["SUPERSEDED"]},
+          "superseded_at_utc": {"type": "string", "minLength": 1}
+        },
+        "required": ["generation_id", "parent_generation_id", "coordinator_epoch", "protocol_version", "package_version", "reason", "created_at_utc", "status", "superseded_at_utc"]
+      }
+    }
+  },
+  "required": ["generation_id", "parent_generation_id", "coordinator_epoch", "protocol_version", "package_version", "reason", "status", "created_at_utc", "updated_at_utc", "updated_by_agent_instance_id", "history"]
+}

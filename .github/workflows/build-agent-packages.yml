@@ -10,7 +10,8 @@ permissions:
   contents: read
 
 jobs:
-  validate-and-package:
+  manager-review:
+    name: MANAGER deterministic structural review
     runs-on: ubuntu-latest
     steps:
       - name: Checkout exact source revision
@@ -21,7 +22,108 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Run intercommunications hardening tests
+      - name: Run structural and package-contract review suite
+        run: |
+          python -m unittest -v \
+            tests.test_alignment_contracts \
+            tests.test_package_sync \
+            tests.test_project_role_routing \
+            tests.test_normalization_acceptance
+
+      - name: Build role release set for structural review
+        run: python tools/build_agent_packages.py --source-revision "$GITHUB_SHA" --out dist
+
+      - name: Verify role package dependency closure
+        run: python tools/verify_agent_packages.py
+
+      - name: Rebuild for structural reproducibility review
+        run: python tools/build_agent_packages.py --source-revision "$GITHUB_SHA" --out dist-manager-repro
+
+      - name: Verify deterministic reproduction
+        run: python tools/check_reproducible_packages.py dist dist-manager-repro
+
+      - name: Emit exact-SHA MANAGER review evidence
+        run: |
+          mkdir -p review-evidence
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          Path('review-evidence/manager-review.json').write_text(json.dumps({
+              'review_lane': 'MANAGER_DETERMINISTIC_STRUCTURAL',
+              'head_sha': os.environ['GITHUB_SHA'],
+              'result': 'PASS',
+              'checks': ['alignment-contracts', 'package-sync', 'role-routing', 'normalization-acceptance', 'package-closure', 'reproducibility'],
+              'mutation_authority': 'NONE_REVIEW_ONLY'
+          }, indent=2) + '\n')
+          PY
+
+      - name: Publish MANAGER review evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: manager-review-${{ github.sha }}
+          path: review-evidence/manager-review.json
+          if-no-files-found: error
+
+  research-redteam:
+    name: RESEARCH deterministic adversarial review
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact source revision
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Run isolation concurrency recovery and adversarial suites
+        run: |
+          python -m unittest -v \
+            tests.test_control_plane \
+            tests.test_project_isolation \
+            tests.test_delivery_recovery \
+            tests.test_recovery_identity \
+            tests.test_v2_coordination_candidate \
+            tests.test_v2_ecosystem_registry_candidate \
+            tests.test_v2_generation_state_candidate \
+            tests.test_normalization_acceptance
+
+      - name: Emit exact-SHA RESEARCH red-team evidence
+        run: |
+          mkdir -p review-evidence
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          Path('review-evidence/research-redteam.json').write_text(json.dumps({
+              'review_lane': 'RESEARCH_DETERMINISTIC_ADVERSARIAL',
+              'head_sha': os.environ['GITHUB_SHA'],
+              'result': 'PASS',
+              'checks': ['control-plane', 'project-isolation', 'delivery-recovery', 'identity-recovery', 'v2-coordination', 'ecosystem-registry', 'generation-state', 'normalization-acceptance'],
+              'mutation_authority': 'NONE_REVIEW_ONLY'
+          }, indent=2) + '\n')
+          PY
+
+      - name: Publish RESEARCH review evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: research-redteam-${{ github.sha }}
+          path: review-evidence/research-redteam.json
+          if-no-files-found: error
+
+  validate-and-package:
+    name: Integrated validation and synchronized package build
+    needs: [manager-review, research-redteam]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact source revision
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Run complete intercommunications hardening tests
         run: python tests/run_all.py
 
       - name: Build coordinated role release set from this commit
