@@ -2,17 +2,18 @@
 
 The internal Artifactory/message-board plane is the first persistent home of a project.
 GitHub is an external code repository binding that happens only after the internal
-project namespace, identity, forums, audit trail and bootstrap state exist.
+project namespace, identity, forums and bootstrap state exist.
 
-This module intentionally depends on injected backends. The ChatGPT runtime must supply
-an internal message-board backend and a GitHub connector verifier. If either authority
-boundary is unavailable, the initializer fails closed rather than silently substituting
-another storage plane.
+The initializer is intentionally interruption-safe. Stable bootstrap records use
+create-or-match semantics so a replacement agent can resume without duplicating state.
+The ChatGPT runtime must supply an internal message-board backend and a GitHub connector
+verifier. Missing authority boundaries fail closed; GitHub is never substituted for the
+internal coordination plane.
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, asdict
 from hashlib import sha256
 from typing import Any, Protocol
 import json
@@ -31,7 +32,6 @@ class InternalBoardBackend(Protocol):
     def object_exists(self, path: str) -> bool: ...
     def write_json(self, path: str, value: dict[str, Any], *, create_only: bool = False) -> None: ...
     def read_json(self, path: str) -> dict[str, Any]: ...
-    def append_event(self, path: str, value: dict[str, Any]) -> None: ...
 
 
 class GitHubRepositoryVerifier(Protocol):
@@ -57,6 +57,18 @@ class ProjectIntent:
     requested_by: str = "human"
 
 
+@dataclass(frozen=True)
+class PrimaryBootstrapResult:
+    """Structured result of the Primary's mandatory initial project assessment."""
+
+    source_of_truth: tuple[str, ...]
+    workstreams: tuple[str, ...]
+    assistance_required: bool
+    research_agents: int = 0
+    manager_agents: int = 0
+    rationale: str = ""
+
+
 @dataclass
 class InitResult:
     project_id: str
@@ -75,6 +87,7 @@ PHASES = (
     "WAITING_FOR_GITHUB",
     "GITHUB_VERIFIED",
     "BOUND",
+    "PRIMARY_INITIALIZING",
     "COMPLETE",
 )
 
@@ -90,17 +103,19 @@ def derive_project_id(display_name: str) -> str:
     return f"{stem}-{digest}"
 
 
+def _canonical_digest(value: dict[str, Any]) -> str:
+    encoded = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+    return sha256(encoded).hexdigest()
+
+
 def _fingerprint_intent(intent: ProjectIntent) -> str:
-    encoded = json.dumps(
+    return _canonical_digest(
         {
             "display_name": intent.display_name.strip(),
             "problem_statement": intent.problem_statement.strip(),
             "requested_by": intent.requested_by,
-        },
-        sort_keys=True,
-        separators=(",", ":"),
-    ).encode("utf-8")
-    return sha256(encoded).hexdigest()
+        }
+    )
 
 
 def _require_phase(value: str) -> None:
@@ -108,8 +123,26 @@ def _require_phase(value: str) -> None:
         raise ProjectInitializationError(f"invalid initialization phase: {value}")
 
 
+def _validate_primary_bootstrap(result: PrimaryBootstrapResult) -> None:
+    if not result.source_of_truth or any(not value.strip() for value in result.source_of_truth):
+        raise ProjectInitializationError("Primary bootstrap requires at least one source-of-truth reference")
+    if not result.workstreams or any(not value.strip() for value in result.workstreams):
+        raise ProjectInitializationError("Primary bootstrap requires at least one workstream")
+    if result.research_agents < 0 or result.manager_agents < 0:
+        raise ProjectInitializationError("agent counts cannot be negative")
+    if not result.rationale.strip():
+        raise ProjectInitializationError("Primary bootstrap requires an allocation/assistance rationale")
+    if result.assistance_required:
+        if result.research_agents < 1:
+            raise ProjectInitializationError("assistance_required requires at least one Research agent")
+        if result.manager_agents > result.research_agents:
+            raise ProjectInitializationError("Manager count cannot exceed Research count")
+    elif result.research_agents != 0 or result.manager_agents != 0:
+        raise ProjectInitializationError("no-assistance bootstrap must allocate zero Research/Manager agents")
+
+
 class ProjectInitializer:
-    """Two-stage initializer: create internal project state, then bind GitHub."""
+    """Three-stage initializer: internal board -> GitHub binding -> Primary bootstrap."""
 
     REQUIRED_DIRECTORIES = (
         "bootstrap",
@@ -147,10 +180,17 @@ class ProjectInitializer:
     def _state_path(self, project_id: str) -> str:
         return f"{self._root(project_id)}/bootstrap/initialization.json"
 
+    def _write_create_or_match(self, path: str, value: dict[str, Any]) -> None:
+        if self.board.object_exists(path):
+            if self.board.read_json(path) != value:
+                raise ProjectInitializationError(f"existing bootstrap object conflicts with expected value: {path}")
+            return
+        self.board.write_json(path, value, create_only=True)
+
     def begin(self, intent: ProjectIntent) -> InitResult:
         """Create or safely resume the internal project namespace.
 
-        This method MUST NOT require a GitHub repository. It stops at WAITING_FOR_GITHUB.
+        This method MUST NOT require or contact GitHub. It stops at WAITING_FOR_GITHUB.
         """
         if not intent.problem_statement.strip():
             raise ProjectInitializationError("problem statement is required")
@@ -170,18 +210,7 @@ class ProjectInitializer:
                 raise ProjectInitializationError(
                     "project namespace collision: existing project intent does not match requested initialization"
                 )
-            phase = state.get("phase")
-            _require_phase(phase)
-            if phase in {"WAITING_FOR_GITHUB", "GITHUB_VERIFIED", "BOUND", "COMPLETE"}:
-                return InitResult(
-                    project_id=project_id,
-                    board_root=root,
-                    phase=phase,
-                    next_action=("PROVIDE_GITHUB_REPOSITORY" if phase == "WAITING_FOR_GITHUB" else "RESUME_BINDING"),
-                    prompt=(GitHubBindingRequirement().prompt if phase == "WAITING_FOR_GITHUB" else None),
-                    github_repository=state.get("github_repository"),
-                )
-            raise ProjectInitializationError(f"project initialization is incomplete at unsupported resume phase {phase}")
+            return self.resume(project_id)
 
         self.board.create_directory(root)
         created.append(root)
@@ -201,8 +230,8 @@ class ProjectInitializer:
             "github_repository": None,
             "revision": 1,
         }
-        self.board.write_json(self._state_path(project_id), state, create_only=True)
-        self.board.write_json(
+        self._write_create_or_match(self._state_path(project_id), state)
+        self._write_create_or_match(
             f"{root}/identity/project.json",
             {
                 "schema": "org-agent-mesh/project-identity-seed/v1-draft",
@@ -210,9 +239,8 @@ class ProjectInitializer:
                 "display_name": intent.display_name.strip(),
                 "authority_state": "UNBOUND_EXTERNAL_REPOSITORY",
             },
-            create_only=True,
         )
-        self.board.write_json(
+        self._write_create_or_match(
             f"{root}/forums/index.json",
             {
                 "schema": "org-agent-mesh/internal-forum-index/v1-draft",
@@ -223,9 +251,8 @@ class ProjectInitializer:
                     "research": f"{root}/forums/research",
                 },
             },
-            create_only=True,
         )
-        self.board.write_json(
+        self._write_create_or_match(
             f"{root}/swarm/state.json",
             {
                 "schema": "org-agent-mesh/swarm-bootstrap-state/v1-draft",
@@ -235,10 +262,9 @@ class ProjectInitializer:
                 "manager_agents": 0,
                 "revision": 0,
             },
-            create_only=True,
         )
-        self.board.append_event(
-            f"{root}/audit/events",
+        self._write_create_or_match(
+            f"{root}/audit/project-internal-namespace-initialized.json",
             {
                 "event": "PROJECT_INTERNAL_NAMESPACE_INITIALIZED",
                 "project_id": project_id,
@@ -246,8 +272,8 @@ class ProjectInitializer:
                 "revision": 1,
             },
         )
-        self.board.append_event(
-            f"{root}/forums/primary/events",
+        self._write_create_or_match(
+            f"{root}/forums/primary/project-bootstrap.json",
             {
                 "kind": "PROJECT_BOOTSTRAP",
                 "project_id": project_id,
@@ -264,7 +290,11 @@ class ProjectInitializer:
         )
 
     def bind_github(self, project_id: str, repository: str) -> InitResult:
-        """Verify a public connector-accessible GitHub repo and complete the binding."""
+        """Verify a public connector-accessible GitHub repo and persist the binding.
+
+        Binding reaches BOUND, not COMPLETE. The Primary must still perform the mandatory
+        initial project assessment and persist it with complete_primary_bootstrap().
+        """
         if self.github is None:
             raise ProjectInitializationError(
                 "GitHub verifier is unavailable; cannot prove public connector accessibility"
@@ -276,14 +306,14 @@ class ProjectInitializer:
         phase = state.get("phase")
         _require_phase(phase)
 
-        if phase == "COMPLETE":
+        if phase in {"BOUND", "PRIMARY_INITIALIZING", "COMPLETE"}:
             if state.get("github_repository") != repository:
                 raise ProjectInitializationError("project is already bound to a different GitHub repository")
             return InitResult(
                 project_id=project_id,
                 board_root=self._root(project_id),
-                phase="COMPLETE",
-                next_action="START_PRIMARY_EXECUTION",
+                phase=phase,
+                next_action=("EXECUTE_PROJECT_WORK" if phase == "COMPLETE" else "COMPLETE_PRIMARY_BOOTSTRAP"),
                 github_repository=repository,
             )
         if phase != "WAITING_FOR_GITHUB":
@@ -300,7 +330,7 @@ class ProjectInitializer:
             )
         canonical = verification.get("full_name") or repository
         root = self._root(project_id)
-        self.board.write_json(
+        self._write_create_or_match(
             f"{root}/identity/github-binding.json",
             {
                 "schema": "org-agent-mesh/github-binding/v1-draft",
@@ -311,18 +341,8 @@ class ProjectInitializer:
                 "public": True,
                 "connector_accessible": True,
             },
-            create_only=True,
         )
-        next_state = dict(state)
-        next_state.update(
-            {
-                "phase": "COMPLETE",
-                "github_repository": canonical,
-                "revision": int(state.get("revision", 0)) + 1,
-            }
-        )
-        self.board.write_json(state_path, next_state)
-        self.board.write_json(
+        self._write_create_or_match(
             f"{root}/handoffs/primary-bootstrap.json",
             {
                 "schema": "org-agent-mesh/primary-bootstrap-handoff/v1-draft",
@@ -332,37 +352,133 @@ class ProjectInitializer:
                 "instructions": [
                     "Validate project identity and GitHub binding before mutation.",
                     "Treat the internal board as canonical coordination state.",
-                    "Perform initial problem decomposition and assistance-need assessment.",
-                    "Use adaptive swarm regulation before requesting research/manager allocation.",
-                    "Persist decisions, evidence, handoffs and swarm state under this project namespace only.",
+                    "Perform source-of-truth discovery and initial problem decomposition.",
+                    "Perform assistance-need assessment using adaptive swarm regulation.",
+                    "Persist the structured Primary bootstrap result before project initialization is COMPLETE.",
                 ],
             },
-            create_only=True,
         )
-        self.board.append_event(
-            f"{root}/audit/events",
+        self._write_create_or_match(
+            f"{root}/audit/github-repository-bound.json",
             {
                 "event": "GITHUB_REPOSITORY_BOUND",
                 "project_id": project_id,
                 "repository": canonical,
-                "revision": next_state["revision"],
+                "target_revision": int(state.get("revision", 0)) + 1,
             },
         )
-        self.board.append_event(
-            f"{root}/forums/primary/events",
+        self._write_create_or_match(
+            f"{root}/forums/primary/primary-bootstrap-ready.json",
             {
                 "kind": "PRIMARY_BOOTSTRAP_READY",
                 "project_id": project_id,
                 "repository": canonical,
-                "message": "GitHub binding verified. Primary may continue project initialization under normal authority rules.",
+                "message": "GitHub binding verified. Primary must complete initial project assessment before initialization is complete.",
             },
         )
+        next_state = dict(state)
+        next_state.update(
+            {
+                "phase": "BOUND",
+                "github_repository": canonical,
+                "revision": int(state.get("revision", 0)) + 1,
+            }
+        )
+        self.board.write_json(state_path, next_state)
+        return InitResult(
+            project_id=project_id,
+            board_root=root,
+            phase="BOUND",
+            next_action="COMPLETE_PRIMARY_BOOTSTRAP",
+            github_repository=canonical,
+        )
+
+    def complete_primary_bootstrap(self, project_id: str, result: PrimaryBootstrapResult) -> InitResult:
+        """Persist initial Primary assessment and finish project initialization."""
+        _validate_primary_bootstrap(result)
+        state_path = self._state_path(project_id)
+        if not self.board.object_exists(state_path):
+            raise ProjectInitializationError("unknown project initialization")
+        state = self.board.read_json(state_path)
+        phase = state.get("phase")
+        _require_phase(phase)
+        if phase not in {"BOUND", "PRIMARY_INITIALIZING", "COMPLETE"}:
+            raise ProjectInitializationError(f"Primary bootstrap is not permitted from phase {phase}")
+        repository = state.get("github_repository")
+        if not repository:
+            raise ProjectInitializationError("Primary bootstrap requires a bound GitHub repository")
+
+        root = self._root(project_id)
+        result_payload = {
+            "source_of_truth": list(result.source_of_truth),
+            "workstreams": list(result.workstreams),
+            "assistance_required": result.assistance_required,
+            "research_agents": result.research_agents,
+            "manager_agents": result.manager_agents,
+            "rationale": result.rationale.strip(),
+        }
+        result_fingerprint = _canonical_digest(result_payload)
+        record = {
+            "schema": "org-agent-mesh/primary-initialization-result/v1-draft",
+            "project_id": project_id,
+            "github_repository": repository,
+            **result_payload,
+            "result_fingerprint": result_fingerprint,
+        }
+
+        result_path = f"{root}/bootstrap/primary-initialization.json"
+        if phase == "COMPLETE":
+            if not self.board.object_exists(result_path) or self.board.read_json(result_path) != record:
+                raise ProjectInitializationError("completed project bootstrap does not match supplied result")
+            return InitResult(
+                project_id=project_id,
+                board_root=root,
+                phase="COMPLETE",
+                next_action="EXECUTE_PROJECT_WORK",
+                github_repository=repository,
+            )
+
+        self._write_create_or_match(result_path, record)
+        self._write_create_or_match(
+            f"{root}/swarm/initial-assessment.json",
+            {
+                "schema": "org-agent-mesh/initial-swarm-assessment/v1-draft",
+                "project_id": project_id,
+                "assistance_required": result.assistance_required,
+                "research_agents": result.research_agents,
+                "manager_agents": result.manager_agents,
+                "rationale": result.rationale.strip(),
+                "source_result_fingerprint": result_fingerprint,
+            },
+        )
+        self._write_create_or_match(
+            f"{root}/audit/project-initialization-complete.json",
+            {
+                "event": "PROJECT_INITIALIZATION_COMPLETE",
+                "project_id": project_id,
+                "repository": repository,
+                "result_fingerprint": result_fingerprint,
+                "target_revision": int(state.get("revision", 0)) + 1,
+            },
+        )
+        self._write_create_or_match(
+            f"{root}/forums/primary/project-initialization-complete.json",
+            {
+                "kind": "PROJECT_INITIALIZATION_COMPLETE",
+                "project_id": project_id,
+                "repository": repository,
+                "message": "Initial source-of-truth, workstream and assistance assessment persisted. Project work may begin.",
+            },
+        )
+        next_state = dict(state)
+        next_state.update({"phase": "COMPLETE", "revision": int(state.get("revision", 0)) + 1})
+        self.board.write_json(state_path, next_state)
         return InitResult(
             project_id=project_id,
             board_root=root,
             phase="COMPLETE",
-            next_action="START_PRIMARY_EXECUTION",
-            github_repository=canonical,
+            next_action="EXECUTE_PROJECT_WORK",
+            github_repository=repository,
         )
 
     def resume(self, project_id: str) -> InitResult:
@@ -372,11 +488,22 @@ class ProjectInitializer:
         state = self.board.read_json(state_path)
         phase = state.get("phase")
         _require_phase(phase)
+        if phase == "WAITING_FOR_GITHUB":
+            next_action = "PROVIDE_GITHUB_REPOSITORY"
+            prompt = GitHubBindingRequirement().prompt
+        elif phase in {"BOUND", "PRIMARY_INITIALIZING"}:
+            next_action = "COMPLETE_PRIMARY_BOOTSTRAP"
+            prompt = None
+        elif phase == "COMPLETE":
+            next_action = "EXECUTE_PROJECT_WORK"
+            prompt = None
+        else:
+            raise ProjectInitializationError(f"initialization cannot safely resume from phase {phase}")
         return InitResult(
             project_id=project_id,
             board_root=self._root(project_id),
             phase=phase,
-            next_action=("PROVIDE_GITHUB_REPOSITORY" if phase == "WAITING_FOR_GITHUB" else "START_PRIMARY_EXECUTION"),
-            prompt=(GitHubBindingRequirement().prompt if phase == "WAITING_FOR_GITHUB" else None),
+            next_action=next_action,
+            prompt=prompt,
             github_repository=state.get("github_repository"),
         )
