@@ -24,7 +24,7 @@ def scenarios():
     over = allocate_v3(ResearchAssessment(0.45, 6, attempts=2, dependency_density=0.0))
     domain = allocate_v3(ResearchAssessment(0.45, 6, domains=1, attempts=2, dependency_density=0.0))
     stable = allocate_v3(ResearchAssessment(0.45, 5, domains=2, attempts=2, dependency_density=0.0))
-    verify = allocate_v3(ResearchAssessment(0.50, 2, attempts=3, stall_count=2))
+    verify = allocate_v3(ResearchAssessment(0.45, 2, attempts=3, stall_count=2))
     return [
         ResizeScenario("scale-up-unresolved", under, {"unresolved_fronts":3,"stalled_cycles":2}, (4,4), (0,1)),
         ResizeScenario("scale-down-duplicate", over, {"duplicate_work_rate":0.65}, (4,4), (0,1)),
@@ -38,6 +38,8 @@ def main():
     total_penalty = 0
     churn = 0
     for scenario in scenarios():
+        if not scenario.start.escalate:
+            raise SystemExit(f"field fixture {scenario.name} attempted resize without an authorized swarm")
         result = resize_v3(scenario.start, scenario.observed)
         penalty = 2 * dist(result.research_agents, scenario.expected_research) + 2 * dist(result.manager_agents, scenario.expected_managers)
         total_penalty += penalty
