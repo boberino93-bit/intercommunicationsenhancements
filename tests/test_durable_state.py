@@ -171,6 +171,47 @@ class DurableStateTest(unittest.TestCase):
         final = DurableLeaseRegistry(self.backend()).get("a", "task-001")
         self.assertIn(final.holder_agent_instance_id, holders)
 
+    def test_expired_cleanup_does_not_hide_concurrent_reclaim(self):
+        start = datetime(2026, 1, 1, tzinfo=timezone.utc)
+        original = active_session("a", "worker-a", "a-worker-a-1")
+        backend = self.backend()
+        registry = DurableLeaseRegistry(backend)
+        old = registry.claim(original, "a", "task-001", ttl_seconds=1, now=start)
+        original_delete = backend.delete_if_version
+        race_time = start + timedelta(seconds=2)
+
+        def delete_after_concurrent_reclaim(
+            namespace, project_id, resource_id, *, expected_version
+        ):
+            backend.compare_and_set(
+                namespace,
+                project_id,
+                resource_id,
+                expected_version=expected_version,
+                payload={
+                    "holder_agent_instance_id": "a-worker-b-1",
+                    "lease_id": "a::lease-race-winner",
+                    "acquired_at_utc": race_time.isoformat().replace("+00:00", "Z"),
+                    "expires_at_utc": (race_time + timedelta(seconds=60))
+                    .isoformat()
+                    .replace("+00:00", "Z"),
+                },
+                now=race_time,
+            )
+            return original_delete(
+                namespace,
+                project_id,
+                resource_id,
+                expected_version=expected_version,
+            )
+
+        backend.delete_if_version = delete_after_concurrent_reclaim
+        observed = registry.get("a", "task-001", now=race_time)
+        self.assertIsNotNone(observed)
+        self.assertEqual(old.version + 1, observed.version)
+        self.assertEqual("a-worker-b-1", observed.holder_agent_instance_id)
+        self.assertEqual("a::lease-race-winner", observed.lease_id)
+
     def test_restarted_instance_cannot_renew_persisted_lease(self):
         start = datetime(2026, 1, 1, tzinfo=timezone.utc)
         original = active_session("a", "worker", "a-worker-1")
