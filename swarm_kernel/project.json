@@ -1,0 +1,17 @@
+{
+  "schema":"swarm-kernel/project/v1",
+  "kernel_version":"1.0.0",
+  "project_id":"intercommunicationsenhancements",
+  "repository":"boberino93-bit/intercommunicationsenhancements",
+  "canonical_branch":"main",
+  "coordination_root":".interagent/",
+  "state_root":".swarm",
+  "identity_source":"PROJECT_IDENTITY_LOCK.json",
+  "foreign_write_policy":"DENY_BY_DEFAULT",
+  "cross_project_telemetry":"READ_ONLY",
+  "lease_ttl_seconds":1800,
+  "heartbeat_interval_seconds":300,
+  "circuit_breaker_threshold":3,
+  "manager_queue_soft_limit":8,
+  "manager_queue_hard_limit":15
+}
