@@ -70,7 +70,8 @@
       "handoff_paths": [
         "PROJECT_MANIFEST.json",
         "HARDENING_STATUS.md",
-        "START_HERE.md"
+        "START_HERE.md",
+        "NEW_PROJECT_BOOTSTRAP.json"
       ],
       "local_contract_path": "AGENT_BOOTSTRAP.json",
       "routing_contract_version": "1.3.0",
@@ -105,7 +106,8 @@
       "handoff_paths": [
         "START_HERE.md",
         "AGENT_DISCOVERY_V7.json",
-        "AGENTBUS_IMPORT/BOOTSTRAP_V7.md"
+        "AGENTBUS_IMPORT/BOOTSTRAP_V7.md",
+        "NEW_PROJECT_BOOTSTRAP.json"
       ],
       "local_contract_path": "AGENT_BOOTSTRAP.json",
       "routing_contract_version": "1.3.0",
@@ -141,7 +143,8 @@
         "REPOSITORY_BOOTSTRAP.md",
         "BenefitFlow-AgentBus/control/PROJECT_IDENTITY_LOCK.json",
         "BenefitFlow-AgentBus/discovery",
-        "BenefitFlow-AgentBus/bootstrap"
+        "BenefitFlow-AgentBus/bootstrap",
+        "NEW_PROJECT_BOOTSTRAP.json"
       ],
       "local_contract_path": "AGENT_BOOTSTRAP.json",
       "routing_contract_version": "1.3.0",
@@ -178,7 +181,8 @@
         "PROJECT_MANIFEST.json",
         "START_HERE.md",
         ".interagent/state",
-        ".interagent/bootstrap"
+        ".interagent/bootstrap",
+        "NEW_PROJECT_BOOTSTRAP.json"
       ],
       "local_contract_path": "AGENT_BOOTSTRAP.json",
       "routing_contract_version": "1.3.0",
@@ -214,7 +218,8 @@
         "SWARM_LAUNCH_KERNEL_V1.md",
         ".swarm/README.md",
         "agentbus-backup/intercomm-optimization-v1/ACTIVE_INTERCOMM_PROFILE.json",
-        "README.md"
+        "README.md",
+        "NEW_PROJECT_BOOTSTRAP.json"
       ],
       "local_contract_path": "AGENT_BOOTSTRAP.json",
       "routing_contract_version": "1.3.0",
