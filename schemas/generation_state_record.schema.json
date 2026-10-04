@@ -1,0 +1,13 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Generation-partitioned Accepted State Record",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "generation_id": {"type": "string", "minLength": 1},
+    "resource_id": {"type": "string", "minLength": 1},
+    "value": {},
+    "updated_by_agent_instance_id": {"type": "string", "minLength": 1}
+  },
+  "required": ["generation_id", "resource_id", "value", "updated_by_agent_instance_id"]
+}
