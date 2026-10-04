@@ -28,6 +28,18 @@ class UniversalIntakeTests(unittest.TestCase):
             config["fallback_resolution"],
             "REGISTERED_FORUM_HANDOFF_EXACT_IDENTIFIER_ONLY",
         )
+        self.assertEqual(
+            config["unresolved_action"],
+            "STOP_AFFECTED_MUTATION_CONTINUE_SAFE_READ_ONLY_DISCOVERY",
+        )
+        self.assertEqual(config["context_reference_path"], "AGENT_CONTEXT_REFERENCE.md")
+        self.assertEqual(config["continuation_protocol_path"], "protocols/autonomous_continuation.md")
+
+    def test_v15_unresolved_policy_cannot_become_mutating(self):
+        registry = copy.deepcopy(self.registry)
+        registry["global_intake"]["unresolved_action"] = "CONTINUE_MUTATION_WHILE_UNRESOLVED"
+        with self.assertRaisesRegex(UniversalIntakeError, "invalid_unresolved_action"):
+            validate_global_intake_registry(registry)
 
     def test_human_alias_resolves_duo_screen_without_topic_guessing(self):
         result = resolve_unbound_intake(
