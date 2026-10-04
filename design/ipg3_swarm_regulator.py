@@ -105,15 +105,13 @@ def should_escalate_v1(a: ResearchAssessment) -> tuple[bool, float, tuple[str, .
 
 
 def should_escalate(a: ResearchAssessment) -> tuple[bool, float, tuple[str, ...]]:
-    """Optimized trigger: score plus structural evidence of decomposition/stall.
-
-    Structural triggers fix two baseline misses discovered by field testing:
-    sustained local stall and a broad genuinely parallel task can justify assistance
-    even when no single weighted signal crosses the aggregate threshold.
-    """
+    """Optimized trigger: score plus structural evidence of decomposition/stall."""
     score, reasons = assistance_score(a)
     hard_trigger = "hard-trigger" in reasons
-    sustained_stall = a.stall_count >= 3 and a.attempts >= 2 and a.confidence < 0.60
+    sustained_stall = (
+        (a.stall_count >= 3 and a.attempts >= 2 and a.confidence < 0.60)
+        or (a.stall_count >= 2 and a.attempts >= 3 and a.confidence < 0.50)
+    )
     broad_parallel = a.independent_workstreams >= 5 and a.attempts >= 2 and a.confidence < 0.65 and a.dependency_density < 0.60
     attempt_gate = a.attempts >= 2 or a.stall_count >= 2 or hard_trigger
     extra = []
@@ -196,8 +194,6 @@ def allocate_v3(a: ResearchAssessment) -> Allocation:
 
     integration_load = (a.domains - 1) + (1 if a.dependency_density >= 0.45 else 0) + (1 if effective_fronts >= 5 else 0)
     managers = 0
-    # A manager is coordination capacity, not a reward for risk. Small expert/verification
-    # cells remain Primary-direct even when the consequence is high.
     if research >= 4 and integration_load >= 2:
         managers = 1
     if research >= 8 and integration_load >= 4:
@@ -209,11 +205,7 @@ def allocate_v3(a: ResearchAssessment) -> Allocation:
 
 
 def resize_v3(current: Allocation, observed: dict) -> Allocation:
-    """Recommend scale-up/down with hysteresis. Primary authorization is still required.
-
-    observed keys: unresolved_fronts, duplicate_work_rate, idle_rate, new_domains,
-    disagreement_rate, stalled_cycles, verification_gap.
-    """
+    """Recommend scale-up/down with hysteresis. Primary authorization is still required."""
     if not current.escalate:
         raise ValueError("cannot resize a rejected allocation")
     research = current.research_agents
