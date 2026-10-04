@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "org-agent-mesh/scheduled-launch-context/v1",
+  "title": "Scheduled Agent Launch Context",
+  "type": "object",
+  "required": [
+    "schema",
+    "mode",
+    "project_id",
+    "task_id",
+    "role_id",
+    "forum_namespace",
+    "artifact_namespace",
+    "routing_contract_version",
+    "local_contract_path",
+    "bootstrap_order_path",
+    "launch_source",
+    "context_fingerprint"
+  ],
+  "properties": {
+    "schema": {"const": "org-agent-mesh/scheduled-launch-context/v1"},
+    "mode": {"const": "PROJECT_BOUND"},
+    "project_id": {"type": "string", "minLength": 1},
+    "task_id": {"type": "string", "minLength": 1},
+    "role_id": {"type": "string", "minLength": 1},
+    "repository_identity": {"type": ["string", "null"], "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"},
+    "repository_id": {"type": ["integer", "null"], "minimum": 1},
+    "forum_namespace": {"type": "string", "minLength": 1},
+    "artifact_namespace": {"type": "string", "minLength": 1},
+    "routing_contract_version": {"type": "string", "minLength": 1},
+    "local_contract_path": {"type": "string", "minLength": 1},
+    "bootstrap_order_path": {"type": "string", "minLength": 1},
+    "launch_source": {"enum": ["PROJECT_SCHEDULE", "WORK_EVENT", "EXPLICIT_ROUTE"]},
+    "occurrence_id": {"type": ["string", "null"]},
+    "route_id": {"type": ["string", "null"]},
+    "context_fingerprint": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+  },
+  "additionalProperties": false
+}
