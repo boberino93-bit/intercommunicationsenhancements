@@ -93,16 +93,20 @@ def _validate_communication_awareness(registry: Mapping[str, Any]) -> None:
     expected = {"DIRECT_INTERNAL_ARTIFACTORY_ACCESS", "PROJECT_NAMESPACE_MATCH", "FULL_SCOPE_PROVEN"}
     if not isinstance(required, list) or set(required) != expected or len(required) != len(expected):
         raise RoutingError("invalid_full_visibility_requirements")
-    template = awareness.get("assessment_ack_template")
-    if not isinstance(template, str) or not template.startswith("COMMUNICATIONS ASSESSED:"):
-        raise RoutingError("invalid_communication_assessment_template")
-    rules = registry.get("rules")
-    if not isinstance(rules, Mapping):
-        raise RoutingError("missing_registry_rules")
-    if rules.get("communication_assessment_before_visibility_claim") is not True:
-        raise RoutingError("communication_assessment_guard_disabled")
-    if rules.get("never_claim_all_communications_from_mirror_snapshot_or_handoff") is not True:
-        raise RoutingError("communication_overclaim_guard_disabled")
+
+    # 1.5 moves some duplicate safety declarations out of the central registry.
+    # Older contracts continue to require those declarations exactly as before.
+    if version < (1, 5, 0):
+        template = awareness.get("assessment_ack_template")
+        if not isinstance(template, str) or not template.startswith("COMMUNICATIONS ASSESSED:"):
+            raise RoutingError("invalid_communication_assessment_template")
+        rules = registry.get("rules")
+        if not isinstance(rules, Mapping):
+            raise RoutingError("missing_registry_rules")
+        if rules.get("communication_assessment_before_visibility_claim") is not True:
+            raise RoutingError("communication_assessment_guard_disabled")
+        if rules.get("never_claim_all_communications_from_mirror_snapshot_or_handoff") is not True:
+            raise RoutingError("communication_overclaim_guard_disabled")
 
 
 def _validate_v14_continuity_contract(registry: Mapping[str, Any]) -> None:
@@ -210,10 +214,26 @@ def _validate_forum_locator(project: Mapping[str, Any], *, project_id: str) -> N
         _safe_repo_path(path, field="forum_repository_view_path")
 
 
+def _validate_project_contract_version(project: Mapping[str, Any], registry_version: tuple[int, int, int], registry_version_text: str) -> None:
+    project_version = _parse_contract_version(project.get("routing_contract_version"))
+    if project_version == registry_version:
+        return
+    if registry_version < (1, 5, 0) or project_version >= registry_version:
+        raise RoutingError("project_routing_contract_version_mismatch")
+    if project.get("effective_continuation_overlay_version") != registry_version_text:
+        raise RoutingError("project_routing_contract_version_mismatch")
+    authority = project.get("continuation_overlay_authority")
+    if not isinstance(authority, str) or not authority.strip():
+        raise RoutingError("missing_continuation_overlay_authority")
+    if project.get("local_bootstrap_migration_state") != "LEGACY_LOCAL_BOOTSTRAP_RETAINED":
+        raise RoutingError("invalid_legacy_bootstrap_migration_state")
+
+
 def validate_registry(registry: Mapping[str, Any]) -> None:
     if registry.get("schema") != "org-agent-mesh/project-role-routing-registry/v1":
         raise RoutingError("unsupported_registry_schema")
-    registry_version = _parse_contract_version(registry.get("routing_contract_version", "1.0.0"))
+    registry_version_text = registry.get("routing_contract_version", "1.0.0")
+    registry_version = _parse_contract_version(registry_version_text)
     _validate_mode(registry.get("mode"), registry_version)
     _validate_communication_awareness(registry)
     _validate_v14_continuity_contract(registry)
@@ -279,8 +299,19 @@ def validate_registry(registry: Mapping[str, Any]) -> None:
         local_contract_path = project.get("local_contract_path")
         if local_contract_path is not None:
             _safe_repo_path(local_contract_path, field="local_contract_path")
-        if _parse_contract_version(project.get("routing_contract_version")) != registry_version:
-            raise RoutingError("project_routing_contract_version_mismatch")
+        _validate_project_contract_version(project, registry_version, registry_version_text)
+
+
+def _communication_core(value: Mapping[str, Any]) -> dict[str, Any]:
+    keys = (
+        "protocol_repository",
+        "protocol_path",
+        "required_on_startup",
+        "required_on_visibility_question",
+        "default_visibility_claim",
+        "full_visibility_requires",
+    )
+    return {key: value.get(key) for key in keys}
 
 
 def _validate_v15_local_contract(contract: Mapping[str, Any], registry: Mapping[str, Any], project: Mapping[str, Any]) -> None:
@@ -311,7 +342,12 @@ def _validate_v15_local_contract(contract: Mapping[str, Any], registry: Mapping[
     if continuation.get("continue_unaffected_work") is not True:
         raise RoutingError("local_unaffected_work_continuation_disabled")
     gates = continuation.get("human_interrupt_only_for")
-    required_gates = {"NON_DELEGABLE_AUTHORITY", "IRRECOVERABLE_DATA_INTEGRITY", "SECURITY_BOUNDARY_DECISION", "REQUIRED_EXTERNAL_CAPABILITY"}
+    required_gates = {
+        "NON_DELEGABLE_AUTHORITY",
+        "IRRECOVERABLE_DATA_INTEGRITY",
+        "SECURITY_BOUNDARY_DECISION",
+        "REQUIRED_EXTERNAL_CAPABILITY",
+    }
     if not isinstance(gates, list) or not required_gates.issubset(set(gates)):
         raise RoutingError("unsafe_local_human_interrupt_policy")
 
@@ -337,8 +373,8 @@ def validate_local_contract(registry: Mapping[str, Any], *, project_id: str, con
         raise RoutingError("unknown_project")
     if contract.get("schema") != "org-agent-mesh/local-agent-bootstrap/v1":
         raise RoutingError("unsupported_local_contract_schema")
-    version = _parse_contract_version(project.get("routing_contract_version"))
-    _validate_mode(contract.get("mode"), version, local=True)
+    project_version = _parse_contract_version(project.get("routing_contract_version"))
+    _validate_mode(contract.get("mode"), project_version, local=True)
     if contract.get("project_id") != project_id:
         raise RoutingError("local_contract_project_mismatch")
     if contract.get("routing_contract_version") != project.get("routing_contract_version"):
@@ -366,13 +402,20 @@ def validate_local_contract(registry: Mapping[str, Any], *, project_id: str, con
         raise RoutingError("local_contract_handoff_mismatch")
     if contract.get("authorized_roles") != project.get("roles"):
         raise RoutingError("local_contract_roles_mismatch")
-    if version >= (1, 3, 0):
-        if contract.get("communication_awareness") != registry.get("communication_awareness"):
+    if project_version >= (1, 3, 0):
+        local_awareness = contract.get("communication_awareness")
+        registry_awareness = registry.get("communication_awareness")
+        if not isinstance(local_awareness, Mapping) or not isinstance(registry_awareness, Mapping):
+            raise RoutingError("local_contract_communication_awareness_mismatch")
+        if project_version >= (1, 5, 0):
+            if _communication_core(local_awareness) != _communication_core(registry_awareness):
+                raise RoutingError("local_contract_communication_awareness_mismatch")
+        elif local_awareness != registry_awareness:
             raise RoutingError("local_contract_communication_awareness_mismatch")
         rules = contract.get("rules")
         if not isinstance(rules, Mapping):
             raise RoutingError("missing_local_contract_rules")
-        expected_identity_conflict = "STOP_AFFECTED_MUTATION_DO_NOT_GUESS" if version >= (1, 5, 0) else "STOP_BEFORE_MUTATION"
+        expected_identity_conflict = "STOP_AFFECTED_MUTATION_DO_NOT_GUESS" if project_version >= (1, 5, 0) else "STOP_BEFORE_MUTATION"
         for key, expected in {
             "identity_lock_first": True,
             "forum_authority_separate_from_repository_view": True,
@@ -385,7 +428,7 @@ def validate_local_contract(registry: Mapping[str, Any], *, project_id: str, con
         }.items():
             if rules.get(key) != expected:
                 raise RoutingError(f"unsafe_local_rule_{key}")
-    if version >= (1, 4, 0):
+    if project_version >= (1, 4, 0):
         if contract.get("execution_modes") != project.get("execution_modes"):
             raise RoutingError("local_contract_execution_modes_mismatch")
         handoff = contract.get("master_handoff")
@@ -403,7 +446,7 @@ def validate_local_contract(registry: Mapping[str, Any], *, project_id: str, con
         }.items():
             if rules.get(key) != expected:
                 raise RoutingError(f"unsafe_local_rule_{key}")
-    if version >= (1, 5, 0):
+    if project_version >= (1, 5, 0):
         _validate_v15_local_contract(contract, registry, project)
 
 
