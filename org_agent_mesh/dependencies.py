@@ -51,7 +51,9 @@ class DependencyRegistry:
     """Durable project-local dependency graph using backend CAS records.
 
     Edges describe data/work dependency only. They never convey capabilities or
-    authority. Optional generation_registry fencing rejects stale-generation work.
+    authority. Topology is generation-scoped so stale-generation evidence cannot
+    alter the current generation's cycle analysis. Optional generation_registry
+    fencing rejects normal stale-generation writes before persistence as well.
     """
 
     NAMESPACE = "dependencies"
@@ -62,10 +64,12 @@ class DependencyRegistry:
         self.backend = backend
         self.generation_registry = generation_registry
 
-    def _edges(self, project_id):
+    def _edges(self, project_id, generation_id):
         edges = []
         for durable in self.backend.list_records(self.NAMESPACE, project_id=project_id):
             payload = _payload(durable)
+            if payload.get("generation_id") != generation_id:
+                continue
             if payload.get("status") in {"INVALIDATED", "SUPERSEDED"}:
                 continue
             producer = payload.get("producer_task_or_node")
@@ -74,9 +78,9 @@ class DependencyRegistry:
                 edges.append((producer, consumer))
         return edges
 
-    def _would_cycle(self, project_id, producer, consumer):
+    def _would_cycle(self, project_id, generation_id, producer, consumer):
         graph = {}
-        for source, target in self._edges(project_id):
+        for source, target in self._edges(project_id, generation_id):
             graph.setdefault(source, set()).add(target)
         graph.setdefault(producer, set()).add(consumer)
         stack = [consumer]
@@ -119,7 +123,7 @@ class DependencyRegistry:
             raise ValueError("required_output is required")
         if self.generation_registry is not None:
             self.generation_registry.assert_current(target_project_id, generation_id)
-        if self._would_cycle(target_project_id, producer, consumer):
+        if self._would_cycle(target_project_id, generation_id, producer, consumer):
             raise DependencyCycleError("dependency would introduce a cycle")
         timestamp = _utc_iso(_utc_now(now))
         payload = {
