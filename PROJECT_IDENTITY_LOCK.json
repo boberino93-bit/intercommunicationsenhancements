@@ -1,49 +1,61 @@
 {
-  "schema": "org-agent-mesh/project-identity-lock/v1",
-  "mode": "FAIL_CLOSED",
-  "project_id": "intercommunicationsenhancements",
-  "project_name": "Intercommunications Enhancements",
-  "writable_repository": "boberino93-bit/intercommunicationsenhancements",
-  "canonical_branch": "main",
-  "coordination_root": ".interagent",
+  "agent_spawn_policy": {
+    "capability_escalation": "DENY",
+    "child_identity_inheritance_required": true,
+    "foreign_project_inference": "DENY",
+    "fresh_child_execution_instance_required": true,
+    "max_active_specialists": 8,
+    "status": "BOUND_ONLY"
+  },
   "artifact_root": ".interagent/artifacts",
-  "identity_lock_path": "PROJECT_IDENTITY_LOCK.json",
-  "bootstrap_order_path": "BOOTSTRAP_ORDER.json",
   "authority_model": {
+    "child_capability_policy": "INHERIT_OR_STRICT_SUBSET_ONLY",
     "integration_authority": "ORCHESTRATOR",
     "review_authority": "REVIEWER",
+    "role_capabilities": {
+      "MANAGER": [
+        "READ_SOURCE",
+        "READ_ARTIFACTS",
+        "WRITE_ARTIFACTS",
+        "WRITE_WORKING_ARTIFACTS",
+        "PUBLISH_MESSAGE",
+        "CLAIM_TASK",
+        "REVIEW_CHANGE"
+      ],
+      "PRIMARY": [
+        "READ_SOURCE",
+        "WRITE_SOURCE",
+        "READ_ARTIFACTS",
+        "WRITE_ARTIFACTS",
+        "WRITE_WORKING_ARTIFACTS",
+        "WRITE_ACCEPTED_STATE",
+        "PUBLISH_MESSAGE",
+        "CLAIM_TASK",
+        "REVIEW_CHANGE",
+        "APPROVE_CHANGE",
+        "CONTROL_PROJECT_LIFECYCLE",
+        "SEND_EXTERNAL_COMMUNICATION",
+        "APPROVE_RELEASE",
+        "CROSS_PROJECT_EXCHANGE",
+        "BUILD_DEPLOYMENT_PACKAGE",
+        "PUBLISH_DEPLOYMENT_PACKAGE"
+      ],
+      "RESEARCH": [
+        "READ_SOURCE",
+        "READ_ARTIFACTS",
+        "WRITE_ARTIFACTS",
+        "WRITE_WORKING_ARTIFACTS",
+        "PUBLISH_MESSAGE",
+        "CLAIM_TASK"
+      ]
+    },
     "roles": {
-      "PRIMARY": "ORCHESTRATOR",
       "MANAGER": "REVIEWER",
+      "PRIMARY": "ORCHESTRATOR",
       "RESEARCH": "SPECIALIST"
     }
   },
-  "agent_spawn_policy": {
-    "status": "BOUND_ONLY",
-    "max_active_specialists": 8,
-    "child_identity_inheritance_required": true,
-    "foreign_project_inference": "DENY"
-  },
-  "human_approval_boundaries": [
-    "Cross-project exchange remains denied unless explicitly approved/capability-granted",
-    "Recursive self-enhancement candidates require local evidence review and Primary acceptance before grafting",
-    "Outbound Slack delivery requires an explicit configured destination and external-communication authority",
-    "Reserved capacity use remains under local Primary authority"
-  ],
-  "write_policy": {
-    "local_project_writes": "ALLOW_WITH_ROLE_AND_CAPABILITY",
-    "cross_project_writes": "DENY_BY_DEFAULT",
-    "peer_observation": "READ_ONLY_WHERE_LOCAL_POLICY_ALLOWS"
-  },
-  "recovery": {
-    "current_human_intent_required": true,
-    "revalidate_on_primary_takeover": true,
-    "revalidate_on_manager_takeover": true,
-    "revalidate_on_research_reassignment": true,
-    "revalidate_on_hung_or_lost_session": true,
-    "revalidate_on_context_restore": true,
-    "revalidate_on_cross_project_context_switch": true
-  },
+  "bootstrap_order_path": "BOOTSTRAP_ORDER.json",
   "cannot_override_identity_lock": [
     "inherited_chat_context",
     "conversation_memory",
@@ -56,6 +68,41 @@
     "neighboring_repositories",
     "another_project_agentbus",
     "handoff_recency",
-    "artifact_recency"
-  ]
+    "artifact_recency",
+    "caller_claimed_project_id",
+    "semantic_similarity"
+  ],
+  "canonical_branch": "main",
+  "coordination_root": ".interagent",
+  "human_approval_boundaries": [
+    "Cross-project exchange remains denied unless explicitly approved/capability-granted",
+    "Recursive self-enhancement candidates require local evidence review and Primary acceptance before grafting",
+    "Outbound Slack delivery requires an explicit configured destination and external-communication authority",
+    "Reserved capacity use remains under local Primary authority"
+  ],
+  "identity_lock_path": "PROJECT_IDENTITY_LOCK.json",
+  "lock_root": ".interagent/locks",
+  "message_root": ".interagent/messages",
+  "mode": "FAIL_CLOSED",
+  "project_id": "intercommunicationsenhancements",
+  "project_name": "Intercommunications Enhancements",
+  "project_root": ".",
+  "recovery": {
+    "current_human_intent_required": true,
+    "revalidate_on_context_restore": true,
+    "revalidate_on_cross_project_context_switch": true,
+    "revalidate_on_hung_or_lost_session": true,
+    "revalidate_on_manager_takeover": true,
+    "revalidate_on_primary_takeover": true,
+    "revalidate_on_research_reassignment": true
+  },
+  "schema": "org-agent-mesh/project-identity-lock/v2",
+  "task_root": ".interagent/tasks",
+  "writable_repository": "boberino93-bit/intercommunicationsenhancements",
+  "write_policy": {
+    "caller_supplied_identity": "UNTRUSTED",
+    "cross_project_writes": "DENY_BY_DEFAULT",
+    "local_project_writes": "ALLOW_ONLY_FROM_ACTIVE_BOUND_SESSION_WITH_REQUIRED_CAPABILITY",
+    "peer_observation": "READ_ONLY_WHERE_LOCAL_POLICY_ALLOWS"
+  }
 }

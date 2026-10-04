@@ -3,10 +3,13 @@
   "title": "Project-scoped Agent Record",
   "type": "object",
   "properties": {
-    "project_id": {"type": "string", "minLength": 1},
+    "project_id": {"type": "string", "pattern": "^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$"},
+    "agent_id": {"type": "string", "minLength": 1},
     "agent_instance_id": {"type": "string", "minLength": 1},
     "authority_tier": {"enum": ["ORCHESTRATOR", "REVIEWER", "SPECIALIST"]},
-    "capabilities": {"type": "object"}
+    "role_profile": {"type": "string", "minLength": 1},
+    "capabilities": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "status": {"enum": ["UNBOUND", "BOUND", "INITIALIZED", "ACTIVE", "DRAINING", "TERMINATED"]}
   },
   "required": ["project_id", "agent_id", "agent_instance_id", "authority_tier", "role_profile", "capabilities", "status"]
 }

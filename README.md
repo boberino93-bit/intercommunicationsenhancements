@@ -1,19 +1,19 @@
 # Intercommunications Enhancements
 
-Dedicated protocol-engineering project for hardening the Organization Agent Mesh into a fail-closed, multi-project intercommunications and deployment control plane.
+Reference protocol-engineering project for hardening the Organization Agent Mesh into a fail-closed, multi-project intercommunications and deployment control plane.
 
-This repository is seeded conceptually and technically from the uploaded `org-agent-mesh-framework-v1.0.0` package. Its purpose is to develop project isolation, deterministic message routing, concurrency safety, explicit cross-project exchange, synchronized agent deployment packages, and adversarial validation for several autonomous project teams operating simultaneously.
+Current target: **framework 1.6.0-alpha.1 / protocol 2.4.0-alpha.1**.
 
 ## Current hardening alpha
 
-- `project_id` is treated as an authorization boundary, not descriptive metadata.
-- Ordinary AgentBus traffic is intra-project only.
-- Cross-project exchange is separate, explicit, deny-by-default, approval/capability-gated, and provenance-preserving.
-- Agent execution identity is separated from human-readable role names.
-- Lane/presence coordination is project-scoped.
-- PRIMARY, MANAGER, and RESEARCH deployment packages are versioned and must match the running project protocol.
-- Stale or foreign deployment packages are rejected.
-- Protocol changes are incomplete until dependent agent packages are rebuilt and validated.
-- GitHub Actions builds and verifies the three role deployment ZIPs from the exact commit SHA on every push to `main`.
+- `project_id` is an authorization boundary, not descriptive metadata.
+- Mutations require an `ACTIVE` immutable bound execution session plus the required capability; self-asserted project IDs do not authorize anything.
+- Canonical project/resource IDs are validated without lossy sanitization.
+- Child agents inherit project/repository/protocol identity, receive a fresh execution instance, and cannot escalate parent capabilities.
+- Ordinary AgentBus traffic is intra-project only; cross-project exchange is a separate deny-by-default approved capability boundary.
+- Project-scoped leases, expected-version state mutation, task ownership, artifact provenance and audit attribution provide reference concurrency/recovery semantics.
+- PRIMARY, MANAGER and RESEARCH packages are generated from a dependency map, contain manifest v3 capability/source/component hashes, and ship as one coordinated release set.
+- CI runs tests, builds exact-SHA packages, verifies dependency closure and source hashes, rebuilds independently, and rejects non-reproducible archives.
+- Protocol or architecture changes are incomplete while any dependent role package is stale.
 
-Start with `PROJECT_CHARTER.md`, `ROADMAP.md`, and `START_HERE.md`.
+Start with `PROJECT_CHARTER.md`, `ROADMAP.md`, `START_HERE.md`, and `ARCHITECTURE.md`.
