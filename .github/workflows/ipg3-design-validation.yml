@@ -1,0 +1,29 @@
+name: IPG3 Design Validation
+
+on:
+  push:
+    branches:
+      - 'design/**'
+    paths:
+      - 'design/**'
+      - '.github/workflows/ipg3-design-validation.yml'
+  pull_request:
+    paths:
+      - 'design/**'
+      - '.github/workflows/ipg3-design-validation.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate-design:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install design validation dependency
+        run: python -m pip install --disable-pip-version-check jsonschema
+      - name: Validate IPG3 drafts
+        run: python design/validate_ipg3.py
