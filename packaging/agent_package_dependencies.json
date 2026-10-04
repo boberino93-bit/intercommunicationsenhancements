@@ -15,7 +15,10 @@
   "schema": "org-agent-mesh/package-dependency-map/v1",
   "shared_patterns": [
     "PROJECT_IDENTITY_LOCK.json",
+    "PROJECT_ROLE_ROUTING_REGISTRY.json",
     "BOOTSTRAP_ORDER.json",
+    "bootstrap/IDENTITY_GATE.md",
+    "bootstrap/PROJECT_ROLE_DISCOVERY.md",
     ".interagent/directives/*.json",
     ".interagent/capacity/freshness_policy.json",
     "PROJECT_MANIFEST.json",
