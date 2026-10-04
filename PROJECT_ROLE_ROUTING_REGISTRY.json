@@ -1,6 +1,6 @@
 {
   "schema": "org-agent-mesh/project-role-routing-registry/v1",
-  "routing_contract_version": "1.1.0",
+  "routing_contract_version": "1.2.0",
   "mode": "FAIL_CLOSED",
   "resolution_key": ["project_id", "role_id"],
   "required_startup_ack": "IDENTITY RESOLVED: project=<project_id>; role=<role_id>; forum=<forum_namespace>; repositories=<authorized_repositories>; state=<handoff_or_state_ref>",
@@ -12,6 +12,7 @@
     "conflicting_identity": "STOP_BEFORE_MUTATION",
     "forum_lookup_before_repository_mutation": true,
     "handoff_lookup_before_repository_mutation": true,
+    "forum_authority_is_not_inferred_from_repository_path": true,
     "stable_repository_id_check": "USE_WHEN_AVAILABLE",
     "local_contract_check": "REQUIRED_WHEN_PRESENT",
     "explicit_human_authorized_framework_rollout": "ALLOW_ONLY_TO_REGISTERED_TARGETS"
@@ -21,50 +22,75 @@
       "repository": "boberino93-bit/intercommunicationsenhancements",
       "repository_id": 1403662737,
       "forum_namespace": "intercommunicationsenhancements::messages",
+      "forum_locator": {
+        "authority": "INTERNAL_ARTIFACTORY",
+        "namespace": "intercommunicationsenhancements::messages",
+        "repository_view": {"mode": "LIVE_MIRROR", "path": ".interagent/messages"}
+      },
       "artifact_namespace": "intercommunicationsenhancements::artifacts",
-      "handoff_paths": [".interagent/messages", "PROJECT_MANIFEST.json", "HARDENING_STATUS.md"],
+      "handoff_paths": ["PROJECT_MANIFEST.json", "HARDENING_STATUS.md", "START_HERE.md"],
       "local_contract_path": "AGENT_BOOTSTRAP.json",
-      "routing_contract_version": "1.1.0",
+      "routing_contract_version": "1.2.0",
       "roles": ["primary", "manager", "research", "recovery", "qa", "build"]
     },
     "duo-open": {
       "repository": "boberino93-bit/duo-open",
       "repository_id": 1396743140,
       "forum_namespace": "duo-open::messages",
+      "forum_locator": {
+        "authority": "INTERNAL_ARTIFACTORY",
+        "namespace": "duo-open::messages",
+        "repository_view": {"mode": "SNAPSHOT_BACKUP", "path": "DEPLOYMENT_METADATA/AGENTBUS_SNAPSHOT/messages"}
+      },
       "artifact_namespace": "duo-open::artifacts",
-      "handoff_paths": [".interagent/messages", "PROJECT_MANIFEST.json", "START_HERE.md"],
+      "handoff_paths": ["START_HERE.md", "AGENT_DISCOVERY_V7.json", "AGENTBUS_IMPORT/BOOTSTRAP_V7.md"],
       "local_contract_path": "AGENT_BOOTSTRAP.json",
-      "routing_contract_version": "1.1.0",
+      "routing_contract_version": "1.2.0",
       "roles": ["primary", "manager", "research", "recovery", "qa", "build"]
     },
     "benefitflow": {
       "repository": "boberino93-bit/benefitflow",
       "repository_id": 1403645790,
       "forum_namespace": "benefitflow::messages",
+      "forum_locator": {
+        "authority": "INTERNAL_ARTIFACTORY",
+        "namespace": "benefitflow::messages",
+        "repository_view": {"mode": "LIVE_MIRROR", "path": "BenefitFlow-AgentBus/forum"}
+      },
       "artifact_namespace": "benefitflow::artifacts",
-      "handoff_paths": [".interagent/messages", "PROJECT_MANIFEST.json", "START_HERE.md"],
+      "handoff_paths": ["REPOSITORY_BOOTSTRAP.md", "BenefitFlow-AgentBus/discovery", "BenefitFlow-AgentBus/bootstrap"],
       "local_contract_path": "AGENT_BOOTSTRAP.json",
-      "routing_contract_version": "1.1.0",
+      "routing_contract_version": "1.2.0",
       "roles": ["primary", "manager", "research", "recovery", "qa", "build"]
     },
     "samsungpowerbootstrap": {
       "repository": "boberino93-bit/samsungpowerbootstrap",
       "repository_id": 1404088763,
       "forum_namespace": "samsungpowerbootstrap::messages",
+      "forum_locator": {
+        "authority": "INTERNAL_ARTIFACTORY",
+        "namespace": "samsungpowerbootstrap::messages",
+        "repository_view": {"mode": "NONE", "path": null}
+      },
       "artifact_namespace": "samsungpowerbootstrap::artifacts",
-      "handoff_paths": [".interagent/messages", "PROJECT_MANIFEST.json", "START_HERE.md"],
+      "handoff_paths": ["PROJECT_MANIFEST.json", "START_HERE.md", ".interagent/state", ".interagent/bootstrap"],
       "local_contract_path": "AGENT_BOOTSTRAP.json",
-      "routing_contract_version": "1.1.0",
+      "routing_contract_version": "1.2.0",
       "roles": ["primary", "manager", "research", "recovery", "qa", "build"]
     },
     "warp-propulsion-lab": {
       "repository": "boberino93-bit/warp-propulsion-lab",
       "repository_id": 1372658198,
       "forum_namespace": "warp-propulsion-lab::messages",
+      "forum_locator": {
+        "authority": "INTERNAL_ARTIFACTORY",
+        "namespace": "warp-propulsion-lab::messages",
+        "repository_view": {"mode": "SNAPSHOT_BACKUP", "path": "agentbus-backup/full-message-board-snapshots"}
+      },
       "artifact_namespace": "warp-propulsion-lab::artifacts",
-      "handoff_paths": [".interagent/messages", "PROJECT_MANIFEST.json", "START_HERE.md"],
+      "handoff_paths": ["SWARM_LAUNCH_KERNEL_V1.md", ".swarm/README.md", "README.md"],
       "local_contract_path": "AGENT_BOOTSTRAP.json",
-      "routing_contract_version": "1.1.0",
+      "routing_contract_version": "1.2.0",
       "roles": ["primary", "manager", "research", "recovery", "qa", "build"]
     }
   }
