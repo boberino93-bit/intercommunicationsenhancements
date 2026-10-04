@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from pathlib import Path
+from datetime import datetime, timezone
 import argparse
 import hashlib
 import json
@@ -11,47 +12,35 @@ ROOT = Path(__file__).resolve().parents[1]
 ROLES = {"PRIMARY": "ORCHESTRATOR", "MANAGER": "REVIEWER", "RESEARCH": "SPECIALIST"}
 IDENTITY_LOCK = "PROJECT_IDENTITY_LOCK.json"
 BOOTSTRAP_ORDER = "BOOTSTRAP_ORDER.json"
-COORDINATION_SNAPSHOT = ".interagent/directives/2026-10-03-project-identity-recovery.json"
-SHARED = [
-    IDENTITY_LOCK, BOOTSTRAP_ORDER, COORDINATION_SNAPSHOT, "bootstrap/IDENTITY_GATE.md", "bootstrap/RECOVERY.md",
-    "PROJECT_MANIFEST.json", "PROJECT_CHARTER.md", "ARCHITECTURE.md", "START_HERE.md", "VERSION",
-    "protocols/project_isolation.md", "protocols/cross_project_exchange.md", "protocols/deployment_package_sync.md",
-    "protocols/recursive_self_enhancement.md", "protocols/slack_scheduled_tasks.md", "protocols/multi_project_capacity.md",
-    "protocols/control_plane_recovery.md",
-    "schemas/message.schema.json", "schemas/agent_record.schema.json", "schemas/presence_frame.schema.json",
-    "schemas/agent_package_manifest.schema.json", "schemas/cross_project_exchange.schema.json",
-    "schemas/enhancement_candidate.schema.json", "schemas/scheduled_task_route.schema.json",
-    "schemas/capacity_signal.schema.json", "schemas/lease_record.schema.json", "schemas/delivery_record.schema.json",
-    "schemas/project_registry.schema.json", "schemas/quarantine_record.schema.json",
-    "org_agent_mesh/constants.py", "org_agent_mesh/project_scope.py", "org_agent_mesh/project_identity.py",
-    "org_agent_mesh/message_bus.py", "org_agent_mesh/cross_project.py", "org_agent_mesh/package_manifest.py",
-    "org_agent_mesh/self_enhancement.py", "org_agent_mesh/scheduled_tasks.py", "org_agent_mesh/capacity.py",
-    "org_agent_mesh/control_plane.py", "org_agent_mesh/delivery.py"
-]
+DEPENDENCY_MAP = "packaging/agent_package_dependencies.json"
 
 
 def sha256(path):
-    digest = hashlib.sha256()
-    digest.update(Path(path).read_bytes())
-    return digest.hexdigest()
+    digest = hashlib.sha256(); digest.update(Path(path).read_bytes()); return digest.hexdigest()
 
 
 def checked_out_revision():
     try:
-        return subprocess.check_output(
-            ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True, stderr=subprocess.STDOUT
-        ).strip().lower()
+        return subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True, stderr=subprocess.STDOUT).strip().lower()
     except (OSError, subprocess.CalledProcessError) as exc:
         raise RuntimeError("cannot determine checked-out source revision") from exc
 
 
+def commit_timestamp():
+    try:
+        raw = subprocess.check_output(["git", "show", "-s", "--format=%cI", "HEAD"], cwd=ROOT, text=True, stderr=subprocess.STDOUT).strip()
+        parsed = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+    except (OSError, subprocess.CalledProcessError, ValueError) as exc:
+        raise RuntimeError("cannot determine checked-out commit timestamp") from exc
+    if parsed.tzinfo is None: raise RuntimeError("commit timestamp must be timezone-aware")
+    return parsed.astimezone(timezone.utc)
+
+
 def validate_source_revision(source_revision):
     revision = str(source_revision).strip().lower()
-    if not re.fullmatch(r"[0-9a-f]{40}", revision):
-        raise ValueError("source_revision must be a full 40-character Git commit SHA")
+    if not re.fullmatch(r"[0-9a-f]{40}", revision): raise ValueError("source_revision must be a full 40-character Git commit SHA")
     actual = checked_out_revision()
-    if revision != actual:
-        raise ValueError(f"declared source revision {revision} does not match checked-out revision {actual}")
+    if revision != actual: raise ValueError(f"declared source revision {revision} does not match checked-out revision {actual}")
     return revision
 
 
@@ -59,70 +48,72 @@ def load_control_state():
     project = json.loads((ROOT / "PROJECT_MANIFEST.json").read_text(encoding="utf-8"))
     identity = json.loads((ROOT / IDENTITY_LOCK).read_text(encoding="utf-8"))
     bootstrap = json.loads((ROOT / BOOTSTRAP_ORDER).read_text(encoding="utf-8"))
-    if identity.get("mode") != "FAIL_CLOSED" or bootstrap.get("mode") != "FAIL_CLOSED":
-        raise ValueError("identity controls must be FAIL_CLOSED")
-    if project["project_id"] != identity["project_id"]:
-        raise ValueError("project manifest and identity lock disagree on project_id")
-    if project["repository_identity"] != identity["writable_repository"]:
-        raise ValueError("project manifest and identity lock disagree on writable repository")
+    dependency_map = json.loads((ROOT / DEPENDENCY_MAP).read_text(encoding="utf-8"))
+    if identity.get("mode") != "FAIL_CLOSED" or bootstrap.get("mode") != "FAIL_CLOSED": raise ValueError("identity controls must be FAIL_CLOSED")
+    if project["project_id"] != identity["project_id"]: raise ValueError("project manifest and identity lock disagree on project_id")
+    if project["repository_identity"] != identity["writable_repository"]: raise ValueError("project manifest and identity lock disagree on writable repository")
     steps = [item.get("id") for item in bootstrap.get("steps", [])]
-    required_prefix = [
-        "validate_current_human_project_intent",
-        "load_and_validate_project_identity_lock",
-    ]
-    if steps[:2] != required_prefix:
-        raise ValueError("bootstrap order does not establish project identity first")
-    return project, identity
+    if steps[:2] != ["validate_current_human_project_intent", "load_and_validate_project_identity_lock"]: raise ValueError("bootstrap order does not establish project identity first")
+    if dependency_map.get("schema") != "org-agent-mesh/package-dependency-map/v1": raise ValueError("unsupported package dependency map schema")
+    return project, identity, dependency_map
+
+
+def expand_patterns(patterns):
+    components = set()
+    for pattern in patterns:
+        matches = sorted(path for path in ROOT.glob(pattern) if path.is_file())
+        if not matches: raise ValueError(f"package dependency pattern matched no files: {pattern}")
+        components.update(path.relative_to(ROOT).as_posix() for path in matches)
+    return sorted(components)
+
+
+def components_for_role(dependency_map, role):
+    role_components = dependency_map.get("role_components", {}).get(role)
+    if not role_components: raise ValueError(f"package dependency map missing role components for {role}")
+    components = set(expand_patterns(dependency_map.get("shared_patterns", [])))
+    for rel in role_components:
+        path = ROOT / rel
+        if not path.is_file(): raise ValueError(f"role component missing: {rel}")
+        components.add(rel)
+    return sorted(components)
+
+
+def _zip_timestamp(value):
+    value = value.astimezone(timezone.utc); second = value.second - (value.second % 2)
+    return (max(value.year, 1980), value.month, value.day, value.hour, value.minute, second)
+
+
+def _write_zip_bytes(archive, name, payload, timestamp):
+    info = zipfile.ZipInfo(name, date_time=_zip_timestamp(timestamp)); info.compress_type = zipfile.ZIP_DEFLATED; info.external_attr = (0o644 & 0xFFFF) << 16; info.create_system = 3
+    archive.writestr(info, payload)
+
+
+def _clean_output(out):
+    out.mkdir(parents=True, exist_ok=True)
+    for path in out.glob("*.zip"): path.unlink()
+    release_set = out / "release-set.json"
+    if release_set.exists(): release_set.unlink()
 
 
 def build(out_dir, source_revision):
     source_revision = validate_source_revision(source_revision)
-    project, identity = load_control_state()
-    out = Path(out_dir)
-    out.mkdir(parents=True, exist_ok=True)
-    results = []
+    project, identity, dependency_map = load_control_state(); out = Path(out_dir); _clean_output(out)
+    built_at = commit_timestamp(); built_at_utc = built_at.isoformat().replace("+00:00", "Z"); dependency_hash = sha256(ROOT / DEPENDENCY_MAP)
+    role_capabilities = identity.get("authority_model", {}).get("role_capabilities", {}); results = []
     for role, tier in ROLES.items():
-        package_version = project["framework_version"]
-        role_files = [f"roles/{role}.md", f"bootstrap/{role}.md"]
-        components = SHARED + role_files
-        component_sha256 = {rel: sha256(ROOT / rel) for rel in components}
-        manifest = {
-            "schema": "org-agent-mesh/agent-package-manifest/v2",
-            "project_id": project["project_id"],
-            "repository_identity": identity["writable_repository"],
-            "canonical_branch": identity["canonical_branch"],
-            "coordination_root": identity["coordination_root"],
-            "artifact_root": identity["artifact_root"],
-            "identity_lock_path": IDENTITY_LOCK,
-            "bootstrap_order_path": BOOTSTRAP_ORDER,
-            "coordination_snapshot_path": COORDINATION_SNAPSHOT,
-            "agent_spawn_policy": identity["agent_spawn_policy"],
-            "deployment_role": role,
-            "authority_tier": tier,
-            "framework_version": project["framework_version"],
-            "protocol_version": project["protocol_version"],
-            "package_version": package_version,
-            "source_revision": source_revision,
-            "identity_artifact_sha256": {
-                IDENTITY_LOCK: component_sha256[IDENTITY_LOCK],
-                BOOTSTRAP_ORDER: component_sha256[BOOTSTRAP_ORDER],
-                COORDINATION_SNAPSHOT: component_sha256[COORDINATION_SNAPSHOT]
-            },
-            "component_sha256": component_sha256,
-            "included_components": components
-        }
+        package_version = project["framework_version"]; components = components_for_role(dependency_map, role); component_sha256 = {rel: sha256(ROOT / rel) for rel in components}
+        capabilities = role_capabilities.get(role)
+        if not isinstance(capabilities, list): raise ValueError(f"identity lock missing role capabilities for {role}")
+        manifest = {"schema":"org-agent-mesh/agent-package-manifest/v3","project_id":project["project_id"],"repository_identity":identity["writable_repository"],"canonical_branch":identity["canonical_branch"],"coordination_root":identity["coordination_root"],"artifact_root":identity["artifact_root"],"identity_lock_path":IDENTITY_LOCK,"bootstrap_order_path":BOOTSTRAP_ORDER,"dependency_map_path":DEPENDENCY_MAP,"dependency_map_sha256":dependency_hash,"agent_spawn_policy":identity["agent_spawn_policy"],"deployment_role":role,"authority_tier":tier,"capabilities":sorted(set(capabilities)),"framework_version":project["framework_version"],"protocol_version":project["protocol_version"],"package_version":package_version,"built_at_utc":built_at_utc,"source_revision":source_revision,"component_sha256":component_sha256,"included_components":components}
         path = out / f"{project['project_id']}-{role.lower()}-{package_version}.zip"
         with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
-            archive.writestr("AGENT_PACKAGE_MANIFEST.json", json.dumps(manifest, indent=2, sort_keys=True) + "\n")
-            for rel in components:
-                archive.write(ROOT / rel, rel)
-        results.append({"path": str(path), "sha256": sha256(path), "manifest": manifest})
+            _write_zip_bytes(archive, "AGENT_PACKAGE_MANIFEST.json", (json.dumps(manifest, indent=2, sort_keys=True)+"\n").encode("utf-8"), built_at)
+            for rel in components: _write_zip_bytes(archive, rel, (ROOT / rel).read_bytes(), built_at)
+        results.append({"path":str(path),"sha256":sha256(path),"manifest":manifest})
+    release_set = {"schema":"org-agent-mesh/release-set/v1","project_id":project["project_id"],"framework_version":project["framework_version"],"protocol_version":project["protocol_version"],"source_revision":source_revision,"built_at_utc":built_at_utc,"dependency_map_sha256":dependency_hash,"packages":[{"deployment_role":item["manifest"]["deployment_role"],"filename":Path(item["path"]).name,"sha256":item["sha256"]} for item in sorted(results,key=lambda item:item["manifest"]["deployment_role"])]}
+    (out / "release-set.json").write_text(json.dumps(release_set, indent=2, sort_keys=True)+"\n", encoding="utf-8")
     return results
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--out", default=str(ROOT / "dist"))
-    parser.add_argument("--source-revision", required=True)
-    args = parser.parse_args()
-    print(json.dumps(build(args.out, args.source_revision), indent=2))
+    parser=argparse.ArgumentParser(); parser.add_argument("--out",default=str(ROOT/"dist")); parser.add_argument("--source-revision",required=True); args=parser.parse_args(); print(json.dumps(build(args.out,args.source_revision),indent=2))

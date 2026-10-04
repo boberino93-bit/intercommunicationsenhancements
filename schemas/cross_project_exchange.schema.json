@@ -1,6 +1,21 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Cross-project Exchange",
+  "title": "Cross-project Exchange Request",
   "type": "object",
+  "properties": {
+    "schema": {"const": "org-agent-mesh/cross-project-exchange/v1"},
+    "exchange_id": {"type": "string", "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?$"},
+    "source_project_id": {"type": "string", "pattern": "^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$"},
+    "destination_project_id": {"type": "string", "pattern": "^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$"},
+    "requesting_agent_id": {"type": "string", "minLength": 1},
+    "purpose": {"type": "string", "minLength": 1},
+    "data_classification": {"type": "string", "minLength": 1},
+    "requested_artifacts": {"type": "array", "items": {"type": "string", "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?$"}},
+    "allowed_use": {"type": "string", "minLength": 1},
+    "created_at_utc": {"type": "string"},
+    "expires_at_utc": {"type": "string"},
+    "correlation_id": {"type": "string", "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?$"},
+    "approval": {"type": "object", "properties": {"status": {"const": "APPROVED"}, "approved_by": {"type": "string", "minLength": 1}}, "required": ["status", "approved_by"]}
+  },
   "required": ["schema", "exchange_id", "source_project_id", "destination_project_id", "requesting_agent_id", "purpose", "data_classification", "requested_artifacts", "allowed_use", "created_at_utc", "expires_at_utc", "correlation_id", "approval"]
 }
