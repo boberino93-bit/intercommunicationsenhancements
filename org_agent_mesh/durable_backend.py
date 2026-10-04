@@ -4,6 +4,7 @@ from hashlib import sha256
 import json
 from pathlib import Path
 import sqlite3
+import time
 from typing import Protocol, runtime_checkable
 
 from .control_plane import StaleVersion
@@ -133,6 +134,22 @@ class SQLiteRecordBackend:
         return connection
 
     def _initialize(self):
+        deadline = time.monotonic() + self.timeout_seconds
+        delay = min(0.01, self.timeout_seconds / 10.0)
+        while True:
+            try:
+                self._initialize_once()
+                return
+            except sqlite3.OperationalError as exc:
+                if "locked" not in str(exc).lower() or time.monotonic() >= deadline:
+                    raise
+                remaining = max(0.0, deadline - time.monotonic())
+                if remaining <= 0:
+                    raise
+                time.sleep(min(delay, remaining))
+                delay = min(delay * 2.0, 0.05)
+
+    def _initialize_once(self):
         connection = self._connect()
         try:
             connection.execute("PRAGMA journal_mode = WAL")
