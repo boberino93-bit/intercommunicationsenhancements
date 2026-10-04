@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Project State Capsule",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "project_id": {"type": "string", "minLength": 1},
+    "repository_identity": {"type": "string", "minLength": 1},
+    "repository_revision": {"type": "string", "minLength": 1},
+    "protocol_version": {"type": "string", "minLength": 1},
+    "package_version": {"type": "string", "minLength": 1},
+    "health_state": {"type": "string", "enum": ["HEALTHY", "DEGRADED", "QUARANTINED", "RECOVERING", "UNKNOWN"]},
+    "generation_id": {"type": ["string", "null"]},
+    "active_objective_id": {"type": ["string", "null"]},
+    "active_claims": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "open_dependencies": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "blocked_tasks": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "last_checkpoint_ref": {"type": ["string", "null"]},
+    "updated_at_utc": {"type": "string", "minLength": 1}
+  },
+  "required": ["project_id", "repository_identity", "repository_revision", "protocol_version", "package_version", "health_state", "generation_id", "active_objective_id", "active_claims", "open_dependencies", "blocked_tasks", "last_checkpoint_ref", "updated_at_utc"]
+}
