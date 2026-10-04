@@ -47,6 +47,7 @@ LOCAL_CONTRACT = {
     "authorized_roles": ["primary", "manager", "research"],
 }
 
+
 class ProjectRoleRoutingTests(unittest.TestCase):
     def test_valid_route_resolves_and_acknowledges(self):
         route = resolve_route(REGISTRY, project_id="alpha", role_id="research", current_repository="owner/alpha", current_repository_id=101)
@@ -119,13 +120,21 @@ class ProjectRoleRoutingTests(unittest.TestCase):
         validate_registry(registry)
         self.assertIn("fold7-power-lab", registry["projects"])
         self.assertNotIn("samsungpowerbootstrap", registry["projects"])
+        self.assertEqual(registry.get("routing_contract_version"), "1.3.0")
+        awareness = registry.get("communication_awareness")
+        self.assertIsInstance(awareness, dict)
+        self.assertTrue(awareness.get("required_on_startup"))
+        self.assertTrue(awareness.get("required_on_visibility_question"))
+        self.assertEqual(awareness.get("default_visibility_claim"), "PARTIAL_UNLESS_PROVEN")
+        self.assertEqual(awareness.get("protocol_path"), "protocols/communication_awareness.md")
         for project in registry["projects"].values():
             self.assertIsInstance(project.get("repository_id"), int)
             self.assertEqual(project.get("local_contract_path"), "AGENT_BOOTSTRAP.json")
-            self.assertEqual(project.get("routing_contract_version"), "1.2.0")
+            self.assertEqual(project.get("routing_contract_version"), "1.3.0")
             self.assertEqual(project["forum_locator"]["authority"], "INTERNAL_ARTIFACTORY")
         local_contract = json.loads((ROOT / "AGENT_BOOTSTRAP.json").read_text())
         validate_local_contract(registry, project_id="intercommunicationsenhancements", contract=local_contract)
+        self.assertEqual(local_contract.get("communication_awareness"), awareness)
 
     def test_routing_contract_is_dependency_closed_for_role_packages(self):
         dependency_map = json.loads((ROOT / "packaging" / "agent_package_dependencies.json").read_text())
@@ -135,6 +144,8 @@ class ProjectRoleRoutingTests(unittest.TestCase):
         self.assertIn("bootstrap/PROJECT_ROLE_DISCOVERY.md", shared)
         self.assertIn("bootstrap/IDENTITY_GATE.md", shared)
         self.assertIn("org_agent_mesh/*.py", shared)
+        self.assertIn("protocols/*.md", shared)
+
 
 if __name__ == "__main__":
     unittest.main()
