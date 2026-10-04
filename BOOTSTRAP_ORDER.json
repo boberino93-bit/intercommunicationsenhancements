@@ -14,6 +14,8 @@
     {"order": 10, "id": "load_swarm_launch_kernel", "paths": ["SWARM_LAUNCH_KERNEL_V1.md", "swarm_kernel/project.json", "swarm_kernel/AGENT_BOOTSTRAP_OVERLAY.md"], "mutation_allowed": false},
     {"order": 11, "id": "bind_global_run_role_and_ready_barrier", "mutation_allowed": true},
     {"order": 12, "id": "classify_task_and_bind_work_context", "path": "protocols/task_intake_and_delegation.md", "mutation_allowed": false},
-    {"order": 13, "id": "execute_task_with_per_mutation_scope_validation", "mutation_allowed": true, "additional_guards": ["project_role_registry_validation", "communication_namespace_conflict_block", "registered_repository_boundary", "swarm_kernel_global_run_validation", "versioned_lease_validation", "idempotency_validation", "manager_backpressure", "circuit_breaker"]}
+    {"order": 13, "id": "load_swarm_learning_context", "path": "protocols/swarm_learning.md", "inheritance_order": ["operating_doctrine", "task_scoped_validated_knowledge", "raw_experience_on_demand_only"], "mutation_allowed": false},
+    {"order": 14, "id": "execute_task_with_per_mutation_scope_validation", "mutation_allowed": true, "additional_guards": ["project_role_registry_validation", "communication_namespace_conflict_block", "registered_repository_boundary", "swarm_kernel_global_run_validation", "versioned_lease_validation", "idempotency_validation", "manager_backpressure", "circuit_breaker", "learning_promotion_authority"]},
+    {"order": 15, "id": "persist_learning_checkpoint_and_handoff", "path": "protocols/swarm_learning.md", "mutation_allowed": true, "additional_guards": ["project_scope_validation", "idempotency_validation", "evidence_provenance_validation", "learning_promotion_authority"]}
   ]
 }
