@@ -17,7 +17,8 @@ Stable baseline remains framework `1.6.0-alpha.1` / protocol `2.4.0-alpha.1` on 
 - benchmark suite and hard promotion thresholds;
 - durable-state adapter semantic contract;
 - external interoperability adapter contract;
-- Adaptive Research & Swarm Regulation protocol for assistance detection, Primary sizing, manager/research topology, live resize and termination.
+- Adaptive Research & Swarm Regulation protocol for assistance detection, Primary sizing, manager/research topology, live resize and termination;
+- Artifactory-first New Project Initializer integration and machine-readable new-project entrypoint.
 
 ### Draft protocol objects
 
@@ -34,7 +35,8 @@ Stable baseline remains framework `1.6.0-alpha.1` / protocol `2.4.0-alpha.1` on 
 - Agent Principal v1;
 - Research Assistance Request v1;
 - Swarm Allocation Decision v1;
-- Swarm State v1.
+- Swarm State v1;
+- Project Initialization State v1.
 
 ### Executable design behavior
 
@@ -70,12 +72,26 @@ Stable baseline remains framework `1.6.0-alpha.1` / protocol `2.4.0-alpha.1` on 
 - fail-closed assistance/allocation/swarm-state validators;
 - explicit rule that only an ACTIVE bound Primary execution instance may authorize allocation or topology changes;
 - forged Primary, budget-overrun, stale-revision, invalid-topology and draining-scale-up adversarial tests;
+- machine-readable `NEW_PROJECT_ENTRYPOINT.json` for fresh-agent discovery;
+- Artifactory/message-board-first project namespace initialization under `projects/<project_id>/`;
+- automatic project-scoped bootstrap, identity, Primary/Manager/Research forum, queue, handoff, evidence, audit, swarm and artifact directories;
+- interruption-safe create-or-match bootstrap semantics;
+- mandatory user prompt for a public GitHub repository only after internal coordination state exists;
+- injected GitHub verifier contract requiring repository resolution, public visibility and ChatGPT GitHub-connector accessibility;
+- explicit rejection of private repositories and public repositories unavailable through the connected GitHub integration;
+- GitHub binding that reaches `BOUND` but cannot mark initialization complete;
+- mandatory structured Primary source-of-truth, workstream and adaptive-swarm assessment before `COMPLETE`;
+- replay-safe same-intent, same-binding and same-Primary-result recovery;
+- rejection of namespace takeover, conflicting intent and silent repository rebinding;
+- end-to-end initializer field campaign including interruption/recovery and invalid repository cases;
 - unit/adversarial tests for the implemented design behaviors;
 - design-only validation harness;
 - design-only GitHub Actions validation workflow.
 
 ## Deliberately not claimed yet
 
+- a live ChatGPT internal Artifactory/message-board adapter exposed to this session/runtime;
+- production execution of the New Project Initializer against the actual internal board service;
 - cryptographic signature verification service;
 - issuer trust registry and credential revocation service;
 - key creation/rotation/recovery implementation;
@@ -100,16 +116,16 @@ Stable baseline remains framework `1.6.0-alpha.1` / protocol `2.4.0-alpha.1` on 
 ## Next gates
 
 1. Keep both IPG3 design CI and the existing G2 package/reproducibility gate green.
-2. Build a larger sanitized replay corpus covering every Message v2 kind and major failure class.
-3. Add read-only adaptive-swarm telemetry to measure real assistance requests before any automatic allocation authority exists.
-4. Measure unnecessary-escalation, missed-escalation, duplicate-work, manager-overhead, cost and convergence outcomes from real campaigns; use those results to challenge the retained synthetic expectations.
-5. Produce formal Benchmark Result records comparing G2 with G3 candidate semantics and overhead.
-6. Expand durable-adapter conformance with process-death, timeout-after-commit, restart persistence and partition/failover scenarios.
-7. Compare PostgreSQL with at least one additional genuinely distributed persistence design before selecting a production substrate; SQLite remains a valuable local/reference candidate, not a multi-node choice.
-8. Add a cryptographic verification interface with pluggable issuer/revocation/key services; do not hard-code one trust provider into the protocol.
-9. Exercise A2A/AGNTCY mappings against real SDK/protocol fixtures and quantify translation loss before building production transport adapters.
+2. Expose or connect a real internal Artifactory/message-board adapter implementing the initializer backend contract; do not substitute GitHub for this plane.
+3. Exercise the new-project initializer against a real fresh project and verify full interruption/recovery behavior.
+4. Build a larger sanitized replay corpus covering every Message v2 kind and major failure class.
+5. Add read-only adaptive-swarm telemetry to measure real assistance requests before any automatic allocation authority exists.
+6. Measure unnecessary-escalation, missed-escalation, duplicate-work, manager-overhead, cost and convergence outcomes from real campaigns; use those results to challenge the retained synthetic expectations.
+7. Produce formal Benchmark Result records comparing G2 with G3 candidate semantics and overhead.
+8. Expand durable-adapter conformance with process-death, timeout-after-commit, restart persistence and partition/failover scenarios.
+9. Compare PostgreSQL with at least one additional genuinely distributed persistence design before selecting a production substrate; SQLite remains a valuable local/reference candidate, not a multi-node choice.
 10. Run independent adversarial review before any G3 artifact moves into authoritative runtime/package paths.
 
 ## Promotion rule
 
-IPG3 remains in `design/` until the candidate implementation demonstrates non-inferiority to G2 on existing invariants and measurable superiority on the G3 target dimensions. Adaptive swarm sizing additionally requires real telemetry before its synthetic policy is treated as production-optimal. Promotion must include tests, adversarial tests, migration evidence, synchronized role packages, exact-revision manifests and reproducible release artifacts.
+IPG3 remains in `design/` until the candidate implementation demonstrates non-inferiority to G2 on existing invariants and measurable superiority on the G3 target dimensions. Adaptive swarm sizing additionally requires real telemetry before its synthetic policy is treated as production-optimal. The New Project Initializer additionally requires a real internal-board adapter and at least one end-to-end live project bootstrap before promotion. Promotion must include tests, adversarial tests, migration evidence, synchronized role packages, exact-revision manifests and reproducible release artifacts.
