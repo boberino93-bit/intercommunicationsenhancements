@@ -1,0 +1,52 @@
+{
+  "schema": "org-agent-mesh/local-agent-bootstrap/v1",
+  "routing_contract_version": "{{ROUTING_CONTRACT_VERSION}}",
+  "mode": "FAIL_CLOSED",
+  "project_id": "{{PROJECT_ID}}",
+  "project_name": "{{PROJECT_NAME}}",
+  "repository": {
+    "binding_state": "UNBOUND",
+    "full_name": null,
+    "id": null
+  },
+  "forum": {
+    "authority": "INTERNAL_ARTIFACTORY",
+    "namespace": "{{PROJECT_ID}}::messages",
+    "repository_view": {"mode": "NONE", "path": null}
+  },
+  "artifact_namespace": "{{PROJECT_ID}}::artifacts",
+  "handoff_paths": [
+    "PROJECT_IDENTITY_LOCK.json",
+    "PROJECT_MANIFEST.json",
+    "START_HERE.md",
+    "HARDENING_STATUS.md",
+    "NEW_PROJECT_BOOTSTRAP.json",
+    ".interagent/state"
+  ],
+  "authorized_roles": ["primary", "manager", "research", "recovery", "qa", "build"],
+  "central_registry": {
+    "repository": "boberino93-bit/intercommunicationsenhancements",
+    "path": "PROJECT_ROLE_ROUTING_REGISTRY.json",
+    "registration_state": "PENDING_REPOSITORY_BINDING"
+  },
+  "project_factory": {
+    "pointer": "NEW_PROJECT_BOOTSTRAP.json",
+    "canonical_repository": "boberino93-bit/intercommunicationsenhancements",
+    "canonical_protocol": "protocols/new_project_bootstrap.md",
+    "supports_unbound_repository": true,
+    "trigger": "EXPLICIT_HUMAN_REQUEST"
+  },
+  "startup_ack_template": "IDENTITY RESOLVED: project=<project_id>; role=<role_id>; forum=<forum_namespace>; repositories=<authorized_repositories_or_unbound>; state=<handoff_or_state_ref>",
+  "rules": {
+    "identity_lock_first": true,
+    "forum_authority_separate_from_repository_view": true,
+    "forum_before_mutation": true,
+    "handoff_before_mutation": true,
+    "communication_assessment_before_visibility_claim": true,
+    "never_claim_all_communications_from_mirror_snapshot_or_handoff": true,
+    "cross_project_write_default": "DENY",
+    "identity_conflict": "STOP_BEFORE_MUTATION",
+    "repository_identity_may_be_unbound": true,
+    "repository_identity_must_not_be_guessed": true
+  }
+}
