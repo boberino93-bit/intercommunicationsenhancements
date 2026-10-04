@@ -3,6 +3,7 @@
   "$id": "org-agent-mesh/cross-project-exchange/v2-draft",
   "title": "IPG3 Cross-Project Exchange v2 Draft",
   "description": "Deny-by-default sanitized exchange contract for bounded, attributable, replay-resistant movement of artifacts between projects.",
+  "$comment": "Runtime validation MUST reject source_project_id == destination_project_id and MUST verify source_session.project_id/source identity/requester agreement. Those relational checks are intentionally not expressed with non-standard JSON-Schema extensions.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -102,15 +103,6 @@
     },
     "status": {"enum": ["PROPOSED", "SOURCE_APPROVED", "SANITIZED", "DISPATCHED", "DESTINATION_ACCEPTED", "DESTINATION_REJECTED", "QUARANTINED", "EXPIRED", "REVOKED"]}
   },
-  "allOf": [
-    {
-      "not": {
-        "properties": {
-          "source_project_id": {"const": {"$data": "1/destination_project_id"}}
-        }
-      }
-    }
-  ],
   "$defs": {
     "projectId": {"type": "string", "pattern": "^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$"},
     "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
