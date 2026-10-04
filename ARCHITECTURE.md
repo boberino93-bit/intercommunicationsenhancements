@@ -8,11 +8,27 @@ Current target: **framework 1.6.0-alpha.1 / protocol 2.4.0-alpha.1**.
 
 ## Identity-first bootstrap
 
-Execution begins with `BOOTSTRAP_ORDER.json`. Current human project intent is validated first, then `PROJECT_IDENTITY_LOCK.json`. Handoffs, queues, forums, accepted state, recent context, working-directory state, and semantic similarity are not authorization inputs.
+Execution begins with `BOOTSTRAP_ORDER.json`. Launch origin is resolved first. Interactive runs validate current human project intent; scheduled project-bound runs validate the captured launch context against the target local contract; generic unbound runs remain read-only until universal routing resolves exactly one project. `PROJECT_IDENTITY_LOCK.json` and the ordinary local authorization gates still follow. Handoffs, queues, forums, accepted state, recent context, working-directory state, and semantic similarity are not mutation authorization inputs.
 
 Canonical operations resolve `project_id -> repository/workspace -> agent_id -> agent_instance_id -> task/resource -> capability`.
 
 `ProjectBinding` is immutable. Lifecycle is `UNBOUND -> BOUND -> INITIALIZED -> ACTIVE -> DRAINING -> TERMINATED`. Only an `ACTIVE` bound `AgentSession` may authorize mutation. Mutation APIs do not accept a caller-supplied project string as proof of identity; destination-side code revalidates the bound session.
+
+## Scheduled agent launch, project context and provider admission
+
+Dynamic scheduled work is project-bound at configuration time rather than rediscovered from topic at execution time. `ScheduledTaskRoute.from_project_contract(...)` captures the exact project ID, role, routing-contract version, authoritative forum/artifact namespaces, repository identity/ID when bound, and bootstrap paths from `AGENT_BOOTSTRAP.json`. `render_scheduler_prompt(...)` serializes that state into a machine-readable `ORG_AGENT_MESH_PROJECT_LAUNCH_CONTEXT` block for the future run.
+
+The launch block is **routing evidence, not mutation authority**. The future run must compare it with the target local contract before mutation, then continue through the identity lock, role/capability checks, master handoff, communication-awareness and active-session gates. Missing, malformed or conflicting scheduled context is fail-closed and may not fall back to topic similarity or silently switch projects. The global entrypoint recognizes a verified scheduled launch as exact routing evidence and skips fuzzy project discovery only after local-contract agreement.
+
+Scheduled execution has a separate pre-provider lifecycle because provider throttling can occur before any agent code executes. The reference state machine is `PENDING -> ADMITTED -> PROVIDER_ACCEPTED -> BOOTSTRAP_READY -> COMPLETED`, with `RETRY_WAIT` and `TERMINAL_FAILURE` branches. `TOO_MANY_REQUESTS`, rate limiting, temporary provider unavailability and timeout before bootstrap are retryable **launch** failures, not project task failures. The logical task may not advance merely because a scheduler fired; project task execution may advance only after `BOOTSTRAP_READY`.
+
+`org_agent_mesh.launch_admission` is the reference scheduler/dispatcher admission implementation. It provides bounded concurrent starts, minimum start spacing, deterministic launch staggering, bounded exponential backoff with deterministic jitter, retry-attempt caps and occurrence identity preservation. `deterministic_launch_offset_seconds(project_id, task_id, window_seconds)` spreads recurring jobs across an admission window to reduce synchronized wake-ups.
+
+The architecture is explicit about the host boundary: provider admission must execute **before** model invocation to prevent a thundering herd. When the actual hosting scheduler exposes such a hook, the admission controller belongs there. When it does not, project configuration must use deterministic staggering plus retry/reconciliation; an agent cannot retrospectively prevent or self-retry a request that was rejected before the agent started. The project therefore does not claim control over provider infrastructure it cannot execute ahead of model invocation.
+
+Retries preserve the same task/occurrence/idempotency identity. Duplicate or late starts are reconciled rather than opening a second independent mutation stream. Provider-throttle and launch-context incidents are recorded as observable evidence and may enter the normal swarm-learning pipeline, but do not bypass validation or doctrine-promotion rules.
+
+Normative behavior is defined in `protocols/scheduled_agent_launch.md`; the route and context schemas are `schemas/scheduled_task_route.schema.json` and `schemas/scheduled_launch_context.schema.json`.
 
 ## Canonical identifiers
 
@@ -84,4 +100,4 @@ Doctrine changes that alter packaged agent behavior are subject to this same rel
 
 ## Remaining production layers
 
-The alpha still needs distributed/multi-node durable adapters for the complete registry set, persistent organizational registry/global observability, a full sanitized cross-project bridge, broker-specific durable acknowledgement transport, and a concrete durable learning-registry implementation that enforces the promotion lifecycle described above. Those are future layers, not current enforcement claims.
+The alpha still needs distributed/multi-node durable adapters for the complete registry set, persistent organizational registry/global observability, a full sanitized cross-project bridge, broker-specific durable acknowledgement transport, a concrete durable learning-registry implementation that enforces the promotion lifecycle described above, and host/scheduler integration that can enforce provider admission before model invocation. Those are future layers, not current enforcement claims.
