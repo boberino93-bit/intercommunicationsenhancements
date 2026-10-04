@@ -52,6 +52,11 @@ Stable baseline remains framework `1.6.0-alpha.1` / protocol `2.4.0-alpha.1` on 
 - SQLite durability candidate with local/multi-process semantics;
 - PostgreSQL durability candidate with server-backed multi-process/multi-node-capable semantics;
 - CI-backed conformance validation of both SQLite and PostgreSQL candidates for exclusive create, CAS, consumable authorization, execution-instance leases, project isolation and append-only event collisions;
+- benchmark-gated evolution candidate lifecycle with forbidden stage-skipping;
+- unsafe, inferior, high-regression or non-reproducible candidate promotion rejection;
+- progress/stall/convergence analyzer that returns repeated non-progress to the strategic evolution ledger;
+- A2A 1.0 Agent Card/Task/Message/Artifact normalization prototype that preserves remote capability declarations only as discovery claims;
+- AGNTCY/SLIM identity and directory normalization prototype with verified-identity evidence, local capability intersection and mandatory local principal issuance;
 - unit/adversarial tests for the implemented design behaviors;
 - design-only validation harness;
 - design-only GitHub Actions validation workflow.
@@ -67,7 +72,7 @@ Stable baseline remains framework `1.6.0-alpha.1` / protocol `2.4.0-alpha.1` on 
 - persistent organization registry;
 - global observability aggregation;
 - production sanitized cross-project bridge;
-- A2A/AGNTCY transport adapters;
+- production A2A/AGNTCY transport clients/servers (current work is normalization/mapping only);
 - live shadow mirroring;
 - representative large-scale replay corpus;
 - empirical benchmark results against G2 beyond regression/conformance gates;
@@ -86,7 +91,7 @@ Stable baseline remains framework `1.6.0-alpha.1` / protocol `2.4.0-alpha.1` on 
 5. Compare PostgreSQL with at least one additional genuinely distributed persistence design before selecting a production substrate; SQLite remains a valuable local/reference candidate, not a multi-node choice.
 6. Add a cryptographic verification interface with pluggable issuer/revocation/key services; do not hard-code one trust provider into the protocol.
 7. Add live read-only shadow mirroring only after offline replay coverage is representative.
-8. Prototype A2A and AGNTCY mappings as isolated adapters and quantify translation loss.
+8. Exercise A2A/AGNTCY mappings against real SDK/protocol fixtures and quantify translation loss before building production transport adapters.
 9. Expand failure injection around crash-after-effect-commit / before-receipt persistence and unknown-outcome reconciliation.
 10. Run independent adversarial review before any G3 artifact moves into authoritative runtime/package paths.
 
