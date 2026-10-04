@@ -16,12 +16,14 @@ This file reports implementation truth. A revision is release-complete only when
 - **ENFORCED + TESTED:** execution-instance-owned expiring leases, stale-instance rejection and compare-and-set stale-write prevention.
 - **ENFORCED + TESTED:** crash-durable SQLite reference persistence for accepted state and leases, including transactional CAS, project-qualified keys, restart recovery, concurrent-writer exclusion, checksum validation and fail-closed schema-version fencing.
 - **ENFORCED + TESTED:** independent project lifecycle; project-scoped task ownership/versioning, artifact provenance/content hashing, and attributable append-only reference audit records.
+- **ENFORCED + TESTED:** dynamic scheduled-task routes capture project identity, authorized role, forum/artifact namespaces and repository identity from the local project contract; generated launch context is verified against that contract before mutation.
+- **ENFORCED + TESTED:** scheduled launch reference admission state machine, bounded concurrent starts, deterministic staggering, minimum start spacing, bounded exponential backoff/jitter, attempt caps and the rule that project task state cannot advance before `BOOTSTRAP_READY`.
 - **ENFORCED:** path guards, capacity reserve, read-only recursive self-enhancement and explicit-destination Slack controls remain packaged.
 
 ## Deployment package enforcement
 
 - **ENFORCED:** deterministic dependency map for shared and role-specific package inputs.
-- **ENFORCED:** shared patterns include every runtime module, schema and protocol document.
+- **ENFORCED:** shared patterns include every runtime module, schema and protocol document, including scheduled-launch/admission code and schemas.
 - **ENFORCED:** manifest v3 records exact source revision, role/tier/capabilities, dependency-map hash and component hashes.
 - **ENFORCED:** verifier recomputes source dependency closure and rejects omissions/extras, source/hash drift, foreign role files, wrong project/repository, stale framework/protocol or mixed revisions.
 - **ENFORCED:** `release-set.json` binds PRIMARY/MANAGER/RESEARCH archive hashes to one revision.
@@ -29,9 +31,11 @@ This file reports implementation truth. A revision is release-complete only when
 
 ## Remaining risks
 
-- **PARTIALLY ENFORCED:** accepted state and leases now have a crash-durable single-node reference backend. Task, artifact, audit, project-registry and delivery ledgers remain thread-safe in-process references, and a multi-node/distributed backend must still demonstrate equivalent atomicity, ownership, expiry/recovery and CAS semantics before being treated as production-conformant.
+- **PARTIALLY ENFORCED:** the provider-admission controller is a tested reference component, but it prevents provider overload only when the actual scheduler/dispatcher can execute it before model invocation. Where ChatGPT's scheduler does not expose a pre-invocation hook, deterministic schedule staggering plus retry/reconciliation is the available mitigation; a model run cannot self-retry a request rejected before it starts.
+- **PARTIALLY ENFORCED:** accepted state and leases now have a crash-durable single-node reference backend. Task, artifact, audit, project-registry, scheduled-occurrence and delivery ledgers remain thread-safe/in-process or protocol-level references, and a multi-node/distributed backend must still demonstrate equivalent atomicity, ownership, expiry/recovery and CAS semantics before being treated as production-conformant.
 - **PARTIALLY ENFORCED:** pause/drain exists in reference runtime; persistent organization-wide lifecycle service remains future work.
 - **PARTIALLY ENFORCED:** cross-project exchange has a fail-closed validator; durable sanitized bridge remains future work.
+- **PARTIALLY ENFORCED:** swarm-learning policy and bootstrap inheritance are defined, but a concrete durable learning-registry/promotion service remains future work.
 - **NOT IMPLEMENTED AS A GLOBAL SERVICE:** organization-wide observability aggregation.
 
 ## Release status rule
