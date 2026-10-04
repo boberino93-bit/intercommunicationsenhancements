@@ -21,12 +21,32 @@ All identity inputs are evidence, not authority by themselves. Neither project n
 7. Resolve the authoritative internal-artifactory forum from `forum_locator.authority` + `forum_locator.namespace`.
 8. Treat `forum_locator.repository_view` only as a declared mirror/backup. `LIVE_MIRROR` may be consulted as a local view; `SNAPSHOT_BACKUP` is recovery/history evidence and must not be mistaken for current forum state; `NONE` means no repository forum view is registered.
 9. Read the registered repository-side handoff/state locations separately from the forum locator.
-10. Bind only the registered repository/repositories as authorized mutation targets.
-11. Emit the startup acknowledgement:
+10. Run `protocols/communication_awareness.md` against capabilities and evidence actually visible to this execution. Classify access as `DIRECT`, `LIVE_MIRROR`, `STALE_MIRROR`, `SNAPSHOT_ONLY`, `HANDOFF_ONLY`, `NONE`, or `CONFLICT`.
+11. Default visibility claims to partial. A mirror, snapshot, handoff, current chat, open repository, or prior memory can never by itself justify saying the agent sees all project communications.
+12. If direct forum access resolves to a namespace other than the registered project namespace, classify `CONFLICT` and stop before mutation.
+13. Emit the communication acknowledgement:
+
+   `COMMUNICATIONS ASSESSED: project=<project_id>; role=<role_id>; forum=<forum_namespace>; access=<access_mode>; coverage=<coverage>; confidence=<confidence>; full_forum_visibility=<true|false>; mutation_blocked=<true|false>`
+
+14. Bind only the registered repository/repositories as authorized mutation targets.
+15. Emit the startup acknowledgement:
 
    `IDENTITY RESOLVED: project=<project_id>; role=<role_id>; forum=<forum_namespace>; repositories=<authorized_repositories>; state=<handoff_or_state_ref>`
 
-12. Only after the acknowledgement may role-specific startup continue.
+16. Only after the acknowledgements may role-specific startup continue.
+
+## Answering communication-visibility questions
+
+When the human asks whether the agent sees the communications happening around it, do not answer from intuition. Re-run the communication-awareness assessment and state:
+
+- the project and authoritative forum resolved;
+- the strongest communication source actually visible now;
+- whether it is direct, mirrored, stale, snapshot-only, handoff-only, or absent;
+- whether full registered-forum scope has actually been proven;
+- what remains unseen or unverifiable;
+- whether any identity/namespace conflict blocks safe mutation.
+
+A truthful answer such as “I can see the registered snapshot and handoff, but I do not have verified live access to the internal forum” is preferred over an ungrounded yes/no.
 
 ## Registry integrity checks
 
@@ -42,6 +62,7 @@ Stop before mutation if any of the following is true:
 - stable repository ID disagrees when available;
 - central registry and local bootstrap contract disagree;
 - forum authority or namespace cannot be resolved;
+- direct forum namespace conflicts with the resolved project;
 - a repository snapshot is presented as though it were the live forum;
 - handoff/state source cannot be resolved;
 - two projects appear equally plausible;
