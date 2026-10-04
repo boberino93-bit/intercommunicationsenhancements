@@ -27,6 +27,7 @@ SCENARIOS = [
     Scenario("dependency-dense-chain", ResearchAssessment(0.38, 6, domains=2, attempts=3, stall_count=2, dependency_density=0.90), True, (1,3), (0,1)),
     Scenario("parallel-cross-domain", ResearchAssessment(0.42, 8, domains=4, attempts=2, verification_needed=True, consequence="HIGH", novelty=0.8), True, (8,10), (2,2)),
     Scenario("critical-three-front", ResearchAssessment(0.52, 3, domains=3, attempts=2, verification_needed=True, consequence="CRITICAL", novelty=0.85), True, (4,5), (1,1)),
+    Scenario("critical-small-novel", ResearchAssessment(0.50, 2, domains=2, attempts=2, verification_needed=True, consequence="CRITICAL", novelty=0.90), True, (3,3), (0,0)),
     Scenario("broad-but-routine", ResearchAssessment(0.48, 5, domains=1, attempts=2, dependency_density=0.05), True, (5,6), (0,0)),
     Scenario("high-context-pressure-only", ResearchAssessment(0.56, 1, attempts=2, context_pressure=0.95), False, (0,0), (0,0)),
 ]
