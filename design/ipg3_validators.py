@@ -7,6 +7,8 @@ mutation or deployment authority.
 
 from __future__ import annotations
 
+import hashlib
+import json
 from datetime import datetime, timezone
 
 
@@ -19,6 +21,11 @@ def _parse_utc(value: str) -> datetime:
     if parsed.tzinfo is None:
         raise IPG3ValidationError("timestamp must be timezone-aware")
     return parsed.astimezone(timezone.utc)
+
+
+def _canonical_sha256(value) -> str:
+    encoded = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
 
 
 def validate_cross_project_exchange(record: dict, *, now: datetime | None = None) -> bool:
@@ -123,4 +130,124 @@ def validate_effect_receipt(record: dict) -> bool:
         raise IPG3ValidationError("failed/rejected effect cannot claim FIRST_COMMIT")
     if prepared and committed and _parse_utc(committed) < _parse_utc(prepared):
         raise IPG3ValidationError("effect commit cannot precede preparation")
+    return True
+
+
+def validate_delegation_contract(
+    record: dict,
+    *,
+    expected_project_id: str | None = None,
+    parent_capabilities: set[str] | None = None,
+    child_capabilities: set[str] | None = None,
+    now: datetime | None = None,
+) -> bool:
+    if record.get("schema") != "org-agent-mesh/delegation-contract/v1-draft":
+        raise IPG3ValidationError("wrong delegation schema")
+    if expected_project_id is not None and record.get("project_id") != expected_project_id:
+        raise IPG3ValidationError("delegation project does not match bound project")
+    if not record.get("objective"):
+        raise IPG3ValidationError("delegation objective is required")
+    scope = record.get("scope") or {}
+    overlap = set(scope.get("in_scope", [])) & set(scope.get("out_of_scope", []))
+    if overlap:
+        raise IPG3ValidationError(f"delegation has contradictory scope entries: {sorted(overlap)}")
+    ceiling = set(record.get("capability_ceiling", []))
+    if parent_capabilities is not None and not ceiling.issubset(set(parent_capabilities)):
+        raise IPG3ValidationError("delegation capability ceiling exceeds parent capabilities")
+    if child_capabilities is not None and not set(child_capabilities).issubset(ceiling):
+        raise IPG3ValidationError("child capabilities exceed delegation ceiling")
+    if record.get("expires_at_utc"):
+        expires = _parse_utc(record["expires_at_utc"])
+        created = _parse_utc(record["created_at_utc"])
+        if expires <= created:
+            raise IPG3ValidationError("delegation expiry must follow creation")
+        current = now or datetime.now(timezone.utc)
+        if expires <= current.astimezone(timezone.utc) and record.get("status") not in {"EXPIRED", "COMPLETED", "FAILED", "CANCELLED", "REJECTED"}:
+            raise IPG3ValidationError("expired delegation cannot remain actionable")
+    if not record.get("source_of_truth"):
+        raise IPG3ValidationError("delegation requires at least one source of truth")
+    if not record.get("completion_criteria"):
+        raise IPG3ValidationError("delegation requires completion criteria")
+    return True
+
+
+_ALLOWED_TRUST_PROMOTIONS = {
+    "AUTHORITATIVE_CONFIG": set(),
+    "VERIFIED_FACT": {"AUTHORITATIVE_CONFIG"},
+    "EXECUTION_EVIDENCE": {"VERIFIED_FACT", "AUTHORITATIVE_CONFIG"},
+    "DERIVED_KNOWLEDGE": {"VERIFIED_FACT"},
+    "AGENT_REFLECTION": {"DERIVED_KNOWLEDGE"},
+    "EXTERNAL_UNTRUSTED": {"DERIVED_KNOWLEDGE", "VERIFIED_FACT"},
+    "QUARANTINED": set(),
+}
+
+
+def validate_trust_promotion(record: dict, target_class: str, *, decision_id: str, validator_count: int = 1) -> bool:
+    if record.get("schema") != "org-agent-mesh/trust-provenance-record/v1-draft":
+        raise IPG3ValidationError("wrong trust/provenance schema")
+    source_class = record.get("trust_class")
+    if target_class == source_class:
+        return True
+    allowed = _ALLOWED_TRUST_PROMOTIONS.get(source_class)
+    if allowed is None or target_class not in allowed:
+        raise IPG3ValidationError(f"trust promotion not allowed: {source_class} -> {target_class}")
+    if not decision_id:
+        raise IPG3ValidationError("trust promotion requires an explicit decision record")
+    if validator_count < 1:
+        raise IPG3ValidationError("trust promotion requires validation evidence")
+    if source_class in {"EXTERNAL_UNTRUSTED", "AGENT_REFLECTION", "DERIVED_KNOWLEDGE"} and target_class == "AUTHORITATIVE_CONFIG":
+        raise IPG3ValidationError("untrusted/derived/reflection content cannot jump directly to authoritative config")
+    if record.get("validation_state") in {"REJECTED", "REVOKED"}:
+        raise IPG3ValidationError("rejected or revoked knowledge cannot be promoted")
+    return True
+
+
+def causal_event_hash(event: dict) -> str:
+    stable = dict(event)
+    stable.pop("event_hash", None)
+    stable.pop("signature", None)
+    return _canonical_sha256(stable)
+
+
+def verify_causal_chain(events: list[dict]) -> bool:
+    if not events:
+        return True
+    ordered = sorted(events, key=lambda item: item["event_sequence"])
+    project_id = ordered[0]["project_id"]
+    seen_ids = set()
+    previous = None
+    parent_edges = {}
+    for event in ordered:
+        if event.get("schema") != "org-agent-mesh/causal-event/v1-draft":
+            raise IPG3ValidationError("wrong causal event schema")
+        if event["project_id"] != project_id:
+            raise IPG3ValidationError("causal chain cannot cross project boundaries")
+        if event["event_id"] in seen_ids:
+            raise IPG3ValidationError("duplicate event id")
+        seen_ids.add(event["event_id"])
+        if event["event_hash"] != causal_event_hash(event):
+            raise IPG3ValidationError("causal event hash mismatch")
+        if previous is None:
+            if event["previous_event_hash"] is not None:
+                raise IPG3ValidationError("first causal event must not claim predecessor hash")
+        else:
+            if event["event_sequence"] != previous["event_sequence"] + 1:
+                raise IPG3ValidationError("causal event sequence gap or reordering detected")
+            if event["previous_event_hash"] != previous["event_hash"]:
+                raise IPG3ValidationError("causal predecessor hash mismatch")
+        parent = event.get("parent_event_id")
+        if parent is not None:
+            if parent not in seen_ids:
+                raise IPG3ValidationError("causal parent must refer to an earlier event in the same chain")
+            parent_edges[event["event_id"]] = parent
+        previous = event
+
+    for event_id in parent_edges:
+        cursor = event_id
+        visited = set()
+        while cursor in parent_edges:
+            if cursor in visited:
+                raise IPG3ValidationError("causal parent cycle detected")
+            visited.add(cursor)
+            cursor = parent_edges[cursor]
     return True
