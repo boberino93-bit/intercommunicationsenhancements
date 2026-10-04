@@ -13,7 +13,10 @@ Stable baseline remains framework `1.6.0-alpha.1` / protocol `2.4.0-alpha.1` on 
 - full generational breakdown from empirical coordination through G3;
 - IPG3 protocol architecture draft;
 - compatibility and shadow-mode migration model;
-- adversarial validation plan.
+- adversarial validation plan;
+- benchmark suite and hard promotion thresholds;
+- durable-state adapter semantic contract;
+- external interoperability adapter contract.
 
 ### Draft protocol objects
 
@@ -26,52 +29,62 @@ Stable baseline remains framework `1.6.0-alpha.1` / protocol `2.4.0-alpha.1` on 
 - Evolution Candidate v2;
 - Benchmark Result v1;
 - Progress Ledger / Stall Signal v1;
-- Cross-Project Exchange v2.
+- Cross-Project Exchange v2;
+- Agent Principal v1.
 
 ### Executable design behavior
 
 - deterministic Message v2 -> Message v3 shadow projection;
 - semantic-equivalence assertion for protected v2 fields;
-- cross-project exchange relational validator;
-- human approval replay/expiry/use validator;
-- effect receipt replay/order validator;
-- unit/adversarial tests for the initial behavior set;
+- sanitized offline Message v2 replay fixtures and replay metrics;
+- cross-project exchange relational validation;
+- human approval replay/expiry/use validation;
+- atomic single-use approval consumption reference ledger;
+- concurrent approval-consumer contention tests;
+- effect prepare/commit/replay/unknown-state reference ledger;
+- idempotency-digest collision rejection;
+- delegation capability ceiling and scope validation;
+- trust-promotion path validation;
+- hash-linked causal-chain verification and tamper detection;
+- authenticated-principal relational validation;
+- unit/adversarial tests for the implemented design behaviors;
 - design-only validation harness;
 - design-only GitHub Actions validation workflow.
 
-## Not yet authoritative or production-complete
+## Deliberately not claimed yet
 
-- authenticated principal implementation;
-- key management, signing, rotation and revocation;
-- durable causal event store;
-- durable approval consumption store;
-- exactly-once-effect coordinator;
-- broker adapter;
+- cryptographic signature verification service;
+- issuer trust registry and credential revocation service;
+- key creation/rotation/recovery implementation;
+- durable causal event backend;
+- durable approval/effect backend;
+- broker-specific delivery implementation;
 - durable distributed lease/CAS/task/artifact/audit adapters;
 - persistent organization registry;
-- global observability service;
+- global observability aggregation;
 - production sanitized cross-project bridge;
-- A2A/AGNTCY adapters;
+- A2A/AGNTCY transport adapters;
 - live shadow mirroring;
-- benchmark corpus and threshold policy;
+- representative large-scale replay corpus;
+- empirical benchmark results against G2;
 - independent proposer/critic/verifier execution topology;
 - complete OWASP/AgentDojo-style adversarial suite;
 - G3 role package definitions;
 - G3 migration tooling;
 - official G3 framework/protocol version.
 
-## Immediate next gates
+## Next gates
 
-1. Design CI must pass all current draft/schema/test checks.
-2. Add runtime-safe validation for delegation contracts and trust promotions.
-3. Add causal-chain verification including hash predecessor and cycle checks.
-4. Add approval-consumption atomicity model and crash/retry tests.
-5. Add effect coordinator state machine with unknown-commit recovery semantics.
-6. Define benchmark suites for security, reliability, interoperability, recovery, cost and duplicate-work rate.
-7. Add offline replay fixtures from sanitized Message v2 examples.
-8. Run shadow projection across a representative message corpus and quantify missing G3 information.
-9. Prototype at least two durable-state backends against the same semantic contract before selecting infrastructure.
-10. Prototype external interoperability as adapters, not as internal authority replacements.
+1. Keep design CI green as the design evolves.
+2. Build a larger sanitized replay corpus covering every Message v2 kind and failure class.
+3. Produce first benchmark-result records comparing G2 with the G3 candidate semantics.
+4. Implement a black-box durable-adapter conformance suite.
+5. Prototype at least two genuinely multi-process/multi-node-capable persistence candidates against that suite before choosing infrastructure.
+6. Add a cryptographic verification interface with pluggable issuer/revocation/key services; do not hard-code one trust provider into the protocol.
+7. Add live read-only shadow mirroring only after offline replay coverage is representative.
+8. Prototype A2A and AGNTCY mappings as isolated adapters and quantify translation loss.
+9. Expand failure injection around crash-after-effect-commit / before-receipt persistence and unknown-outcome reconciliation.
+10. Run independent adversarial review before any G3 artifact moves into authoritative runtime/package paths.
 
 ## Promotion rule
 
