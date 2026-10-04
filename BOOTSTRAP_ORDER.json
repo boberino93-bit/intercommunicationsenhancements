@@ -11,6 +11,6 @@
     {"order": 7, "id": "bind_global_run_role_and_ready_barrier", "mutation_allowed": true},
     {"order": 8, "id": "load_project_handoffs_queues_forums_and_accepted_state", "mutation_allowed": false},
     {"order": 9, "id": "classify_task_and_bind_work_context", "path": "protocols/task_intake_and_delegation.md", "mutation_allowed": false},
-    {"order": 10, "id": "execute_task_with_per_mutation_scope_lease_and_idempotency_validation", "mutation_allowed": true}
+    {"order": 10, "id": "execute_task_with_per_mutation_scope_validation", "mutation_allowed": true, "additional_guards": ["swarm_kernel_global_run_validation", "versioned_lease_validation", "idempotency_validation", "manager_backpressure", "circuit_breaker"]}
   ]
 }
