@@ -47,6 +47,7 @@ def run_python_checks() -> list[str]:
         "test_ipg3_reference_state.py",
         "test_ipg3_identity_validators.py",
         "test_durable_adapters.py",
+        "test_ipg3_evolution_engine.py",
         "shadow_replay.py",
     ):
         completed = subprocess.run([sys.executable, name], cwd=ROOT, capture_output=True, text=True)
@@ -66,7 +67,7 @@ def main() -> int:
             print(f"- {failure}")
         return 1
     print("IPG3 DESIGN VALIDATION: PASS")
-    print(f"Validated {len(list(ROOT.glob('*.draft.schema.json')))} draft schemas plus shadow, relational, identity, atomic-state, durable-adapter, and replay checks.")
+    print(f"Validated {len(list(ROOT.glob('*.draft.schema.json')))} draft schemas plus shadow, relational, identity, atomic-state, durable-adapter, recursive-evolution, and replay checks.")
     print("Confirmed design/ remains outside authoritative deployment dependency closure.")
     return 0
 
