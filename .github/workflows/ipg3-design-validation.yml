@@ -18,12 +18,28 @@ permissions:
 jobs:
   validate-design:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: ipg3
+          POSTGRES_PASSWORD: ipg3
+          POSTGRES_DB: ipg3
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ipg3 -d ipg3"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      IPG3_POSTGRES_DSN: postgresql://ipg3:ipg3@localhost:5432/ipg3
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Install design validation dependency
-        run: python -m pip install --disable-pip-version-check jsonschema
-      - name: Validate IPG3 drafts
+      - name: Install design validation dependencies
+        run: python -m pip install --disable-pip-version-check jsonschema "psycopg[binary]"
+      - name: Validate IPG3 drafts and durable adapters
         run: python design/validate_ipg3.py
