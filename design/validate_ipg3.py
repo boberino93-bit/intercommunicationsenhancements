@@ -39,9 +39,14 @@ def validate_isolation() -> list[str]:
     return failures
 
 
-def run_unittests() -> list[str]:
+def run_python_checks() -> list[str]:
     failures = []
-    for name in ("test_shadow_projection.py", "test_ipg3_validators.py", "test_ipg3_reference_state.py"):
+    for name in (
+        "test_shadow_projection.py",
+        "test_ipg3_validators.py",
+        "test_ipg3_reference_state.py",
+        "shadow_replay.py",
+    ):
         completed = subprocess.run([sys.executable, name], cwd=ROOT, capture_output=True, text=True)
         if completed.returncode != 0:
             failures.append(f"{name} failed:\n{completed.stdout}\n{completed.stderr}")
@@ -52,14 +57,14 @@ def main() -> int:
     failures = []
     failures.extend(validate_json_schemas())
     failures.extend(validate_isolation())
-    failures.extend(run_unittests())
+    failures.extend(run_python_checks())
     if failures:
         print("IPG3 DESIGN VALIDATION: FAIL")
         for failure in failures:
             print(f"- {failure}")
         return 1
     print("IPG3 DESIGN VALIDATION: PASS")
-    print(f"Validated {len(list(ROOT.glob('*.draft.schema.json')))} draft schemas plus shadow, relational, and atomic-state tests.")
+    print(f"Validated {len(list(ROOT.glob('*.draft.schema.json')))} draft schemas plus shadow, relational, atomic-state, and replay checks.")
     print("Confirmed design/ remains outside authoritative deployment dependency closure.")
     return 0
 
