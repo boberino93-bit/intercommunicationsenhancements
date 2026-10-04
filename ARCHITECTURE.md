@@ -36,7 +36,9 @@ Collision-sensitive work uses project-qualified expiring leases owned by a speci
 
 Projects have independent `ACTIVE`, `DRAINING`, and `PAUSED` lifecycle state. Pausing one project does not stop unrelated projects.
 
-The current registries are thread-safe in-process references. A distributed adapter is conformant only if it preserves equivalent atomicity, ownership, expiry/recovery and CAS semantics; otherwise it must fail closed.
+`DurableRecordBackend` defines the durable create/read/CAS/versioned-delete/list contract. `SQLiteRecordBackend` is the first crash-durable reference implementation: it uses transactional project-qualified records, WAL, FULL synchronous persistence, deterministic JSON checksums and schema-version fencing. `DurableVersionedStateStore` and `DurableLeaseRegistry` preserve the existing bound-session authorization, execution-instance ownership, expiry/recovery and CAS semantics across process restarts. Their tests exercise reopen recovery, concurrent writers, competing lease claimants, stale execution instances, cross-project key collisions, tamper detection and concurrent expired-lease reclamation.
+
+The remaining task, artifact, audit, project-registry and delivery registries are thread-safe in-process references. A distributed or multi-node adapter is conformant only if it preserves equivalent atomicity, ownership, expiry/recovery, isolation and CAS semantics; otherwise it must fail closed. The SQLite backend is a single-node durability reference and is not presented as a distributed-consensus service.
 
 ## Cross-project exchange
 
@@ -56,4 +58,4 @@ A revision is release-complete only after `tests -> exact-SHA build -> package v
 
 ## Remaining production layers
 
-The alpha still needs durable distributed state adapters, persistent organizational registry/global observability, a full sanitized cross-project bridge, and broker-specific durable acknowledgement transport. Those are future layers, not current enforcement claims.
+The alpha still needs distributed/multi-node durable adapters for the complete registry set, persistent organizational registry/global observability, a full sanitized cross-project bridge, and broker-specific durable acknowledgement transport. Those are future layers, not current enforcement claims.
