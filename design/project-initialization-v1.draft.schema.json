@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "org-agent-mesh/project-initialization/v1-draft",
+  "title": "Project Initialization State v1 Draft",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "project_id",
+    "display_name",
+    "problem_statement",
+    "requested_by",
+    "intent_fingerprint",
+    "phase",
+    "github_repository",
+    "revision"
+  ],
+  "properties": {
+    "schema": {"const": "org-agent-mesh/project-initialization/v1-draft"},
+    "project_id": {"type": "string", "pattern": "^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$"},
+    "display_name": {"type": "string", "minLength": 1},
+    "problem_statement": {"type": "string", "minLength": 1},
+    "requested_by": {"type": "string", "minLength": 1},
+    "intent_fingerprint": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "phase": {
+      "enum": [
+        "NEW",
+        "BOARD_RESERVED",
+        "BOARD_BOOTSTRAPPED",
+        "WAITING_FOR_GITHUB",
+        "GITHUB_VERIFIED",
+        "BOUND",
+        "COMPLETE"
+      ]
+    },
+    "github_repository": {"type": ["string", "null"]},
+    "revision": {"type": "integer", "minimum": 0}
+  }
+}
