@@ -54,7 +54,13 @@ def _parse_utc(value):
 
 def _canonical_json(payload):
     try:
-        return json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+        return json.dumps(
+            payload,
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=False,
+            allow_nan=False,
+        )
     except (TypeError, ValueError) as exc:
         raise TypeError("durable payload must be JSON-serializable") from exc
 
@@ -120,7 +126,9 @@ class SQLiteRecordBackend:
             isolation_level=None,
         )
         connection.execute("PRAGMA foreign_keys = ON")
-        connection.execute("PRAGMA busy_timeout = 5000")
+        connection.execute(
+            f"PRAGMA busy_timeout = {max(1, int(self.timeout_seconds * 1000))}"
+        )
         connection.execute("PRAGMA synchronous = FULL")
         return connection
 
@@ -183,13 +191,15 @@ class SQLiteRecordBackend:
             raise CorruptDurableRecord("persisted record identity is invalid") from exc
         if not isinstance(version, int) or version < 1:
             raise CorruptDurableRecord("persisted record version is invalid")
+        if not isinstance(payload_json, str) or not isinstance(digest, str):
+            raise CorruptDurableRecord("persisted payload or checksum has invalid type")
         if _digest(payload_json) != digest:
             raise CorruptDurableRecord(
                 f"checksum mismatch for {project_id!r}/{namespace!r}/{resource_id!r}"
             )
         try:
             payload = json.loads(payload_json)
-        except json.JSONDecodeError as exc:
+        except (json.JSONDecodeError, TypeError) as exc:
             raise CorruptDurableRecord("persisted payload JSON is invalid") from exc
         _parse_utc(updated_at)
         return DurableRecord(
@@ -200,6 +210,18 @@ class SQLiteRecordBackend:
             payload,
             updated_at,
         )
+
+    @staticmethod
+    def _select_row(connection, namespace, project_id, resource_id):
+        return connection.execute(
+            """
+            SELECT namespace, project_id, resource_id, version,
+                   payload_json, payload_sha256, updated_at_utc
+            FROM mesh_records
+            WHERE namespace = ? AND project_id = ? AND resource_id = ?
+            """,
+            (namespace, project_id, resource_id),
+        ).fetchone()
 
     def create(self, namespace, project_id, resource_id, payload, *, now=None):
         namespace = _namespace(namespace)
@@ -246,16 +268,9 @@ class SQLiteRecordBackend:
         resource_id = require_resource_id(resource_id)
         connection = self._connect()
         try:
-            row = connection.execute(
-                """
-                SELECT namespace, project_id, resource_id, version,
-                       payload_json, payload_sha256, updated_at_utc
-                FROM mesh_records
-                WHERE namespace = ? AND project_id = ? AND resource_id = ?
-                """,
-                (namespace, project_id, resource_id),
-            ).fetchone()
-            return self._decode(row)
+            return self._decode(
+                self._select_row(connection, namespace, project_id, resource_id)
+            )
         finally:
             connection.close()
 
@@ -279,6 +294,15 @@ class SQLiteRecordBackend:
         connection = self._connect()
         try:
             connection.execute("BEGIN IMMEDIATE")
+            current = self._decode(
+                self._select_row(connection, namespace, project_id, resource_id)
+            )
+            if current is None:
+                raise StaleVersion("durable record does not exist")
+            if current.version != expected_version:
+                raise StaleVersion(
+                    f"stale durable version: expected {expected_version}, current {current.version}"
+                )
             cursor = connection.execute(
                 """
                 UPDATE mesh_records
@@ -300,18 +324,7 @@ class SQLiteRecordBackend:
                 ),
             )
             if cursor.rowcount != 1:
-                current = connection.execute(
-                    """
-                    SELECT version FROM mesh_records
-                    WHERE namespace = ? AND project_id = ? AND resource_id = ?
-                    """,
-                    (namespace, project_id, resource_id),
-                ).fetchone()
-                if current is None:
-                    raise StaleVersion("durable record does not exist")
-                raise StaleVersion(
-                    f"stale durable version: expected {expected_version}, current {current[0]}"
-                )
+                raise StaleVersion("durable record changed during compare-and-set")
             connection.execute("COMMIT")
             return DurableRecord(
                 namespace,
@@ -337,6 +350,16 @@ class SQLiteRecordBackend:
         connection = self._connect()
         try:
             connection.execute("BEGIN IMMEDIATE")
+            current = self._decode(
+                self._select_row(connection, namespace, project_id, resource_id)
+            )
+            if current is None:
+                connection.execute("ROLLBACK")
+                return False
+            if current.version != expected_version:
+                raise StaleVersion(
+                    f"stale durable version: expected {expected_version}, current {current.version}"
+                )
             cursor = connection.execute(
                 """
                 DELETE FROM mesh_records
@@ -346,19 +369,7 @@ class SQLiteRecordBackend:
                 (namespace, project_id, resource_id, expected_version),
             )
             if cursor.rowcount != 1:
-                current = connection.execute(
-                    """
-                    SELECT version FROM mesh_records
-                    WHERE namespace = ? AND project_id = ? AND resource_id = ?
-                    """,
-                    (namespace, project_id, resource_id),
-                ).fetchone()
-                if current is None:
-                    connection.execute("ROLLBACK")
-                    return False
-                raise StaleVersion(
-                    f"stale durable version: expected {expected_version}, current {current[0]}"
-                )
+                raise StaleVersion("durable record changed during versioned delete")
             connection.execute("COMMIT")
             return True
         except Exception:
