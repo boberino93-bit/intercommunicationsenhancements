@@ -31,16 +31,16 @@ jobs:
             tests.test_normalization_acceptance
 
       - name: Build role release set for structural review
-        run: python tools/build_agent_packages.py --source-revision "$GITHUB_SHA" --out dist-manager
+        run: python tools/build_agent_packages.py --source-revision "$GITHUB_SHA" --out dist
 
       - name: Verify role package dependency closure
-        run: python tools/verify_agent_packages.py --dist dist-manager
+        run: python tools/verify_agent_packages.py
 
       - name: Rebuild for structural reproducibility review
         run: python tools/build_agent_packages.py --source-revision "$GITHUB_SHA" --out dist-manager-repro
 
       - name: Verify deterministic reproduction
-        run: python tools/check_reproducible_packages.py dist-manager dist-manager-repro
+        run: python tools/check_reproducible_packages.py dist dist-manager-repro
 
       - name: Emit exact-SHA MANAGER review evidence
         run: |
