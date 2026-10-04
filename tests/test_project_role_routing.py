@@ -2,7 +2,12 @@ import json
 from pathlib import Path
 import unittest
 
-from org_agent_mesh.project_role_routing import RoutingError, resolve_route, validate_registry
+from org_agent_mesh.project_role_routing import (
+    RoutingError,
+    resolve_route,
+    validate_local_contract,
+    validate_registry,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -22,6 +27,17 @@ REGISTRY = {
         }
     },
 }
+LOCAL_CONTRACT = {
+    "schema": "org-agent-mesh/local-agent-bootstrap/v1",
+    "routing_contract_version": "1.1.0",
+    "mode": "FAIL_CLOSED",
+    "project_id": "alpha",
+    "repository": {"full_name": "owner/alpha", "id": 101},
+    "forum": {"namespace": "alpha::messages", "preferred_path": ".interagent/messages"},
+    "artifact_namespace": "alpha::artifacts",
+    "handoff_paths": [".interagent/messages", "PROJECT_MANIFEST.json"],
+    "authorized_roles": ["primary", "manager", "research"],
+}
 
 
 class ProjectRoleRoutingTests(unittest.TestCase):
@@ -38,6 +54,15 @@ class ProjectRoleRoutingTests(unittest.TestCase):
         self.assertEqual(route.forum_namespace, "alpha::messages")
         self.assertEqual(route.local_contract_path, "AGENT_BOOTSTRAP.json")
         self.assertIn("IDENTITY RESOLVED: project=alpha; role=research", route.acknowledgement("handoff-7"))
+
+    def test_local_contract_matches_registry(self):
+        validate_local_contract(REGISTRY, project_id="alpha", contract=LOCAL_CONTRACT)
+
+    def test_local_contract_drift_fails_closed(self):
+        contract = json.loads(json.dumps(LOCAL_CONTRACT))
+        contract["forum"]["namespace"] = "beta::messages"
+        with self.assertRaisesRegex(RoutingError, "local_contract_forum_mismatch"):
+            validate_local_contract(REGISTRY, project_id="alpha", contract=contract)
 
     def test_unknown_project_fails_closed(self):
         with self.assertRaisesRegex(RoutingError, "unknown_project"):
@@ -84,13 +109,19 @@ class ProjectRoleRoutingTests(unittest.TestCase):
         with self.assertRaisesRegex(RoutingError, "unsafe_handoff_path"):
             validate_registry(registry)
 
-    def test_real_registry_validates(self):
+    def test_real_registry_and_local_contract_validate(self):
         registry = json.loads((ROOT / "PROJECT_ROLE_ROUTING_REGISTRY.json").read_text())
         validate_registry(registry)
         for project in registry["projects"].values():
             self.assertIsInstance(project.get("repository_id"), int)
             self.assertEqual(project.get("local_contract_path"), "AGENT_BOOTSTRAP.json")
             self.assertEqual(project.get("routing_contract_version"), "1.1.0")
+        local_contract = json.loads((ROOT / "AGENT_BOOTSTRAP.json").read_text())
+        validate_local_contract(
+            registry,
+            project_id="intercommunicationsenhancements",
+            contract=local_contract,
+        )
 
     def test_routing_contract_is_dependency_closed_for_role_packages(self):
         dependency_map = json.loads((ROOT / "packaging" / "agent_package_dependencies.json").read_text())
