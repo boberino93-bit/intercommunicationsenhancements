@@ -3,6 +3,8 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Mapping
 
+from .control_plane import StaleVersion, require_active_session
+from .durable_backend import CorruptDurableRecord, DurableRecordBackend
 from .project_scope import (
     ProjectScopeError,
     require_project_id,
@@ -141,3 +143,117 @@ def validate_sanitized_project_summary(summary: Mapping):
         if not isinstance(summary[field], str) or not summary[field].strip():
             raise ValueError(f"{field} must be a non-empty string")
     return True
+
+
+class SanitizedEcosystemRegistry:
+    """Project-owned copy-by-value registry of approved sanitized peer summaries.
+
+    The durable record is owned by ``target_project_id`` (the local coordinator
+    project). The summarized peer project remains data inside that local record.
+    This never writes to the peer project and therefore does not grant cross-project
+    mutation authority. The caller must obtain peer data through an independently
+    authorized read/export path before publishing it here.
+    """
+
+    NAMESPACE = "ecosystem-summaries"
+
+    def __init__(self, backend):
+        if not isinstance(backend, DurableRecordBackend):
+            raise TypeError("backend must implement DurableRecordBackend")
+        self.backend = backend
+
+    @staticmethod
+    def _resource_id(peer_project_id):
+        return require_resource_id(f"project-{require_project_id(peer_project_id)}")
+
+    @staticmethod
+    def _verify(record, peer_project_id):
+        if record is None:
+            return None
+        payload = record.payload
+        if not isinstance(payload, dict):
+            raise CorruptDurableRecord("ecosystem summary payload must be an object")
+        summary = payload.get("summary")
+        validate_sanitized_project_summary(summary)
+        if summary["project_id"] != peer_project_id:
+            raise CorruptDurableRecord("ecosystem summary peer identity mismatch")
+        if not payload.get("source_exchange_ref") or not payload.get("recorded_by_agent_instance_id"):
+            raise CorruptDurableRecord("ecosystem summary provenance is incomplete")
+        return record
+
+    def read(self, local_project_id, peer_project_id):
+        local_project_id = require_project_id(local_project_id)
+        peer_project_id = require_project_id(peer_project_id)
+        record = self.backend.read(
+            self.NAMESPACE,
+            local_project_id,
+            self._resource_id(peer_project_id),
+        )
+        return self._verify(record, peer_project_id)
+
+    def publish(
+        self,
+        session,
+        target_project_id,
+        summary,
+        *,
+        source_exchange_ref,
+        expected_version=None,
+        now=None,
+    ):
+        binding = require_active_session(
+            session,
+            target_project_id,
+            operation="sanitized ecosystem summary publication",
+            capability="WRITE_ACCEPTED_STATE",
+        )
+        validate_sanitized_project_summary(summary)
+        if not source_exchange_ref:
+            raise ValueError("source_exchange_ref is required")
+        peer_project_id = summary["project_id"]
+        resource_id = self._resource_id(peer_project_id)
+        payload = {
+            "summary": dict(summary),
+            "source_exchange_ref": str(source_exchange_ref),
+            "recorded_by_agent_instance_id": binding.agent_instance_id,
+        }
+        current = self.backend.read(self.NAMESPACE, target_project_id, resource_id)
+        if current is None:
+            if expected_version not in (None, 0):
+                raise StaleVersion("ecosystem summary does not yet exist")
+            record = self.backend.create(
+                self.NAMESPACE,
+                target_project_id,
+                resource_id,
+                payload,
+                now=now,
+            )
+            return self._verify(record, peer_project_id)
+        verified = self._verify(current, peer_project_id)
+        if verified.payload == payload:
+            return verified
+        if expected_version is None:
+            raise StaleVersion("expected_version is required to replace ecosystem summary")
+        if current.version != expected_version:
+            raise StaleVersion(
+                f"stale ecosystem summary version: expected {expected_version}, current {current.version}"
+            )
+        record = self.backend.compare_and_set(
+            self.NAMESPACE,
+            target_project_id,
+            resource_id,
+            expected_version=expected_version,
+            payload=payload,
+            now=now,
+        )
+        return self._verify(record, peer_project_id)
+
+    def list_local(self, local_project_id):
+        local_project_id = require_project_id(local_project_id)
+        records = []
+        for record in self.backend.list_records(self.NAMESPACE, project_id=local_project_id):
+            payload = record.payload
+            if not isinstance(payload, dict) or not isinstance(payload.get("summary"), dict):
+                raise CorruptDurableRecord("ecosystem registry contains malformed record")
+            records.append(self._verify(record, payload["summary"].get("project_id")))
+        return records
