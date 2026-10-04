@@ -16,7 +16,8 @@
   "steps": [
     {
       "order": 1,
-      "id": "resolve_launch_origin_and_validate_project_intent",
+      "id": "validate_current_human_project_intent",
+      "step_scope": "resolve_launch_origin_and_validate_project_intent",
       "active_project_context_policy": "USE_AS_STRONG_ROUTING_EVIDENCE_UNLESS_EXPLICIT_TARGET_CONFLICTS",
       "paths": ["protocols/scheduled_agent_launch.md", "protocols/universal_task_routing.md"],
       "launch_modes": {
