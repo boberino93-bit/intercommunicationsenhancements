@@ -1,0 +1,33 @@
+{
+  "schema": "org-agent-mesh/local-directive/v1",
+  "directive_id": "2026-10-04-communication-awareness-v1.3",
+  "project_id": "intercommunicationsenhancements",
+  "status": "ACTIVE",
+  "scope": "FRAMEWORK_AND_REGISTERED_PROJECT_BOOTSTRAP",
+  "lesson": "An agent must distinguish the authoritative project forum from the communication sources it can actually observe in the current execution.",
+  "required_order": [
+    "resolve_project_and_role",
+    "resolve_authoritative_forum",
+    "inspect_direct_runtime_forum_access",
+    "inspect_registered_repository_view",
+    "inspect_registered_handoffs",
+    "classify_visibility",
+    "emit_communications_assessment",
+    "answer_visibility_questions_without_overclaiming"
+  ],
+  "visibility_classes": [
+    "DIRECT",
+    "LIVE_MIRROR",
+    "STALE_MIRROR",
+    "SNAPSHOT_ONLY",
+    "HANDOFF_ONLY",
+    "NONE",
+    "CONFLICT"
+  ],
+  "default_visibility_claim": "PARTIAL_UNLESS_PROVEN",
+  "full_visibility_scope": "REGISTERED_PROJECT_FORUM_ONLY",
+  "conflict_policy": "STOP_BEFORE_MUTATION",
+  "cross_project_write_default": "DENY",
+  "package_propagation_required": true,
+  "routing_contract_version": "1.3.0"
+}
