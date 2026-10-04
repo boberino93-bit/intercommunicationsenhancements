@@ -8,7 +8,8 @@
     "class": "ProjectInitializer",
     "begin_operation": "begin",
     "resume_operation": "resume",
-    "github_binding_operation": "bind_github"
+    "github_binding_operation": "bind_github",
+    "primary_completion_operation": "complete_primary_bootstrap"
   },
   "internal_coordination_plane": {
     "required": true,
@@ -41,17 +42,34 @@
     },
     "user_prompt": "Please provide the GitHub repository for this project. It must be publicly shared and accessible through the GitHub integration connected to ChatGPT.",
     "binding_must_not_occur_before_internal_namespace": true,
-    "silent_rebind_after_completion": false
+    "binding_phase": "BOUND",
+    "silent_rebind_after_binding": false
+  },
+  "primary_initialization": {
+    "required_before_complete": true,
+    "result_type": "PrimaryBootstrapResult",
+    "required_outputs": [
+      "source_of_truth",
+      "workstreams",
+      "assistance_required",
+      "research_agents",
+      "manager_agents",
+      "rationale"
+    ],
+    "swarm_policy": "design/ADAPTIVE_SWARM_REGULATION.md"
   },
   "completion": {
     "required_phase": "COMPLETE",
-    "next_action": "START_PRIMARY_EXECUTION",
+    "next_action": "EXECUTE_PROJECT_WORK",
     "primary_handoff": "handoffs/primary-bootstrap.json",
-    "next_protocol": "design/ADAPTIVE_SWARM_REGULATION.md"
+    "primary_result": "bootstrap/primary-initialization.json",
+    "initial_swarm_assessment": "swarm/initial-assessment.json"
   },
   "recovery": {
     "interruptible": true,
     "same_intent_resume_is_idempotent": true,
+    "same_binding_resume_is_idempotent": true,
+    "same_primary_result_resume_is_idempotent": true,
     "conflicting_intent_fails_closed": true,
     "ambiguous_existing_namespace_fails_closed": true
   },
