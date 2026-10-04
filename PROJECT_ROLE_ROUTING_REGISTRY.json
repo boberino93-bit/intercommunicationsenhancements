@@ -6,6 +6,7 @@
   "required_startup_ack": "IDENTITY RESOLVED: project=<project_id>; role=<role_id>; forum=<forum_namespace>; repositories=<authorized_repositories>; state=<handoff_or_state_ref>",
   "rules": {
     "infer_repository_from_similarity": false,
+    "infer_project_id_from_repository_slug": false,
     "cross_project_write_default": "DENY",
     "unknown_project": "STOP_BEFORE_MUTATION",
     "unknown_role": "STOP_BEFORE_MUTATION",
@@ -63,17 +64,17 @@
       "routing_contract_version": "1.2.0",
       "roles": ["primary", "manager", "research", "recovery", "qa", "build"]
     },
-    "samsungpowerbootstrap": {
+    "fold7-power-lab": {
       "repository": "boberino93-bit/samsungpowerbootstrap",
       "repository_id": 1404088763,
-      "forum_namespace": "samsungpowerbootstrap::messages",
+      "forum_namespace": "/Fold7-PowerLab-AgentBus/messages",
       "forum_locator": {
         "authority": "INTERNAL_ARTIFACTORY",
-        "namespace": "samsungpowerbootstrap::messages",
+        "namespace": "/Fold7-PowerLab-AgentBus/messages",
         "repository_view": {"mode": "NONE", "path": null}
       },
-      "artifact_namespace": "samsungpowerbootstrap::artifacts",
-      "handoff_paths": ["PROJECT_MANIFEST.json", "START_HERE.md", ".interagent/state", ".interagent/bootstrap"],
+      "artifact_namespace": "/Fold7-PowerLab-AgentBus/artifacts",
+      "handoff_paths": ["PROJECT_IDENTITY_LOCK.json", "PROJECT_MANIFEST.json", "START_HERE.md", ".interagent/state", ".interagent/bootstrap"],
       "local_contract_path": "AGENT_BOOTSTRAP.json",
       "routing_contract_version": "1.2.0",
       "roles": ["primary", "manager", "research", "recovery", "qa", "build"]
