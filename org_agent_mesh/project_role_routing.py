@@ -42,6 +42,62 @@ def _safe_repo_path(value: Any, *, field: str) -> str:
     return value
 
 
+def _parse_contract_version(value: Any) -> tuple[int, int, int]:
+    if not isinstance(value, str) or not value:
+        raise RoutingError("invalid_routing_contract_version")
+    parts = value.split(".")
+    if len(parts) != 3:
+        raise RoutingError("invalid_routing_contract_version")
+    try:
+        parsed = tuple(int(part) for part in parts)
+    except ValueError as exc:
+        raise RoutingError("invalid_routing_contract_version") from exc
+    if any(part < 0 for part in parsed):
+        raise RoutingError("invalid_routing_contract_version")
+    return parsed
+
+
+def _validate_communication_awareness(registry: Mapping[str, Any]) -> None:
+    version = _parse_contract_version(registry.get("routing_contract_version", "1.0.0"))
+    awareness = registry.get("communication_awareness")
+    if version < (1, 3, 0):
+        if awareness is not None and not isinstance(awareness, Mapping):
+            raise RoutingError("invalid_communication_awareness")
+        return
+
+    if not isinstance(awareness, Mapping):
+        raise RoutingError("missing_communication_awareness")
+    repository = awareness.get("protocol_repository")
+    if not isinstance(repository, str) or repository.count("/") != 1:
+        raise RoutingError("invalid_communication_awareness_repository")
+    _safe_repo_path(awareness.get("protocol_path"), field="communication_awareness_protocol_path")
+    if awareness.get("required_on_startup") is not True:
+        raise RoutingError("communication_awareness_startup_not_required")
+    if awareness.get("required_on_visibility_question") is not True:
+        raise RoutingError("communication_awareness_visibility_question_not_required")
+    if awareness.get("default_visibility_claim") != "PARTIAL_UNLESS_PROVEN":
+        raise RoutingError("unsafe_default_visibility_claim")
+    required = awareness.get("full_visibility_requires")
+    expected = {
+        "DIRECT_INTERNAL_ARTIFACTORY_ACCESS",
+        "PROJECT_NAMESPACE_MATCH",
+        "FULL_SCOPE_PROVEN",
+    }
+    if not isinstance(required, list) or set(required) != expected or len(required) != len(expected):
+        raise RoutingError("invalid_full_visibility_requirements")
+    template = awareness.get("assessment_ack_template")
+    if not isinstance(template, str) or not template.startswith("COMMUNICATIONS ASSESSED:"):
+        raise RoutingError("invalid_communication_assessment_template")
+
+    rules = registry.get("rules")
+    if not isinstance(rules, Mapping):
+        raise RoutingError("missing_registry_rules")
+    if rules.get("communication_assessment_before_visibility_claim") is not True:
+        raise RoutingError("communication_assessment_guard_disabled")
+    if rules.get("never_claim_all_communications_from_mirror_snapshot_or_handoff") is not True:
+        raise RoutingError("communication_overclaim_guard_disabled")
+
+
 def _validate_forum_locator(project: Mapping[str, Any], *, project_id: str) -> None:
     namespace = project.get("forum_namespace")
     locator = project.get("forum_locator")
@@ -71,6 +127,8 @@ def validate_registry(registry: Mapping[str, Any]) -> None:
         raise RoutingError("registry_not_fail_closed")
     if registry.get("schema") != "org-agent-mesh/project-role-routing-registry/v1":
         raise RoutingError("unsupported_registry_schema")
+
+    _validate_communication_awareness(registry)
 
     projects = registry.get("projects")
     if not isinstance(projects, Mapping) or not projects:
@@ -137,8 +195,10 @@ def validate_registry(registry: Mapping[str, Any]) -> None:
             _safe_repo_path(local_contract_path, field="local_contract_path")
 
         contract_version = project.get("routing_contract_version")
-        if contract_version is not None and (not isinstance(contract_version, str) or not contract_version):
-            raise RoutingError("invalid_routing_contract_version")
+        project_version = _parse_contract_version(contract_version)
+        registry_version = _parse_contract_version(registry.get("routing_contract_version", "1.0.0"))
+        if project_version != registry_version:
+            raise RoutingError("project_routing_contract_version_mismatch")
 
 
 def validate_local_contract(
@@ -187,6 +247,26 @@ def validate_local_contract(
         raise RoutingError("local_contract_handoff_mismatch")
     if contract.get("authorized_roles") != project.get("roles"):
         raise RoutingError("local_contract_roles_mismatch")
+
+    if _parse_contract_version(project.get("routing_contract_version")) >= (1, 3, 0):
+        if contract.get("communication_awareness") != registry.get("communication_awareness"):
+            raise RoutingError("local_contract_communication_awareness_mismatch")
+        rules = contract.get("rules")
+        if not isinstance(rules, Mapping):
+            raise RoutingError("missing_local_contract_rules")
+        required_rules = {
+            "identity_lock_first": True,
+            "forum_authority_separate_from_repository_view": True,
+            "forum_before_mutation": True,
+            "handoff_before_mutation": True,
+            "communication_assessment_before_visibility_claim": True,
+            "never_claim_all_communications_from_mirror_snapshot_or_handoff": True,
+            "cross_project_write_default": "DENY",
+            "identity_conflict": "STOP_BEFORE_MUTATION",
+        }
+        for key, expected in required_rules.items():
+            if rules.get(key) != expected:
+                raise RoutingError(f"unsafe_local_rule_{key}")
 
 
 def resolve_route(
