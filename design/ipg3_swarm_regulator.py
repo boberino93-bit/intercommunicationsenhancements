@@ -4,9 +4,9 @@ This module has no authority to spawn agents. It produces recommendations/alloca
 that require an ACTIVE Primary execution instance to authorize through the control plane.
 
 Three policies are retained for field comparison:
-- v1: naive breadth sizing (baseline candidate)
-- v2: dependency-aware sizing and reduced manager overhead
-- v3: risk/verification cells, diminishing returns, and live resize hysteresis
+- v1: naive breadth sizing and score-only escalation (baseline)
+- v2: structural escalation + dependency-aware sizing + lower manager overhead
+- v3: verification cells, diminishing returns, and live resize hysteresis
 """
 
 from __future__ import annotations
@@ -62,7 +62,7 @@ class Allocation:
 
 
 def assistance_score(a: ResearchAssessment) -> tuple[float, tuple[str, ...]]:
-    """Evidence-weighted trigger score. Low confidence alone is insufficient."""
+    """Evidence-weighted signal score. The policy decides how signals become escalation."""
     score = 0.0
     reasons: list[str] = []
     if a.confidence < 0.60:
@@ -92,17 +92,36 @@ def assistance_score(a: ResearchAssessment) -> tuple[float, tuple[str, ...]]:
     if a.novelty >= 0.75:
         score += 0.45
         reasons.append("high-novelty")
-    # Require either a meaningful combined signal or a hard trigger.
     hard_trigger = a.tool_gap or (a.conflicting_evidence and a.verification_needed)
     return score, tuple(reasons + (["hard-trigger"] if hard_trigger else []))
 
 
-def should_escalate(a: ResearchAssessment) -> tuple[bool, float, tuple[str, ...]]:
+def should_escalate_v1(a: ResearchAssessment) -> tuple[bool, float, tuple[str, ...]]:
+    """Baseline trigger retained so field tests can measure later improvements."""
     score, reasons = assistance_score(a)
     hard_trigger = "hard-trigger" in reasons
-    # Avoid escalating on a first weak attempt unless a hard trigger exists.
     attempt_gate = a.attempts >= 2 or a.stall_count >= 2 or hard_trigger
     return bool((score >= 1.55 and attempt_gate) or hard_trigger), score, reasons
+
+
+def should_escalate(a: ResearchAssessment) -> tuple[bool, float, tuple[str, ...]]:
+    """Optimized trigger: score plus structural evidence of decomposition/stall.
+
+    Structural triggers fix two baseline misses discovered by field testing:
+    sustained local stall and a broad genuinely parallel task can justify assistance
+    even when no single weighted signal crosses the aggregate threshold.
+    """
+    score, reasons = assistance_score(a)
+    hard_trigger = "hard-trigger" in reasons
+    sustained_stall = a.stall_count >= 3 and a.attempts >= 2 and a.confidence < 0.60
+    broad_parallel = a.independent_workstreams >= 5 and a.attempts >= 2 and a.confidence < 0.65 and a.dependency_density < 0.60
+    attempt_gate = a.attempts >= 2 or a.stall_count >= 2 or hard_trigger
+    extra = []
+    if sustained_stall:
+        extra.append("structural-stall-trigger")
+    if broad_parallel:
+        extra.append("structural-parallel-trigger")
+    return bool((score >= 1.55 and attempt_gate) or hard_trigger or sustained_stall or broad_parallel), score, tuple(reasons + tuple(extra))
 
 
 def _topology(research: int, managers: int) -> str:
@@ -116,8 +135,8 @@ def _topology(research: int, managers: int) -> str:
 
 
 def allocate_v1(a: ResearchAssessment) -> Allocation:
-    """Naive first implementation: size mostly from breadth and verify/risk boosts."""
-    escalate, score, reasons = should_escalate(a)
+    """Naive first implementation: breadth sizing and researcher-count manager ratio."""
+    escalate, score, reasons = should_escalate_v1(a)
     if not escalate:
         return Allocation(False, 0, 0, "REJECTED", score, reasons)
     research = a.independent_workstreams
@@ -130,7 +149,7 @@ def allocate_v1(a: ResearchAssessment) -> Allocation:
 
 
 def allocate_v2(a: ResearchAssessment) -> Allocation:
-    """First optimization: account for sequential dependencies and manager overhead."""
+    """First optimization: structural triggers, dependency-aware sizing, lower manager overhead."""
     escalate, score, reasons = should_escalate(a)
     if not escalate:
         return Allocation(False, 0, 0, "REJECTED", score, reasons)
@@ -150,16 +169,14 @@ def allocate_v2(a: ResearchAssessment) -> Allocation:
 
 
 def allocate_v3(a: ResearchAssessment) -> Allocation:
-    """Second optimization: independent verification cells + diminishing-return caps."""
+    """Second optimization: risk-targeted verification cells and diminishing-return caps."""
     escalate, score, reasons = should_escalate(a)
     if not escalate:
         return Allocation(False, 0, 0, "REJECTED", score, reasons)
 
-    # Parallel capacity should follow executable fronts, not question count.
     effective_fronts = max(1, ceil(a.independent_workstreams * (1.0 - 0.85 * a.dependency_density)))
     research = effective_fronts
 
-    # Add independent verification only where epistemic/risk signals justify it.
     verification_pressure = (
         int(a.verification_needed)
         + int(a.conflicting_evidence)
@@ -171,17 +188,16 @@ def allocate_v3(a: ResearchAssessment) -> Allocation:
     if verification_pressure >= 4 and effective_fronts >= 3:
         research += 1
 
-    # Tool gaps require a capable worker, not a large swarm.
     if a.tool_gap and effective_fronts == 1:
         research = max(research, 1)
 
-    # Diminishing returns: more than ~2 agents per independent front needs strong cause.
     soft_cap = max(2, effective_fronts * 2)
     research = min(research, soft_cap, 12)
 
-    # Management is driven by coordination/integration, not researcher count alone.
     integration_load = (a.domains - 1) + (1 if a.dependency_density >= 0.45 else 0) + (1 if effective_fronts >= 5 else 0)
     managers = 0
+    # A manager is coordination capacity, not a reward for risk. Small expert/verification
+    # cells remain Primary-direct even when the consequence is high.
     if research >= 4 and integration_load >= 2:
         managers = 1
     if research >= 8 and integration_load >= 4:
@@ -212,12 +228,10 @@ def resize_v3(current: Allocation, observed: dict) -> Allocation:
     stalled = int(observed.get("stalled_cycles", 0))
     verification_gap = bool(observed.get("verification_gap", False))
 
-    # Scale up only on sustained unmet parallel demand or verification need.
     if (unresolved >= 2 and stalled >= 2) or verification_gap:
         add = min(2, max(1, unresolved))
         research = min(12, research + add)
         reasons.append("scale-up-unresolved-demand")
-    # Scale down on clear oversupply; hysteresis avoids flapping.
     elif duplicate >= 0.35 or idle >= 0.40:
         remove = 2 if max(duplicate, idle) >= 0.60 else 1
         research = max(1, research - remove)
