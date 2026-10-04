@@ -16,6 +16,7 @@
   "shared_patterns": [
     "PROJECT_IDENTITY_LOCK.json",
     "PROJECT_ROLE_ROUTING_REGISTRY.json",
+    "AGENT_BOOTSTRAP.json",
     "BOOTSTRAP_ORDER.json",
     "bootstrap/IDENTITY_GATE.md",
     "bootstrap/PROJECT_ROLE_DISCOVERY.md",
