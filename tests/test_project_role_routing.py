@@ -96,6 +96,7 @@ class ProjectRoleRoutingTests(unittest.TestCase):
         dependency_map = json.loads((ROOT / "packaging" / "agent_package_dependencies.json").read_text())
         shared = set(dependency_map["shared_patterns"])
         self.assertIn("PROJECT_ROLE_ROUTING_REGISTRY.json", shared)
+        self.assertIn("AGENT_BOOTSTRAP.json", shared)
         self.assertIn("bootstrap/PROJECT_ROLE_DISCOVERY.md", shared)
         self.assertIn("bootstrap/IDENTITY_GATE.md", shared)
         self.assertIn("org_agent_mesh/*.py", shared)
