@@ -1,0 +1,257 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "org-agent-mesh/message/v3-draft",
+  "title": "Organization Agent Mesh Message v3 Draft",
+  "description": "Non-authoritative IPG3 design schema. This file is intentionally outside schemas/ and protocols/ so it is not included in current deployment packages.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "protocol_version",
+    "protocol_features",
+    "message_id",
+    "project_id",
+    "channel_id",
+    "created_at_utc",
+    "expires_at_utc",
+    "sender",
+    "recipients",
+    "class",
+    "kind",
+    "priority",
+    "task",
+    "causality",
+    "delivery",
+    "trust",
+    "policy",
+    "payload",
+    "integrity"
+  ],
+  "properties": {
+    "schema": {
+      "const": "org-agent-mesh/message/v3-draft"
+    },
+    "protocol_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "protocol_features": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Z0-9_]+$"
+      },
+      "uniqueItems": true
+    },
+    "message_id": {
+      "$ref": "#/$defs/resourceId"
+    },
+    "project_id": {
+      "$ref": "#/$defs/projectId"
+    },
+    "channel_id": {
+      "$ref": "#/$defs/resourceId"
+    },
+    "created_at_utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expires_at_utc": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "sender": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["agent_id", "agent_instance_id", "role", "principal_id"],
+      "properties": {
+        "agent_id": {"type": "string", "minLength": 1},
+        "agent_instance_id": {"type": "string", "minLength": 1},
+        "role": {"type": "string", "minLength": 1},
+        "principal_id": {"type": ["string", "null"]}
+      }
+    },
+    "recipients": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["type", "id"],
+        "properties": {
+          "type": {
+            "enum": ["AGENT", "ROLE", "SERVICE", "FORUM"]
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "class": {
+      "enum": [
+        "CONTROL",
+        "WORK",
+        "EVIDENCE",
+        "REVIEW",
+        "DECISION",
+        "EFFECT",
+        "SECURITY",
+        "OBSERVABILITY",
+        "EVOLUTION"
+      ]
+    },
+    "kind": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9_]*$"
+    },
+    "priority": {
+      "enum": ["normal", "high", "critical"]
+    },
+    "task": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["task_id", "delegation_contract_id", "approval_id"],
+      "properties": {
+        "task_id": {"type": ["string", "null"]},
+        "delegation_contract_id": {"type": ["string", "null"]},
+        "approval_id": {"type": ["string", "null"]}
+      }
+    },
+    "causality": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "trace_id",
+        "correlation_id",
+        "causation_id",
+        "parent_message_id",
+        "project_event_sequence"
+      ],
+      "properties": {
+        "trace_id": {"type": ["string", "null"]},
+        "correlation_id": {"type": ["string", "null"]},
+        "causation_id": {"type": ["string", "null"]},
+        "parent_message_id": {"type": ["string", "null"]},
+        "project_event_sequence": {"type": ["integer", "null"], "minimum": 0}
+      }
+    },
+    "delivery": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["idempotency_key", "ack_policy", "max_attempts"],
+      "properties": {
+        "idempotency_key": {"$ref": "#/$defs/resourceId"},
+        "ack_policy": {
+          "enum": ["NONE", "RECEIPT", "EXECUTION", "EFFECT_COMMIT"]
+        },
+        "max_attempts": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        }
+      }
+    },
+    "trust": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["trust_class", "provenance_refs"],
+      "properties": {
+        "trust_class": {
+          "enum": [
+            "AUTHORITATIVE_CONFIG",
+            "VERIFIED_FACT",
+            "EXECUTION_EVIDENCE",
+            "DERIVED_KNOWLEDGE",
+            "AGENT_REFLECTION",
+            "EXTERNAL_UNTRUSTED",
+            "QUARANTINED"
+          ]
+        },
+        "provenance_refs": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1},
+          "uniqueItems": true
+        }
+      }
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sensitivity", "retention_class"],
+      "properties": {
+        "sensitivity": {
+          "enum": ["PUBLIC", "INTERNAL", "CONFIDENTIAL", "RESTRICTED"]
+        },
+        "retention_class": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["subject", "summary", "body", "evidence", "artifacts", "supersedes"],
+      "properties": {
+        "subject": {"type": "string"},
+        "summary": {"type": "string"},
+        "body": {},
+        "evidence": {
+          "type": "array",
+          "items": {}
+        },
+        "artifacts": {
+          "type": "array",
+          "items": {}
+        },
+        "supersedes": {
+          "type": "array",
+          "items": {"type": "string"},
+          "uniqueItems": true
+        }
+      }
+    },
+    "integrity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["payload_sha256", "canonical_envelope_sha256", "signature"],
+      "properties": {
+        "payload_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "canonical_envelope_sha256": {
+          "anyOf": [
+            {"$ref": "#/$defs/sha256"},
+            {"type": "null"}
+          ]
+        },
+        "signature": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "required": ["algorithm", "key_id", "value"],
+          "properties": {
+            "algorithm": {"type": "string", "minLength": 1},
+            "key_id": {"type": "string", "minLength": 1},
+            "value": {"type": "string", "minLength": 1}
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "projectId": {
+      "type": "string",
+      "pattern": "^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$"
+    },
+    "resourceId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9._:-]*[A-Za-z0-9])?$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  }
+}
