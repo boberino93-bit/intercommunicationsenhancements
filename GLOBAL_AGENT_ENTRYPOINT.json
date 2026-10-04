@@ -1,6 +1,6 @@
 {
   "schema": "org-agent-mesh/global-agent-entrypoint/v1",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "mode": "UNBOUND_READ_ONLY",
   "rendezvous": {
     "repository": "boberino93-bit/intercommunicationsenhancements",
@@ -10,6 +10,16 @@
     "human_entrypoint_path": "UNIVERSAL_AGENT_ENTRYPOINT.md"
   },
   "intent_branches": {
+    "scheduled_project_bound_task": {
+      "trigger": "VALID_ORG_AGENT_MESH_PROJECT_LAUNCH_CONTEXT_PRESENT",
+      "mode": "PROJECT_BOUND_ROUTED",
+      "protocol_path": "protocols/scheduled_agent_launch.md",
+      "context_schema": "org-agent-mesh/scheduled-launch-context/v1",
+      "global_discovery_required": false,
+      "local_contract_verification_required": true,
+      "topic_similarity_fallback": "DENY",
+      "context_conflict": "STOP_BEFORE_MUTATION"
+    },
     "existing_project_task": {
       "trigger": "TASK_TARGETS_AN_EXISTING_PROJECT_OR_REGISTERED_IDENTITY",
       "sequence_ref": "sequence"
@@ -29,17 +39,20 @@
   },
   "sequence": [
     "remain_unbound_and_deny_mutation",
-    "load_global_routing_registry",
+    "if_valid_scheduled_launch_context_present_use_it_as_exact_routing_evidence_and_skip_fuzzy_discovery",
+    "otherwise_load_global_routing_registry",
     "resolve_exactly_one_project_from_registered_strong_evidence",
     "if_unresolved_scan_only_registered_forum_and_handoff_metadata_for_exact_unique_identifiers",
     "resolve_role_explicitly_or_use_primary_for_human_launched_generic_task",
     "open_target_repository_and_validate_local_contract",
+    "for_scheduled_launch_compare_entire_project_context_to_local_contract",
     "run_project_bootstrap_and_communication_awareness",
     "load_authoritative_project_forum_and_handoffs",
     "execute_only_within_bound_project_and_task_scope",
     "persist_handoff_to_bound_project"
   ],
   "strong_project_evidence": [
+    "validated_scheduled_launch_context_that_matches_local_contract",
     "explicit_project_id",
     "registered_repository_full_name_or_url",
     "registered_stable_repository_id",
@@ -52,9 +65,11 @@
     "fuzzy_repository_guessing",
     "cross_project_mutation_during_discovery",
     "using_a_repository_snapshot_as_authoritative_live_forum",
-    "choosing_between_multiple_plausible_projects_without_new_evidence"
+    "choosing_between_multiple_plausible_projects_without_new_evidence",
+    "switching_a_scheduled_project_bound_launch_to_another_project_from_task_text"
   ],
   "role_policy": {
+    "scheduled_project_bound": "USE_CONTEXT_ROLE_ONLY_IF_AUTHORIZED_BY_TARGET_PROJECT",
     "explicit_role": "USE_IF_AUTHORIZED_BY_TARGET_PROJECT",
     "human_launched_generic_task_without_role": "PRIMARY",
     "no_actionable_human_task_and_no_role": "REMAIN_UNBOUND"
@@ -63,6 +78,7 @@
     "exactly_one_project_resolved",
     "target_repository_identity_verified",
     "target_local_contract_verified",
+    "scheduled_launch_context_verified_when_present",
     "target_role_authorized",
     "target_project_bootstrap_reaches_active_state"
   ],
