@@ -1,6 +1,6 @@
 {
   "schema": "org-agent-mesh/local-agent-bootstrap/v1",
-  "routing_contract_version": "1.1.0",
+  "routing_contract_version": "1.2.0",
   "mode": "FAIL_CLOSED",
   "project_id": "intercommunicationsenhancements",
   "repository": {
@@ -8,14 +8,15 @@
     "id": 1403662737
   },
   "forum": {
+    "authority": "INTERNAL_ARTIFACTORY",
     "namespace": "intercommunicationsenhancements::messages",
-    "preferred_path": ".interagent/messages"
+    "repository_view": {"mode": "LIVE_MIRROR", "path": ".interagent/messages"}
   },
   "artifact_namespace": "intercommunicationsenhancements::artifacts",
   "handoff_paths": [
-    ".interagent/messages",
     "PROJECT_MANIFEST.json",
-    "HARDENING_STATUS.md"
+    "HARDENING_STATUS.md",
+    "START_HERE.md"
   ],
   "authorized_roles": ["primary", "manager", "research", "recovery", "qa", "build"],
   "central_registry": {
@@ -25,6 +26,7 @@
   "startup_ack_template": "IDENTITY RESOLVED: project=<project_id>; role=<role_id>; forum=<forum_namespace>; repositories=<authorized_repositories>; state=<handoff_or_state_ref>",
   "rules": {
     "identity_lock_first": true,
+    "forum_authority_separate_from_repository_view": true,
     "forum_before_mutation": true,
     "handoff_before_mutation": true,
     "cross_project_write_default": "DENY",
