@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "org-agent-mesh/progress-ledger/v1-draft",
+  "title": "IPG3 Progress Ledger v1 Draft",
+  "description": "Cycle-local progress ledger with explicit convergence and stall detection signals.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "ledger_id", "project_id", "objective_id", "opened_at_utc", "updated_at_utc",
+    "iterations", "progress_summary", "stall_state", "recommended_action"
+  ],
+  "properties": {
+    "schema": {"const": "org-agent-mesh/progress-ledger/v1-draft"},
+    "ledger_id": {"type": "string", "minLength": 8},
+    "project_id": {"type": "string", "pattern": "^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$"},
+    "objective_id": {"type": "string", "minLength": 1},
+    "opened_at_utc": {"type": "string", "format": "date-time"},
+    "updated_at_utc": {"type": "string", "format": "date-time"},
+    "iterations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["iteration", "hypothesis", "action_fingerprint", "evidence_gained", "measurable_progress", "failure_class", "next_experiment"],
+        "properties": {
+          "iteration": {"type": "integer", "minimum": 0},
+          "hypothesis": {"type": "string", "minLength": 1},
+          "action_fingerprint": {"type": "string", "minLength": 1},
+          "evidence_gained": {"type": "array", "items": {"type": "string"}},
+          "measurable_progress": {"type": "boolean"},
+          "failure_class": {"type": ["string", "null"]},
+          "next_experiment": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "progress_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["novel_evidence_count", "repeated_action_count", "distinct_failure_classes", "accepted_change_count", "rejected_candidate_count"],
+      "properties": {
+        "novel_evidence_count": {"type": "integer", "minimum": 0},
+        "repeated_action_count": {"type": "integer", "minimum": 0},
+        "distinct_failure_classes": {"type": "integer", "minimum": 0},
+        "accepted_change_count": {"type": "integer", "minimum": 0},
+        "rejected_candidate_count": {"type": "integer", "minimum": 0}
+      }
+    },
+    "stall_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "signals", "consecutive_nonprogress_iterations"],
+      "properties": {
+        "status": {"enum": ["PROGRESSING", "WATCH", "STALLED", "CONVERGED", "BLOCKED"]},
+        "signals": {
+          "type": "array",
+          "items": {"enum": ["REPEATED_ACTION", "REPEATED_FAILURE", "NO_NOVEL_EVIDENCE", "EQUIVALENT_PROPOSALS", "COMPLEXITY_WITHOUT_BENEFIT", "DEPENDENCY_BLOCK", "MARGINAL_GAIN_BELOW_THRESHOLD"]},
+          "uniqueItems": true
+        },
+        "consecutive_nonprogress_iterations": {"type": "integer", "minimum": 0}
+      }
+    },
+    "recommended_action": {"enum": ["CONTINUE", "REPLAN", "RETURN_TO_EVOLUTION_LEDGER", "ESCALATE", "STOP_CONVERGED"]}
+  }
+}
