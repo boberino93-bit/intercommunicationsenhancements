@@ -1,16 +1,18 @@
 {
-  "schema": "org-agent-mesh/bootstrap-order/v1",
+  "schema": "org-agent-mesh/bootstrap-order/v2",
   "mode": "FAIL_CLOSED",
   "steps": [
     {"order": 1, "id": "validate_current_human_project_intent", "mutation_allowed": false},
-    {"order": 2, "id": "load_and_validate_project_identity_lock", "path": "PROJECT_IDENTITY_LOCK.json", "mutation_allowed": false},
-    {"order": 3, "id": "validate_agent_package_manifest_against_identity_lock", "path": "AGENT_PACKAGE_MANIFEST.json", "mutation_allowed": false},
-    {"order": 4, "id": "bind_execution_instance_to_project", "mutation_allowed": false},
-    {"order": 5, "id": "load_project_manifest_and_authority", "path": "PROJECT_MANIFEST.json", "mutation_allowed": false},
-    {"order": 6, "id": "load_swarm_launch_kernel", "paths": ["SWARM_LAUNCH_KERNEL_V1.md", "swarm_kernel/project.json", "swarm_kernel/AGENT_BOOTSTRAP_OVERLAY.md"], "mutation_allowed": false},
-    {"order": 7, "id": "bind_global_run_role_and_ready_barrier", "mutation_allowed": true},
-    {"order": 8, "id": "load_project_handoffs_queues_forums_and_accepted_state", "mutation_allowed": false},
-    {"order": 9, "id": "classify_task_and_bind_work_context", "path": "protocols/task_intake_and_delegation.md", "mutation_allowed": false},
-    {"order": 10, "id": "execute_task_with_per_mutation_scope_validation", "mutation_allowed": true, "additional_guards": ["swarm_kernel_global_run_validation", "versioned_lease_validation", "idempotency_validation", "manager_backpressure", "circuit_breaker"]}
+    {"order": 2, "id": "resolve_project_and_role_routing", "paths": ["PROJECT_ROLE_ROUTING_REGISTRY.json", "bootstrap/PROJECT_ROLE_DISCOVERY.md"], "mutation_allowed": false},
+    {"order": 3, "id": "load_and_validate_project_identity_lock", "path": "PROJECT_IDENTITY_LOCK.json", "mutation_allowed": false},
+    {"order": 4, "id": "validate_agent_package_manifest_against_identity_lock", "path": "AGENT_PACKAGE_MANIFEST.json", "mutation_allowed": false},
+    {"order": 5, "id": "bind_execution_instance_to_project_and_role", "mutation_allowed": false},
+    {"order": 6, "id": "load_project_manifest_and_authority", "path": "PROJECT_MANIFEST.json", "mutation_allowed": false},
+    {"order": 7, "id": "load_registered_forum_and_handoff_state", "mutation_allowed": false},
+    {"order": 8, "id": "emit_identity_resolved_acknowledgement", "mutation_allowed": false},
+    {"order": 9, "id": "load_swarm_launch_kernel", "paths": ["SWARM_LAUNCH_KERNEL_V1.md", "swarm_kernel/project.json", "swarm_kernel/AGENT_BOOTSTRAP_OVERLAY.md"], "mutation_allowed": false},
+    {"order": 10, "id": "bind_global_run_role_and_ready_barrier", "mutation_allowed": true},
+    {"order": 11, "id": "classify_task_and_bind_work_context", "path": "protocols/task_intake_and_delegation.md", "mutation_allowed": false},
+    {"order": 12, "id": "execute_task_with_per_mutation_scope_validation", "mutation_allowed": true, "additional_guards": ["project_role_registry_validation", "registered_repository_boundary", "swarm_kernel_global_run_validation", "versioned_lease_validation", "idempotency_validation", "manager_backpressure", "circuit_breaker"]}
   ]
 }
