@@ -1,0 +1,52 @@
+{
+  "schema": "org-agent-mesh/global-agent-entrypoint/v1",
+  "version": "1.0.0",
+  "mode": "UNBOUND_READ_ONLY",
+  "rendezvous": {
+    "repository": "boberino93-bit/intercommunicationsenhancements",
+    "repository_id": 1403662737,
+    "registry_path": "PROJECT_ROLE_ROUTING_REGISTRY.json",
+    "protocol_path": "protocols/universal_task_routing.md",
+    "human_entrypoint_path": "UNIVERSAL_AGENT_ENTRYPOINT.md"
+  },
+  "sequence": [
+    "remain_unbound_and_deny_mutation",
+    "load_global_routing_registry",
+    "resolve_exactly_one_project_from_registered_strong_evidence",
+    "if_unresolved_scan_only_registered_forum_and_handoff_metadata_for_exact_unique_identifiers",
+    "resolve_role_explicitly_or_use_primary_for_human_launched_generic_task",
+    "open_target_repository_and_validate_local_contract",
+    "run_project_bootstrap_and_communication_awareness",
+    "load_authoritative_project_forum_and_handoffs",
+    "execute_only_within_bound_project_and_task_scope",
+    "persist_handoff_to_bound_project"
+  ],
+  "strong_project_evidence": [
+    "explicit_project_id",
+    "registered_repository_full_name_or_url",
+    "registered_stable_repository_id",
+    "registered_forum_namespace",
+    "registered_exact_discovery_alias",
+    "exact_unique_identifier_found_in_registered_read_only_forum_or_handoff_metadata"
+  ],
+  "forbidden_resolution_methods": [
+    "topic_similarity",
+    "fuzzy_repository_guessing",
+    "cross_project_mutation_during_discovery",
+    "using_a_repository_snapshot_as_authoritative_live_forum",
+    "choosing_between_multiple_plausible_projects_without_new_evidence"
+  ],
+  "role_policy": {
+    "explicit_role": "USE_IF_AUTHORIZED_BY_TARGET_PROJECT",
+    "human_launched_generic_task_without_role": "PRIMARY",
+    "no_actionable_human_task_and_no_role": "REMAIN_UNBOUND"
+  },
+  "mutation_gate": [
+    "exactly_one_project_resolved",
+    "target_repository_identity_verified",
+    "target_local_contract_verified",
+    "target_role_authorized",
+    "target_project_bootstrap_reaches_active_state"
+  ],
+  "conflict_policy": "STOP_BEFORE_MUTATION"
+}

@@ -1,11 +1,25 @@
 # Project + Role Discovery Protocol
 
-This protocol runs after the project identity lock and before any role-specific work or repository mutation.
+This protocol is the **project-bound** discovery gate. It normally runs after the target project's identity lock and before any role-specific work or repository mutation.
+
+## Unbound-agent bridge
+
+If the agent was launched outside every project, or cannot yet prove which project owns the task, do **not** guess a local project and do not start this protocol against a candidate repository.
+
+Instead:
+
+1. remain `UNBOUND` with mutation denied;
+2. load `UNIVERSAL_AGENT_ENTRYPOINT.md` and `GLOBAL_AGENT_ENTRYPOINT.json` from `boberino93-bit/intercommunicationsenhancements`;
+3. resolve exactly one project under `protocols/universal_task_routing.md`;
+4. verify that project's registered repository and local bootstrap contract;
+5. only then enter this project-bound protocol in the target project.
+
+The universal layer may use a narrow read-only scan of registered forum/handoff metadata to find an exact unique project identifier. It may not use fuzzy topic similarity or mutate candidate projects during discovery.
 
 ## Inputs
 
-- `project_id`: derived from the project environment or explicitly named by the human.
-- `role_id`: explicitly assigned by the human or deployment package.
+- `project_id`: derived from the verified project environment or explicitly named/resolved from registered strong evidence.
+- `role_id`: explicitly assigned by the human/deployment package, or `primary` when a human-launched generic task agent reaches this protocol through the declared universal-intake default.
 - current repository full name and, when available, the provider's stable repository ID.
 
 All identity inputs are evidence, not authority by themselves. Neither project nor repository may be guessed from topic similarity.
@@ -50,13 +64,14 @@ A truthful answer such as “I can see the registered snapshot and handoff, but 
 
 ## Registry integrity checks
 
-The registry itself is invalid if it contains duplicate repository bindings, duplicate stable repository IDs, duplicate forum or artifact namespaces, unsafe relative paths, malformed role sets, invalid forum authority, a forum namespace mismatch, or an invalid repository-view mode/path pair. Invalid registry state must stop startup before mutation.
+The registry itself is invalid if it contains duplicate repository bindings, duplicate stable repository IDs, duplicate forum or artifact namespaces, unsafe relative paths, malformed role sets, invalid forum authority, a forum namespace mismatch, an invalid repository-view mode/path pair, colliding discovery aliases, or discovery aliases that impersonate another project's canonical routing identifiers. Invalid registry state must stop startup before mutation.
 
 ## Fail-closed conditions
 
 Stop before mutation if any of the following is true:
 
 - project is unknown;
+- project discovery is ambiguous or supported only by topic similarity;
 - role is unknown or unauthorized;
 - project and repository identity disagree;
 - stable repository ID disagrees when available;
@@ -68,7 +83,7 @@ Stop before mutation if any of the following is true:
 - two projects appear equally plausible;
 - a repository is requested that is not registered for the resolved project.
 
-Do not rewrite, normalize, or guess identifiers to make them fit. Do not invent a repository forum path when the forum is external to GitHub.
+Do not rewrite, normalize, or guess canonical identifiers to make them fit. Human-facing registered discovery aliases may use case/whitespace normalization only for exact alias matching. Do not invent a repository forum path when the forum is external to GitHub.
 
 ## Cross-project framework rollout
 
@@ -81,4 +96,4 @@ A framework rollout may update peer projects only when all of these are true:
 - mutation is limited to the resolved target repository;
 - each target is validated after deployment.
 
-Ordinary project work remains cross-project deny-by-default.
+Ordinary project work remains cross-project deny-by-default. Universal discovery adds only a narrow read-only routing bridge; it does not create a cross-project mutation channel.

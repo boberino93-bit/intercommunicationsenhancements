@@ -2,7 +2,15 @@
 
 This repository hardens the Organization Agent Mesh for simultaneous unrelated projects.
 
+## Universal launch path
+
+An agent launched **outside any project** must begin at `UNIVERSAL_AGENT_ENTRYPOINT.md`, not by guessing a project from the task topic. The universal layer stays read-only while it resolves exactly one registered project, can consult registered forum/handoff metadata only for exact ownership identifiers, then verifies the target project's local contract and enters that project's normal bootstrap.
+
+The machine-readable anchor is `GLOBAL_AGENT_ENTRYPOINT.json`; the detailed protocol is `protocols/universal_task_routing.md`.
+
 ## Bootstrap order
+
+For an already project-bound agent:
 
 1. Validate current human project intent.
 2. Validate `PROJECT_IDENTITY_LOCK.json`.
@@ -33,6 +41,8 @@ Research findings, hypotheses and implementation authority remain distinct. Adap
 
 ## Current alpha invariants
 
+- Unbound agents may read routing metadata but cannot mutate any project.
+- A generic human-launched task agent defaults to the target project's `primary` workflow only after one project is resolved; the target project must still authorize and activate that role.
 - Caller-supplied project IDs are untrusted; bound session identity authorizes mutation.
 - Invalid canonical IDs are rejected rather than rewritten into ambiguous aliases.
 - Internal messages require matching projects and bound sender identity.
