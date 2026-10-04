@@ -8,18 +8,9 @@
   },
   "purpose": "Deterministic dependency closure for deployable agent role packages.",
   "role_components": {
-    "MANAGER": [
-      "roles/MANAGER.md",
-      "bootstrap/MANAGER.md"
-    ],
-    "PRIMARY": [
-      "roles/PRIMARY.md",
-      "bootstrap/PRIMARY.md"
-    ],
-    "RESEARCH": [
-      "roles/RESEARCH.md",
-      "bootstrap/RESEARCH.md"
-    ]
+    "MANAGER": ["roles/MANAGER.md", "bootstrap/MANAGER.md"],
+    "PRIMARY": ["roles/PRIMARY.md", "bootstrap/PRIMARY.md"],
+    "RESEARCH": ["roles/RESEARCH.md", "bootstrap/RESEARCH.md"]
   },
   "schema": "org-agent-mesh/package-dependency-map/v1",
   "shared_patterns": [
@@ -32,6 +23,11 @@
     "ARCHITECTURE.md",
     "START_HERE.md",
     "VERSION",
+    "SWARM_LAUNCH_KERNEL_V1.md",
+    ".swarm/README.md",
+    "swarm_kernel/*.md",
+    "swarm_kernel/*.json",
+    "swarm_kernel/*.py",
     "protocols/*.md",
     "schemas/*.json",
     "org_agent_mesh/*.py",
