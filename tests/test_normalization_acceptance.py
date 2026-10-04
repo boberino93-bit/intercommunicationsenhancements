@@ -6,17 +6,19 @@ import tempfile
 import unittest
 
 from org_agent_mesh.constants import PROTOCOL_VERSION
+from org_agent_mesh.capsules import StateCapsuleRegistry, validate_swarm_capsule
 from org_agent_mesh.containment import ContainmentStateError, ProjectHealthRegistry
-from org_agent_mesh.continuity import OperationalCheckpointRegistry
+from org_agent_mesh.continuity import ContinuityStateError, OperationalCheckpointRegistry
 from org_agent_mesh.control_plane import AgentSession, LeaseConflict
 from org_agent_mesh.dependencies import DependencyRegistry
 from org_agent_mesh.durable_backend import SQLiteRecordBackend
 from org_agent_mesh.durable_state import DurableLeaseRegistry
-from org_agent_mesh.ecosystem_coordination import SanitizedEcosystemRegistry, compare_coordinator_claims
+from org_agent_mesh.ecosystem_coordination import SanitizedEcosystemRegistry, assert_summary_promotable, compare_coordinator_claims
 from org_agent_mesh.evaluation import ScenarioEvidence, assert_anti_goodhart, passive_intelligence_baseline
 from org_agent_mesh.generation import GenerationRegistry, StaleGeneration
 from org_agent_mesh.project_scope import ProjectBinding, ProjectScopeError
 from org_agent_mesh.scheduled_tasks import ScheduledTaskRoute
+from org_agent_mesh.thematic_routing import ThematicRouteRegistry
 
 PROJECT = "intercommunicationsenhancements"
 REPO = "boberino93-bit/intercommunicationsenhancements"
@@ -41,13 +43,16 @@ class NormalizationAcceptanceTests(unittest.TestCase):
 
     def test_controlled_debugging_active_owner_then_expiry(self):
         with tempfile.TemporaryDirectory() as d:
-            leases = DurableLeaseRegistry(self.backend(d))
+            backend = self.backend(d)
+            leases = DurableLeaseRegistry(backend)
             now = datetime(2026, 10, 4, 20, 0, tzinfo=timezone.utc)
-            first = leases.claim(session("primary", "owner-1"), PROJECT, "debug-resource", ttl_seconds=30, now=now)
+            owner = session("primary", "owner-1")
+            other = session("manager", "manager-1")
+            first = leases.claim(owner, PROJECT, "debug-resource", ttl_seconds=30, now=now)
             with self.assertRaises(LeaseConflict):
-                leases.claim(session("manager", "manager-1"), PROJECT, "debug-resource", ttl_seconds=30, now=now + timedelta(seconds=1))
+                leases.claim(other, PROJECT, "debug-resource", ttl_seconds=30, now=now + timedelta(seconds=1))
             leases.recover_expired(project_id=PROJECT, now=now + timedelta(seconds=31))
-            second = leases.claim(session("manager", "manager-1"), PROJECT, "debug-resource", ttl_seconds=30, now=now + timedelta(seconds=32))
+            second = leases.claim(other, PROJECT, "debug-resource", ttl_seconds=30, now=now + timedelta(seconds=32))
             self.assertNotEqual(first.lease_id, second.lease_id)
 
     def test_crashed_blocker_handback_and_stale_resume(self):
@@ -69,7 +74,8 @@ class NormalizationAcceptanceTests(unittest.TestCase):
 
     def test_contamination_hysteresis_and_controlled_rejoin(self):
         with tempfile.TemporaryDirectory() as d:
-            health = ProjectHealthRegistry(self.backend(d), required_recovery_probes=3, cooldown_seconds=60)
+            backend = self.backend(d)
+            health = ProjectHealthRegistry(backend, required_recovery_probes=3, cooldown_seconds=60)
             s = session()
             t0 = datetime(2026, 10, 4, 20, 0, tzinfo=timezone.utc)
             rec = health.initialize(s, PROJECT, now=t0)
@@ -100,6 +106,11 @@ class NormalizationAcceptanceTests(unittest.TestCase):
             with self.assertRaises(ProjectScopeError):
                 registry.publish(foreign, PROJECT, summary, source_exchange_ref="x")
 
+    def test_quarantined_peer_summary_cannot_be_promoted(self):
+        summary = {"project_id": "benefitflow", "project_name": "BenefitFlow", "purpose": "benefits", "status": "QUARANTINED", "repository_identity": "boberino93-bit/benefitflow", "canonical_branch": "main", "board_root": "/BenefitFlow-AgentBus", "protocol_version": PROTOCOL_VERSION, "package_version": "1.6.0-alpha.1", "capacity_state": "QUARANTINED", "backup_state": "VERIFIED", "recovery_state": "RECOVERING", "allowed_cross_project_links": [], "last_verified": "2026-10-04T20:00:00Z"}
+        with self.assertRaises(ProjectScopeError):
+            assert_summary_promotable(summary)
+
     def test_recursive_generation_rejects_stale_mutation(self):
         with tempfile.TemporaryDirectory() as d:
             backend = self.backend(d)
@@ -127,6 +138,30 @@ class NormalizationAcceptanceTests(unittest.TestCase):
         self.assertTrue(ctx.assert_matches_project_contract(contract))
         self.assertEqual(PROJECT, ctx.project_id)
 
+    def test_project_and_swarm_capsules_reconstruct_shared_state(self):
+        with tempfile.TemporaryDirectory() as d:
+            backend = self.backend(d)
+            reg = StateCapsuleRegistry(backend)
+            s = session()
+            t0 = "2026-10-04T20:00:00Z"
+            project = {"project_id": PROJECT, "repository_identity": REPO, "repository_revision": "rev-1", "protocol_version": PROTOCOL_VERSION, "package_version": "1.6.0-alpha.1", "health_state": "HEALTHY", "generation_id": "gen-1", "active_objective_id": "obj-1", "active_claims": ["claim-1"], "open_dependencies": ["dep-1"], "blocked_tasks": [], "last_checkpoint_ref": "cp-1", "updated_at_utc": t0}
+            reg.publish_project(s, PROJECT, project)
+            self.assertEqual("rev-1", reg.read_project(PROJECT).payload["repository_revision"])
+            swarm = {"swarm_id": "swarm-1", "coordinator_epoch": "epoch-1", "protocol_version": PROTOCOL_VERSION, "project_capsules": [project], "quarantined_projects": [], "global_freeze": False, "updated_at_utc": t0}
+            self.assertTrue(validate_swarm_capsule(swarm))
+            srec = reg.publish_swarm(s, PROJECT, swarm)
+            self.assertEqual("swarm-1", srec.payload["swarm_id"])
+
+    def test_thematic_routing_is_project_local_and_deterministic(self):
+        with tempfile.TemporaryDirectory() as d:
+            routes = ThematicRouteRegistry(self.backend(d))
+            s = session()
+            routes.publish(s, PROJECT, "security-route", themes=("security", "containment"), destination="research", priority=10)
+            routes.publish(s, PROJECT, "general-route", themes=("planning",), destination="manager", priority=20)
+            matches = routes.resolve(PROJECT, ("security",))
+            self.assertEqual(["research"], [r.payload["destination"] for r in matches])
+            self.assertEqual([], routes.resolve("foreign-project", ("security",)))
+
     def test_recurring_protocol_smoke_contract_exists(self):
         text = Path("protocols/primary_recurring_swarm_protocol.md").read_text()
         for phrase in ("PRIMARY RECURRING SWARM PROTOCOL", "Dependency and suspension lifecycle", "Containment and recovery", "Re-entry to full normalization", "Smoke-test criterion"):
@@ -134,7 +169,8 @@ class NormalizationAcceptanceTests(unittest.TestCase):
 
     def test_parallel_dependency_canary(self):
         with tempfile.TemporaryDirectory() as d:
-            deps = DependencyRegistry(self.backend(d))
+            backend = self.backend(d)
+            deps = DependencyRegistry(backend)
             def create(i):
                 return deps.create(session(f"worker-{i}", f"worker-{i}"), PROJECT, f"dep-{i}", generation_id="g", producer_task_or_node=f"p-{i}", consumer_task_or_node=f"c-{i}", required_output="artifact").resource_id
             with ThreadPoolExecutor(max_workers=8) as pool:
