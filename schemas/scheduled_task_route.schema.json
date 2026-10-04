@@ -1,20 +1,36 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "org-agent-mesh/scheduled-task-route/v1",
+  "$id": "org-agent-mesh/scheduled-task-route/v2",
   "title": "Scheduled Task Route",
   "type": "object",
   "required": [
     "schema",
     "project_id",
     "task_id",
+    "role_id",
+    "routing_contract_version",
+    "context_binding",
+    "launch_source",
     "execution_scheduler",
     "delivery_transport",
-    "delivery_events"
+    "delivery_events",
+    "canonical_state_required_before_completion_post",
+    "admission_policy_id"
   ],
   "properties": {
-    "schema": {"const": "org-agent-mesh/scheduled-task-route/v1"},
+    "schema": {"const": "org-agent-mesh/scheduled-task-route/v2"},
     "project_id": {"type": "string", "minLength": 1},
     "task_id": {"type": "string", "minLength": 1},
+    "role_id": {"type": "string", "minLength": 1},
+    "routing_contract_version": {"type": "string", "minLength": 1},
+    "forum_namespace": {"type": ["string", "null"]},
+    "artifact_namespace": {"type": ["string", "null"]},
+    "repository_identity": {"type": ["string", "null"], "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"},
+    "repository_id": {"type": ["integer", "null"], "minimum": 1},
+    "local_contract_path": {"type": "string", "minLength": 1},
+    "bootstrap_order_path": {"type": "string", "minLength": 1},
+    "context_binding": {"enum": ["PROJECT_BOUND_REQUIRED", "STATIC_MESSAGE_ONLY"]},
+    "launch_source": {"enum": ["PROJECT_SCHEDULE", "WORK_EVENT", "EXPLICIT_ROUTE"]},
     "execution_scheduler": {"enum": ["AUTOMATION", "NONE_STATIC_SLACK"]},
     "delivery_transport": {"enum": ["NONE", "SLACK"]},
     "slack_workspace_id": {"type": ["string", "null"]},
@@ -27,9 +43,26 @@
     },
     "slack_input_mode": {"enum": ["NONE", "READ_ONLY_CONTEXT", "EXPLICIT_HUMAN_APPROVAL"]},
     "canonical_state_required_before_completion_post": {"const": true},
-    "idempotency_key": {"type": ["string", "null"]}
+    "idempotency_key": {"type": ["string", "null"]},
+    "admission_policy_id": {"type": "string", "minLength": 1}
   },
   "allOf": [
+    {
+      "if": {"properties": {"execution_scheduler": {"const": "AUTOMATION"}}},
+      "then": {
+        "properties": {"context_binding": {"const": "PROJECT_BOUND_REQUIRED"}},
+        "required": ["forum_namespace", "artifact_namespace"]
+      }
+    },
+    {
+      "if": {"properties": {"execution_scheduler": {"const": "NONE_STATIC_SLACK"}}},
+      "then": {
+        "properties": {
+          "context_binding": {"const": "STATIC_MESSAGE_ONLY"},
+          "delivery_transport": {"const": "SLACK"}
+        }
+      }
+    },
     {
       "if": {"properties": {"delivery_transport": {"const": "SLACK"}}},
       "then": {"required": ["slack_destination_id"]}
