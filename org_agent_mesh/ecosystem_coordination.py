@@ -145,6 +145,22 @@ def validate_sanitized_project_summary(summary: Mapping):
     return True
 
 
+def assert_summary_promotable(summary: Mapping):
+    """Reject quarantined, recovering, or otherwise unverified peer state at promotion boundaries.
+
+    Untrusted summaries may still be retained as evidence in a local sanitized registry;
+    callers must pass this guard before treating a peer summary as promotable ecosystem truth.
+    """
+    validate_sanitized_project_summary(summary)
+    if summary["status"] != "ACTIVE":
+        raise ProjectScopeError("peer project is not ACTIVE and cannot be promoted")
+    if summary["recovery_state"] != "VERIFIED":
+        raise ProjectScopeError("peer recovery state is not VERIFIED")
+    if summary["capacity_state"] in {"UNKNOWN", "UNSAFE", "EXHAUSTED", "QUARANTINED"}:
+        raise ProjectScopeError("peer capacity/health state is not promotable")
+    return True
+
+
 class SanitizedEcosystemRegistry:
     """Project-owned copy-by-value registry of approved sanitized peer summaries.
 
