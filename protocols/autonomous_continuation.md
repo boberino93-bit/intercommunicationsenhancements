@@ -1,6 +1,6 @@
 # Autonomous Continuation Protocol
 
-Version: 1.0.0
+Version: 1.1.0
 Status: ACTIVE
 
 ## Purpose
@@ -56,6 +56,22 @@ A fresh agent must not treat missing chat history as missing project context. Af
 
 `AGENT_CONTEXT_REFERENCE.md` is orientation, not authorization. It may explain what the project is and what request families are likely, but it must never create a task, expand authority, or override the current human message.
 
+## User control-message interruptions
+
+All agents must implement `protocols/user_control_messages.md`.
+
+A human request for status, progress, percentage complete, current blocker, evidence, explanation, or an immediate acknowledgement is a **control message**, not a cancellation or task replacement, unless the human explicitly says to stop, cancel, pause, change objective, change project, revoke authority, or otherwise materially redirect execution.
+
+When such a control message arrives during active work:
+
+1. answer it immediately;
+2. preserve the active project/task/execution state;
+3. apply any additional durable directive contained in the message;
+4. resume the exact interrupted work automatically without requiring the human to say `continue`;
+5. avoid repeating already-completed work.
+
+A progress percentage is approximate unless backed by explicit telemetry. Estimate it from the remaining known execution phases and do not fabricate precision.
+
 ## Shorthand recovery
 
 For short commands such as `continue`, `do that`, `run it`, `update the packages`, or `execute that`, resolve the referent from the current human message first, then the bound project's durable current state and handoff. Ask only if multiple materially incompatible referents remain after this recovery sequence.
@@ -63,3 +79,5 @@ For short commands such as `continue`, `do that`, `run it`, `update the packages
 ## Completion
 
 Do not return control merely because one phase ended. Continue research -> implementation -> validation -> fix/retest -> package alignment -> handoff/recovery checks -> recursive improvement while meaningful authorized gain remains. Stop at fixed point, a genuine authority gate, an irrecoverable integrity block, or an unavailable required capability.
+
+A user control-message response is not completion. Resume the interrupted assignment after answering unless the human explicitly changed or cancelled it.
