@@ -1,10 +1,13 @@
 from pathlib import Path
 import json
+import sys
 import unittest
 
-from org_agent_mesh.universal_intake import discover_project
-
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from org_agent_mesh.universal_intake import discover_project
 
 
 class CrossContractAlignmentTests(unittest.TestCase):
@@ -13,7 +16,8 @@ class CrossContractAlignmentTests(unittest.TestCase):
         steps = bootstrap["steps"]
         classify_index = next(i for i, step in enumerate(steps) if step["id"] == "classify_task_and_bind_work_context")
         for i, step in enumerate(steps):
-            if i < classify_index: self.assertFalse(step.get("mutation_allowed", False), step["id"])
+            if i < classify_index:
+                self.assertFalse(step.get("mutation_allowed", False), step["id"])
         ready_index = next(i for i, step in enumerate(steps) if step["id"] == "bind_global_run_role_instance_and_ready_barrier_if_swarm")
         self.assertGreater(ready_index, classify_index)
 
@@ -41,7 +45,8 @@ class CrossContractAlignmentTests(unittest.TestCase):
     def test_global_round_member_is_routable(self):
         registry = json.loads((ROOT / "PROJECT_ROLE_ROUTING_REGISTRY.json").read_text(encoding="utf-8"))
         swarm = json.loads((ROOT / "swarm_kernel" / "project.json").read_text(encoding="utf-8"))
-        for project_id in swarm["expected_global_round_projects"]: self.assertIn(project_id, registry["projects"])
+        for project_id in swarm["expected_global_round_projects"]:
+            self.assertIn(project_id, registry["projects"])
 
     def test_active_project_context_resolves_this_project_without_history_guessing(self):
         registry = json.loads((ROOT / "PROJECT_ROLE_ROUTING_REGISTRY.json").read_text(encoding="utf-8"))
@@ -52,7 +57,8 @@ class CrossContractAlignmentTests(unittest.TestCase):
     def test_semantic_package_closure_carries_handoff_and_factory(self):
         deps = json.loads((ROOT / "packaging" / "agent_package_dependencies.json").read_text(encoding="utf-8"))
         patterns = set(deps["shared_patterns"])
-        for required in ("MASTER_HANDOFF.json", "NEW_PROJECT_BOOTSTRAP.json", "HARDENING_STATUS.md", "templates/new-project/*.json", "templates/new-project/*.md"): self.assertIn(required, patterns)
+        for required in ("MASTER_HANDOFF.json", "NEW_PROJECT_BOOTSTRAP.json", "HARDENING_STATUS.md", "templates/new-project/*.json", "templates/new-project/*.md"):
+            self.assertIn(required, patterns)
 
     def test_new_project_factory_materializes_master_handoff(self):
         kit = json.loads((ROOT / "NEW_PROJECT_BOOTSTRAP.json").read_text(encoding="utf-8"))
@@ -61,4 +67,5 @@ class CrossContractAlignmentTests(unittest.TestCase):
         self.assertIn(".interagent/handoffs", kit["required_directories"])
 
 
-if __name__ == "__main__": unittest.main()
+if __name__ == "__main__":
+    unittest.main()
