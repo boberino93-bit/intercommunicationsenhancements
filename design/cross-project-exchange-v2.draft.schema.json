@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "org-agent-mesh/cross-project-exchange/v2-draft",
+  "title": "IPG3 Cross-Project Exchange v2 Draft",
+  "description": "Deny-by-default sanitized exchange contract for bounded, attributable, replay-resistant movement of artifacts between projects.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "exchange_id", "source_project_id", "destination_project_id", "created_at_utc", "expires_at_utc",
+    "requester", "source_session", "approval_id", "purpose", "scope", "sanitization", "artifacts", "delivery",
+    "destination_validation", "status"
+  ],
+  "properties": {
+    "schema": {"const": "org-agent-mesh/cross-project-exchange/v2-draft"},
+    "exchange_id": {"type": "string", "minLength": 12},
+    "source_project_id": {"$ref": "#/$defs/projectId"},
+    "destination_project_id": {"$ref": "#/$defs/projectId"},
+    "created_at_utc": {"type": "string", "format": "date-time"},
+    "expires_at_utc": {"type": "string", "format": "date-time"},
+    "requester": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["agent_id", "agent_instance_id", "principal_id"],
+      "properties": {
+        "agent_id": {"type": "string", "minLength": 1},
+        "agent_instance_id": {"type": "string", "minLength": 1},
+        "principal_id": {"type": ["string", "null"]}
+      }
+    },
+    "source_session": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["project_id", "agent_id", "agent_instance_id", "capability"],
+      "properties": {
+        "project_id": {"$ref": "#/$defs/projectId"},
+        "agent_id": {"type": "string", "minLength": 1},
+        "agent_instance_id": {"type": "string", "minLength": 1},
+        "capability": {"const": "CROSS_PROJECT_EXCHANGE"}
+      }
+    },
+    "approval_id": {"type": "string", "minLength": 1},
+    "purpose": {"type": "string", "minLength": 1},
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["allowed_artifact_types", "allowed_paths", "max_artifacts", "max_total_bytes"],
+      "properties": {
+        "allowed_artifact_types": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+        "allowed_paths": {"type": "array", "items": {"type": "string"}},
+        "max_artifacts": {"type": "integer", "minimum": 1},
+        "max_total_bytes": {"type": "integer", "minimum": 1}
+      }
+    },
+    "sanitization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["profile_id", "profile_revision", "remove_secrets", "remove_personal_data", "remove_project_instance_state", "validation_ref"],
+      "properties": {
+        "profile_id": {"type": "string", "minLength": 1},
+        "profile_revision": {"type": "string", "minLength": 1},
+        "remove_secrets": {"type": "boolean"},
+        "remove_personal_data": {"type": "boolean"},
+        "remove_project_instance_state": {"type": "boolean"},
+        "validation_ref": {"type": ["string", "null"]}
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["artifact_id", "source_sha256", "sanitized_sha256", "size_bytes", "trust_record_id"],
+        "properties": {
+          "artifact_id": {"type": "string", "minLength": 1},
+          "source_sha256": {"$ref": "#/$defs/sha256"},
+          "sanitized_sha256": {"$ref": "#/$defs/sha256"},
+          "size_bytes": {"type": "integer", "minimum": 0},
+          "trust_record_id": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "delivery": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["idempotency_key", "transport", "effect_receipt_id"],
+      "properties": {
+        "idempotency_key": {"type": "string", "minLength": 1},
+        "transport": {"type": "string", "minLength": 1},
+        "effect_receipt_id": {"type": ["string", "null"]}
+      }
+    },
+    "destination_validation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["required", "validator_id", "decision"],
+      "properties": {
+        "required": {"type": "boolean"},
+        "validator_id": {"type": ["string", "null"]},
+        "decision": {"enum": ["PENDING", "ACCEPT", "REJECT", "QUARANTINE"]}
+      }
+    },
+    "status": {"enum": ["PROPOSED", "SOURCE_APPROVED", "SANITIZED", "DISPATCHED", "DESTINATION_ACCEPTED", "DESTINATION_REJECTED", "QUARANTINED", "EXPIRED", "REVOKED"]}
+  },
+  "allOf": [
+    {
+      "not": {
+        "properties": {
+          "source_project_id": {"const": {"$data": "1/destination_project_id"}}
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "projectId": {"type": "string", "pattern": "^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$"},
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}
