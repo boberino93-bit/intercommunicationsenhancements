@@ -315,14 +315,26 @@ class DurableLeaseRegistry:
             return None
         if current.expired(now):
             try:
-                self.backend.delete_if_version(
+                deleted = self.backend.delete_if_version(
                     self.NAMESPACE,
                     project_id,
                     resource_id,
                     expected_version=current.version,
                 )
             except StaleVersion:
-                pass
+                latest = self._record(
+                    self.backend.read(self.NAMESPACE, project_id, resource_id)
+                )
+                if latest is not None and not latest.expired(now):
+                    return latest
+                return None
+            if deleted:
+                return None
+            latest = self._record(
+                self.backend.read(self.NAMESPACE, project_id, resource_id)
+            )
+            if latest is not None and not latest.expired(now):
+                return latest
             return None
         return current
 
