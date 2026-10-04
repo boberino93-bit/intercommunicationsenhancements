@@ -3,8 +3,8 @@
   "mode": "FAIL_CLOSED",
   "steps": [
     {"order": 1, "id": "validate_current_human_project_intent", "mutation_allowed": false},
-    {"order": 2, "id": "resolve_project_and_role_routing", "paths": ["PROJECT_ROLE_ROUTING_REGISTRY.json", "bootstrap/PROJECT_ROLE_DISCOVERY.md"], "mutation_allowed": false},
-    {"order": 3, "id": "load_and_validate_project_identity_lock", "path": "PROJECT_IDENTITY_LOCK.json", "mutation_allowed": false},
+    {"order": 2, "id": "load_and_validate_project_identity_lock", "path": "PROJECT_IDENTITY_LOCK.json", "mutation_allowed": false},
+    {"order": 3, "id": "resolve_project_and_role_routing", "paths": ["PROJECT_ROLE_ROUTING_REGISTRY.json", "bootstrap/PROJECT_ROLE_DISCOVERY.md"], "mutation_allowed": false},
     {"order": 4, "id": "validate_agent_package_manifest_against_identity_lock", "path": "AGENT_PACKAGE_MANIFEST.json", "mutation_allowed": false},
     {"order": 5, "id": "bind_execution_instance_to_project_and_role", "mutation_allowed": false},
     {"order": 6, "id": "load_project_manifest_and_authority", "path": "PROJECT_MANIFEST.json", "mutation_allowed": false},
