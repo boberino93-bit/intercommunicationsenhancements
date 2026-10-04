@@ -103,25 +103,82 @@ class ProjectRoleRoutingTests(unittest.TestCase):
         with self.assertRaisesRegex(RoutingError, "unsafe_handoff_path"):
             validate_registry(registry)
 
-    def test_real_registry_and_local_contract_validate_v14(self):
+    def test_real_registry_and_local_contract_validate_v15(self):
         registry = json.loads((ROOT / "PROJECT_ROLE_ROUTING_REGISTRY.json").read_text())
         validate_registry(registry)
-        self.assertEqual(registry.get("routing_contract_version"), "1.4.0")
+        self.assertEqual(registry.get("routing_contract_version"), "1.5.0")
+        self.assertEqual(registry.get("mode"), "FAIL_CLOSED_LOCAL_CONTINUE_GLOBAL")
         self.assertIn("fold7-power-lab", registry["projects"])
         self.assertIn("ai-behaviour-control-lab", registry["projects"])
         awareness = registry["communication_awareness"]
         self.assertTrue(awareness["required_on_startup"])
-        for project in registry["projects"].values():
+        self.assertEqual(registry["fresh_agent_context"]["authority"], "ORIENTATION_ONLY")
+        self.assertEqual(registry["autonomous_continuation"]["fail_closed_scope"], "AFFECTED_MUTATION_OR_BRANCH_ONLY")
+        for project_id, project in registry["projects"].items():
             self.assertIsInstance(project.get("repository_id"), int)
             self.assertEqual(project.get("local_contract_path"), "AGENT_BOOTSTRAP.json")
-            self.assertEqual(project.get("routing_contract_version"), "1.4.0")
             self.assertEqual(project["forum_locator"]["authority"], "INTERNAL_ARTIFACTORY")
             self.assertEqual(project["roles"], ["primary", "manager", "research"])
             self.assertIn("MASTER_HANDOFF.json", project["handoff_paths"])
+            self.assertIn("AGENT_CONTEXT_REFERENCE.md", project["handoff_paths"])
             self.assertEqual(project["master_handoff_path"], "MASTER_HANDOFF.json")
+            self.assertEqual(project["context_reference_path"], "AGENT_CONTEXT_REFERENCE.md")
+            if project_id == "warp-propulsion-lab":
+                self.assertEqual(project["routing_contract_version"], "1.3.0")
+                self.assertEqual(project["effective_continuation_overlay_version"], "1.5.0")
+                self.assertEqual(project["local_bootstrap_migration_state"], "LEGACY_LOCAL_BOOTSTRAP_RETAINED")
+                self.assertTrue(project["continuation_overlay_authority"])
+            else:
+                self.assertEqual(project["routing_contract_version"], "1.5.0")
         local_contract = json.loads((ROOT / "AGENT_BOOTSTRAP.json").read_text())
         validate_local_contract(registry, project_id="intercommunicationsenhancements", contract=local_contract)
-        self.assertEqual(local_contract.get("communication_awareness"), awareness)
+        self.assertEqual(local_contract["fresh_agent_context"]["authority"], "ORIENTATION_ONLY")
+        self.assertTrue(local_contract["autonomous_continuation"]["localized_fail_closed"])
+
+    def test_v15_rejects_permissive_mode(self):
+        registry = json.loads((ROOT / "PROJECT_ROLE_ROUTING_REGISTRY.json").read_text())
+        registry["mode"] = "PERMISSIVE_CONTINUE_GLOBAL"
+        with self.assertRaisesRegex(RoutingError, "registry_not_fail_closed"):
+            validate_registry(registry)
+
+    def test_v15_rejects_context_reference_as_authority(self):
+        registry = json.loads((ROOT / "PROJECT_ROLE_ROUTING_REGISTRY.json").read_text())
+        registry["fresh_agent_context"]["authority"] = "AUTHORITATIVE"
+        with self.assertRaisesRegex(RoutingError, "fresh_agent_context_authority_expansion"):
+            validate_registry(registry)
+
+    def test_v15_rejects_unbounded_fail_closed_scope(self):
+        registry = json.loads((ROOT / "PROJECT_ROLE_ROUTING_REGISTRY.json").read_text())
+        registry["autonomous_continuation"]["fail_closed_scope"] = "IGNORE_AND_CONTINUE"
+        with self.assertRaisesRegex(RoutingError, "unsafe_continuation_fail_closed_scope"):
+            validate_registry(registry)
+
+    def test_v15_rejects_cross_project_write_expansion(self):
+        registry = json.loads((ROOT / "PROJECT_ROLE_ROUTING_REGISTRY.json").read_text())
+        registry["rules"]["cross_project_write_default"] = "ALLOW"
+        with self.assertRaisesRegex(RoutingError, "unsafe_v15_registry_rule_cross_project_write_default"):
+            validate_registry(registry)
+
+    def test_v15_local_contract_cannot_disable_localized_fail_closed(self):
+        registry = json.loads((ROOT / "PROJECT_ROLE_ROUTING_REGISTRY.json").read_text())
+        contract = json.loads((ROOT / "AGENT_BOOTSTRAP.json").read_text())
+        contract["autonomous_continuation"]["localized_fail_closed"] = False
+        with self.assertRaisesRegex(RoutingError, "local_fail_closed_disabled"):
+            validate_local_contract(registry, project_id="intercommunicationsenhancements", contract=contract)
+
+    def test_v15_legacy_project_requires_explicit_overlay(self):
+        registry = json.loads((ROOT / "PROJECT_ROLE_ROUTING_REGISTRY.json").read_text())
+        legacy = registry["projects"]["warp-propulsion-lab"]
+        legacy.pop("effective_continuation_overlay_version")
+        with self.assertRaisesRegex(RoutingError, "project_routing_contract_version_mismatch"):
+            validate_registry(registry)
+
+    def test_v15_legacy_overlay_requires_authority_reference(self):
+        registry = json.loads((ROOT / "PROJECT_ROLE_ROUTING_REGISTRY.json").read_text())
+        legacy = registry["projects"]["warp-propulsion-lab"]
+        legacy.pop("continuation_overlay_authority")
+        with self.assertRaisesRegex(RoutingError, "missing_continuation_overlay_authority"):
+            validate_registry(registry)
 
     def test_v14_rejects_role_mode_overlap(self):
         registry = json.loads((ROOT / "PROJECT_ROLE_ROUTING_REGISTRY.json").read_text())
@@ -157,7 +214,16 @@ class ProjectRoleRoutingTests(unittest.TestCase):
     def test_routing_contract_is_dependency_closed_for_role_packages(self):
         dependency_map = json.loads((ROOT / "packaging" / "agent_package_dependencies.json").read_text())
         shared = set(dependency_map["shared_patterns"])
-        for expected in ("PROJECT_ROLE_ROUTING_REGISTRY.json", "AGENT_BOOTSTRAP.json", "MASTER_HANDOFF.json", "bootstrap/PROJECT_ROLE_DISCOVERY.md", "bootstrap/IDENTITY_GATE.md", "org_agent_mesh/*.py", "protocols/*.md", "schemas/*.json"):
+        for expected in (
+            "PROJECT_ROLE_ROUTING_REGISTRY.json",
+            "AGENT_BOOTSTRAP.json",
+            "MASTER_HANDOFF.json",
+            "bootstrap/PROJECT_ROLE_DISCOVERY.md",
+            "bootstrap/IDENTITY_GATE.md",
+            "org_agent_mesh/*.py",
+            "protocols/*.md",
+            "schemas/*.json",
+        ):
             self.assertIn(expected, shared)
 
 

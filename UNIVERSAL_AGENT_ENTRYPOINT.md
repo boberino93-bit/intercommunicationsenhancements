@@ -9,6 +9,7 @@ This repository is the **routing rendezvous**, not automatically the target proj
 - project routing registry: `PROJECT_ROLE_ROUTING_REGISTRY.json`
 - fresh-agent ecosystem orientation: `AGENT_CONTEXT_REFERENCE.md`
 - persistent execution protocol: `protocols/autonomous_continuation.md`
+- user control-message protocol: `protocols/user_control_messages.md`
 - detailed routing protocol: `protocols/universal_task_routing.md`
 - new-project bootstrap kit: `NEW_PROJECT_BOOTSTRAP.json`
 
@@ -83,6 +84,23 @@ Once a valid human assignment exists, follow `protocols/autonomous_continuation.
 - recover context from the current message, local bootstrap, context reference, master handoff, accepted decisions/supersessions, task state, evidence, and peer findings before asking the human to repeat context;
 - escalate only for a genuine non-delegable human authority decision, irrecoverable data-integrity issue, security-boundary decision, or required unavailable external capability;
 - continue recursive work while measurable information, validation, or risk-reduction gain remains; stop at convergence or a true gate.
+
+## User control-message interruptions
+
+After a valid assignment is active, a human request for status, progress, approximate percentage complete, current blocker, evidence, explanation, or an immediate acknowledgement is a **control message**, not task completion or replacement.
+
+Follow `protocols/user_control_messages.md`:
+
+- answer the control request immediately before continuing tool or implementation work;
+- preserve the active project binding, task, execution state, claims, leases, generation/run identifiers, branch, and durable handoff unless normal recovery rules require otherwise;
+- report progress honestly; when a percentage is requested and no explicit telemetry exists, estimate it from the remaining known execution phases and label it approximate;
+- apply any new durable directive contained in the same human message;
+- resume the exact interrupted work automatically without requiring the human to say `continue`;
+- do not repeat work already completed before the interruption.
+
+Automatic resume does not override an explicit human instruction that ends or pauses the current work, materially redirects the objective, switches projects, revokes authority, or changes a safety/security boundary.
+
+This interaction behavior is universal across projects and roles, but it never grants cross-project mutation authority.
 
 ## Shorthand recovery
 

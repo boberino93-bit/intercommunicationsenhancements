@@ -44,12 +44,42 @@ def validate_source_revision(source_revision):
     return revision
 
 
+def _contract_version(value):
+    try:
+        parts = tuple(int(part) for part in str(value).split("."))
+    except ValueError as exc:
+        raise ValueError("invalid bootstrap routing_contract_version") from exc
+    if len(parts) != 3 or any(part < 0 for part in parts): raise ValueError("invalid bootstrap routing_contract_version")
+    return parts
+
+
+def _validate_bootstrap_safety_mode(bootstrap):
+    mode = bootstrap.get("mode")
+    if mode == "FAIL_CLOSED":
+        return
+    version = _contract_version(bootstrap.get("routing_contract_version", "0.0.0"))
+    if mode != "FAIL_CLOSED_LOCAL_CONTINUE_GLOBAL" or version < (1, 5, 0):
+        raise ValueError("bootstrap control mode is not fail-closed")
+    continuation = bootstrap.get("continuation_contract")
+    if not isinstance(continuation, dict): raise ValueError("routing 1.5 bootstrap missing continuation_contract")
+    expected = {
+        "routine_confirmation": "DENY",
+        "fail_closed_scope": "AFFECTED_MUTATION_OR_BRANCH_ONLY",
+        "continue_unaffected_safe_work": True,
+        "human_escalation": "TRUE_HUMAN_GATE_ONLY",
+    }
+    for key, value in expected.items():
+        if continuation.get(key) != value:
+            raise ValueError(f"unsafe routing 1.5 bootstrap continuation setting: {key}")
+
+
 def load_control_state():
     project = json.loads((ROOT / "PROJECT_MANIFEST.json").read_text(encoding="utf-8"))
     identity = json.loads((ROOT / IDENTITY_LOCK).read_text(encoding="utf-8"))
     bootstrap = json.loads((ROOT / BOOTSTRAP_ORDER).read_text(encoding="utf-8"))
     dependency_map = json.loads((ROOT / DEPENDENCY_MAP).read_text(encoding="utf-8"))
-    if identity.get("mode") != "FAIL_CLOSED" or bootstrap.get("mode") != "FAIL_CLOSED": raise ValueError("identity controls must be FAIL_CLOSED")
+    if identity.get("mode") != "FAIL_CLOSED": raise ValueError("identity control must be FAIL_CLOSED")
+    _validate_bootstrap_safety_mode(bootstrap)
     if project["project_id"] != identity["project_id"]: raise ValueError("project manifest and identity lock disagree on project_id")
     if project["repository_identity"] != identity["writable_repository"]: raise ValueError("project manifest and identity lock disagree on writable repository")
     steps = [item.get("id") for item in bootstrap.get("steps", [])]
