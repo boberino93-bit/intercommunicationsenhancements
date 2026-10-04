@@ -32,6 +32,8 @@ SCENARIOS = [
     Scenario("high-context-pressure-only", ResearchAssessment(0.56, 1, attempts=2, context_pressure=0.95), False, (0,0), (0,0)),
 ]
 
+EXPECTED_PENALTIES = {"v1-baseline": 44, "v2-dependency-aware": 4, "v3-risk-cell+hysteresis": 0}
+
 
 def distance(value: int, expected: tuple[int,int]) -> int:
     lo, hi = expected
@@ -65,6 +67,9 @@ def main():
         print(f"{name}: penalty={penalty}")
         for row in details:
             print("  ", row)
+        expected = EXPECTED_PENALTIES[name]
+        if penalty != expected:
+            raise SystemExit(f"benchmark drift for {name}: expected {expected}, got {penalty}; explicitly re-baseline if justified")
 
     v1, v2, v3 = [item[1] for item in results]
     if not v2 < v1:
