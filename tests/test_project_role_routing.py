@@ -101,8 +101,10 @@ class ProjectRoleRoutingTests(unittest.TestCase):
 
     def test_duplicate_repository_binding_is_rejected(self):
         registry = json.loads(json.dumps(REGISTRY))
-        registry["projects"]["beta"] = {**registry["projects"]["alpha"], "repository_id": 202, "forum_namespace": "beta::messages", "artifact_namespace": "beta::artifacts"}
-        registry["projects"]["beta"]["forum_locator"]["namespace"] = "beta::messages"
+        beta = json.loads(json.dumps(registry["projects"]["alpha"]))
+        beta.update({"repository_id": 202, "forum_namespace": "beta::messages", "artifact_namespace": "beta::artifacts"})
+        beta["forum_locator"]["namespace"] = "beta::messages"
+        registry["projects"]["beta"] = beta
         with self.assertRaisesRegex(RoutingError, "duplicate_repository_binding"):
             validate_registry(registry)
 
@@ -115,6 +117,8 @@ class ProjectRoleRoutingTests(unittest.TestCase):
     def test_real_registry_and_local_contract_validate(self):
         registry = json.loads((ROOT / "PROJECT_ROLE_ROUTING_REGISTRY.json").read_text())
         validate_registry(registry)
+        self.assertIn("fold7-power-lab", registry["projects"])
+        self.assertNotIn("samsungpowerbootstrap", registry["projects"])
         for project in registry["projects"].values():
             self.assertIsInstance(project.get("repository_id"), int)
             self.assertEqual(project.get("local_contract_path"), "AGENT_BOOTSTRAP.json")
