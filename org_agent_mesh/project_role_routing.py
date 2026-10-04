@@ -16,6 +16,9 @@ class ResolvedRoute:
     repository: str
     repository_id: int | None
     forum_namespace: str
+    forum_authority: str
+    forum_repository_view_mode: str
+    forum_repository_view_path: str | None
     artifact_namespace: str
     handoff_paths: tuple[str, ...]
     local_contract_path: str | None
@@ -37,6 +40,30 @@ def _safe_repo_path(value: Any, *, field: str) -> str:
     if path.is_absolute() or ".." in path.parts:
         raise RoutingError(f"unsafe_{field}")
     return value
+
+
+def _validate_forum_locator(project: Mapping[str, Any], *, project_id: str) -> None:
+    namespace = project.get("forum_namespace")
+    locator = project.get("forum_locator")
+    if not isinstance(locator, Mapping):
+        raise RoutingError("missing_forum_locator")
+    if locator.get("authority") != "INTERNAL_ARTIFACTORY":
+        raise RoutingError("invalid_forum_authority")
+    if locator.get("namespace") != namespace:
+        raise RoutingError("forum_locator_namespace_mismatch")
+
+    view = locator.get("repository_view")
+    if not isinstance(view, Mapping):
+        raise RoutingError("missing_forum_repository_view")
+    mode = view.get("mode")
+    path = view.get("path")
+    if mode not in {"LIVE_MIRROR", "SNAPSHOT_BACKUP", "NONE"}:
+        raise RoutingError("invalid_forum_repository_view_mode")
+    if mode == "NONE":
+        if path is not None:
+            raise RoutingError("forum_repository_view_path_must_be_null")
+    else:
+        _safe_repo_path(path, field="forum_repository_view_path")
 
 
 def validate_registry(registry: Mapping[str, Any]) -> None:
@@ -90,6 +117,7 @@ def validate_registry(registry: Mapping[str, Any]) -> None:
         if forum in seen_forums:
             raise RoutingError("duplicate_forum_namespace")
         seen_forums.add(forum)
+        _validate_forum_locator(project, project_id=project_id)
 
         artifact = project.get("artifact_namespace")
         if not isinstance(artifact, str) or not artifact:
@@ -143,11 +171,18 @@ def validate_local_contract(
         raise RoutingError("local_contract_repository_id_mismatch")
 
     forum = contract.get("forum")
-    if not isinstance(forum, Mapping) or forum.get("namespace") != project.get("forum_namespace"):
+    locator = project.get("forum_locator")
+    if not isinstance(forum, Mapping):
         raise RoutingError("local_contract_forum_mismatch")
+    if forum.get("namespace") != project.get("forum_namespace"):
+        raise RoutingError("local_contract_forum_mismatch")
+    if forum.get("authority") != locator.get("authority"):
+        raise RoutingError("local_contract_forum_authority_mismatch")
+    if forum.get("repository_view") != locator.get("repository_view"):
+        raise RoutingError("local_contract_forum_repository_view_mismatch")
+
     if contract.get("artifact_namespace") != project.get("artifact_namespace"):
         raise RoutingError("local_contract_artifact_namespace_mismatch")
-
     if contract.get("handoff_paths") != project.get("handoff_paths"):
         raise RoutingError("local_contract_handoff_mismatch")
     if contract.get("authorized_roles") != project.get("roles"):
@@ -184,12 +219,17 @@ def resolve_route(
         if current_repository_id != repository_id:
             raise RoutingError("repository_stable_id_mismatch")
 
+    forum_locator = project["forum_locator"]
+    repository_view = forum_locator["repository_view"]
     return ResolvedRoute(
         project_id=project_id,
         role_id=role_id,
         repository=repository,
         repository_id=repository_id,
         forum_namespace=project["forum_namespace"],
+        forum_authority=forum_locator["authority"],
+        forum_repository_view_mode=repository_view["mode"],
+        forum_repository_view_path=repository_view["path"],
         artifact_namespace=project["artifact_namespace"],
         handoff_paths=tuple(project["handoff_paths"]),
         local_contract_path=project.get("local_contract_path"),
