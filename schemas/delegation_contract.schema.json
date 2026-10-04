@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Organization Agent Mesh Delegation Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema": {"const": "org-agent-mesh/delegation-contract/v1"},
+    "contract_id": {"type": "string", "minLength": 1},
+    "project_id": {"type": "string", "minLength": 1},
+    "task_id": {"type": "string", "minLength": 1},
+    "parent_agent_id": {"type": "string", "minLength": 1},
+    "parent_agent_instance_id": {"type": "string", "minLength": 1},
+    "assignee_agent_id": {"type": ["string", "null"]},
+    "assignee_role": {"enum": ["PRIMARY", "MANAGER", "RESEARCH"]},
+    "objective": {"type": "string", "minLength": 1},
+    "in_scope_resources": {"type": "array", "minItems": 1, "items": {"type": "string"}, "uniqueItems": true},
+    "out_of_scope_boundaries": {"type": "array", "minItems": 1, "items": {"type": "string"}, "uniqueItems": true},
+    "allowed_tools": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "capability_ceiling": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "write_boundaries": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "source_of_truth_refs": {"type": "array", "minItems": 1, "items": {"type": "string"}, "uniqueItems": true},
+    "evidence_requirements": {"type": "array", "minItems": 1, "items": {"type": "string"}, "uniqueItems": true},
+    "output_contract": {"type": "string", "minLength": 1},
+    "completion_condition": {"type": "string", "minLength": 1},
+    "failure_condition": {"type": "string", "minLength": 1},
+    "parent_trace_id": {"type": ["string", "null"]},
+    "expires_at_utc": {"type": ["string", "null"]},
+    "cancellation_policy": {"type": "string", "minLength": 1},
+    "status": {"enum": ["DRAFT", "AUTHORIZED", "ACTIVE", "COMPLETED", "FAILED", "CANCELLED"]},
+    "created_at_utc": {"type": "string", "minLength": 1}
+  },
+  "required": ["schema", "contract_id", "project_id", "task_id", "parent_agent_id", "parent_agent_instance_id", "assignee_agent_id", "assignee_role", "objective", "in_scope_resources", "out_of_scope_boundaries", "allowed_tools", "capability_ceiling", "write_boundaries", "source_of_truth_refs", "evidence_requirements", "output_contract", "completion_condition", "failure_condition", "parent_trace_id", "expires_at_utc", "cancellation_policy", "status", "created_at_utc"]
+}
