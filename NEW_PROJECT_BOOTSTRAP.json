@@ -1,0 +1,72 @@
+{
+  "schema": "org-agent-mesh/new-project-bootstrap-kit/v1",
+  "version": "1.0.0",
+  "status": "ACTIVE",
+  "purpose": "Allow an agent launched inside any participating project to seed a new project with the same inter-agent architecture before a GitHub repository exists, then bind and register that repository later.",
+  "trigger": {
+    "required": "EXPLICIT_HUMAN_REQUEST_TO_CREATE_OR_BOOTSTRAP_A_NEW_PROJECT",
+    "implicit_topic_similarity": "DENY",
+    "cross_project_guessing": "DENY"
+  },
+  "canonical_source": {
+    "repository": "boberino93-bit/intercommunicationsenhancements",
+    "protocol": "protocols/new_project_bootstrap.md",
+    "templates_root": "templates/new-project"
+  },
+  "seed_state": {
+    "mode": "UNBOUND_PROJECT",
+    "repository_binding": "UNBOUND",
+    "github_required_to_start": false,
+    "forum_authority": "INTERNAL_ARTIFACTORY",
+    "forum_namespace_template": "{{PROJECT_ID}}::messages",
+    "artifact_namespace_template": "{{PROJECT_ID}}::artifacts",
+    "repository_view": {"mode": "NONE", "path": null}
+  },
+  "required_documents": [
+    {"output": "AGENT_BOOTSTRAP.json", "template": "templates/new-project/AGENT_BOOTSTRAP.template.json"},
+    {"output": "PROJECT_IDENTITY_LOCK.json", "template": "templates/new-project/PROJECT_IDENTITY_LOCK.template.json"},
+    {"output": "PROJECT_MANIFEST.json", "template": "templates/new-project/PROJECT_MANIFEST.template.json"},
+    {"output": "BOOTSTRAP_ORDER.json", "template": "templates/new-project/BOOTSTRAP_ORDER.template.json"},
+    {"output": "START_HERE.md", "template": "templates/new-project/START_HERE.template.md"},
+    {"output": "PROJECT_CHARTER.md", "template": "templates/new-project/PROJECT_CHARTER.template.md"},
+    {"output": "HARDENING_STATUS.md", "template": "templates/new-project/HARDENING_STATUS.template.md"}
+  ],
+  "required_directories": [
+    ".interagent/messages",
+    ".interagent/directives",
+    ".interagent/capacity",
+    ".interagent/state",
+    ".swarm"
+  ],
+  "identity_rules": {
+    "copy_source_project_identity": false,
+    "copy_source_repository_identity": false,
+    "project_id_source": "EXPLICIT_HUMAN_NAME_OR_PROVISIONAL_SLUG_FROM_EXPLICIT_NEW_PROJECT_REQUEST",
+    "repository_fields_while_unbound": {"full_name": null, "id": null},
+    "unknown_identity_action": "SEED_PROVISIONAL_IDENTITY_AND_MARK_PENDING_INSTEAD_OF_BINDING_TO_AN_EXISTING_PROJECT"
+  },
+  "startup_rules": {
+    "identity_lock_first": true,
+    "forum_before_mutation": true,
+    "handoff_before_mutation": true,
+    "communication_assessment_before_visibility_claim": true,
+    "cross_project_write_default": "DENY",
+    "source_project_is_reference_only": true
+  },
+  "repository_binding_lifecycle": {
+    "initial": "UNBOUND",
+    "allowed_unbound_work": ["project chartering", "internal forum setup", "artifact setup", "research", "planning", "bootstrap document generation"],
+    "github_mutation_while_unbound": "DENY",
+    "bind_trigger": "EXPLICIT_REPOSITORY_CREATION_OR_CONNECTION",
+    "bind_steps": [
+      "verify repository full name and stable repository id",
+      "update PROJECT_IDENTITY_LOCK.json",
+      "update PROJECT_MANIFEST.json",
+      "update AGENT_BOOTSTRAP.json repository block",
+      "create repository mirror paths only after repository exists",
+      "register project in PROJECT_ROLE_ROUTING_REGISTRY.json after identity verification",
+      "record binding handoff in the new project's authoritative forum"
+    ]
+  },
+  "completion_ack_template": "NEW PROJECT SEEDED: project=<project_id>; forum=<forum_namespace>; artifacts=<artifact_namespace>; repository_binding=UNBOUND; templates=<materialized_documents>; next=<work_or_repository_binding>"
+}
