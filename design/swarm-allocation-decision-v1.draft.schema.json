@@ -1,0 +1,21 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"org-agent-mesh/swarm-allocation-decision/v1-draft",
+  "title":"Swarm Allocation Decision v1 (draft)",
+  "type":"object","additionalProperties":false,
+  "required":["schema","decision_id","project_id","assistance_request_id","decided_by","research_agents","manager_agents","topology","reasoning_summary","budget","status"],
+  "properties":{
+    "schema":{"const":"org-agent-mesh/swarm-allocation-decision/v1-draft"},
+    "decision_id":{"type":"string","minLength":1},
+    "project_id":{"type":"string","minLength":1},
+    "assistance_request_id":{"type":"string","minLength":1},
+    "decided_by":{"type":"object","additionalProperties":false,"required":["agent_id","agent_instance_id","role"],"properties":{"agent_id":{"type":"string"},"agent_instance_id":{"type":"string"},"role":{"const":"PRIMARY"}}},
+    "research_agents":{"type":"integer","minimum":0,"maximum":32},
+    "manager_agents":{"type":"integer","minimum":0,"maximum":8},
+    "topology":{"enum":["PRIMARY_DIRECT","SINGLE_MANAGER_CELL","MULTI_MANAGER_CELLS","REJECTED"]},
+    "cells":{"type":"array","items":{"type":"object","required":["cell_id","research_agents"],"properties":{"cell_id":{"type":"string"},"manager_id":{"type":["string","null"]},"research_agents":{"type":"integer","minimum":1,"maximum":8},"workstreams":{"type":"array","items":{"type":"string"}}}},"default":[]},
+    "reasoning_summary":{"type":"string","minLength":1},
+    "budget":{"type":"object","required":["max_research_agents","max_manager_agents","max_cycles"],"properties":{"max_research_agents":{"type":"integer","minimum":0},"max_manager_agents":{"type":"integer","minimum":0},"max_cycles":{"type":"integer","minimum":1}}},
+    "status":{"enum":["AUTHORIZED","REJECTED","SUPERSEDED","TERMINATED"]}
+  }
+}
