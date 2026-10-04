@@ -37,6 +37,23 @@
     ],
     "assessment_ack_template": "COMMUNICATIONS ASSESSED: project=<project_id>; role=<role_id>; forum=<forum_namespace>; access=<access_mode>; coverage=<coverage>; confidence=<confidence>; full_forum_visibility=<true|false>; mutation_blocked=<true|false>"
   },
+  "learning_contract": {
+    "protocol_repository": "boberino93-bit/intercommunicationsenhancements",
+    "protocol_path": "protocols/swarm_learning.md",
+    "required_before_work": true,
+    "required_before_normal_handoff": true,
+    "inheritance_order": [
+      "OPERATING_DOCTRINE",
+      "TASK_SCOPED_VALIDATED_KNOWLEDGE",
+      "RAW_EXPERIENCE_ON_DEMAND_ONLY"
+    ],
+    "raw_experience_authority": "NONE",
+    "candidate_auto_promotion": "DENY",
+    "high_risk_auto_promotion": "DENY",
+    "doctrine_integration_authority": "ORCHESTRATOR",
+    "no_material_learning_allowed": true,
+    "cross_project_learning_mutation_default": "DENY"
+  },
   "project_factory": {
     "pointer": "NEW_PROJECT_BOOTSTRAP.json",
     "canonical_repository": "boberino93-bit/intercommunicationsenhancements",
@@ -52,6 +69,9 @@
     "handoff_before_mutation": true,
     "communication_assessment_before_visibility_claim": true,
     "never_claim_all_communications_from_mirror_snapshot_or_handoff": true,
+    "raw_experience_as_authoritative_policy": "DENY",
+    "learning_promotion_requires_evidence": true,
+    "learning_conflict_resolution": "SURFACE_AND_DEFER_TO_HIGHER_AUTHORITY",
     "cross_project_write_default": "DENY",
     "identity_conflict": "STOP_BEFORE_MUTATION"
   }
