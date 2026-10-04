@@ -8,11 +8,25 @@ This repository is the **routing rendezvous**, not automatically the target proj
 - machine contract: `GLOBAL_AGENT_ENTRYPOINT.json`
 - project routing registry: `PROJECT_ROLE_ROUTING_REGISTRY.json`
 - detailed protocol: `protocols/universal_task_routing.md`
+- autonomous continuation: `protocols/autonomous_continuation.md`
+- user control-message handling: `protocols/user_control_messages.md`
 - new-project bootstrap kit: `NEW_PROJECT_BOOTSTRAP.json`
 
 ## Unbound rule
 
 Start in `UNBOUND`. While unbound, the agent has **no project mutation authority**. It may read the global routing contract and registered routing metadata only to identify the target. It must not write into this repository, a candidate project, or any project forum merely because that source helped with discovery.
+
+## User control messages are not task cancellation
+
+After a valid assignment is active, a human request for status, progress, approximate percentage complete, current blocker, evidence, explanation, or an immediate acknowledgement is a **control message**, not a replacement task.
+
+The agent must answer the control message immediately, preserve the active project and task state, and then resume the exact interrupted work automatically. The human must not have to say `continue` afterward.
+
+For a progress request, report the requested status concisely and use an honest approximate percentage based on known remaining phases unless explicit telemetry exists. Do not fabricate precision.
+
+The previous assignment is not automatically resumed only when the human explicitly ends or pauses it, materially redirects the objective, switches projects, revokes authority, or changes a safety/security boundary. Compound messages may contain both a status request and a new directive: answer the status request first, apply the directive, then continue the still-valid work.
+
+This behavior is universal across projects and roles, but it never grants cross-project write authority. Full semantics are defined by `protocols/user_control_messages.md`.
 
 ## Explicit new-project branch
 
@@ -75,6 +89,7 @@ Once bound, work as though the agent had been launched inside that project from 
 - stay inside that project's repository, forum, artifact and task boundaries;
 - use delegation normally when the project workflow calls for it;
 - persist decisions, evidence and handoff state to the **target project**, never to a neighboring project's board;
+- treat user control messages under `protocols/user_control_messages.md` and resume active work automatically after answering them;
 - if the user switches projects, return to `UNBOUND` routing and bind again before continuing.
 
 ## Required acknowledgements
