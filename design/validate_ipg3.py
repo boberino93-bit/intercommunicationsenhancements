@@ -33,7 +33,23 @@ def validate_isolation() -> list[str]:
     if "design/*" in shared_patterns or "design/**" in shared_patterns:
         failures.append("design/ is included in authoritative deployment dependency closure")
     for path in ROOT.glob("*"):
-        if path.is_file() and path.name.startswith(("message-v3", "delegation-contract", "effect-receipt", "human-approval", "trust-provenance", "causal-event", "evolution-candidate", "benchmark-result", "progress-ledger", "cross-project-exchange", "agent-principal", "research-assistance-request", "swarm-allocation-decision", "swarm-state")):
+        if path.is_file() and path.name.startswith((
+            "message-v3",
+            "delegation-contract",
+            "effect-receipt",
+            "human-approval",
+            "trust-provenance",
+            "causal-event",
+            "evolution-candidate",
+            "benchmark-result",
+            "progress-ledger",
+            "cross-project-exchange",
+            "agent-principal",
+            "research-assistance-request",
+            "swarm-allocation-decision",
+            "swarm-state",
+            "project-initialization",
+        )):
             if path.parent.name != "design":
                 failures.append(f"draft artifact escaped design/: {path}")
     return failures
@@ -51,6 +67,7 @@ def run_python_checks() -> list[str]:
         "test_external_mappings.py",
         "test_ipg3_swarm_regulator.py",
         "test_ipg3_swarm_validators.py",
+        "test_ipg3_project_initializer.py",
         "field_test_swarm_regulator.py",
         "field_test_swarm_lifecycle.py",
         "shadow_replay.py",
@@ -72,7 +89,7 @@ def main() -> int:
             print(f"- {failure}")
         return 1
     print("IPG3 DESIGN VALIDATION: PASS")
-    print(f"Validated {len(list(ROOT.glob('*.draft.schema.json')))} draft schemas plus shadow, relational, identity, atomic-state, durable-adapter, recursive-evolution, interoperability, adaptive-swarm, swarm-authority, static/dynamic field-campaign, and replay checks.")
+    print(f"Validated {len(list(ROOT.glob('*.draft.schema.json')))} draft schemas plus shadow, relational, identity, atomic-state, durable-adapter, recursive-evolution, interoperability, adaptive-swarm, swarm-authority, project-initialization, static/dynamic field-campaign, and replay checks.")
     print("Confirmed design/ remains outside authoritative deployment dependency closure.")
     return 0
 
