@@ -16,7 +16,8 @@
   "handoff_paths": [
     "PROJECT_MANIFEST.json",
     "HARDENING_STATUS.md",
-    "START_HERE.md"
+    "START_HERE.md",
+    "NEW_PROJECT_BOOTSTRAP.json"
   ],
   "authorized_roles": ["primary", "manager", "research", "recovery", "qa", "build"],
   "central_registry": {
@@ -35,6 +36,13 @@
       "FULL_SCOPE_PROVEN"
     ],
     "assessment_ack_template": "COMMUNICATIONS ASSESSED: project=<project_id>; role=<role_id>; forum=<forum_namespace>; access=<access_mode>; coverage=<coverage>; confidence=<confidence>; full_forum_visibility=<true|false>; mutation_blocked=<true|false>"
+  },
+  "project_factory": {
+    "pointer": "NEW_PROJECT_BOOTSTRAP.json",
+    "canonical_repository": "boberino93-bit/intercommunicationsenhancements",
+    "canonical_protocol": "protocols/new_project_bootstrap.md",
+    "supports_unbound_repository": true,
+    "trigger": "EXPLICIT_HUMAN_REQUEST"
   },
   "startup_ack_template": "IDENTITY RESOLVED: project=<project_id>; role=<role_id>; forum=<forum_namespace>; repositories=<authorized_repositories>; state=<handoff_or_state_ref>",
   "rules": {
