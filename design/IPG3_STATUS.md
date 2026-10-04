@@ -47,6 +47,11 @@ Stable baseline remains framework `1.6.0-alpha.1` / protocol `2.4.0-alpha.1` on 
 - trust-promotion path validation;
 - hash-linked causal-chain verification and tamper detection;
 - authenticated-principal relational validation;
+- backend-independent durable adapter API;
+- black-box durable-adapter conformance suite;
+- SQLite durability candidate with local/multi-process semantics;
+- PostgreSQL durability candidate with server-backed multi-process/multi-node-capable semantics;
+- CI-backed conformance validation of both SQLite and PostgreSQL candidates for exclusive create, CAS, consumable authorization, execution-instance leases, project isolation and append-only event collisions;
 - unit/adversarial tests for the implemented design behaviors;
 - design-only validation harness;
 - design-only GitHub Actions validation workflow.
@@ -56,17 +61,16 @@ Stable baseline remains framework `1.6.0-alpha.1` / protocol `2.4.0-alpha.1` on 
 - cryptographic signature verification service;
 - issuer trust registry and credential revocation service;
 - key creation/rotation/recovery implementation;
-- durable causal event backend;
-- durable approval/effect backend;
+- a selected production durability backend;
+- full durable integration of causal events, approvals, effects, tasks, artifacts and audit state into the active runtime;
 - broker-specific delivery implementation;
-- durable distributed lease/CAS/task/artifact/audit adapters;
 - persistent organization registry;
 - global observability aggregation;
 - production sanitized cross-project bridge;
 - A2A/AGNTCY transport adapters;
 - live shadow mirroring;
 - representative large-scale replay corpus;
-- empirical benchmark results against G2;
+- empirical benchmark results against G2 beyond regression/conformance gates;
 - independent proposer/critic/verifier execution topology;
 - complete OWASP/AgentDojo-style adversarial suite;
 - G3 role package definitions;
@@ -75,11 +79,11 @@ Stable baseline remains framework `1.6.0-alpha.1` / protocol `2.4.0-alpha.1` on 
 
 ## Next gates
 
-1. Keep design CI green as the design evolves.
-2. Build a larger sanitized replay corpus covering every Message v2 kind and failure class.
-3. Produce first benchmark-result records comparing G2 with the G3 candidate semantics.
-4. Implement a black-box durable-adapter conformance suite.
-5. Prototype at least two genuinely multi-process/multi-node-capable persistence candidates against that suite before choosing infrastructure.
+1. Keep both IPG3 design CI and the existing G2 package/reproducibility gate green.
+2. Build a larger sanitized replay corpus covering every Message v2 kind and major failure class.
+3. Produce first formal benchmark-result records comparing G2 with G3 candidate semantics and overhead.
+4. Expand durable-adapter conformance with process-death, timeout-after-commit, restart persistence and partition/failover scenarios.
+5. Compare PostgreSQL with at least one additional genuinely distributed persistence design before selecting a production substrate; SQLite remains a valuable local/reference candidate, not a multi-node choice.
 6. Add a cryptographic verification interface with pluggable issuer/revocation/key services; do not hard-code one trust provider into the protocol.
 7. Add live read-only shadow mirroring only after offline replay coverage is representative.
 8. Prototype A2A and AGNTCY mappings as isolated adapters and quantify translation loss.
