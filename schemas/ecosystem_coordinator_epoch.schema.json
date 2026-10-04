@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Human-designated Ecosystem Coordinator Epoch",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "coordinator_agent_id": {"type": "string", "minLength": 1},
+    "coordinator_project_id": {"type": "string", "minLength": 1},
+    "epoch_id": {"type": "string", "minLength": 1},
+    "scope": {"enum": ["ECOSYSTEM_SCOPE", "BRIDGE_SCOPE"]},
+    "allowed_reads": {"type": "array", "items": {"type": "string"}},
+    "allowed_writes": {"type": "array", "items": {"type": "string"}},
+    "prohibited_actions": {"type": "array", "items": {"type": "string"}},
+    "start_time": {"type": "string", "minLength": 1},
+    "expiry_or_review_condition": {"type": "string", "minLength": 1},
+    "human_assignment_ref": {"type": "string", "minLength": 1}
+  },
+  "required": ["coordinator_agent_id", "coordinator_project_id", "epoch_id", "scope", "allowed_reads", "allowed_writes", "prohibited_actions", "start_time", "expiry_or_review_condition", "human_assignment_ref"]
+}

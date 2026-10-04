@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Sanitized Ecosystem Project Summary",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "project_id": {"type": "string", "minLength": 1},
+    "project_name": {"type": "string", "minLength": 1},
+    "purpose": {"type": "string", "minLength": 1},
+    "status": {"type": "string", "minLength": 1},
+    "repository_identity": {"type": "string", "minLength": 1},
+    "canonical_branch": {"type": "string", "minLength": 1},
+    "board_root": {"type": "string", "minLength": 1},
+    "protocol_version": {"type": "string", "minLength": 1},
+    "package_version": {"type": "string", "minLength": 1},
+    "capacity_state": {"type": "string", "minLength": 1},
+    "backup_state": {"type": "string", "minLength": 1},
+    "recovery_state": {"type": "string", "minLength": 1},
+    "allowed_cross_project_links": {"type": "array", "items": {"type": "string"}},
+    "last_verified": {"type": "string", "minLength": 1}
+  },
+  "required": ["project_id", "project_name", "purpose", "status", "repository_identity", "canonical_branch", "board_root", "protocol_version", "package_version", "capacity_state", "backup_state", "recovery_state", "allowed_cross_project_links", "last_verified"]
+}

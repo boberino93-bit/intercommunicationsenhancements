@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Project Dependency Record",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "dependency_id": {"type": "string", "minLength": 1},
+    "generation_id": {"type": "string", "minLength": 1},
+    "producer_task_or_node": {"type": "string", "minLength": 1},
+    "consumer_task_or_node": {"type": "string", "minLength": 1},
+    "required_output": {"type": "string", "minLength": 1},
+    "status": {"enum": ["OPEN", "IN_PROGRESS", "RESOLVED", "INVALIDATED", "SUPERSEDED", "BLOCKED"]},
+    "created_at_utc": {"type": "string", "minLength": 1},
+    "resolved_at_utc": {"type": ["string", "null"]},
+    "evidence_ref": {"type": ["string", "null"]},
+    "updated_by_agent_instance_id": {"type": "string", "minLength": 1}
+  },
+  "required": ["dependency_id", "generation_id", "producer_task_or_node", "consumer_task_or_node", "required_output", "status", "created_at_utc", "resolved_at_utc", "evidence_ref", "updated_by_agent_instance_id"]
+}
