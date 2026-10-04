@@ -23,11 +23,7 @@
       "repository": "boberino93-bit/intercommunicationsenhancements",
       "repository_id": 1403662737,
       "forum_namespace": "intercommunicationsenhancements::messages",
-      "forum_locator": {
-        "authority": "INTERNAL_ARTIFACTORY",
-        "namespace": "intercommunicationsenhancements::messages",
-        "repository_view": {"mode": "LIVE_MIRROR", "path": ".interagent/messages"}
-      },
+      "forum_locator": {"authority": "INTERNAL_ARTIFACTORY", "namespace": "intercommunicationsenhancements::messages", "repository_view": {"mode": "LIVE_MIRROR", "path": ".interagent/messages"}},
       "artifact_namespace": "intercommunicationsenhancements::artifacts",
       "handoff_paths": ["PROJECT_MANIFEST.json", "HARDENING_STATUS.md", "START_HERE.md"],
       "local_contract_path": "AGENT_BOOTSTRAP.json",
@@ -37,13 +33,9 @@
     "duo-open": {
       "repository": "boberino93-bit/duo-open",
       "repository_id": 1396743140,
-      "forum_namespace": "duo-open::messages",
-      "forum_locator": {
-        "authority": "INTERNAL_ARTIFACTORY",
-        "namespace": "duo-open::messages",
-        "repository_view": {"mode": "SNAPSHOT_BACKUP", "path": "DEPLOYMENT_METADATA/AGENTBUS_SNAPSHOT/messages"}
-      },
-      "artifact_namespace": "duo-open::artifacts",
+      "forum_namespace": "/DuoOpen-AgentBus/messages",
+      "forum_locator": {"authority": "INTERNAL_ARTIFACTORY", "namespace": "/DuoOpen-AgentBus/messages", "repository_view": {"mode": "SNAPSHOT_BACKUP", "path": "DEPLOYMENT_METADATA/AGENTBUS_SNAPSHOT/messages"}},
+      "artifact_namespace": "/DuoOpen-AgentBus/artifacts",
       "handoff_paths": ["START_HERE.md", "AGENT_DISCOVERY_V7.json", "AGENTBUS_IMPORT/BOOTSTRAP_V7.md"],
       "local_contract_path": "AGENT_BOOTSTRAP.json",
       "routing_contract_version": "1.2.0",
@@ -52,14 +44,10 @@
     "benefitflow": {
       "repository": "boberino93-bit/benefitflow",
       "repository_id": 1403645790,
-      "forum_namespace": "benefitflow::messages",
-      "forum_locator": {
-        "authority": "INTERNAL_ARTIFACTORY",
-        "namespace": "benefitflow::messages",
-        "repository_view": {"mode": "LIVE_MIRROR", "path": "BenefitFlow-AgentBus/forum"}
-      },
-      "artifact_namespace": "benefitflow::artifacts",
-      "handoff_paths": ["REPOSITORY_BOOTSTRAP.md", "BenefitFlow-AgentBus/discovery", "BenefitFlow-AgentBus/bootstrap"],
+      "forum_namespace": "BenefitFlow-AgentBus/forum/",
+      "forum_locator": {"authority": "INTERNAL_ARTIFACTORY", "namespace": "BenefitFlow-AgentBus/forum/", "repository_view": {"mode": "LIVE_MIRROR", "path": "BenefitFlow-AgentBus/forum"}},
+      "artifact_namespace": "BenefitFlow-AgentBus/artifactory/",
+      "handoff_paths": ["REPOSITORY_BOOTSTRAP.md", "BenefitFlow-AgentBus/control/PROJECT_IDENTITY_LOCK.json", "BenefitFlow-AgentBus/discovery", "BenefitFlow-AgentBus/bootstrap"],
       "local_contract_path": "AGENT_BOOTSTRAP.json",
       "routing_contract_version": "1.2.0",
       "roles": ["primary", "manager", "research", "recovery", "qa", "build"]
@@ -68,11 +56,7 @@
       "repository": "boberino93-bit/samsungpowerbootstrap",
       "repository_id": 1404088763,
       "forum_namespace": "/Fold7-PowerLab-AgentBus/messages",
-      "forum_locator": {
-        "authority": "INTERNAL_ARTIFACTORY",
-        "namespace": "/Fold7-PowerLab-AgentBus/messages",
-        "repository_view": {"mode": "NONE", "path": null}
-      },
+      "forum_locator": {"authority": "INTERNAL_ARTIFACTORY", "namespace": "/Fold7-PowerLab-AgentBus/messages", "repository_view": {"mode": "NONE", "path": null}},
       "artifact_namespace": "/Fold7-PowerLab-AgentBus/artifacts",
       "handoff_paths": ["PROJECT_IDENTITY_LOCK.json", "PROJECT_MANIFEST.json", "START_HERE.md", ".interagent/state", ".interagent/bootstrap"],
       "local_contract_path": "AGENT_BOOTSTRAP.json",
@@ -82,14 +66,10 @@
     "warp-propulsion-lab": {
       "repository": "boberino93-bit/warp-propulsion-lab",
       "repository_id": 1372658198,
-      "forum_namespace": "warp-propulsion-lab::messages",
-      "forum_locator": {
-        "authority": "INTERNAL_ARTIFACTORY",
-        "namespace": "warp-propulsion-lab::messages",
-        "repository_view": {"mode": "SNAPSHOT_BACKUP", "path": "agentbus-backup/full-message-board-snapshots"}
-      },
-      "artifact_namespace": "warp-propulsion-lab::artifacts",
-      "handoff_paths": ["SWARM_LAUNCH_KERNEL_V1.md", ".swarm/README.md", "README.md"],
+      "forum_namespace": "/Warp-Propulsion-AgentBus/messages",
+      "forum_locator": {"authority": "INTERNAL_ARTIFACTORY", "namespace": "/Warp-Propulsion-AgentBus/messages", "repository_view": {"mode": "SNAPSHOT_BACKUP", "path": "agentbus-backup/full-message-board-snapshots"}},
+      "artifact_namespace": "/Warp-Propulsion-AgentBus/artifacts",
+      "handoff_paths": ["SWARM_LAUNCH_KERNEL_V1.md", ".swarm/README.md", "agentbus-backup/intercomm-optimization-v1/ACTIVE_INTERCOMM_PROFILE.json", "README.md"],
       "local_contract_path": "AGENT_BOOTSTRAP.json",
       "routing_contract_version": "1.2.0",
       "roles": ["primary", "manager", "research", "recovery", "qa", "build"]
