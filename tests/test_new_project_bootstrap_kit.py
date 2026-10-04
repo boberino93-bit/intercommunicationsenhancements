@@ -11,6 +11,7 @@ class NewProjectBootstrapKitTests(unittest.TestCase):
         self.assertEqual(kit["seed_state"]["repository_binding"], "UNBOUND")
         self.assertFalse(kit["seed_state"]["github_required_to_start"])
         self.assertIsNone(kit["seed_state"]["repository_view"]["path"])
+        self.assertTrue(kit["recursion"]["every_seeded_project_materializes_local_factory_pointer"])
 
         outputs = {item["output"] for item in kit["required_documents"]}
         self.assertEqual(
@@ -23,6 +24,7 @@ class NewProjectBootstrapKitTests(unittest.TestCase):
                 "START_HERE.md",
                 "PROJECT_CHARTER.md",
                 "HARDENING_STATUS.md",
+                "NEW_PROJECT_BOOTSTRAP.json",
             },
         )
 
@@ -35,6 +37,7 @@ class NewProjectBootstrapKitTests(unittest.TestCase):
             "PROJECT_IDENTITY_LOCK.template.json",
             "PROJECT_MANIFEST.template.json",
             "BOOTSTRAP_ORDER.template.json",
+            "NEW_PROJECT_BOOTSTRAP.template.json",
         ]
         for name in template_names:
             raw = (ROOT / "templates" / "new-project" / name).read_text()
@@ -45,6 +48,14 @@ class NewProjectBootstrapKitTests(unittest.TestCase):
                 self.assertIsNone(repository.get("full_name"))
                 self.assertIsNone(repository.get("id"))
             self.assertNotIn('"full_name": "boberino93-bit/', raw)
+
+    def test_recursive_pointer_is_unbound_and_canonical(self):
+        pointer = json.loads((ROOT / "templates" / "new-project" / "NEW_PROJECT_BOOTSTRAP.template.json").read_text())
+        self.assertEqual(pointer["source_project"]["repository_binding_state"], "UNBOUND")
+        self.assertIsNone(pointer["source_project"]["repository"])
+        self.assertEqual(pointer["canonical_kit"]["repository"], "boberino93-bit/intercommunicationsenhancements")
+        self.assertTrue(pointer["rules"]["materialize_this_pointer_in_every_seeded_project"])
+        self.assertFalse(pointer["local_reference"]["copy_identity_values"])
 
     def test_global_entrypoint_has_explicit_new_project_branch(self):
         entrypoint = json.loads((ROOT / "GLOBAL_AGENT_ENTRYPOINT.json").read_text())
