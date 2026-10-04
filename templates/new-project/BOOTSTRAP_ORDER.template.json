@@ -1,0 +1,34 @@
+{
+  "schema": "org-agent-mesh/bootstrap-order/v1",
+  "project_id": "{{PROJECT_ID}}",
+  "mode": "FAIL_CLOSED",
+  "repository_binding_state": "UNBOUND",
+  "sequence": [
+    "load PROJECT_IDENTITY_LOCK.json",
+    "verify project_id and authoritative forum namespace",
+    "load AGENT_BOOTSTRAP.json",
+    "read authoritative project forum before mutation",
+    "load PROJECT_MANIFEST.json and current handoff/state",
+    "assess communication visibility and state limitations explicitly",
+    "resolve authorized role",
+    "enter ACTIVE_PROJECT state",
+    "execute only inside project scope",
+    "persist handoff and forum message",
+    "bind GitHub later only on explicit repository creation or connection"
+  ],
+  "unbound_repository_rules": [
+    "repository full_name and id remain null",
+    "GitHub mutation is denied",
+    "repository mirror mode remains NONE",
+    "internal forum remains authoritative",
+    "research planning artifacts and handoffs remain allowed"
+  ],
+  "mutation_gate": [
+    "project identity resolved",
+    "forum namespace matched",
+    "role authorized",
+    "handoff read",
+    "communication visibility assessed"
+  ],
+  "conflict_policy": "STOP_BEFORE_MUTATION"
+}
