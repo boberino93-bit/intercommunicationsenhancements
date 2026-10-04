@@ -1,0 +1,53 @@
+{
+  "schema": "org-agent-mesh/project-role-routing-registry/v1",
+  "mode": "FAIL_CLOSED",
+  "resolution_key": ["project_id", "role_id"],
+  "required_startup_ack": "IDENTITY RESOLVED: project=<project_id>; role=<role_id>; forum=<forum_namespace>; repositories=<authorized_repositories>; state=<handoff_or_state_ref>",
+  "rules": {
+    "infer_repository_from_similarity": false,
+    "cross_project_write_default": "DENY",
+    "unknown_project": "STOP_BEFORE_MUTATION",
+    "unknown_role": "STOP_BEFORE_MUTATION",
+    "conflicting_identity": "STOP_BEFORE_MUTATION",
+    "forum_lookup_before_repository_mutation": true,
+    "handoff_lookup_before_repository_mutation": true,
+    "explicit_human_authorized_framework_rollout": "ALLOW_ONLY_TO_REGISTERED_TARGETS"
+  },
+  "projects": {
+    "intercommunicationsenhancements": {
+      "repository": "boberino93-bit/intercommunicationsenhancements",
+      "forum_namespace": "intercommunicationsenhancements::messages",
+      "artifact_namespace": "intercommunicationsenhancements::artifacts",
+      "handoff_paths": [".interagent/messages", "PROJECT_MANIFEST.json", "HARDENING_STATUS.md"],
+      "roles": ["primary", "manager", "research", "recovery", "qa", "build"]
+    },
+    "duo-open": {
+      "repository": "boberino93-bit/duo-open",
+      "forum_namespace": "duo-open::messages",
+      "artifact_namespace": "duo-open::artifacts",
+      "handoff_paths": [".interagent/messages", "PROJECT_MANIFEST.json", "START_HERE.md"],
+      "roles": ["primary", "manager", "research", "recovery", "qa", "build"]
+    },
+    "benefitflow": {
+      "repository": "boberino93-bit/benefitflow",
+      "forum_namespace": "benefitflow::messages",
+      "artifact_namespace": "benefitflow::artifacts",
+      "handoff_paths": [".interagent/messages", "PROJECT_MANIFEST.json", "START_HERE.md"],
+      "roles": ["primary", "manager", "research", "recovery", "qa", "build"]
+    },
+    "samsungpowerbootstrap": {
+      "repository": "boberino93-bit/samsungpowerbootstrap",
+      "forum_namespace": "samsungpowerbootstrap::messages",
+      "artifact_namespace": "samsungpowerbootstrap::artifacts",
+      "handoff_paths": [".interagent/messages", "PROJECT_MANIFEST.json", "START_HERE.md"],
+      "roles": ["primary", "manager", "research", "recovery", "qa", "build"]
+    },
+    "warp-propulsion-lab": {
+      "repository": "boberino93-bit/warp-propulsion-lab",
+      "forum_namespace": "warp-propulsion-lab::messages",
+      "artifact_namespace": "warp-propulsion-lab::artifacts",
+      "handoff_paths": [".interagent/messages", "PROJECT_MANIFEST.json", "START_HERE.md"],
+      "roles": ["primary", "manager", "research", "recovery", "qa", "build"]
+    }
+  }
+}
