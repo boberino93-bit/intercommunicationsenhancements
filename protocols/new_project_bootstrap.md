@@ -34,6 +34,9 @@ Required documents are:
 - `START_HERE.md`
 - `PROJECT_CHARTER.md`
 - `HARDENING_STATUS.md`
+- `NEW_PROJECT_BOOTSTRAP.json`
+
+The last document is a local factory pointer for the newly seeded project itself. This makes bootstrap capability recursive: every project created by this architecture can later seed another isolated project without inheriting the parent project's identity.
 
 Treat these as the minimum portable architecture. Project-specific files may be added after identity is locked.
 
@@ -47,7 +50,8 @@ While repository binding is `UNBOUND`:
 - do not copy the source project's repository ID;
 - do not mutate an unrelated existing repository on behalf of the new project;
 - keep repository mirror paths disabled (`NONE`);
-- keep the authoritative forum and artifact namespaces independent of GitHub.
+- keep the authoritative forum and artifact namespaces independent of GitHub;
+- keep the local `NEW_PROJECT_BOOTSTRAP.json` source-project repository field unbound.
 
 ## Phase 4 — Bind GitHub later
 
@@ -56,9 +60,10 @@ When the user explicitly creates, supplies, or connects a repository:
 1. Verify the repository full name and, when available, stable repository ID.
 2. Change repository binding from `UNBOUND` to `BOUND_VERIFIED` in `PROJECT_IDENTITY_LOCK.json`.
 3. Update repository blocks in `PROJECT_MANIFEST.json` and `AGENT_BOOTSTRAP.json`.
-4. Establish repository mirror/backup paths appropriate to the project.
-5. Add the project to `PROJECT_ROLE_ROUTING_REGISTRY.json` only after the repository identity is verified.
-6. Record the binding event in the new project's authoritative forum.
+4. Update the local `NEW_PROJECT_BOOTSTRAP.json` pointer so its `source_project.repository` identifies the now-verified repository.
+5. Establish repository mirror/backup paths appropriate to the project.
+6. Add the project to `PROJECT_ROLE_ROUTING_REGISTRY.json` only after the repository identity is verified.
+7. Record the binding event in the new project's authoritative forum.
 
 ## Discovery from any participating project
 
@@ -70,7 +75,7 @@ A newly launched agent that receives an explicit new-project request should ther
 2. read its `NEW_PROJECT_BOOTSTRAP.json` pointer;
 3. load this canonical protocol and template set;
 4. enter new-project seed mode without changing the current project's identity;
-5. create the new project's isolated namespaces and bootstrap documents.
+5. create the new project's isolated namespaces and bootstrap documents, including its own local project-factory pointer.
 
 ## Safety invariants
 
@@ -80,3 +85,4 @@ A newly launched agent that receives an explicit new-project request should ther
 - Repository identity is nullable until binding and must never be guessed.
 - Internal forum identity exists before repository identity.
 - A source project can provide architecture, never identity.
+- Every newly seeded project carries forward bootstrap discovery without copying its parent project's identity.
