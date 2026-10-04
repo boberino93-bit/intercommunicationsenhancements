@@ -1,0 +1,41 @@
+{
+  "schema": "org-agent-mesh/project-manifest/v1",
+  "project_id": "{{PROJECT_ID}}",
+  "project_name": "{{PROJECT_NAME}}",
+  "status": "BOOTSTRAPPED_UNBOUND",
+  "purpose": "{{PROJECT_PURPOSE}}",
+  "repository": {
+    "binding_state": "UNBOUND",
+    "full_name": null,
+    "id": null
+  },
+  "forum": {
+    "authority": "INTERNAL_ARTIFACTORY",
+    "namespace": "{{PROJECT_ID}}::messages",
+    "repository_view": {"mode": "NONE", "path": null}
+  },
+  "artifact_namespace": "{{PROJECT_ID}}::artifacts",
+  "bootstrap_contract": "AGENT_BOOTSTRAP.json",
+  "identity_lock": "PROJECT_IDENTITY_LOCK.json",
+  "bootstrap_order": "BOOTSTRAP_ORDER.json",
+  "human_entrypoint": "START_HERE.md",
+  "charter": "PROJECT_CHARTER.md",
+  "hardening_status": "HARDENING_STATUS.md",
+  "roles": ["primary", "manager", "research", "recovery", "qa", "build"],
+  "architecture_source": {
+    "repository": "boberino93-bit/intercommunicationsenhancements",
+    "kit": "NEW_PROJECT_BOOTSTRAP.json",
+    "protocol": "protocols/new_project_bootstrap.md"
+  },
+  "directories": [
+    ".interagent/messages",
+    ".interagent/directives",
+    ".interagent/capacity",
+    ".interagent/state",
+    ".swarm"
+  ],
+  "registration": {
+    "central_registry": "boberino93-bit/intercommunicationsenhancements:PROJECT_ROLE_ROUTING_REGISTRY.json",
+    "state": "PENDING_REPOSITORY_BINDING"
+  }
+}
