@@ -1,0 +1,63 @@
+{
+  "schema": "org-agent-mesh/new-project-entrypoint/v1-draft",
+  "status": "DESIGN_DRAFT_NON_AUTHORITATIVE",
+  "purpose": "Initialize a brand-new isolated Organization Agent Mesh project from a human project idea.",
+  "documentation": "design/NEW_PROJECT_INITIALIZER.md",
+  "implementation": {
+    "module": "design/ipg3_project_initializer.py",
+    "class": "ProjectInitializer",
+    "begin_operation": "begin",
+    "resume_operation": "resume",
+    "github_binding_operation": "bind_github"
+  },
+  "internal_coordination_plane": {
+    "required": true,
+    "backend_contract": "InternalBoardBackend",
+    "default_projects_root": "projects",
+    "default_namespace": "projects/<project_id>",
+    "must_precede_github_prompt": true,
+    "fallback_to_github_storage": false
+  },
+  "initial_internal_structure": [
+    "bootstrap",
+    "identity",
+    "forums/primary",
+    "forums/managers",
+    "forums/research",
+    "queues",
+    "handoffs",
+    "evidence",
+    "audit",
+    "swarm",
+    "artifacts"
+  ],
+  "github_binding": {
+    "required": true,
+    "verifier_contract": "GitHubRepositoryVerifier",
+    "requirements": {
+      "repository_resolves": true,
+      "repository_public": true,
+      "chatgpt_github_connector_accessible": true
+    },
+    "user_prompt": "Please provide the GitHub repository for this project. It must be publicly shared and accessible through the GitHub integration connected to ChatGPT.",
+    "binding_must_not_occur_before_internal_namespace": true,
+    "silent_rebind_after_completion": false
+  },
+  "completion": {
+    "required_phase": "COMPLETE",
+    "next_action": "START_PRIMARY_EXECUTION",
+    "primary_handoff": "handoffs/primary-bootstrap.json",
+    "next_protocol": "design/ADAPTIVE_SWARM_REGULATION.md"
+  },
+  "recovery": {
+    "interruptible": true,
+    "same_intent_resume_is_idempotent": true,
+    "conflicting_intent_fails_closed": true,
+    "ambiguous_existing_namespace_fails_closed": true
+  },
+  "security": {
+    "internal_board_is_coordination_source_of_truth": true,
+    "github_binding_does_not_grant_project_authority": true,
+    "project_session_capability_checks_still_required": true
+  }
+}
