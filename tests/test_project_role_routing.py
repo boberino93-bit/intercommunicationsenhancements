@@ -12,6 +12,7 @@ from org_agent_mesh.project_role_routing import (
 ROOT = Path(__file__).resolve().parents[1]
 REGISTRY = {
     "schema": "org-agent-mesh/project-role-routing-registry/v1",
+    "routing_contract_version": "1.2.0",
     "mode": "FAIL_CLOSED",
     "projects": {
         "alpha": {
@@ -135,6 +136,38 @@ class ProjectRoleRoutingTests(unittest.TestCase):
         local_contract = json.loads((ROOT / "AGENT_BOOTSTRAP.json").read_text())
         validate_local_contract(registry, project_id="intercommunicationsenhancements", contract=local_contract)
         self.assertEqual(local_contract.get("communication_awareness"), awareness)
+
+    def test_v13_requires_communication_awareness(self):
+        registry = json.loads((ROOT / "PROJECT_ROLE_ROUTING_REGISTRY.json").read_text())
+        registry.pop("communication_awareness")
+        with self.assertRaisesRegex(RoutingError, "missing_communication_awareness"):
+            validate_registry(registry)
+
+    def test_v13_rejects_permissive_visibility_default(self):
+        registry = json.loads((ROOT / "PROJECT_ROLE_ROUTING_REGISTRY.json").read_text())
+        registry["communication_awareness"]["default_visibility_claim"] = "FULL"
+        with self.assertRaisesRegex(RoutingError, "unsafe_default_visibility_claim"):
+            validate_registry(registry)
+
+    def test_v13_rejects_disabled_overclaim_guard(self):
+        registry = json.loads((ROOT / "PROJECT_ROLE_ROUTING_REGISTRY.json").read_text())
+        registry["rules"]["never_claim_all_communications_from_mirror_snapshot_or_handoff"] = False
+        with self.assertRaisesRegex(RoutingError, "communication_overclaim_guard_disabled"):
+            validate_registry(registry)
+
+    def test_v13_local_contract_awareness_drift_fails_closed(self):
+        registry = json.loads((ROOT / "PROJECT_ROLE_ROUTING_REGISTRY.json").read_text())
+        contract = json.loads((ROOT / "AGENT_BOOTSTRAP.json").read_text())
+        contract["communication_awareness"]["required_on_visibility_question"] = False
+        with self.assertRaisesRegex(RoutingError, "local_contract_communication_awareness_mismatch"):
+            validate_local_contract(registry, project_id="intercommunicationsenhancements", contract=contract)
+
+    def test_v13_local_contract_cannot_disable_visibility_assessment(self):
+        registry = json.loads((ROOT / "PROJECT_ROLE_ROUTING_REGISTRY.json").read_text())
+        contract = json.loads((ROOT / "AGENT_BOOTSTRAP.json").read_text())
+        contract["rules"]["communication_assessment_before_visibility_claim"] = False
+        with self.assertRaisesRegex(RoutingError, "unsafe_local_rule_communication_assessment_before_visibility_claim"):
+            validate_local_contract(registry, project_id="intercommunicationsenhancements", contract=contract)
 
     def test_routing_contract_is_dependency_closed_for_role_packages(self):
         dependency_map = json.loads((ROOT / "packaging" / "agent_package_dependencies.json").read_text())
