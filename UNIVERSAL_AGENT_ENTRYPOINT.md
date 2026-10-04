@@ -8,14 +8,31 @@ This repository is the **routing rendezvous**, not automatically the target proj
 - machine contract: `GLOBAL_AGENT_ENTRYPOINT.json`
 - project routing registry: `PROJECT_ROLE_ROUTING_REGISTRY.json`
 - detailed protocol: `protocols/universal_task_routing.md`
+- new-project bootstrap kit: `NEW_PROJECT_BOOTSTRAP.json`
 
 ## Unbound rule
 
 Start in `UNBOUND`. While unbound, the agent has **no project mutation authority**. It may read the global routing contract and registered routing metadata only to identify the target. It must not write into this repository, a candidate project, or any project forum merely because that source helped with discovery.
 
+## Explicit new-project branch
+
+An explicit human request to **create, start, seed, or bootstrap a new project** is not an unresolved-existing-project error. It enters the `UNBOUND_PROJECT_SEED` branch defined in `GLOBAL_AGENT_ENTRYPOINT.json` and `NEW_PROJECT_BOOTSTRAP.json`.
+
+For that branch:
+
+1. do not select an existing registered project by topic similarity;
+2. use the current project, if any, only as an architecture reference;
+3. create the new project's own project ID, identity lock, forum namespace, artifact namespace, manifest, bootstrap order, handoff entrypoint, charter, and hardening record from the canonical templates;
+4. set repository binding to `UNBOUND`, with repository full name and ID set to `null`;
+5. allow project planning, research, internal forum work, artifacts, and handoffs before GitHub exists;
+6. deny GitHub mutation until a repository is explicitly created or connected;
+7. when a repository is later connected, verify its identity, update the local contracts, then add the project to the central routing registry.
+
+The source project's repository, forum namespace, artifact namespace, and project-specific state must never be inherited by the new project.
+
 ## Project discovery
 
-Resolve exactly one registered project using strong evidence, in this order:
+For work targeting an existing project, resolve exactly one registered project using strong evidence, in this order:
 
 1. a project ID explicitly named by the human;
 2. an exact registered repository full name/URL or stable repository ID;
@@ -35,9 +52,9 @@ For a normal human-launched generic agent with an actionable task and no role as
 
 If no actionable human task and no role are present, remain unbound.
 
-## Binding the project
+## Binding an existing project
 
-After project discovery:
+After existing-project discovery:
 
 1. switch to the registered target repository;
 2. verify the repository full name and stable repository ID when available;
@@ -62,12 +79,16 @@ Once bound, work as though the agent had been launched inside that project from 
 
 ## Required acknowledgements
 
-During discovery:
+During existing-project discovery:
 
 `PROJECT DISCOVERED: project=<project_id>; repository=<repository>; forum=<forum_namespace>; evidence=<evidence>; mutation_ready=false`
 
 After universal role routing:
 
 `UNBOUND ROUTE RESOLVED: project=<project_id>; role=<role_id>; role_source=<source>; repository=<repository>; forum=<forum_namespace>; mutation_ready=false`
+
+For a new project seed:
+
+`NEW PROJECT SEEDED: project=<project_id>; forum=<forum_namespace>; artifacts=<artifact_namespace>; repository_binding=UNBOUND; templates=<materialized_documents>; next=<work_or_repository_binding>`
 
 Then use the target project's existing `IDENTITY RESOLVED` and `COMMUNICATIONS ASSESSED` acknowledgements during normal bootstrap.
