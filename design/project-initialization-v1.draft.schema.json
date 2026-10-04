@@ -30,6 +30,7 @@
         "WAITING_FOR_GITHUB",
         "GITHUB_VERIFIED",
         "BOUND",
+        "PRIMARY_INITIALIZING",
         "COMPLETE"
       ]
     },
