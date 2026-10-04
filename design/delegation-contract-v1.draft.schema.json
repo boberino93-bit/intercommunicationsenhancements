@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "org-agent-mesh/delegation-contract/v1-draft",
+  "title": "Organization Agent Mesh Delegation Contract v1 Draft",
+  "description": "Non-authoritative IPG3 design schema for bounded agent delegation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "contract_id",
+    "project_id",
+    "created_at_utc",
+    "expires_at_utc",
+    "delegator",
+    "assignee",
+    "objective",
+    "scope",
+    "source_of_truth",
+    "allowed_tools",
+    "capability_ceiling",
+    "write_boundaries",
+    "evidence_requirements",
+    "output_contract",
+    "completion_criteria",
+    "failure_criteria",
+    "parent_task_id",
+    "parent_trace_id",
+    "status",
+    "integrity"
+  ],
+  "properties": {
+    "schema": {"const": "org-agent-mesh/delegation-contract/v1-draft"},
+    "contract_id": {"$ref": "#/$defs/resourceId"},
+    "project_id": {"$ref": "#/$defs/projectId"},
+    "created_at_utc": {"type": "string", "format": "date-time"},
+    "expires_at_utc": {"type": ["string", "null"], "format": "date-time"},
+    "delegator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["agent_id", "agent_instance_id", "role"],
+      "properties": {
+        "agent_id": {"type": "string", "minLength": 1},
+        "agent_instance_id": {"type": "string", "minLength": 1},
+        "role": {"type": "string", "minLength": 1}
+      }
+    },
+    "assignee": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "id"],
+      "properties": {
+        "type": {"enum": ["AGENT", "ROLE", "SELECTOR"]},
+        "id": {"type": "string", "minLength": 1}
+      }
+    },
+    "objective": {"type": "string", "minLength": 1},
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["in_scope", "out_of_scope"],
+      "properties": {
+        "in_scope": {"type": "array", "items": {"type": "string"}},
+        "out_of_scope": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "source_of_truth": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "minItems": 1
+    },
+    "allowed_tools": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "uniqueItems": true
+    },
+    "capability_ceiling": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "uniqueItems": true
+    },
+    "write_boundaries": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1}
+    },
+    "evidence_requirements": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1}
+    },
+    "output_contract": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "completion_criteria": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "minItems": 1
+    },
+    "failure_criteria": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1}
+    },
+    "parent_task_id": {"type": ["string", "null"]},
+    "parent_trace_id": {"type": ["string", "null"]},
+    "status": {
+      "enum": ["ISSUED", "ACCEPTED", "ACTIVE", "COMPLETED", "FAILED", "CANCELLED", "EXPIRED", "REJECTED"]
+    },
+    "integrity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contract_sha256", "signature"],
+      "properties": {
+        "contract_sha256": {"anyOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]},
+        "signature": {"type": ["object", "null"]}
+      }
+    }
+  },
+  "$defs": {
+    "projectId": {"type": "string", "pattern": "^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$"},
+    "resourceId": {"type": "string", "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9._:-]*[A-Za-z0-9])?$"},
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}
