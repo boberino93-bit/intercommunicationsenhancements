@@ -113,6 +113,47 @@ def validate_registry(registry: Mapping[str, Any]) -> None:
             raise RoutingError("invalid_routing_contract_version")
 
 
+def validate_local_contract(
+    registry: Mapping[str, Any],
+    *,
+    project_id: str,
+    contract: Mapping[str, Any],
+) -> None:
+    validate_registry(registry)
+    project = registry["projects"].get(project_id)
+    if not isinstance(project, Mapping):
+        raise RoutingError("unknown_project")
+
+    if contract.get("schema") != "org-agent-mesh/local-agent-bootstrap/v1":
+        raise RoutingError("unsupported_local_contract_schema")
+    if contract.get("mode") != "FAIL_CLOSED":
+        raise RoutingError("local_contract_not_fail_closed")
+    if contract.get("project_id") != project_id:
+        raise RoutingError("local_contract_project_mismatch")
+    if contract.get("routing_contract_version") != project.get("routing_contract_version"):
+        raise RoutingError("local_contract_version_mismatch")
+
+    repository = contract.get("repository")
+    if not isinstance(repository, Mapping):
+        raise RoutingError("invalid_local_repository")
+    if repository.get("full_name") != project.get("repository"):
+        raise RoutingError("local_contract_repository_mismatch")
+    expected_repository_id = project.get("repository_id")
+    if expected_repository_id is not None and repository.get("id") != expected_repository_id:
+        raise RoutingError("local_contract_repository_id_mismatch")
+
+    forum = contract.get("forum")
+    if not isinstance(forum, Mapping) or forum.get("namespace") != project.get("forum_namespace"):
+        raise RoutingError("local_contract_forum_mismatch")
+    if contract.get("artifact_namespace") != project.get("artifact_namespace"):
+        raise RoutingError("local_contract_artifact_namespace_mismatch")
+
+    if contract.get("handoff_paths") != project.get("handoff_paths"):
+        raise RoutingError("local_contract_handoff_mismatch")
+    if contract.get("authorized_roles") != project.get("roles"):
+        raise RoutingError("local_contract_roles_mismatch")
+
+
 def resolve_route(
     registry: Mapping[str, Any],
     *,
