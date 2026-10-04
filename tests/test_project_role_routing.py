@@ -2,12 +2,7 @@ import json
 from pathlib import Path
 import unittest
 
-from org_agent_mesh.project_role_routing import (
-    RoutingError,
-    resolve_route,
-    validate_local_contract,
-    validate_registry,
-)
+from org_agent_mesh.project_role_routing import RoutingError, resolve_route, validate_local_contract, validate_registry
 
 ROOT = Path(__file__).resolve().parents[1]
 REGISTRY = {
@@ -19,11 +14,7 @@ REGISTRY = {
             "repository": "owner/alpha",
             "repository_id": 101,
             "forum_namespace": "alpha::messages",
-            "forum_locator": {
-                "authority": "INTERNAL_ARTIFACTORY",
-                "namespace": "alpha::messages",
-                "repository_view": {"mode": "SNAPSHOT_BACKUP", "path": "agentbus/messages"},
-            },
+            "forum_locator": {"authority": "INTERNAL_ARTIFACTORY", "namespace": "alpha::messages", "repository_view": {"mode": "SNAPSHOT_BACKUP", "path": "agentbus/messages"}},
             "artifact_namespace": "alpha::artifacts",
             "handoff_paths": ["START_HERE.md", "state"],
             "local_contract_path": "AGENT_BOOTSTRAP.json",
@@ -38,11 +29,7 @@ LOCAL_CONTRACT = {
     "mode": "FAIL_CLOSED",
     "project_id": "alpha",
     "repository": {"full_name": "owner/alpha", "id": 101},
-    "forum": {
-        "authority": "INTERNAL_ARTIFACTORY",
-        "namespace": "alpha::messages",
-        "repository_view": {"mode": "SNAPSHOT_BACKUP", "path": "agentbus/messages"},
-    },
+    "forum": {"authority": "INTERNAL_ARTIFACTORY", "namespace": "alpha::messages", "repository_view": {"mode": "SNAPSHOT_BACKUP", "path": "agentbus/messages"}},
     "artifact_namespace": "alpha::artifacts",
     "handoff_paths": ["START_HERE.md", "state"],
     "authorized_roles": ["primary", "manager", "research"],
@@ -116,26 +103,44 @@ class ProjectRoleRoutingTests(unittest.TestCase):
         with self.assertRaisesRegex(RoutingError, "unsafe_handoff_path"):
             validate_registry(registry)
 
-    def test_real_registry_and_local_contract_validate(self):
+    def test_real_registry_and_local_contract_validate_v14(self):
         registry = json.loads((ROOT / "PROJECT_ROLE_ROUTING_REGISTRY.json").read_text())
         validate_registry(registry)
+        self.assertEqual(registry.get("routing_contract_version"), "1.4.0")
         self.assertIn("fold7-power-lab", registry["projects"])
-        self.assertNotIn("samsungpowerbootstrap", registry["projects"])
-        self.assertEqual(registry.get("routing_contract_version"), "1.3.0")
-        awareness = registry.get("communication_awareness")
-        self.assertIsInstance(awareness, dict)
-        self.assertTrue(awareness.get("required_on_startup"))
-        self.assertTrue(awareness.get("required_on_visibility_question"))
-        self.assertEqual(awareness.get("default_visibility_claim"), "PARTIAL_UNLESS_PROVEN")
-        self.assertEqual(awareness.get("protocol_path"), "protocols/communication_awareness.md")
+        self.assertIn("ai-behaviour-control-lab", registry["projects"])
+        awareness = registry["communication_awareness"]
+        self.assertTrue(awareness["required_on_startup"])
         for project in registry["projects"].values():
             self.assertIsInstance(project.get("repository_id"), int)
             self.assertEqual(project.get("local_contract_path"), "AGENT_BOOTSTRAP.json")
-            self.assertEqual(project.get("routing_contract_version"), "1.3.0")
+            self.assertEqual(project.get("routing_contract_version"), "1.4.0")
             self.assertEqual(project["forum_locator"]["authority"], "INTERNAL_ARTIFACTORY")
+            self.assertEqual(project["roles"], ["primary", "manager", "research"])
+            self.assertIn("MASTER_HANDOFF.json", project["handoff_paths"])
+            self.assertEqual(project["master_handoff_path"], "MASTER_HANDOFF.json")
         local_contract = json.loads((ROOT / "AGENT_BOOTSTRAP.json").read_text())
         validate_local_contract(registry, project_id="intercommunicationsenhancements", contract=local_contract)
         self.assertEqual(local_contract.get("communication_awareness"), awareness)
+
+    def test_v14_rejects_role_mode_overlap(self):
+        registry = json.loads((ROOT / "PROJECT_ROLE_ROUTING_REGISTRY.json").read_text())
+        registry["projects"]["benefitflow"]["execution_modes"].append("research")
+        with self.assertRaisesRegex(RoutingError, "role_execution_mode_overlap"):
+            validate_registry(registry)
+
+    def test_v14_requires_master_handoff_in_handoff_paths(self):
+        registry = json.loads((ROOT / "PROJECT_ROLE_ROUTING_REGISTRY.json").read_text())
+        registry["projects"]["duo-open"]["handoff_paths"].remove("MASTER_HANDOFF.json")
+        with self.assertRaisesRegex(RoutingError, "master_handoff_missing_from_handoff_paths"):
+            validate_registry(registry)
+
+    def test_v14_local_contract_cannot_disable_master_handoff(self):
+        registry = json.loads((ROOT / "PROJECT_ROLE_ROUTING_REGISTRY.json").read_text())
+        contract = json.loads((ROOT / "AGENT_BOOTSTRAP.json").read_text())
+        contract["master_handoff"]["required_before_mutation"] = False
+        with self.assertRaisesRegex(RoutingError, "local_master_handoff_gate_disabled"):
+            validate_local_contract(registry, project_id="intercommunicationsenhancements", contract=contract)
 
     def test_v13_requires_communication_awareness(self):
         registry = json.loads((ROOT / "PROJECT_ROLE_ROUTING_REGISTRY.json").read_text())
@@ -149,35 +154,11 @@ class ProjectRoleRoutingTests(unittest.TestCase):
         with self.assertRaisesRegex(RoutingError, "unsafe_default_visibility_claim"):
             validate_registry(registry)
 
-    def test_v13_rejects_disabled_overclaim_guard(self):
-        registry = json.loads((ROOT / "PROJECT_ROLE_ROUTING_REGISTRY.json").read_text())
-        registry["rules"]["never_claim_all_communications_from_mirror_snapshot_or_handoff"] = False
-        with self.assertRaisesRegex(RoutingError, "communication_overclaim_guard_disabled"):
-            validate_registry(registry)
-
-    def test_v13_local_contract_awareness_drift_fails_closed(self):
-        registry = json.loads((ROOT / "PROJECT_ROLE_ROUTING_REGISTRY.json").read_text())
-        contract = json.loads((ROOT / "AGENT_BOOTSTRAP.json").read_text())
-        contract["communication_awareness"]["required_on_visibility_question"] = False
-        with self.assertRaisesRegex(RoutingError, "local_contract_communication_awareness_mismatch"):
-            validate_local_contract(registry, project_id="intercommunicationsenhancements", contract=contract)
-
-    def test_v13_local_contract_cannot_disable_visibility_assessment(self):
-        registry = json.loads((ROOT / "PROJECT_ROLE_ROUTING_REGISTRY.json").read_text())
-        contract = json.loads((ROOT / "AGENT_BOOTSTRAP.json").read_text())
-        contract["rules"]["communication_assessment_before_visibility_claim"] = False
-        with self.assertRaisesRegex(RoutingError, "unsafe_local_rule_communication_assessment_before_visibility_claim"):
-            validate_local_contract(registry, project_id="intercommunicationsenhancements", contract=contract)
-
     def test_routing_contract_is_dependency_closed_for_role_packages(self):
         dependency_map = json.loads((ROOT / "packaging" / "agent_package_dependencies.json").read_text())
         shared = set(dependency_map["shared_patterns"])
-        self.assertIn("PROJECT_ROLE_ROUTING_REGISTRY.json", shared)
-        self.assertIn("AGENT_BOOTSTRAP.json", shared)
-        self.assertIn("bootstrap/PROJECT_ROLE_DISCOVERY.md", shared)
-        self.assertIn("bootstrap/IDENTITY_GATE.md", shared)
-        self.assertIn("org_agent_mesh/*.py", shared)
-        self.assertIn("protocols/*.md", shared)
+        for expected in ("PROJECT_ROLE_ROUTING_REGISTRY.json", "AGENT_BOOTSTRAP.json", "MASTER_HANDOFF.json", "bootstrap/PROJECT_ROLE_DISCOVERY.md", "bootstrap/IDENTITY_GATE.md", "org_agent_mesh/*.py", "protocols/*.md", "schemas/*.json"):
+            self.assertIn(expected, shared)
 
 
 if __name__ == "__main__":

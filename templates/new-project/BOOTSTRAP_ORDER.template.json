@@ -1,34 +1,10 @@
 {
-  "schema": "org-agent-mesh/bootstrap-order/v1",
+  "schema": "org-agent-mesh/bootstrap-order/v2",
   "project_id": "{{PROJECT_ID}}",
   "mode": "FAIL_CLOSED",
   "repository_binding_state": "UNBOUND",
-  "sequence": [
-    "load PROJECT_IDENTITY_LOCK.json",
-    "verify project_id and authoritative forum namespace",
-    "load AGENT_BOOTSTRAP.json",
-    "read authoritative project forum before mutation",
-    "load PROJECT_MANIFEST.json and current handoff/state",
-    "assess communication visibility and state limitations explicitly",
-    "resolve authorized role",
-    "enter ACTIVE_PROJECT state",
-    "execute only inside project scope",
-    "persist handoff and forum message",
-    "bind GitHub later only on explicit repository creation or connection"
-  ],
-  "unbound_repository_rules": [
-    "repository full_name and id remain null",
-    "GitHub mutation is denied",
-    "repository mirror mode remains NONE",
-    "internal forum remains authoritative",
-    "research planning artifacts and handoffs remain allowed"
-  ],
-  "mutation_gate": [
-    "project identity resolved",
-    "forum namespace matched",
-    "role authorized",
-    "handoff read",
-    "communication visibility assessed"
-  ],
+  "sequence": ["load PROJECT_IDENTITY_LOCK.json", "verify project_id and authoritative forum namespace", "load AGENT_BOOTSTRAP.json", "bind authority role, execution mode and unique agent_instance_id", "read MASTER_HANDOFF.json before scanning historical coordination state", "read only handoff-referenced project forum/state needed for the current task", "assess communication visibility and state limitations explicitly", "classify the requested task before any swarm READY or lease mutation", "enter ACTIVE_PROJECT state", "execute only inside project scope", "manually checkpoint MASTER_HANDOFF.json after material state transitions and before yield", "bind GitHub later only on explicit repository creation or connection"],
+  "unbound_repository_rules": ["repository full_name and id remain null", "GitHub mutation is denied", "repository mirror mode remains NONE", "internal forum remains authoritative", "research planning artifacts and handoffs remain allowed"],
+  "mutation_gate": ["project identity resolved", "forum namespace matched", "role authorized", "execution instance bound", "MASTER_HANDOFF.json read", "communication visibility assessed", "task classified"],
   "conflict_policy": "STOP_BEFORE_MUTATION"
 }

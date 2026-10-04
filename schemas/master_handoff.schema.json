@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "org-agent-mesh/master-handoff/v1",
+  "title": "Project Master Handoff",
+  "type": "object",
+  "required": ["schema", "project_id", "generation", "updated_at_utc", "updated_by", "authority", "current_objective", "source_state", "active_agents", "expired_agents", "workstreams", "blockers", "pending_actions", "recent_refs", "latest_checkpoints"],
+  "properties": {
+    "schema": {"const": "org-agent-mesh/master-handoff/v1"},
+    "project_id": {"type": "string", "minLength": 1},
+    "generation": {"type": "integer", "minimum": 0},
+    "updated_at_utc": {"type": "string", "format": "date-time"},
+    "updated_by": {
+      "type": "object",
+      "required": ["agent_id", "agent_instance_id", "role"],
+      "properties": {
+        "agent_id": {"type": "string", "minLength": 1},
+        "agent_instance_id": {"type": "string", "minLength": 1},
+        "role": {"enum": ["PRIMARY", "MANAGER", "RESEARCH"]},
+        "execution_mode": {"type": ["string", "null"]}
+      },
+      "additionalProperties": false
+    },
+    "authority": {
+      "type": "object",
+      "required": ["canonical_coordination", "master_handoff_authority", "repository_mirror_role"],
+      "properties": {
+        "canonical_coordination": {"type": "string", "minLength": 1},
+        "master_handoff_authority": {"type": "string", "minLength": 1},
+        "repository_mirror_role": {"enum": ["CANONICAL", "LIVE_MIRROR", "RECOVERY_ONLY", "SOURCE_MIRROR", "NONE"]}
+      },
+      "additionalProperties": true
+    },
+    "current_objective": {"type": "string"},
+    "source_state": {
+      "type": "object",
+      "required": ["repository", "revision"],
+      "properties": {
+        "repository": {"type": ["string", "null"]},
+        "revision": {"type": ["string", "null"]},
+        "release": {"type": ["string", "null"]},
+        "package_set": {"type": ["string", "null"]}
+      },
+      "additionalProperties": true
+    },
+    "active_agents": {"type": "array", "items": {"$ref": "#/$defs/agentState"}},
+    "expired_agents": {"type": "array", "items": {"$ref": "#/$defs/agentState"}},
+    "workstreams": {"type": "array", "items": {"type": "object"}},
+    "blockers": {"type": "array", "items": {"type": "object"}},
+    "pending_actions": {"type": "array", "items": {"type": "object"}},
+    "recent_refs": {"type": "array", "items": {"type": "string"}},
+    "latest_checkpoints": {"type": "array", "items": {"type": "string"}}
+  },
+  "$defs": {
+    "agentState": {
+      "type": "object",
+      "required": ["agent_id", "agent_instance_id", "role", "status", "last_checkpoint_utc", "summary", "next_action"],
+      "properties": {
+        "agent_id": {"type": "string", "minLength": 1},
+        "agent_instance_id": {"type": "string", "minLength": 1},
+        "role": {"enum": ["PRIMARY", "MANAGER", "RESEARCH"]},
+        "execution_mode": {"type": ["string", "null"]},
+        "status": {"enum": ["ACTIVE", "IDLE", "HANDOFF_READY", "EXPIRED", "STALE", "COMPLETE"]},
+        "task_id": {"type": ["string", "null"]},
+        "last_checkpoint_utc": {"type": "string", "format": "date-time"},
+        "summary": {"type": "string"},
+        "next_action": {"type": "string"},
+        "evidence_refs": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

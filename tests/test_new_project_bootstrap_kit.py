@@ -12,33 +12,14 @@ class NewProjectBootstrapKitTests(unittest.TestCase):
         self.assertFalse(kit["seed_state"]["github_required_to_start"])
         self.assertIsNone(kit["seed_state"]["repository_view"]["path"])
         self.assertTrue(kit["recursion"]["every_seeded_project_materializes_local_factory_pointer"])
-
         outputs = {item["output"] for item in kit["required_documents"]}
-        self.assertEqual(
-            outputs,
-            {
-                "AGENT_BOOTSTRAP.json",
-                "PROJECT_IDENTITY_LOCK.json",
-                "PROJECT_MANIFEST.json",
-                "BOOTSTRAP_ORDER.json",
-                "START_HERE.md",
-                "PROJECT_CHARTER.md",
-                "HARDENING_STATUS.md",
-                "NEW_PROJECT_BOOTSTRAP.json",
-            },
-        )
-
+        self.assertEqual(outputs, {"AGENT_BOOTSTRAP.json", "PROJECT_IDENTITY_LOCK.json", "PROJECT_MANIFEST.json", "BOOTSTRAP_ORDER.json", "MASTER_HANDOFF.json", "START_HERE.md", "PROJECT_CHARTER.md", "HARDENING_STATUS.md", "NEW_PROJECT_BOOTSTRAP.json"})
+        self.assertIn(".interagent/handoffs", kit["required_directories"])
         for item in kit["required_documents"]:
             self.assertTrue((ROOT / item["template"]).is_file(), item["template"])
 
     def test_json_templates_parse_and_do_not_bind_source_repository(self):
-        template_names = [
-            "AGENT_BOOTSTRAP.template.json",
-            "PROJECT_IDENTITY_LOCK.template.json",
-            "PROJECT_MANIFEST.template.json",
-            "BOOTSTRAP_ORDER.template.json",
-            "NEW_PROJECT_BOOTSTRAP.template.json",
-        ]
+        template_names = ["AGENT_BOOTSTRAP.template.json", "PROJECT_IDENTITY_LOCK.template.json", "PROJECT_MANIFEST.template.json", "BOOTSTRAP_ORDER.template.json", "MASTER_HANDOFF.template.json", "NEW_PROJECT_BOOTSTRAP.template.json"]
         for name in template_names:
             raw = (ROOT / "templates" / "new-project" / name).read_text()
             parsed = json.loads(raw)
@@ -55,6 +36,7 @@ class NewProjectBootstrapKitTests(unittest.TestCase):
         self.assertIsNone(pointer["source_project"]["repository"])
         self.assertEqual(pointer["canonical_kit"]["repository"], "boberino93-bit/intercommunicationsenhancements")
         self.assertTrue(pointer["rules"]["materialize_this_pointer_in_every_seeded_project"])
+        self.assertTrue(pointer["rules"]["new_project_must_receive_master_handoff"])
         self.assertFalse(pointer["local_reference"]["copy_identity_values"])
 
     def test_global_entrypoint_has_explicit_new_project_branch(self):
@@ -65,11 +47,15 @@ class NewProjectBootstrapKitTests(unittest.TestCase):
         self.assertEqual(branch["source_project_identity_inheritance"], "DENY")
         self.assertEqual(branch["cross_project_mutation"], "DENY")
 
-    def test_local_bootstrap_exposes_project_factory(self):
+    def test_local_bootstrap_exposes_project_factory_and_master_handoff(self):
         bootstrap = json.loads((ROOT / "AGENT_BOOTSTRAP.json").read_text())
         self.assertEqual(bootstrap["project_factory"]["pointer"], "NEW_PROJECT_BOOTSTRAP.json")
         self.assertTrue(bootstrap["project_factory"]["supports_unbound_repository"])
         self.assertIn("NEW_PROJECT_BOOTSTRAP.json", bootstrap["handoff_paths"])
+        self.assertIn("MASTER_HANDOFF.json", bootstrap["handoff_paths"])
+        self.assertTrue(bootstrap["master_handoff"]["manual_checkpoint_required"])
+        self.assertEqual(bootstrap["authorized_roles"], ["primary", "manager", "research"])
+        self.assertIn("recovery", bootstrap["execution_modes"])
 
 
 if __name__ == "__main__":

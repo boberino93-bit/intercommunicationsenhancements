@@ -1,0 +1,17 @@
+{
+  "schema": "org-agent-mesh/master-handoff/v1",
+  "project_id": "{{PROJECT_ID}}",
+  "generation": 0,
+  "updated_at_utc": "{{CREATED_AT_UTC}}",
+  "updated_by": {"agent_id": "bootstrap", "agent_instance_id": "{{BOOTSTRAP_AGENT_INSTANCE_ID}}", "role": "PRIMARY", "execution_mode": "BUILD"},
+  "authority": {"canonical_coordination": "{{FORUM_NAMESPACE}}", "master_handoff_authority": "INTERNAL_ARTIFACTORY", "repository_mirror_role": "NONE"},
+  "current_objective": "Bootstrap project continuity state.",
+  "source_state": {"repository": null, "revision": null, "release": null, "package_set": null},
+  "active_agents": [],
+  "expired_agents": [],
+  "workstreams": [],
+  "blockers": [],
+  "pending_actions": [{"priority": 1, "action": "Bind repository identity when explicitly created or connected."}],
+  "recent_refs": ["PROJECT_MANIFEST.json", "PROJECT_IDENTITY_LOCK.json"],
+  "latest_checkpoints": []
+}

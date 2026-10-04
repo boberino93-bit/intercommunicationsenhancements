@@ -1,0 +1,17 @@
+{
+  "schema": "org-agent-mesh/master-handoff/v1",
+  "project_id": "intercommunicationsenhancements",
+  "generation": 2,
+  "updated_at_utc": "2026-10-04T09:40:00Z",
+  "updated_by": {"agent_id": "primary-alignment", "agent_instance_id": "primary-alignment-20261004T093500Z", "role": "PRIMARY", "execution_mode": "RECOVERY"},
+  "authority": {"canonical_coordination": "intercommunicationsenhancements::messages", "master_handoff_authority": "INTERNAL_ARTIFACTORY_WITH_REPOSITORY_LIVE_MIRROR", "repository_mirror_role": "LIVE_MIRROR"},
+  "current_objective": "Converge the intercommunication/swarm framework and participating projects on one role, routing, instance-fencing, capacity, and durable handoff model.",
+  "source_state": {"repository": "boberino93-bit/intercommunicationsenhancements", "revision": "PENDING_CURRENT_ALIGNMENT_COMMIT", "release": "1.6.0-alpha.1", "package_set": "REBUILD_REQUIRED_FOR_ALIGNMENT_COMMIT"},
+  "active_agents": [{"agent_id": "primary-alignment", "agent_instance_id": "primary-alignment-20261004T093500Z", "role": "PRIMARY", "execution_mode": "RECOVERY", "status": "ACTIVE", "task_id": "cross-project-alignment-handoff-v1", "last_checkpoint_utc": "2026-10-04T09:40:00Z", "summary": "Reference-framework alignment tree complete; CI and peer-project propagation remain.", "next_action": "Advance main, validate exact-SHA CI, then propagate v1.4/bootstrap/kernel/handoff semantics to each registered project and canonical AgentBus.", "evidence_refs": ["protocols/agent_state_handoff.md", "PROJECT_ROLE_ROUTING_REGISTRY.json", "BOOTSTRAP_ORDER.json", "swarm_kernel/kernel.py", "tests/test_alignment_contracts.py"]}],
+  "expired_agents": [],
+  "workstreams": [{"id": "framework-alignment", "status": "READY_FOR_VALIDATION", "summary": "Three-role authority model, execution modes, task-before-swarm ordering, instance-fenced swarm leases, capacity admission, active project context, AI Behaviour routing registration, and semantic package closure implemented."}, {"id": "handoff-continuity", "status": "READY_FOR_VALIDATION", "summary": "MASTER_HANDOFF.json plus append-only per-instance checkpoint standard implemented and recursive project factory updated."}, {"id": "project-propagation", "status": "PENDING", "summary": "Duo Open, BenefitFlow, Warp Propulsion Lab, AI Behaviour Control Lab, and Fold7 Power Lab still need local contract/handoff convergence."}],
+  "blockers": [],
+  "pending_actions": [{"priority": 1, "action": "Validate reference-framework exact-SHA CI and repair any composition-test failures."}, {"priority": 2, "action": "Propagate local bootstrap, swarm kernel where applicable, and MASTER_HANDOFF.json to participating projects."}, {"priority": 3, "action": "Persist/read back master handoff activation records in each canonical internal coordination store."}],
+  "recent_refs": ["protocols/agent_state_handoff.md", "schemas/master_handoff.schema.json", "PROJECT_ROLE_ROUTING_REGISTRY.json", "swarm_kernel/kernel.py"],
+  "latest_checkpoints": []
+}
