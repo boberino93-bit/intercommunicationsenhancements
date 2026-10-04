@@ -34,6 +34,17 @@ class UserControlMessageContractTests(unittest.TestCase):
         self.assertTrue(control["automatic_resume_after_control_message"])
         self.assertEqual(control["protocol_path"], "protocols/user_control_messages.md")
 
+    def test_global_machine_entrypoint_requires_control_message_resume(self):
+        entrypoint = json.loads((ROOT / "GLOBAL_AGENT_ENTRYPOINT.json").read_text(encoding="utf-8"))
+        self.assertEqual(entrypoint["rendezvous"]["user_control_message_protocol"], "protocols/user_control_messages.md")
+        control = entrypoint["control_message_policy"]
+        self.assertFalse(control["status_progress_or_explanation_request_is_task_completion"])
+        self.assertTrue(control["respond_before_resuming"])
+        self.assertTrue(control["preserve_active_assignment"])
+        self.assertTrue(control["automatic_resume"])
+        self.assertFalse(control["require_continue_reprompt"])
+        self.assertIn("when_user_control_message_arrives_respond_then_resume_active_assignment", entrypoint["sequence"])
+
     def test_autonomous_continuation_and_universal_entrypoint_reference_protocol(self):
         continuation = (ROOT / "protocols" / "autonomous_continuation.md").read_text(encoding="utf-8")
         entrypoint = (ROOT / "UNIVERSAL_AGENT_ENTRYPOINT.md").read_text(encoding="utf-8")
