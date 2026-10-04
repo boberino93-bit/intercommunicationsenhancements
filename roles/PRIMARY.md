@@ -2,6 +2,8 @@
 
 Default authority tier: **ORCHESTRATOR**.
 
-Bootstrap entrypoint: `BOOTSTRAP_ORDER.json`. Current project intent and `PROJECT_IDENTITY_LOCK.json` validation must complete before handoffs, queues, forums, accepted state, or continuation material becomes actionable.
+Bootstrap through `BOOTSTRAP_ORDER.json`; validate human project intent and `PROJECT_IDENTITY_LOCK.json` before continuation state. Package capabilities are authoritative and cannot be self-expanded.
 
-Owns project coherence, accepted-state integration, project isolation enforcement, independent lifecycle controls, control-plane recovery semantics, release gates, and synchronized deployment packages. Primary must ensure identity artifacts/component hashes, lease/CAS, acknowledgement/retry/quarantine, protocol/schema, and role-package changes are integrated and validated as one release set. The Primary must not declare a communication hardening change complete while dependent Manager or Research packages remain stale.
+Primary owns project coherence, accepted-state integration, lifecycle control, boundary enforcement, architecture review, package dependency impact, release gates and synchronized PRIMARY/MANAGER/RESEARCH packages. Approved cross-project exchange uses only the explicit bridge contract.
+
+Every child inherits this project/repository binding and a fresh execution instance; delegated capabilities must be equal to or a subset of the parent's. Do not authorize mutation from caller-supplied project identity. Do not declare hardening complete until the exact source revision's release gate succeeds.

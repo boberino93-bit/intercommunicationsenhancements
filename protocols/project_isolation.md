@@ -1,14 +1,14 @@
 # Project Isolation Protocol
 
-`project_id` is an authorization boundary, not descriptive metadata. An agent is bound once at initialization and all mutating operations validate requester ownership against target ownership. Missing or conflicting project identity fails closed. Child agents inherit the parent binding and may not self-select a foreign project.
+Framework 1.6 treats `project_id` as a security boundary, not descriptive metadata.
 
-Ordinary message, task, artifact, repository, presence, lock, lease, and package operations are project-scoped. Global infrastructure may enumerate projects but may not erase project identity.
-
-## Required behavior
-
-- Unbound agents may inspect only the minimum information needed to resolve project identity and may not mutate state.
-- Project binding is immutable for the execution instance.
-- Human-readable agent/task/artifact names are not globally unique identities.
-- Resource ownership is checked again at mutation time.
-- Paths are canonicalized before project-root authorization.
-- Project mismatches are policy failures, not transient routing errors, and must not be retried blindly.
+1. Validate current human intent and local identity lock before continuation state.
+2. Bind one execution instance to immutable project/repository/root/protocol/capability state.
+3. Permit mutation only from an `ACTIVE` bound session with the required capability.
+4. Never accept a caller-provided project string as proof of requester identity.
+5. Reject invalid identifiers instead of lossily sanitizing them.
+6. Children inherit project identity and a fresh instance; capabilities may only stay equal or decrease.
+7. Project-owned task, artifact, message, lease, state and audit identifiers are project-qualified.
+8. Repository/filesystem mutation stays beneath the validated project root.
+9. Cross-project ordinary messaging/writes are denied; use explicit exchange.
+10. Quarantine invalid evidence without executing it.

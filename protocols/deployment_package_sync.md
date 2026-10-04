@@ -1,17 +1,11 @@
 # Deployment Package Synchronization
 
-Each project Primary owns release coherence for its deployable PRIMARY, MANAGER, and RESEARCH packages. Any change to project identity, AgentBus semantics, schemas, bootstrap, capabilities, role responsibilities, artifact routing, or repository/workspace resolution triggers dependency analysis.
+A hardening change is incomplete while any affected deployable role is stale.
 
-Affected packages must be rebuilt, manifest-validated, archive-validated, and smoke-tested before hardening is declared complete.
+Authoritative dependency closure is `packaging/agent_package_dependencies.json`. Shared globs cover all runtime modules, schemas and protocol documents; role files are added per PRIMARY, MANAGER and RESEARCH.
 
-Deployment role is separate from authority tier:
+Manifest v3 records exact source SHA, role, capabilities, framework/protocol/package versions, deterministic commit-derived build time, dependency-map SHA-256, exact component inventory and hashes.
 
-- `PRIMARY` maps to `ORCHESTRATOR` by default.
-- `MANAGER` maps to `REVIEWER` by default.
-- `RESEARCH` maps to `SPECIALIST` by default.
+Verification recomputes dependency closure from repository source, rejects missing/extra archive members, compares every component to manifest and source, rejects foreign role instructions, enforces the complete role set and one source revision, and validates `release-set.json` archive hashes.
 
-Custom grants remain explicit and least-privilege.
-
-## Release gate
-
-A protocol/framework change is incomplete while a dependent deployment package remains stale. Package manifests must declare project ID, deployment role, authority tier, framework version, protocol version, package version, source revision, and included components. Foreign-project or incompatible-protocol packages fail closed.
+CI independently rebuilds and compares output hashes. The CI artifact is authoritative only for its exact source revision.

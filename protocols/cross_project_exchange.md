@@ -1,21 +1,9 @@
 # Cross-Project Exchange Protocol
 
-Cross-project traffic is denied on the ordinary internal bus. Sharing requires a distinct exchange envelope naming source and destination projects, purpose, classification, requested artifacts, allowed use, expiry, correlation, and approval.
+Cross-project exchange is an explicit API boundary, never an internal AgentBus override.
 
-Data should be exported by value as the smallest useful sanitized snapshot. Imported data retains provenance. Trust is non-transitive.
+A valid request requires a source-project `ACTIVE` session with `CROSS_PROJECT_EXCHANGE`, exact requesting-agent agreement, distinct source/destination projects, purpose/classification, bounded artifact references, allowed use, correlation, valid creation/expiry, and explicit approval with approver identity.
 
-## Default policy
+Default is DENY. Approval does not grant peer mutation rights. Data should move by value as a sanitized bounded snapshot retaining provenance. A peer imports it under its own policy.
 
-`DENY`
-
-A permitted exchange requires all of the following:
-
-1. Explicit source and destination project IDs.
-2. A caller with `CROSS_PROJECT_EXCHANGE` capability.
-3. An approved exchange record.
-4. A bounded purpose and allowed-use declaration.
-5. Explicit artifact references rather than implicit context sharing.
-6. Expiry where the exchange is time-sensitive.
-7. Audit/provenance records on export and import.
-
-Ordinary project channels never become cross-project channels merely because an agent can name another project.
+The current alpha implements validation only; a durable sanitized export/import bridge remains future work.
