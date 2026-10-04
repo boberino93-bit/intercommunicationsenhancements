@@ -24,7 +24,8 @@ class CrossContractAlignmentTests(unittest.TestCase):
     def test_master_handoff_is_required_before_mutation(self):
         bootstrap = json.loads((ROOT / "BOOTSTRAP_ORDER.json").read_text(encoding="utf-8"))
         ids = [step["id"] for step in bootstrap["steps"]]
-        self.assertLess(ids.index("load_master_handoff"), ids.index("execute_task_with_per_mutation_scope_validation"))
+        execute_id = "execute_task_with_autonomous_continuation_and_per_mutation_scope_validation"
+        self.assertLess(ids.index("load_master_handoff"), ids.index(execute_id))
         local = json.loads((ROOT / "AGENT_BOOTSTRAP.json").read_text(encoding="utf-8"))
         self.assertTrue(local["master_handoff"]["required_before_mutation"])
         self.assertTrue(local["rules"]["manual_master_handoff_checkpoint_after_material_transition"])
@@ -64,6 +65,7 @@ class CrossContractAlignmentTests(unittest.TestCase):
         kit = json.loads((ROOT / "NEW_PROJECT_BOOTSTRAP.json").read_text(encoding="utf-8"))
         outputs = {entry["output"] for entry in kit["required_documents"]}
         self.assertIn("MASTER_HANDOFF.json", outputs)
+        self.assertIn("AGENT_CONTEXT_REFERENCE.md", outputs)
         self.assertIn(".interagent/handoffs", kit["required_directories"])
 
 

@@ -13,13 +13,34 @@ class NewProjectBootstrapKitTests(unittest.TestCase):
         self.assertIsNone(kit["seed_state"]["repository_view"]["path"])
         self.assertTrue(kit["recursion"]["every_seeded_project_materializes_local_factory_pointer"])
         outputs = {item["output"] for item in kit["required_documents"]}
-        self.assertEqual(outputs, {"AGENT_BOOTSTRAP.json", "PROJECT_IDENTITY_LOCK.json", "PROJECT_MANIFEST.json", "BOOTSTRAP_ORDER.json", "MASTER_HANDOFF.json", "START_HERE.md", "PROJECT_CHARTER.md", "HARDENING_STATUS.md", "NEW_PROJECT_BOOTSTRAP.json"})
+        self.assertEqual(
+            outputs,
+            {
+                "AGENT_BOOTSTRAP.json",
+                "PROJECT_IDENTITY_LOCK.json",
+                "PROJECT_MANIFEST.json",
+                "BOOTSTRAP_ORDER.json",
+                "MASTER_HANDOFF.json",
+                "AGENT_CONTEXT_REFERENCE.md",
+                "START_HERE.md",
+                "PROJECT_CHARTER.md",
+                "HARDENING_STATUS.md",
+                "NEW_PROJECT_BOOTSTRAP.json",
+            },
+        )
         self.assertIn(".interagent/handoffs", kit["required_directories"])
         for item in kit["required_documents"]:
             self.assertTrue((ROOT / item["template"]).is_file(), item["template"])
 
     def test_json_templates_parse_and_do_not_bind_source_repository(self):
-        template_names = ["AGENT_BOOTSTRAP.template.json", "PROJECT_IDENTITY_LOCK.template.json", "PROJECT_MANIFEST.template.json", "BOOTSTRAP_ORDER.template.json", "MASTER_HANDOFF.template.json", "NEW_PROJECT_BOOTSTRAP.template.json"]
+        template_names = [
+            "AGENT_BOOTSTRAP.template.json",
+            "PROJECT_IDENTITY_LOCK.template.json",
+            "PROJECT_MANIFEST.template.json",
+            "BOOTSTRAP_ORDER.template.json",
+            "MASTER_HANDOFF.template.json",
+            "NEW_PROJECT_BOOTSTRAP.template.json",
+        ]
         for name in template_names:
             raw = (ROOT / "templates" / "new-project" / name).read_text()
             parsed = json.loads(raw)
@@ -47,13 +68,15 @@ class NewProjectBootstrapKitTests(unittest.TestCase):
         self.assertEqual(branch["source_project_identity_inheritance"], "DENY")
         self.assertEqual(branch["cross_project_mutation"], "DENY")
 
-    def test_local_bootstrap_exposes_project_factory_and_master_handoff(self):
+    def test_local_bootstrap_exposes_project_factory_master_handoff_and_context_reference(self):
         bootstrap = json.loads((ROOT / "AGENT_BOOTSTRAP.json").read_text())
         self.assertEqual(bootstrap["project_factory"]["pointer"], "NEW_PROJECT_BOOTSTRAP.json")
         self.assertTrue(bootstrap["project_factory"]["supports_unbound_repository"])
         self.assertIn("NEW_PROJECT_BOOTSTRAP.json", bootstrap["handoff_paths"])
         self.assertIn("MASTER_HANDOFF.json", bootstrap["handoff_paths"])
+        self.assertIn("AGENT_CONTEXT_REFERENCE.md", bootstrap["handoff_paths"])
         self.assertTrue(bootstrap["master_handoff"]["manual_checkpoint_required"])
+        self.assertEqual(bootstrap["fresh_agent_context"]["authority"], "ORIENTATION_ONLY")
         self.assertEqual(bootstrap["authorized_roles"], ["primary", "manager", "research"])
         self.assertIn("recovery", bootstrap["execution_modes"])
 
@@ -62,14 +85,8 @@ class NewProjectBootstrapKitTests(unittest.TestCase):
             (ROOT / "templates" / "new-project" / "AGENT_BOOTSTRAP.template.json").read_text()
         )
         scheduled = bootstrap_template["scheduled_launch_contract"]
-        self.assertEqual(
-            scheduled["context_schema"],
-            "org-agent-mesh/scheduled-launch-context/v1",
-        )
-        self.assertEqual(
-            scheduled["route_schema"],
-            "org-agent-mesh/scheduled-task-route/v2",
-        )
+        self.assertEqual(scheduled["context_schema"], "org-agent-mesh/scheduled-launch-context/v1")
+        self.assertEqual(scheduled["route_schema"], "org-agent-mesh/scheduled-task-route/v2")
         self.assertTrue(scheduled["capture_from_local_contract"])
         self.assertTrue(scheduled["validate_against_local_contract_before_mutation"])
         self.assertEqual(scheduled["task_state_advancement_before_bootstrap_ready"], "DENY")
@@ -78,14 +95,13 @@ class NewProjectBootstrapKitTests(unittest.TestCase):
             (ROOT / "templates" / "new-project" / "BOOTSTRAP_ORDER.template.json").read_text()
         )
         self.assertTrue(order_template["pre_provider_admission"]["required_for_dynamic_scheduled_launches"])
-        self.assertEqual(
-            order_template["pre_provider_admission"]["task_state_advancement_before_bootstrap_ready"],
-            "DENY",
-        )
+        self.assertEqual(order_template["pre_provider_admission"]["task_state_advancement_before_bootstrap_ready"], "DENY")
         self.assertEqual(
             order_template["launch_origin_rules"]["SCHEDULED_PROJECT_BOUND"],
             "require machine-readable launch context captured from this project's local contract and verify it before mutation",
         )
+        self.assertEqual(order_template["autonomous_continuation"]["routine_confirmation"], "DENY_AFTER_VALID_ASSIGNMENT")
+        self.assertTrue(order_template["autonomous_continuation"]["localized_fail_closed"])
 
         entrypoint = json.loads((ROOT / "GLOBAL_AGENT_ENTRYPOINT.json").read_text())
         scheduled_branch = entrypoint["intent_branches"]["scheduled_project_bound_task"]

@@ -11,11 +11,13 @@ class TaskIntakeRoutingTests(unittest.TestCase):
         steps = bootstrap["steps"]
         ids = [step["id"] for step in steps]
         classify = ids.index("classify_task_and_bind_work_context")
-        execute = ids.index("execute_task_with_per_mutation_scope_validation")
+        execute = ids.index("execute_task_with_autonomous_continuation_and_per_mutation_scope_validation")
         self.assertLess(classify, execute)
         self.assertFalse(steps[classify]["mutation_allowed"])
         self.assertTrue(steps[execute]["mutation_allowed"])
         self.assertEqual(steps[classify]["path"], "protocols/task_intake_and_delegation.md")
+        self.assertIn("localized_fail_closed", steps[execute]["additional_guards"])
+        self.assertIn("no_routine_confirmation", steps[execute]["additional_guards"])
 
     def test_new_protocol_and_schemas_are_dependency_closed(self):
         deps = json.loads((ROOT / "packaging/agent_package_dependencies.json").read_text(encoding="utf-8"))
