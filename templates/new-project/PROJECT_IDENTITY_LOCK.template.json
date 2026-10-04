@@ -1,0 +1,40 @@
+{
+  "schema": "org-agent-mesh/project-identity-lock/v1",
+  "project_id": "{{PROJECT_ID}}",
+  "project_name": "{{PROJECT_NAME}}",
+  "identity_state": "PROVISIONAL_UNBOUND",
+  "repository": {
+    "binding_state": "UNBOUND",
+    "full_name": null,
+    "id": null,
+    "binding_rule": "MUST_BE_EXPLICITLY_CONNECTED_AND_VERIFIED_BEFORE_USE"
+  },
+  "forum": {
+    "authority": "INTERNAL_ARTIFACTORY",
+    "namespace": "{{PROJECT_ID}}::messages"
+  },
+  "artifact_namespace": "{{PROJECT_ID}}::artifacts",
+  "source_architecture": {
+    "repository": "boberino93-bit/intercommunicationsenhancements",
+    "kit": "NEW_PROJECT_BOOTSTRAP.json",
+    "identity_inheritance": "FORBIDDEN"
+  },
+  "locks": {
+    "project_id_must_match_local_contract": true,
+    "forum_namespace_must_match_local_contract": true,
+    "repository_must_not_be_inferred": true,
+    "cross_project_write_default": "DENY",
+    "identity_conflict_action": "STOP_BEFORE_MUTATION"
+  },
+  "binding_transition": {
+    "from": "UNBOUND",
+    "to": "BOUND_VERIFIED",
+    "requires": [
+      "explicit repository connection or creation",
+      "verified repository full name",
+      "stable repository id when available",
+      "local contract update",
+      "central registry update"
+    ]
+  }
+}
