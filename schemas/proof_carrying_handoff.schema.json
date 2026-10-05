@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "org-agent-mesh/proof-carrying-handoff/v1",
+  "title": "Proof Carrying Handoff",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["handoff_id","project_id","repository_identity","work_instance_id","sender_agent_instance_id","receiver_agent_instance_id","sender_capabilities","receiver_capabilities","ownership_epoch","checkpoint_digest","policy_certificate_id","issued_at_utc","expires_at_utc","nonce","signature"],
+  "properties": {
+    "handoff_id": {"type":"string","minLength":1},
+    "project_id": {"type":"string","minLength":1},
+    "repository_identity": {"type":"string","minLength":3},
+    "work_instance_id": {"type":"string","minLength":1},
+    "sender_agent_instance_id": {"type":"string","minLength":1},
+    "receiver_agent_instance_id": {"type":"string","minLength":1},
+    "sender_capabilities": {"type":"array","items":{"type":"string"},"uniqueItems":true},
+    "receiver_capabilities": {"type":"array","items":{"type":"string"},"uniqueItems":true},
+    "ownership_epoch": {"type":"integer","minimum":0},
+    "checkpoint_digest": {"type":"string","minLength":1},
+    "policy_certificate_id": {"type":"string","minLength":1},
+    "issued_at_utc": {"type":"string","format":"date-time"},
+    "expires_at_utc": {"type":"string","format":"date-time"},
+    "nonce": {"type":"string","minLength":1},
+    "signature": {"type":"string","pattern":"^[a-f0-9]{64}$"}
+  }
+}
