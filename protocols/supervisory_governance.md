@@ -2,7 +2,7 @@
 
 Status: **CANONICAL ACTIVE OVERLAY**
 
-This protocol adds lifecycle supervision, intentional-stop persistence, human-gated scheduled-task activation, and ChatGPT Project placement semantics to the existing Org Agent Mesh. It is additive. It does not replace project isolation, capability gates, consequence authorization, lease/fencing rules, the frozen normalized runtime baseline, or stronger safety controls.
+This protocol adds lifecycle supervision, intentional-stop persistence, human-gated scheduled-task activation, explicit mutation authorization, roleless agent admission, and ChatGPT Project placement semantics to the existing Org Agent Mesh. It is additive. It does not replace project isolation, capability gates, consequence authorization, lease/fencing rules, the frozen normalized runtime baseline, or stronger safety controls.
 
 ## 1. Authority
 
@@ -15,6 +15,38 @@ The User is the highest authority. The MASTER has global lifecycle supervision a
 Global lifecycle supervision does **not** grant unrestricted cross-project source mutation. Repository writes, production actions, destructive operations, credentials, releases, and other consequential effects remain governed by existing project/capability/consequence controls.
 
 Scheduled-task activation is a separate gate from lifecycle supervision. No autonomous role inherits task-enablement authority from MASTER/PRIMARY lifecycle authority.
+
+Mutation authorization is also a separate gate from lifecycle supervision, role selection, claims, leases and repository permissions.
+
+## 1.1 Mutation authorization hard gate
+
+The governing invariant is:
+
+`INTENT != AUTHORIZATION`
+
+Understanding the user's desired outcome does not itself authorize an external side effect. Before every externally durable mutation, apply `protocols/mutation_authorization.md` and `governance/MUTATION_AUTHORIZATION_POLICY.json`.
+
+A capability question, design discussion, enthusiasm, likely preference, repository ownership, role seniority, write permission, or successful project routing must not be promoted into mutation authority.
+
+Interactive human-launched work must have an unambiguous execution directive or clear permission covering the target/bounded mutation class. If authorization is materially ambiguous, deny the affected write while continuing safe read-only analysis, validation or patch preparation.
+
+Scheduled/delegated work may use an active human-approved durable task contract only when that contract explicitly covers the mutation class and target scope. A schedule firing is never authority by itself.
+
+Existing stronger exact-action authorization requirements continue to govern destructive, production, financial, security/credential, cross-project, scheduled-task enablement and other high-consequence actions.
+
+## 1.2 Roleless generic-agent admission
+
+A human-launched generic project agent with no explicit role does **not** default to PRIMARY.
+
+It enters `protocols/roleless_agent_admission.md`, resolves the exact project, reads current frontier/claims/backlogs/liveness/control state, and selects only a locally self-admissible role based on verified project demand.
+
+PRIMARY is scarce authority and may not be self-promoted merely because no role was specified. MASTER is never self-selected through project admission.
+
+Role and claim are organizational placement and work ownership only:
+
+`ROLE + CLAIM != MUTATION_AUTHORIZATION`
+
+If no material unclaimed work exists, `NO_MATERIAL_WORK` is a valid result. Agents must not manufacture work to remain active.
 
 ## 2. Master is global and roaming
 
@@ -56,7 +88,7 @@ Supervisors may use:
 
 Use the least disruptive effective intervention. The governing question is whether continued execution is currently expected to materially advance the governing objective.
 
-Valid reasons include goal misalignment, instruction drift, scope creep, redundancy, low expected information gain, circular work, invalid assumptions, superseded work, poor methodology, weak evidence, project-goal conflict, architecture conflict, unexpected risk, destructive behavior, resource imbalance, blocked execution, agent conflict, premature implementation, premature research, quality degradation, changed project state, user direction, Master direction, or another defensible governance reason.
+Valid reasons include goal misalignment, instruction drift, scope creep, redundancy, low expected information gain, circular work, invalid assumptions, superseded work, poor methodology, weak evidence, project-goal conflict, architecture conflict, unexpected risk, destructive behavior, resource imbalance, blocked execution, agent conflict, premature implementation, premature research, quality degradation, changed project state, authorization missing/ambiguous/out-of-scope, role-admission conflict, user direction, Master direction, or another defensible governance reason.
 
 ## 6. Stop semantics
 
@@ -72,6 +104,8 @@ Control operations are idempotent in effect: repeating STOP against already-stop
 
 Long-running agents must check control state between bounded units of work. An already-running atomic operation may finish only when interruption would risk corruption/inconsistency; the agent must then honor the authoritative state before beginning another unit.
 
+Before crossing any mutation boundary, the agent must also revalidate the current mutation authorization envelope.
+
 `org_agent_mesh.supervision.CooperativeAgentRuntime` provides the reference behavior.
 
 ## 8. Redirect and pause
@@ -79,6 +113,8 @@ Long-running agents must check control state between bounded units of work. An a
 REDIRECT persists the current partial state, increments assignment revision, applies the new direction, and resumes only under the revised assignment.
 
 PAUSE persists current partial state and enters a machine-readable paused state. Resume requires a valid control transition; the schedule firing by itself is not a resume instruction.
+
+A redirect that materially changes target, operation class, consequence, production/security/financial scope, scheduled-task state, cross-project scope or task objective also invalidates the prior mutation-authorization decision for the changed portion.
 
 ## 9. Intentional-stop persistence and respawn protection
 
@@ -92,6 +128,8 @@ A new logical execution may be authorized by:
 A clock firing, an incomplete status, or a stale prompt is insufficient authority to revive the old execution.
 
 Logical restart authority does **not** imply authority to enable a disabled recurring scheduled task. Those are separate gates.
+
+Logical restart authority also does **not** imply fresh mutation authority. The restarted execution must re-evaluate its active human-approved mutation envelope.
 
 ## 10. Scheduled-task activation gate
 
@@ -129,7 +167,7 @@ The human enable action is intentionally manual because enabling multiple recurr
 
 Every scheduled/cold-start swarm launch that has already been human-enabled must:
 
-1. load current supervisory governance alongside the existing recurring/successor protocols;
+1. load current supervisory governance, mutation-authorization policy and existing recurring/successor protocols;
 2. validate exact project/role launch context against the local contract;
 3. load current control/intentional-stop state before starting or replacing work;
 4. preserve occurrence identity across provider retry;
@@ -138,19 +176,26 @@ Every scheduled/cold-start swarm launch that has already been human-enabled must
 7. route scheduled project agents through the project-placement mechanism when a host adapter is available;
 8. preserve User > MASTER > PRIMARY authority;
 9. treat the schedule as a wake-up trigger, never an independent authority system;
-10. never modify its own or another task's enabled state.
+10. never modify its own or another task's enabled state;
+11. before each external write, verify the active human-approved scheduled task contract actually covers that mutation class and target scope.
 
 ## 12. Alignment monitoring
 
-PRIMARY and MASTER supervisors should combine current user objective, project instructions, architecture, completed sibling work, evidence quality, remaining uncertainty, progress, duplication probability, resource cost, risk, and blockers. Do not reduce governance to a single arbitrary score threshold.
+PRIMARY and MASTER supervisors should combine current user objective, project instructions, architecture, completed sibling work, evidence quality, remaining uncertainty, progress, duplication probability, resource cost, risk, blockers, authorization state and admission pressure. Do not reduce governance to a single arbitrary score threshold.
 
 PRIMARY optimizes for project success, not subordinate activity. MASTER optimizes for the user's portfolio objectives, not utilization or keeping every branch alive.
 
 Schedule alignment is configuration alignment only. It may update prompts or governance references while preserving disabled/enabled state; it is never permission to activate the swarm.
 
+Generic-agent admission is demand-driven. Supervisors should favor roles that relieve verified bottlenecks and should stop or redirect excess capacity when useful unclaimed work is exhausted.
+
 ## 13. Audit records
 
-Autonomous lifecycle interventions should record at least supervisor, target, project where applicable, action, reason code, concise explanation, state-preservation result, respawn disposition, and timestamp. Scheduled-task state-change attempts should also record actor, prior state, requested state, whether explicit human authorization was present, and disposition. Never record authentication tokens, session secrets, passwords, cookies, credentials, or private authentication material.
+Autonomous lifecycle interventions should record at least supervisor, target, project where applicable, action, reason code, concise explanation, state-preservation result, respawn disposition, and timestamp. Scheduled-task state-change attempts should also record actor, prior state, requested state, whether explicit human authorization was present, and disposition.
+
+Material mutation-authorization decisions should additionally retain compact evidence of operation class, target scope, authorization disposition, governing rule, whether a write was prevented, and corrective action. Roleless admissions should record selected role/reason and claim identity when material.
+
+Never record authentication tokens, session secrets, passwords, cookies, credentials, or unnecessary verbatim private conversation content.
 
 ## 14. Compatibility
 
