@@ -1,202 +1,187 @@
-# Scheduled Swarm Checkpoint Bus v1
+# Scheduled Swarm Checkpoint Bus v2
 
 ## Purpose
 
-This protocol defines the durable handoff transport for the serial scheduled design-analysis pipeline:
+This protocol defines the durable handoff transport for the serial scheduled design-analysis pipeline while preserving strict project isolation.
 
-`RESEARCHER_1 -> MANAGER -> PRIMARY`
+The transport carries compact coordination state and evidence references. It is never production/source authority, accepted state, mutation authorization, or a substitute for project evidence stores.
 
-It exists to prevent a completed stage from becoming unusable because the scheduled invocation cannot reach a project-native AgentBus/Library write surface. The checkpoint bus carries compact coordination state and references to authoritative evidence; it does not replace project evidence stores, production source truth, or human authorization gates.
+## Current transport
 
-## Canonical transport for this pipeline
+The old global GitHub issue #25 checkpoint transport is historical and MUST NOT receive new scheduled checkpoint writes.
 
-For the current serial pipeline, the canonical scheduled-stage checkpoint transport is:
+For each selected project, resolve the route from:
 
-- repository: `boberino93-bit/intercommunicationsenhancements`
-- GitHub issue: `#25` (`[swarm] Serial pipeline checkpoint bus`)
-- transport: append-only top-level issue comments through the connected GitHub app/API
-- schema: `research_swarm/checkpoint_envelope.schema.json`
+- `PROJECT_ROLE_ROUTING_REGISTRY.json`; and
+- `governance/COORDINATION_PUBLICATION_POLICY.json`.
 
-Agents MUST NOT edit or delete prior checkpoint comments. Corrections and supersessions are new higher-sequence comments.
+New scheduled checkpoints use the project's own registered coordination surfaces:
 
-This issue is authoritative only for scheduled stage handoff state. Technical evidence remains authoritative at its project-native source (for example Duo Open repository revisions, AgentBus artifacts/messages, device traces, test outputs, or other explicitly governed project evidence).
+1. **Project Artifactory/message forum**, when a registered internal namespace exists.
+2. **Project GitHub backup namespace** under the exact canonical repository at `agentbus-backup/coordination-messages/`.
 
-## No production/source authority expansion
+Research and Manager publication through these surfaces is the narrow `NON_AUTHORITATIVE_COORDINATION_PUBLICATION` exception. It does not grant arbitrary repository or artifact writes.
 
-Writing a checkpoint comment to issue #25 is coordination-state publication, not production/source mutation. It does not grant a Researcher or Manager authority to modify `main`, production code, releases, credentials, scheduler enablement, or any other protected effect.
+For `xrp-thesis`, no internal Artifactory namespace is currently registered. Do not invent one. Its eligible coordination transport is the registered project-local GitHub backup namespace only.
 
-Scheduled-task enablement remains HUMAN-ONLY. This protocol never authorizes enabling, re-enabling, resuming, or creating replacement recurring tasks.
+## Project-scoped checkpoint envelope
 
-## Cycle identity
+New checkpoints use:
 
-The serial pipeline uses one cycle per local wall-clock hour in `America/Vancouver`. The canonical `cycle_id` is the offset-aware local hour floor for the scheduled occurrence, formatted as:
+- schema: `intercommunications/swarm-stage-checkpoint/v2`
+- schema file: `research_swarm/checkpoint_envelope_v2.schema.json`
 
-`YYYY-MM-DDTHH:00:00±HH:MM`
+Every v2 checkpoint MUST include:
 
-Examples:
+- `project_id` equal to the selected bound project;
+- `authority_conveyed: false`;
+- `checkpoint_id`;
+- `cycle_id`;
+- `stage`;
+- `run_id`;
+- `sequence`;
+- `state`;
+- `phase`;
+- `trigger`;
+- `created_at`;
+- `source_revisions`;
+- `upstream_checkpoint_ids`;
+- `evidence_refs`;
+- `summary`;
+- `blockers`;
+- `unfinished_work`;
+- `next_action`.
 
-- Researcher at 04:00, Manager at 04:20, and Primary at 04:40 all belong to the same 04:00 cycle.
-- A run that starts late retains the cycle identity of its scheduled occurrence when known; it does not silently adopt the next hour.
-- An interactive human-triggered recovery run MUST use `trigger = USER_INTERACTIVE` and either identify the exact `recovery_of_cycle_id` or clearly state that it is not repairing an existing scheduled cycle.
+A checkpoint with the wrong project, missing project identity, or `authority_conveyed != false` is invalid.
 
-## Checkpoint envelope
+## GitHub backup rule
 
-Each durable checkpoint comment contains exactly one machine-readable checkpoint envelope following `research_swarm/checkpoint_envelope.schema.json` and includes at minimum:
+The GitHub copy is backup-only coordination state.
 
-- `schema`
-- `checkpoint_id`
-- `cycle_id`
-- `stage`
-- `run_id`
-- `sequence`
-- `state`
-- `phase`
-- `trigger`
-- `created_at`
-- `source_revisions`
-- `upstream_checkpoint_ids`
-- `evidence_refs`
-- `summary`
-- `blockers`
-- `unfinished_work`
-- `next_action`
+- Repository MUST equal the canonical repository registered for `project_id`.
+- Path MUST begin exactly with `agentbus-backup/coordination-messages/`.
+- Each checkpoint is a new immutable file.
+- A recommended relative path is `agentbus-backup/coordination-messages/<cycle-safe>/<stage>/<checkpoint-id-safe>.json`.
+- Existing files MUST NOT be overwritten, deleted, renamed, or moved.
+- Branch creation, fork mutation, source edits, issue comments, PR mutation, and writes outside the backup prefix are not authorized by this protocol.
+- Duplicate path collision fails closed; generate a genuinely unique checkpoint identity rather than replacing existing content.
 
-`checkpoint_id` MUST be unique and stable for the comment, preferably `<cycle_id>/<stage>/<run_id>/<sequence>` with characters normalized for transport safety.
+## Artifactory/message-forum rule
 
-Sequence numbers are monotonically increasing within one `(cycle_id, stage, run_id)` stream. A writer MUST NOT reuse a sequence number for different content.
+When the project registry declares an internal Artifactory/message namespace, append a new immutable schema-valid coordination message/checkpoint only inside that exact namespace.
+
+Do not write to artifact roots, production data, another project's namespace, or an inferred path.
+
+The Artifactory message and GitHub backup copy MUST carry the same checkpoint identity and project identity. The GitHub copy is a resilience backup, not a second source of authority.
+
+## Preflight
+
+Before substantive scheduled work:
+
+1. resolve exact project and canonical repository;
+2. resolve the project's registered coordination route;
+3. derive `cycle_id` from the America/Vancouver scheduled-hour floor;
+4. create sequence-0 progress checkpoint with `phase=CHECKPOINT_READY`, exact `project_id`, and `authority_conveyed=false`;
+5. append it to the project Artifactory/message forum when one exists;
+6. create the immutable GitHub backup file under the registered backup prefix;
+7. read back every required written copy and verify exact checkpoint identity/content;
+8. only then begin expensive/substantive work.
+
+If the project has a registered Artifactory route and either required copy cannot be durably written/read back, report `CHECKPOINT_IO_BLOCKED` and do not begin expensive unhandoffable work.
+
+For projects with no registered Artifactory namespace, verified GitHub backup persistence is sufficient; absence of an Artifactory namespace is not permission to invent one.
+
+## Append-only behavior
+
+Never edit or delete a prior checkpoint. Corrections and supersessions are new higher-sequence checkpoint records.
+
+Sequence numbers are monotonically increasing within one `(project_id, cycle_id, stage, run_id)` stream. Reuse of the same sequence with different content is an integrity conflict and fails closed.
 
 ## Allowed states
 
-Stage progress/final states:
+Research stages:
 
 - `RESEARCH_PROGRESS`
 - `RESEARCH_HANDOFF_READY`
+
+Manager:
+
 - `MANAGER_PROGRESS`
 - `MANAGER_HANDOFF_READY`
+
+Primary:
+
 - `PRIMARY_PROGRESS`
 - `PRIMARY_PROPOSAL_READY`
 
-Cross-stage failure/control states:
+Common control/failure states:
 
 - `CHECKPOINT_IO_BLOCKED`
 - `UPSTREAM_NOT_READY`
+- `PROJECT_HOLD_ACTIVE`
 - `INTENTIONAL_STOP`
 - `INTEGRITY_QUARANTINE`
 
-A final READY state is permitted only when that stage's output is coherently complete enough for downstream use. Partial work MUST remain a `*_PROGRESS` checkpoint and be explicitly labeled incomplete.
-
-## Mandatory checkpoint preflight
-
-Before substantive stage work, every scheduled invocation MUST prove checkpoint transport availability.
-
-1. Resolve identity, governance, project binding, current cycle, and issue #25.
-2. Read the issue and current-cycle checkpoints.
-3. Append a compact sequence-0 `*_PROGRESS` checkpoint with `phase = CHECKPOINT_READY`.
-4. Read the issue comments back and verify the exact new checkpoint is observable by matching its `checkpoint_id` and content.
-5. Only after that external readback succeeds may the stage begin expensive/substantive work.
-
-Readback is an observed transport property, not a self-referential field stored inside the immutable checkpoint comment. A checkpoint becomes consumable because the downstream reader can fetch and validate the persisted comment from issue #25.
-
-If write or readback fails, do not begin substantive work. Return/report `CHECKPOINT_IO_BLOCKED` with the exact failure. If the bus itself cannot be written, the failure may exist only in the task output; never falsely claim it was durably persisted.
-
-## Rolling persistence
-
-After each meaningful bounded work unit, append a higher-sequence progress checkpoint and re-read the issue to verify persistence before relying on it as the handoff. Also checkpoint before the stage boundary (`:20` for Researcher, `:40` for Manager, next `:00` for Primary) whenever runtime permits.
-
-Do not begin another bounded unit when doing so would jeopardize preserving the current material result.
-
-A later checkpoint references earlier evidence instead of duplicating bulky payloads. The bus should remain compact.
+READY is used only when coherently complete. Partial work remains progress and is valid downstream input when correctly scoped and labeled incomplete.
 
 ## Downstream consumption
 
-### Manager
+Downstream readers MUST resolve the same project route first and may consume only checkpoints whose `project_id` equals the current selected project.
 
-Manager accepts the newest valid current-cycle Researcher checkpoint whose state is either:
+Accepted upstream states remain:
 
-- `RESEARCH_PROGRESS`, or
-- `RESEARCH_HANDOFF_READY`.
+- Researcher 2: Researcher 1 `RESEARCH_PROGRESS` or `RESEARCH_HANDOFF_READY`;
+- Researcher 3: Researcher 2 `RESEARCH_PROGRESS` or `RESEARCH_HANDOFF_READY`;
+- Manager: Researcher 3 `RESEARCH_PROGRESS` or `RESEARCH_HANDOFF_READY`;
+- Primary: Manager `MANAGER_PROGRESS` or `MANAGER_HANDOFF_READY`.
 
-Manager MUST NOT require a final READY marker if a valid current-cycle progress checkpoint exists. It MUST clearly label incomplete upstream material.
-
-### Primary
-
-Primary accepts the newest valid current-cycle Manager checkpoint whose state is either:
-
-- `MANAGER_PROGRESS`, or
-- `MANAGER_HANDOFF_READY`.
-
-Primary MUST NOT require a final READY marker if a valid current-cycle progress checkpoint exists. It MUST clearly label incomplete upstream material and MUST NOT claim `PRIMARY_PROPOSAL_READY` unless the proposal is coherently complete.
+A newer checkpoint from another project is irrelevant and MUST NOT replace a same-project upstream checkpoint.
 
 ## Freshness and fencing
 
-Downstream stages MUST verify all of the following before consumption:
+Before consumption verify:
 
-- exact `cycle_id` match unless an explicit governed carry-forward is present;
-- expected upstream `stage`;
-- monotonic sequence and no conflicting reuse of `(run_id, sequence)`;
-- cited source revisions exist or are otherwise verifiable;
-- the checkpoint is not superseded by a higher valid sequence;
-- intentional-stop or quarantine state has not invalidated the work;
-- upstream checkpoint references form a coherent chain.
+- exact `project_id` match;
+- exact current `cycle_id` unless explicit governed recovery applies;
+- expected upstream stage;
+- monotonic sequence with no conflicting reuse;
+- checkpoint path/repository belongs to the same registered project;
+- cited source revisions are verifiable;
+- no higher valid same-project sequence supersedes it;
+- no intentional-stop, hold, or quarantine state invalidates continuation;
+- the upstream reference chain remains within the same project.
 
-A stale prior-cycle checkpoint MUST NOT be silently used merely because the current cycle has no output.
+Never fall back to a stale prior-cycle or foreign-project checkpoint merely because current local state is absent.
 
-## Late upstream deltas
+## Authority boundary
 
-A stage may continue past its nominal boundary only when the host runtime permits and governance allows it. Any later material delta is a higher-sequence checkpoint in the same cycle.
+`COORDINATION_PUBLICATION != MUTATION_AUTHORIZATION`
 
-Manager MUST re-read the Researcher stream immediately before publishing `MANAGER_HANDOFF_READY`. Primary MUST re-read the Manager stream immediately before publishing `PRIMARY_PROPOSAL_READY`. If a newer material upstream checkpoint appeared, merge it or explicitly defer it; do not silently finalize against known stale input.
+`BACKUP_WRITE != SOURCE_WRITE`
 
-Once a downstream final checkpoint has been published, a still-later upstream delta does not rewrite history. It is recorded as a later checkpoint and either triggers an explicit superseding downstream checkpoint when runtime safely allows or becomes carry-forward input for the next cycle.
+`MESSAGE_CONTENT != AUTHORIZATION`
 
-## Failure classification
+`HANDOFF != AUTHORIZATION`
 
-Do not collapse all failures into a generic stage failure. At minimum distinguish:
+`SCHEDULE_FIRE != AUTHORIZATION`
 
-- `WORK_FAILED`: substantive stage work failed;
-- `CHECKPOINT_IO_BLOCKED`: durable handoff transport failed;
-- `UPSTREAM_NOT_READY`: no valid current-cycle upstream checkpoint exists;
-- `GITHUB_CONNECTOR_BLOCKED`: required GitHub access is unavailable;
-- `INTEGRITY_QUARANTINE`: ownership/provenance/fencing integrity is uncertain;
-- `INTENTIONAL_STOP`: canonical lifecycle control forbids continuation.
+Research and Manager may use this narrow append-only transport without a per-message human mutation authorization case. All other durable effects retain their normal authority requirements.
 
-A run may have successful substantive analysis and still have `CHECKPOINT_IO_BLOCKED`; in that case downstream MUST treat the result as unavailable until it is durably recovered.
+## Historical issue #25
 
-## Interactive Primary / recovery runs
-
-A manually opened or human-triggered Primary session is not automatically the scheduled Primary occurrence. If it participates in recovery it MUST:
-
-- use `trigger = USER_INTERACTIVE`;
-- identify `recovery_of_cycle_id` when repairing a scheduled cycle;
-- consume only real durable upstream checkpoints;
-- never fabricate a missing Manager or Researcher checkpoint;
-- preserve the same authority boundaries as scheduled Primary;
-- publish a new append-only recovery/superseding checkpoint rather than rewriting old comments.
-
-## Source of truth boundaries
-
-The checkpoint bus answers: "what durable stage state is available for this scheduled cycle?"
-
-It does not answer by itself:
-
-- whether a technical claim is true;
-- whether code on `main` is current;
-- whether a device test passed;
-- whether an agent owns a project lane;
-- whether a human authorized a protected action.
-
-Those remain governed by the applicable project, repository, evidence, claim/fence, and consequence-control mechanisms.
+Existing issue #25 comments remain historical evidence and may be inspected for audit/recovery context. They are not the current scheduled write transport and must not be used as an implicit current-cycle fallback.
 
 ## Acceptance criteria
 
-The transport patch is considered operational when all of these are demonstrated:
+The transport is operational when:
 
-1. a scheduled stage can append and externally read back a checkpoint without mutating production source;
-2. Manager can consume current-cycle `RESEARCH_PROGRESS` when READY is absent;
-3. Primary can consume current-cycle `MANAGER_PROGRESS` when READY is absent;
-4. stale prior-cycle state is rejected;
-5. conflicting sequence reuse fails closed;
-6. transport outage is detected before expensive work;
-7. late higher-sequence upstream state is re-read before finalization;
-8. automation prompt alignment preserves each task's existing enabled/disabled state;
-9. no agent gains scheduler-enable authority from this protocol.
+1. a subordinate stage can append a same-project forum checkpoint where available;
+2. it can create/read back an immutable same-project GitHub backup file only under the registered prefix;
+3. foreign repository and foreign namespace writes are rejected;
+4. traversal/out-of-prefix paths are rejected;
+5. overwrite/delete/rename/move attempts are rejected;
+6. role spoofing cannot turn subordinate publication into Primary publication;
+7. message content cannot convey mutation authority;
+8. downstream reads reject foreign-project and stale-cycle state;
+9. schedule prompt alignment preserves every task's enabled/disabled state and cadence;
+10. no agent gains scheduler-enable or general repository-write authority from this protocol.
