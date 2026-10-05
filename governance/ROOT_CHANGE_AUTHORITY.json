@@ -1,0 +1,37 @@
+{
+  "schema": "intercommunications/root-change-authority/v1",
+  "production_baseline_sha": "099103eaf2d22f7e118fa51958e8a06cfe737ea5",
+  "sole_human_change_authority": true,
+  "human_root_change_principals": [
+    {
+      "name": "Robert Leonard",
+      "github_login": "boberino93-bit"
+    }
+  ],
+  "scope": [
+    "production_promotion",
+    "main_branch_change",
+    "universal_policy_change",
+    "root_authority_change",
+    "deployment_authorization"
+  ],
+  "delegation": {
+    "allowed": false,
+    "automatic_delegation": false,
+    "agent_delegation": false
+  },
+  "invariants": {
+    "agent_may_mint_root_authority": false,
+    "learning_may_modify_root_authority": false,
+    "confidence_or_consensus_may_create_authority": false,
+    "root_change_requires_authenticated_human_principal": true
+  },
+  "repository_enforcement": {
+    "codeowners_path": ".github/CODEOWNERS",
+    "ci_actor_guard_path": ".github/workflows/root-authority-guard.yml",
+    "authorized_github_actor": "boberino93-bit",
+    "preventive_branch_rule_required": true,
+    "preventive_branch_rule_verified": false,
+    "note": "Repository ruleset/branch protection is an external GitHub control and must be configured with repository administration permission before sole-change enforcement can be called preventive at the GitHub branch boundary."
+  }
+}
