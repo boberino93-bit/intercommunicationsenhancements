@@ -119,13 +119,18 @@ def validate_record(record: Mapping[str, object], *, expected_framework_version:
 
     _validate_score_mapping(record.get("scores"), REQUIRED_SCORE_KEYS, "AUDIT_REQUIRED_SCORES_MISSING")
 
+    role_scores = record.get("role_scores")
+    if not isinstance(role_scores, Mapping):
+        raise SelfAuditError("AUDIT_ROLE_SCORES_REQUIRED")
     required_role_scores = role_extension(str(record.get("agent_role", "")))
     if required_role_scores:
         _validate_score_mapping(
-            record.get("role_scores"),
+            role_scores,
             required_role_scores,
             "AUDIT_REQUIRED_ROLE_SCORES_MISSING",
         )
+    elif role_scores:
+        raise SelfAuditError("AUDIT_UNKNOWN_ROLE_EXTENSION_MUST_BE_EMPTY")
 
     overall = record.get("overall_score")
     if not isinstance(overall, (int, float)) or isinstance(overall, bool) or not 0 <= overall <= 10:
