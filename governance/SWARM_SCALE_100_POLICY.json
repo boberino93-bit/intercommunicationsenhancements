@@ -1,6 +1,6 @@
 {
   "schema": "org-agent-mesh/swarm-scale-policy/v1",
-  "status": "ACTIVE_TARGET_ALIGNMENT_VERIFIED_STAGE15_NOT_YET_PASSED",
+  "status": "ACTIVE_TARGET_CONTRACT_READY_PREFLIGHT_BLOCKED",
   "target_population": 100,
   "staged_populations": [15, 30, 60, 100],
   "registered_project_count": 7,
@@ -9,9 +9,20 @@
   "global_round_expected_set_aligned": true,
   "alignment_verification": "governance/SWARM_SCALE_100_ALIGNMENT_VERIFICATION_20261005.json",
   "historical_compatibility_audit": "governance/SWARM_SCALE_100_COMPATIBILITY_AUDIT_20261005.json",
-  "stage_15_ready": true,
-  "stage_15_status": "ELIGIBLE_TO_TEST_NOT_YET_PASSED",
-  "stage_15_blocker": null,
+  "stage_15_contract_ready": true,
+  "stage_15_preflight_ready": false,
+  "stage_15_ready": false,
+  "stage_15_status": "CONTRACT_READY_PREFLIGHT_BLOCKED",
+  "stage_15_blocker": "FRESH_PROJECT_CAPACITY_EVIDENCE_REQUIRED",
+  "stage_15_preflight_policy": "governance/STAGE15_PREFLIGHT_POLICY.json",
+  "stage_15_evidence_schema": "schemas/stage15_evidence.schema.json",
+  "stage_15_preflight_runtime": "org_agent_mesh.stage15_preflight",
+  "readiness_semantics": {
+    "contract_ready": "seven-project contract alignment only",
+    "preflight_ready": "fresh project capacity + operations + kernel preflight evidence",
+    "stage_passed": "post-run convergence gate only",
+    "none_of_these_convey_launch_authority": true
+  },
   "theoretical_per_project_active_roles": {
     "PRIMARY": 1,
     "MANAGER": 1,
