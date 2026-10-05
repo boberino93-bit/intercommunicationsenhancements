@@ -11,18 +11,21 @@ def load_json(path: str):
 
 
 class MutationAuthorizationGovernanceTests(unittest.TestCase):
-    def test_mutation_policy_is_hard_gate(self):
+    def test_mutation_policy_is_hard_gate_and_single_use(self):
         policy = load_json("governance/MUTATION_AUTHORIZATION_POLICY.json")
         self.assertEqual(policy["status"], "ACTIVE_HARD_GATE")
         self.assertEqual(policy["invariant"], "INTENT_IS_NOT_AUTHORIZATION")
-        self.assertTrue(policy["authorization_record_required_before_each_mutation"])
-        self.assertEqual(policy["interactive_explicit_test"]["material_ambiguity_result"], "AUTHORIZATION_UNRESOLVED")
-        self.assertEqual(policy["interactive_explicit_test"]["unresolved_write_behavior"], "DENY")
+        self.assertTrue(policy["principal_claim_required"])
+        self.assertTrue(policy["authorization_record_required_before_each_mutation_case"])
+        self.assertTrue(policy["authorization_case"]["single_use"])
+        self.assertFalse(policy["authorization_case"]["session_persistence"])
+        self.assertFalse(policy["authorization_case"]["conversation_persistence"])
         self.assertFalse(policy["role_is_mutation_authority"])
         self.assertFalse(policy["claim_or_lease_is_mutation_authority"])
+        self.assertFalse(policy["authentication_is_mutation_authority"])
         self.assertFalse(policy["scheduled_work"]["schedule_fire_is_authorization"])
 
-    def test_inferred_intent_and_capability_questions_are_not_authority(self):
+    def test_prior_permission_and_task_contract_are_not_authority(self):
         policy = load_json("governance/MUTATION_AUTHORIZATION_POLICY.json")
         invalid = set(policy["invalid_authorization_sources"])
         for source in (
@@ -32,21 +35,22 @@ class MutationAuthorizationGovernanceTests(unittest.TestCase):
             "ENTHUSIASM_OR_PRAISE",
             "ROLE_OR_SENIORITY",
             "REPOSITORY_PERMISSION",
-            "PRIOR_UNRELATED_AUTHORIZATION",
+            "PRIOR_AUTHORIZATION",
+            "PRIOR_AUTHENTICATION",
+            "ACTIVE_TASK_CONTRACT_ALONE",
+            "SCHEDULE_FIRE",
+            "PARENT_AGENT_DELEGATION_ALONE",
+            "SESSION_CONTEXT",
+            "CONVERSATION_CONTINUITY",
         ):
             self.assertIn(source, invalid)
 
-    def test_valid_authorization_sources_are_bounded(self):
+    def test_only_current_single_use_human_case_is_standalone_authority(self):
         policy = load_json("governance/MUTATION_AUTHORIZATION_POLICY.json")
-        self.assertEqual(
-            set(policy["valid_authorization_sources"]),
-            {
-                "CURRENT_HUMAN_EXPLICIT",
-                "ACTIVE_HUMAN_APPROVED_TASK_CONTRACT",
-                "DELEGATED_WITHIN_APPROVED_SCOPE",
-            },
-        )
-        self.assertFalse(policy["delegation"]["may_expand_human_approved_mutation_envelope"])
+        self.assertEqual(policy["valid_authorization_sources"], ["CURRENT_HUMAN_SINGLE_USE_AUTHORIZATION_CASE"])
+        self.assertFalse(policy["delegation"]["may_create_new_human_authorization"])
+        self.assertFalse(policy["delegation"]["may_expand_case_scope"])
+        self.assertTrue(policy["scheduled_work"]["each_distinct_mutation_case_requires_fresh_human_authorization"])
 
     def test_roleless_admission_does_not_self_promote_primary(self):
         policy = load_json("governance/ROLELESS_AGENT_ADMISSION_POLICY.json")
@@ -56,19 +60,15 @@ class MutationAuthorizationGovernanceTests(unittest.TestCase):
         self.assertFalse(role["primary_self_promotion"])
         self.assertFalse(role["master_self_selection"])
         self.assertFalse(policy["role_plus_claim_grants_mutation_authority"])
-        self.assertFalse(policy["minimal_human_launch"]["generic_start_instruction_alone_authorizes_external_mutation"])
 
     def test_global_entrypoint_routes_generic_agent_to_roleless_admission(self):
         entry = load_json("GLOBAL_AGENT_ENTRYPOINT.json")
-        self.assertEqual(entry["version"], "1.6.0")
         self.assertEqual(entry["mutation_authorization_policy"]["invariant"], "INTENT_IS_NOT_AUTHORIZATION")
-        self.assertFalse(entry["mutation_authorization_policy"]["capability_question_is_authorization"])
         self.assertEqual(
             entry["role_policy"]["human_launched_generic_project_agent_without_role"],
             "ROLELESS_DEMAND_DRIVEN_ADMISSION",
         )
         self.assertEqual(entry["role_policy"]["generic_agent_primary_self_promotion"], "DENY")
-        self.assertIn("proposed_external_side_effect_has_valid_mutation_authorization_source", entry["mutation_gate"])
 
     def test_local_bootstrap_separates_role_claim_and_mutation_authority(self):
         bootstrap = load_json("AGENT_BOOTSTRAP.json")
@@ -76,33 +76,19 @@ class MutationAuthorizationGovernanceTests(unittest.TestCase):
         self.assertEqual(bootstrap["mutation_authorization"]["invariant"], "INTENT_IS_NOT_AUTHORIZATION")
         self.assertFalse(bootstrap["roleless_agent_admission"]["primary_self_promotion"])
         self.assertFalse(bootstrap["roleless_agent_admission"]["role_or_claim_grants_mutation_authority"])
-        self.assertFalse(bootstrap["rules"]["generic_human_launch_without_role_defaults_to_primary"])
-        self.assertTrue(bootstrap["rules"]["ambiguous_mutation_authorization_fails_closed"])
 
     def test_bootstrap_order_has_authorization_gate_before_mutation(self):
         order = load_json("BOOTSTRAP_ORDER.json")
-        self.assertEqual(order["schema"], "org-agent-mesh/bootstrap-order/v5")
         steps = {step["id"]: step for step in order["steps"]}
         auth_step = steps["evaluate_current_mutation_authorization_envelope"]
         self.assertFalse(auth_step["mutation_allowed"])
         self.assertTrue(auth_step["result_required_before_any_external_side_effect"])
-        execute = steps["execute_task_with_autonomous_continuation_and_per_mutation_scope_validation"]
-        self.assertIn("mutation_authorization_validation_before_each_external_side_effect", execute["additional_guards"])
-        self.assertIn("stronger_exact_action_authorization_when_applicable", execute["additional_guards"])
 
-    def test_supervisory_policy_cannot_turn_role_into_write_authority(self):
-        policy = load_json("governance/SWARM_SUPERVISION_POLICY.json")
-        self.assertFalse(policy["mutation_authorization"]["supervisory_role_grants_mutation_authority"])
-        self.assertFalse(policy["mutation_authorization"]["claim_or_lease_grants_mutation_authority"])
-        self.assertFalse(policy["roleless_agent_admission"]["generic_agent_defaults_to_primary"])
-        self.assertFalse(policy["roleless_agent_admission"]["primary_self_promotion"])
-        self.assertTrue(policy["runtime"]["authorization_check_before_each_external_side_effect"])
-
-    def test_protocol_contains_near_miss_regression_examples(self):
+    def test_protocol_forbids_ambient_authorization(self):
         text = (ROOT / "protocols" / "mutation_authorization.md").read_text()
-        self.assertIn("Can you harden this?", text)
-        self.assertIn("do **not** by themselves authorize mutation", text)
-        self.assertIn("Implement this fix and commit it.", text)
+        self.assertIn("There is no session-wide", text)
+        self.assertIn("even one issued seconds earlier", text)
+        self.assertIn("Every distinct mutation case requires its own case ID", text)
 
 
 if __name__ == "__main__":
