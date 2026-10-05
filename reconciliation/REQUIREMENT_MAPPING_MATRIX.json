@@ -1,0 +1,27 @@
+{
+  "schema": "org-agent-mesh/post-normalization-requirement-map/v1",
+  "status": "VALIDATION_PENDING",
+  "baseline_revision": "72e87ce7cddca17fd78c8ece3ecb5f523c7021e2",
+  "normalized_runtime_revision": "fb592418f700fc5e540e76bfa42b043e03fe6ed9",
+  "mappings": [
+    {"requirement":"one canonical control plane","classification":"ALREADY_IMPLEMENTED_AND_PROVEN","evidence":["org_agent_mesh/control_plane.py","HARDENING_STATUS.md"]},
+    {"requirement":"project-bound authenticated execution identity","classification":"ALREADY_IMPLEMENTED_AND_PROVEN","evidence":["org_agent_mesh/control_plane.py","org_agent_mesh/project_scope.py"]},
+    {"requirement":"child authority non-escalation","classification":"ALREADY_IMPLEMENTED_AND_PROVEN","evidence":["org_agent_mesh/control_plane.py"]},
+    {"requirement":"launch admission before provider work","classification":"PARTIALLY_SATISFIED","evidence":["org_agent_mesh/launch_admission.py","HARDENING_STATUS.md"],"limitation":"pre-invocation scheduler hook is host-dependent"},
+    {"requirement":"policy compiler / effective policy slice","classification":"PARTIALLY_SATISFIED","candidate":["org_agent_mesh/reliability_kernel.py","schemas/effective_policy_slice.schema.json"]},
+    {"requirement":"verifiable policy certificate","classification":"PARTIALLY_SATISFIED","candidate":["org_agent_mesh/reliability_kernel.py","schemas/policy_certificate.schema.json"],"limitation":"reference HMAC key distribution is not production PKI"},
+    {"requirement":"machine-enforceable invariant registry","classification":"PARTIALLY_SATISFIED","candidate":["org_agent_mesh/reliability_kernel.py"]},
+    {"requirement":"resource governor","classification":"PARTIALLY_SATISFIED","candidate":["org_agent_mesh/reliability_kernel.py"],"limitation":"bounded reference governor; durable global fairness pending"},
+    {"requirement":"SAFE_MINIMAL_MODE","classification":"PARTIALLY_SATISFIED","candidate":["org_agent_mesh/reliability_kernel.py"]},
+    {"requirement":"authenticated human BREAK_GLASS","classification":"MISSING","reason":"must not be simulated by agent-side code"},
+    {"requirement":"schema/protocol evolution registry","classification":"PARTIALLY_SATISFIED","candidate":["org_agent_mesh/reliability_kernel.py","reliability/RELIABILITY_KERNEL_REGISTRY.json"]},
+    {"requirement":"proof-carrying handoff","classification":"PARTIALLY_SATISFIED","candidate":["org_agent_mesh/reliability_kernel.py","schemas/proof_carrying_handoff.schema.json"]},
+    {"requirement":"control-loop damping / hysteresis","classification":"PARTIALLY_SATISFIED","candidate":["org_agent_mesh/reliability_kernel.py"]},
+    {"requirement":"formal reliability SLOs and error budgets","classification":"PARTIALLY_SATISFIED","candidate":["reliability/RELIABILITY_KERNEL_REGISTRY.json"],"limitation":"targets defined; runtime measurement service pending"},
+    {"requirement":"protected-transition assurance case","classification":"PARTIALLY_SATISFIED","candidate":["schemas/assurance_case.schema.json"],"limitation":"gate integration pending"},
+    {"requirement":"catastrophic reconstruction drill","classification":"MISSING"},
+    {"requirement":"supply-chain attestation","classification":"PARTIALLY_SATISFIED","evidence":["HARDENING_STATUS.md"],"limitation":"existing reproducible package hashes are strong provenance but not full attestation infrastructure"},
+    {"requirement":"credential lifecycle / broker","classification":"FUTURE_RESEARCH"},
+    {"requirement":"production deployment","classification":"NOT_NEEDED","reason":"directive explicitly does not authorize deployment"}
+  ]
+}
