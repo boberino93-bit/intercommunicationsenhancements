@@ -95,6 +95,28 @@ class SelfAuditLedgerTests(unittest.TestCase):
         with self.assertRaisesRegex(SelfAuditError, "REQUIRED_SCORES_MISSING"):
             validate_record(changed)
 
+    def test_known_role_requires_its_extension_scores(self):
+        changed = copy.deepcopy(self.audit1)
+        changed["role_scores"].pop("authorization_gating")
+        changed["record_hash"] = canonical_record_hash(changed)
+        with self.assertRaisesRegex(SelfAuditError, "REQUIRED_ROLE_SCORES_MISSING"):
+            validate_record(changed)
+
+    def test_unknown_role_cannot_invent_extension(self):
+        changed = copy.deepcopy(self.audit1)
+        changed["agent_role"] = "UNKNOWN_SPECIALIST"
+        changed["role_scores"] = {"invented_metric": 9.0}
+        changed["record_hash"] = canonical_record_hash(changed)
+        with self.assertRaisesRegex(SelfAuditError, "UNKNOWN_ROLE_EXTENSION_MUST_BE_EMPTY"):
+            validate_record(changed)
+
+    def test_unknown_role_can_use_common_core_with_empty_extension(self):
+        changed = copy.deepcopy(self.audit1)
+        changed["agent_role"] = "UNKNOWN_SPECIALIST"
+        changed["role_scores"] = {}
+        changed["record_hash"] = canonical_record_hash(changed)
+        validate_record(changed)
+
     def test_common_trigger_phrases_are_detected(self):
         self.assertTrue(is_self_audit_request("Please self-evaluate your performance"))
         self.assertTrue(is_self_audit_request("Audit yourself against the framework"))
