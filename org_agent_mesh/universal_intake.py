@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 import re
-from typing import Any, Mapping
+from typing import Any, Mapping, Sequence
 
 from .project_role_routing import ResolvedRoute, RoutingError, resolve_route, validate_local_contract, validate_registry
 
@@ -26,15 +26,20 @@ class ProjectDiscovery:
 @dataclass(frozen=True)
 class UniversalIntakeResult:
     discovery: ProjectDiscovery
-    role_id: str
+    role_id: str | None
     role_source: str
 
     @property
     def mutation_ready(self) -> bool:
         return False
 
+    @property
+    def roleless_admission_pending(self) -> bool:
+        return self.role_id is None and self.role_source == "roleless_demand_pending"
+
     def acknowledgement(self) -> str:
-        return f"UNBOUND ROUTE RESOLVED: project={self.discovery.project_id}; role={self.role_id}; role_source={self.role_source}; repository={self.discovery.repository}; forum={self.discovery.forum_namespace}; mutation_ready=false"
+        role = self.role_id if self.role_id is not None else "ROLELESS_ADMISSION"
+        return f"UNBOUND ROUTE RESOLVED: project={self.discovery.project_id}; role={role}; role_source={self.role_source}; repository={self.discovery.repository}; forum={self.discovery.forum_namespace}; mutation_ready=false"
 
 
 def _normalize_alias(value: str) -> str:
@@ -46,6 +51,20 @@ def _contains_exact_human_alias(text: str, alias: str) -> bool:
     normalized_alias = _normalize_alias(alias)
     pattern = r"(?<!\w)" + re.escape(normalized_alias).replace(r"\ ", r"\s+") + r"(?!\w)"
     return re.search(pattern, normalized_text) is not None
+
+
+def _validate_self_admissible_roles(project: Mapping[str, Any]) -> None:
+    roles = project.get("roles", [])
+    self_admissible = project.get("self_admissible_roles")
+    if not isinstance(self_admissible, list) or not all(isinstance(role, str) and role for role in self_admissible):
+        raise UniversalIntakeError("invalid_self_admissible_roles")
+    if len(set(self_admissible)) != len(self_admissible):
+        raise UniversalIntakeError("duplicate_self_admissible_role")
+    for role in self_admissible:
+        if role not in roles:
+            raise UniversalIntakeError("self_admissible_role_not_authorized")
+        if role in {"primary", "master"}:
+            raise UniversalIntakeError("privileged_role_cannot_be_self_admissible")
 
 
 def validate_global_intake_registry(registry: Mapping[str, Any]) -> None:
@@ -73,6 +92,8 @@ def validate_global_intake_registry(registry: Mapping[str, Any]) -> None:
         raise UniversalIntakeError("project_similarity_inference_must_be_false")
     if config.get("role_inference_from_topic") is not False:
         raise UniversalIntakeError("role_inference_from_topic_must_be_false")
+    if config.get("generic_human_task_role_mode") != "ROLELESS_DEMAND_DRIVEN_ADMISSION":
+        raise UniversalIntakeError("generic_human_task_must_use_roleless_admission")
     if config.get("cross_project_routing_scan") != "READ_ONLY_REGISTERED_METADATA":
         raise UniversalIntakeError("invalid_cross_project_routing_scan")
     if config.get("fallback_resolution") != "REGISTERED_FORUM_HANDOFF_EXACT_IDENTIFIER_ONLY":
@@ -93,13 +114,11 @@ def validate_global_intake_registry(registry: Mapping[str, Any]) -> None:
 
     if version >= (1, 4, 0) and config.get("active_project_context_policy") != "USE_AS_STRONG_ROUTING_EVIDENCE_UNLESS_EXPLICIT_TARGET_CONFLICTS":
         raise UniversalIntakeError("invalid_active_project_context_policy")
-    default_role = config.get("default_human_task_role")
-    if not isinstance(default_role, str) or not default_role:
-        raise UniversalIntakeError("invalid_default_human_task_role")
     seen_aliases: dict[str, str] = {}
     projects = registry["projects"]
     reserved_identifiers: dict[str, str] = {}
     for project_id, project in projects.items():
+        _validate_self_admissible_roles(project)
         for value in (project_id, project.get("repository"), project.get("forum_namespace")):
             if isinstance(value, str) and value:
                 normalized = _normalize_alias(value)
@@ -124,8 +143,6 @@ def validate_global_intake_registry(registry: Mapping[str, Any]) -> None:
             if existing is not None and existing != project_id:
                 raise UniversalIntakeError("duplicate_discovery_alias")
             seen_aliases[normalized] = project_id
-        if default_role not in project.get("roles", []):
-            raise UniversalIntakeError("default_human_task_role_not_authorized")
 
 
 def discover_project(
@@ -220,14 +237,70 @@ def resolve_unbound_intake(
     )
     project = registry["projects"][discovery.project_id]
     if requested_role is not None:
+        if requested_role not in project["roles"]:
+            raise UniversalIntakeError("unknown_or_unauthorized_role")
         role_id, role_source = requested_role, "explicit"
     else:
         if not human_task_present:
             raise UniversalIntakeError("role_required_without_human_task")
-        role_id, role_source = registry["global_intake"]["default_human_task_role"], "global_human_task_default"
-    if role_id not in project["roles"]:
-        raise UniversalIntakeError("unknown_or_unauthorized_role")
+        role_id, role_source = None, "roleless_demand_pending"
     return UniversalIntakeResult(discovery=discovery, role_id=role_id, role_source=role_source)
+
+
+def admit_roleless_role(
+    registry: Mapping[str, Any],
+    *,
+    intake: UniversalIntakeResult,
+    local_contract: Mapping[str, Any],
+    role_pressure: Mapping[str, float | int],
+    state_is_fresh: bool,
+    blocked_roles: Sequence[str] = (),
+) -> UniversalIntakeResult:
+    """Select one safe project-local role from fresh, explicit role-pressure data.
+
+    This function performs organizational admission only. It never grants mutation authority
+    and it intentionally refuses to self-promote a generic agent to PRIMARY or MASTER.
+    """
+    if not intake.roleless_admission_pending:
+        raise UniversalIntakeError("roleless_admission_not_pending")
+    if not state_is_fresh:
+        raise UniversalIntakeError("stale_role_demand_state")
+
+    project_id = intake.discovery.project_id
+    validate_local_contract(registry, project_id=project_id, contract=local_contract)
+    project = registry["projects"][project_id]
+    project_roles = tuple(project.get("self_admissible_roles", ()))
+    local_admission = local_contract.get("roleless_agent_admission")
+    if not isinstance(local_admission, Mapping):
+        raise UniversalIntakeError("missing_local_roleless_admission_contract")
+    if local_admission.get("required_for_generic_human_launch_without_explicit_role") is not True:
+        raise UniversalIntakeError("local_roleless_admission_not_required")
+    if local_admission.get("primary_self_promotion") is not False:
+        raise UniversalIntakeError("local_primary_self_promotion_not_denied")
+    if local_admission.get("role_or_claim_grants_mutation_authority") is not False:
+        raise UniversalIntakeError("local_role_or_claim_authority_expansion")
+    local_roles = local_admission.get("self_admissible_roles")
+    if not isinstance(local_roles, list) or not all(isinstance(role, str) and role for role in local_roles):
+        raise UniversalIntakeError("invalid_local_self_admissible_roles")
+
+    allowed = [role for role in local_roles if role in project_roles and role not in {"primary", "master"}]
+    if not allowed:
+        raise UniversalIntakeError("no_self_admissible_roles")
+
+    blocked = set(blocked_roles)
+    scored: list[tuple[float, int, str]] = []
+    for index, role in enumerate(allowed):
+        raw = role_pressure.get(role, 0)
+        if isinstance(raw, bool) or not isinstance(raw, (int, float)) or raw < 0:
+            raise UniversalIntakeError("invalid_role_pressure")
+        pressure = float(raw)
+        if role not in blocked and pressure > 0:
+            scored.append((pressure, -index, role))
+    if not scored:
+        raise UniversalIntakeError("no_material_work")
+
+    _, _, selected = max(scored)
+    return replace(intake, role_id=selected, role_source="roleless_demand_driven")
 
 
 def complete_project_binding(
@@ -239,6 +312,8 @@ def complete_project_binding(
     current_repository_id: int | None = None,
 ) -> ResolvedRoute:
     project_id = intake.discovery.project_id
+    if intake.role_id is None:
+        raise UniversalIntakeError("roleless_admission_required")
     validate_local_contract(registry, project_id=project_id, contract=local_contract)
     repository = current_repository or intake.discovery.repository
     repository_id = current_repository_id if current_repository_id is not None else intake.discovery.repository_id

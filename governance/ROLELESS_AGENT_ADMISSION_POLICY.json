@@ -1,0 +1,78 @@
+{
+  "schema": "org-agent-mesh/roleless-agent-admission/v1",
+  "version": "1.0.0",
+  "status": "ACTIVE_ADMISSION_OVERLAY",
+  "protocol": "protocols/roleless_agent_admission.md",
+  "state_machine": [
+    "UNBOUND",
+    "PROJECT_VERIFIED",
+    "DEMAND_ASSESSED",
+    "ROLE_CANDIDATE",
+    "CLAIMED",
+    "ACTIVE"
+  ],
+  "generic_agent_semantics": "AVAILABLE_PROJECT_CAPACITY_NOT_AUTHORITY",
+  "required_demand_inputs": [
+    "CURRENT_FRONTIER",
+    "ACTIVE_CLAIMS_LEASES_FENCES",
+    "RESEARCH_BACKLOG",
+    "VALIDATION_OR_CONTRADICTION_BACKLOG",
+    "REVIEW_OR_INTEGRATION_BACKLOG",
+    "IMPLEMENTATION_OR_PROTOTYPE_BACKLOG",
+    "BLOCKERS_AND_MISSING_CAPABILITIES",
+    "ROLE_LIVENESS",
+    "INTENTIONAL_STOP_PAUSE_OR_QUARANTINE",
+    "DUPLICATE_WORK_RISK",
+    "CAPACITY_OR_BACKPRESSURE",
+    "LATEST_ACCEPTED_STATE_AND_SOURCE_REVISION"
+  ],
+  "role_selection": {
+    "demand_driven": true,
+    "fixed_global_ratios": false,
+    "requires_local_role_authorization": true,
+    "primary_self_promotion": false,
+    "master_self_selection": false,
+    "primary_requires": [
+      "CURRENT_HUMAN_EXPLICIT_ASSIGNMENT",
+      "AUTHORIZED_PROJECT_LOCAL_DELEGATION_WITHIN_HUMAN_APPROVED_SCOPE",
+      "EQUIVALENT_STRICT_LOCAL_POLICY_PATH"
+    ],
+    "no_material_work_result": "NO_MATERIAL_WORK"
+  },
+  "claim_before_mutate": {
+    "required_for_exclusive_or_mutating_work": true,
+    "duplicate_active_claim_behavior": "RESELECT_OR_STOP",
+    "independent_validation_exception_requires_label": true,
+    "coordination_unavailable_mutation_behavior": "DENY_CONFLICTING_MUTATION_ALLOW_SAFE_READ_ONLY"
+  },
+  "role_switch": {
+    "bounded_unit_boundary_only": true,
+    "persist_handoff_when_required": true,
+    "release_or_expire_current_claim": true,
+    "reassess_demand": true,
+    "new_claim_when_needed": true,
+    "reauthorize_mutation": true,
+    "carry_old_write_authority": false
+  },
+  "mutation_authorization_separate": true,
+  "role_plus_claim_grants_mutation_authority": false,
+  "capacity": {
+    "assume_unlimited_concurrency": false,
+    "respect_provider_limits": true,
+    "respect_rate_limits": true,
+    "respect_repository_contention": true,
+    "respect_storage_and_artifact_pressure": true,
+    "respect_review_backpressure": true,
+    "unknown_limits_are_infinite": false
+  },
+  "stale_state_protection": {
+    "refresh_before_claim_when_practical": true,
+    "refresh_before_first_mutation_when_practical": true,
+    "reselect_on_material_state_change": true
+  },
+  "minimal_human_launch": {
+    "generic_start_instruction_authorizes_read_only_admission": true,
+    "generic_start_instruction_authorizes_self_admissible_role_selection": true,
+    "generic_start_instruction_alone_authorizes_external_mutation": false
+  }
+}

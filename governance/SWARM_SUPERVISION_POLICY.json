@@ -1,6 +1,6 @@
 {
   "schema": "org-agent-mesh/supervisory-governance/v1",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "status": "ACTIVE_OVERLAY",
   "authority_order": ["USER", "MASTER", "PRIMARY", "SUBORDINATE"],
   "scope_rule": "SUPERVISORY_LIFECYCLE_AUTHORITY_DOES_NOT_GRANT_CROSS_PROJECT_SOURCE_MUTATION",
@@ -14,6 +14,25 @@
   "primary": {
     "authority": "OWN_PROJECT_TREE_ONLY",
     "cross_project_control": "DENY_UNLESS_MASTER_DELEGATES_THROUGH_AN_EXISTING_AUTHORIZED_CONTROL_PATH"
+  },
+  "mutation_authorization": {
+    "policy_path": "governance/MUTATION_AUTHORIZATION_POLICY.json",
+    "protocol_path": "protocols/mutation_authorization.md",
+    "invariant": "INTENT_IS_NOT_AUTHORIZATION",
+    "required_before_every_external_mutation": true,
+    "supervisory_role_grants_mutation_authority": false,
+    "claim_or_lease_grants_mutation_authority": false,
+    "ambiguous_authorization_behavior": "DENY_AFFECTED_WRITE_CONTINUE_SAFE_READ_ONLY",
+    "stronger_exact_action_authorization_preserved": true
+  },
+  "roleless_agent_admission": {
+    "policy_path": "governance/ROLELESS_AGENT_ADMISSION_POLICY.json",
+    "protocol_path": "protocols/roleless_agent_admission.md",
+    "generic_agent_defaults_to_primary": false,
+    "demand_driven": true,
+    "primary_self_promotion": false,
+    "master_self_selection": false,
+    "role_selection_grants_mutation_authority": false
   },
   "chat_project_mapping": {
     "intercommunicationsenhancements": "Intercommunication enhancements",
@@ -35,14 +54,16 @@
     "ARCHITECTURE_CONFLICT", "UNEXPECTED_RISK", "DESTRUCTIVE_BEHAVIOR",
     "RESOURCE_IMBALANCE", "BLOCKED_EXECUTION", "AGENT_CONFLICT",
     "PREMATURE_IMPLEMENTATION", "PREMATURE_RESEARCH", "QUALITY_DEGRADATION",
-    "PROJECT_STATE_CHANGED", "USER_OVERRIDE", "MASTER_DIRECTION", "OTHER"
+    "PROJECT_STATE_CHANGED", "USER_OVERRIDE", "MASTER_DIRECTION", "AUTHORIZATION_MISSING",
+    "AUTHORIZATION_AMBIGUOUS", "AUTHORIZATION_SCOPE_MISMATCH", "ROLE_ADMISSION_CONFLICT", "OTHER"
   ],
   "runtime": {
     "bounded_work_units_required": true,
     "control_check_between_units_required": true,
     "atomic_operation_may_finish_if_interruption_would_corrupt_state": true,
     "stop_preserves_useful_partial_state": true,
-    "stop_means_delete": false
+    "stop_means_delete": false,
+    "authorization_check_before_each_external_side_effect": true
   },
   "respawn": {
     "intentional_stop_sets_allow_respawn_false": true,
@@ -87,6 +108,8 @@
     "supervision_module": "org_agent_mesh.supervision",
     "schedule_activation_module": "org_agent_mesh.schedule_activation",
     "chat_project_router_module": "org_agent_mesh.chat_project_routing",
+    "mutation_authorization_policy": "governance/MUTATION_AUTHORIZATION_POLICY.json",
+    "roleless_agent_admission_policy": "governance/ROLELESS_AGENT_ADMISSION_POLICY.json",
     "protocol": "protocols/supervisory_governance.md"
   }
 }
