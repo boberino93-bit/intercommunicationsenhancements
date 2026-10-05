@@ -1,6 +1,6 @@
 {
   "schema": "org-agent-mesh/global-agent-entrypoint/v1",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "routing_contract_version": "1.5.0",
   "mode": "UNBOUND_READ_ONLY",
   "rendezvous": {
@@ -15,7 +15,8 @@
     "supervisory_governance_protocol": "protocols/supervisory_governance.md",
     "supervisory_governance_policy": "governance/SWARM_SUPERVISION_POLICY.json",
     "chat_project_router_module": "org_agent_mesh.chat_project_routing",
-    "supervision_module": "org_agent_mesh.supervision"
+    "supervision_module": "org_agent_mesh.supervision",
+    "schedule_activation_module": "org_agent_mesh.schedule_activation"
   },
   "orientation_policy": {
     "reference_is_authority": false,
@@ -50,6 +51,19 @@
     "bounded_work_unit_control_checks_required": true,
     "useful_partial_state_preservation_required_when_practical": true
   },
+  "scheduled_task_activation_policy": {
+    "activation_authority": "EXPLICIT_CURRENT_HUMAN_ACTION_ONLY",
+    "agents_may_enable": false,
+    "master_may_enable": false,
+    "primary_may_enable": false,
+    "recovery_may_enable": false,
+    "migration_or_alignment_may_enable": false,
+    "automatic_reenable": false,
+    "disabled_is_control_gate": true,
+    "disabled_is_health_failure": false,
+    "configuration_updates_must_preserve_enabled_state": true,
+    "logical_restart_does_not_imply_task_enablement": true
+  },
   "intent_branches": {
     "scheduled_master_task": {
       "trigger": "VALID_MASTER_SCHEDULED_LAUNCH",
@@ -58,7 +72,8 @@
       "project_id": null,
       "chat_project": null,
       "global_discovery_required": true,
-      "project_binding_for_conversation": "DENY"
+      "project_binding_for_conversation": "DENY",
+      "self_enable_or_reenable": "DENY"
     },
     "scheduled_project_bound_task": {
       "trigger": "VALID_ORG_AGENT_MESH_PROJECT_LAUNCH_CONTEXT_PRESENT",
@@ -70,6 +85,7 @@
       "supervisory_state_reconciliation_required": true,
       "intentional_stop_respawn_check_required": true,
       "chat_project_verification_required_when_host_supports_it": true,
+      "self_enable_or_reenable": "DENY",
       "topic_similarity_fallback": "DENY",
       "context_conflict": "BLOCK_AFFECTED_MUTATION_CONTINUE_SAFE_INDEPENDENT_WORK"
     },
@@ -79,6 +95,8 @@
   "sequence": [
     "remain_unbound_and_deny_mutation_until_exact_project_resolution_or_valid_roaming_master_identity",
     "load_current_supervisory_governance_before_starting_or_replacing_swarm_work",
+    "preserve_current_scheduled_task_enabled_state_unless_current_human_explicitly_requested_change",
+    "never_auto_enable_or_reenable_a_disabled_swarm_task",
     "if_valid_scheduled_master_launch_preserve_global_roaming_identity_and_do_not_attach_chat_to_project",
     "if_valid_scheduled_project_launch_context_present_use_it_as_exact_routing_evidence_and_skip_fuzzy_discovery",
     "otherwise_load_global_routing_registry",
@@ -100,8 +118,8 @@
     "persist_handoff_to_bound_project"
   ],
   "strong_project_evidence": ["validated_scheduled_launch_context_that_matches_local_contract", "explicit_project_id", "registered_repository_full_name_or_url", "registered_stable_repository_id", "registered_forum_namespace", "registered_exact_discovery_alias", "exact_unique_identifier_found_in_registered_read_only_forum_or_handoff_metadata"],
-  "forbidden_resolution_methods": ["topic_similarity_as_write_authority", "fuzzy_repository_guessing", "cross_project_mutation_during_discovery", "using_a_repository_snapshot_as_authoritative_live_forum", "choosing_between_multiple_materially_plausible_projects_without_new_evidence", "switching_a_scheduled_project_bound_launch_to_another_project_from_task_text", "binding_master_conversation_to_current_priority_project"],
-  "role_policy": {"master": "GLOBAL_ROAMING_LIFECYCLE_SUPERVISOR_WITH_EXISTING_MUTATION_LIMITS", "scheduled_project_bound": "USE_CONTEXT_ROLE_ONLY_IF_AUTHORIZED_BY_TARGET_PROJECT", "explicit_role": "USE_IF_AUTHORIZED_BY_TARGET_PROJECT", "human_launched_generic_task_without_role": "PRIMARY", "no_actionable_human_task_and_no_role": "REMAIN_UNBOUND"},
+  "forbidden_resolution_methods": ["topic_similarity_as_write_authority", "fuzzy_repository_guessing", "cross_project_mutation_during_discovery", "using_a_repository_snapshot_as_authoritative_live_forum", "choosing_between_multiple_materially_plausible_projects_without_new_evidence", "switching_a_scheduled_project_bound_launch_to_another_project_from_task_text", "binding_master_conversation_to_current_priority_project", "automatically_enabling_a_disabled_swarm_task"],
+  "role_policy": {"master": "GLOBAL_ROAMING_LIFECYCLE_SUPERVISOR_WITH_EXISTING_MUTATION_LIMITS_AND_NO_TASK_ENABLE_AUTHORITY", "scheduled_project_bound": "USE_CONTEXT_ROLE_ONLY_IF_AUTHORIZED_BY_TARGET_PROJECT", "explicit_role": "USE_IF_AUTHORIZED_BY_TARGET_PROJECT", "human_launched_generic_task_without_role": "PRIMARY", "no_actionable_human_task_and_no_role": "REMAIN_UNBOUND"},
   "mutation_gate": ["exactly_one_project_resolved_for_non_master_mutation", "target_repository_identity_verified", "target_local_contract_verified", "target_context_reference_loaded_as_orientation_only", "scheduled_launch_context_verified_when_present", "supervisory_state_allows_execution", "target_role_authorized", "target_project_bootstrap_reaches_active_state"],
   "new_project_exception_to_existing_project_gate": {"scope": "NEW_PROJECT_BOOTSTRAP_ONLY", "requires": "EXPLICIT_HUMAN_REQUEST", "repository_identity": "MAY_REMAIN_UNBOUND", "allowed_mutation": "NEW_PROJECT_ISOLATED_NAMESPACE_ONLY", "existing_project_mutation": "DENY_UNLESS_SEPARATELY_REQUESTED"},
   "conflict_policy": "BLOCK_AFFECTED_MUTATION_RECOVER_CONTEXT_CONTINUE_UNAFFECTED_WORK"
