@@ -1,0 +1,13 @@
+{
+  "schema": "org-agent-mesh/artifact-completeness/v1",
+  "version": "1.0.0",
+  "status": "ACTIVE",
+  "readiness_states": ["DRAFT", "TEMPLATE", "PARTIALLY_POPULATED", "REQUIRES_HUMAN_INPUT", "READY_TO_USE", "READY_TO_SUBMIT", "READY_TO_EXECUTE"],
+  "ready_states_require_all_mandatory_fields": true,
+  "ready_states_require_no_unresolved_placeholders": true,
+  "ready_states_require_current_identifiers": true,
+  "ready_states_require_final_render_validation": true,
+  "out_of_band_input_must_be_declared": true,
+  "readiness_does_not_grant_authority": true,
+  "placeholder_markers": ["TODO", "TBD", "REPLACE_ME", "[PASTE", "[INSERT", "${", "<TOKEN>", "<VALUE>"]
+}
