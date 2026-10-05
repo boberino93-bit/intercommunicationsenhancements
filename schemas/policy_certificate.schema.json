@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "org-agent-mesh/policy-certificate/v1",
+  "title": "Policy Certificate",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["certificate_id","policy_slice","issued_at_utc","expires_at_utc","nonce","issuer","payload_digest","signature"],
+  "properties": {
+    "certificate_id": {"type":"string","minLength":1},
+    "policy_slice": {"$ref":"effective_policy_slice.schema.json"},
+    "issued_at_utc": {"type":"string","format":"date-time"},
+    "expires_at_utc": {"type":"string","format":"date-time"},
+    "nonce": {"type":"string","minLength":1},
+    "issuer": {"type":"string","minLength":1},
+    "payload_digest": {"type":"string","pattern":"^[a-f0-9]{64}$"},
+    "signature": {"type":"string","pattern":"^[a-f0-9]{64}$"}
+  }
+}
