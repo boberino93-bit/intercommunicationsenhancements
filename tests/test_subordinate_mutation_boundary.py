@@ -1,6 +1,5 @@
 from datetime import datetime, timezone
-
-import pytest
+import unittest
 
 from org_agent_mesh.constants import PROTOCOL_VERSION
 from org_agent_mesh.control_plane import AgentSession, require_active_session
@@ -52,52 +51,54 @@ def message(role):
     }
 
 
-def test_legacy_subordinate_write_artifacts_grant_is_not_effective():
-    session = active_session(["READ_SOURCE", "READ_ARTIFACTS", "WRITE_ARTIFACTS", "PUBLISH_MESSAGE"])
-    with pytest.raises(ProjectScopeError):
-        require_active_session(
-            session,
-            "duo-open",
-            operation="artifact write",
-            capability="WRITE_ARTIFACTS",
-        )
+class SubordinateMutationBoundaryTests(unittest.TestCase):
+    def test_legacy_subordinate_write_artifacts_grant_is_not_effective(self):
+        session = active_session(["READ_SOURCE", "READ_ARTIFACTS", "WRITE_ARTIFACTS", "PUBLISH_MESSAGE"])
+        with self.assertRaises(ProjectScopeError):
+            require_active_session(
+                session,
+                "duo-open",
+                operation="artifact write",
+                capability="WRITE_ARTIFACTS",
+            )
 
+    def test_legacy_subordinate_claim_task_grant_is_not_effective(self):
+        session = active_session(["READ_SOURCE", "CLAIM_TASK", "PUBLISH_MESSAGE"])
+        with self.assertRaises(ProjectScopeError):
+            require_active_session(
+                session,
+                "duo-open",
+                operation="task claim",
+                capability="CLAIM_TASK",
+            )
 
-def test_legacy_subordinate_claim_task_grant_is_not_effective():
-    session = active_session(["READ_SOURCE", "CLAIM_TASK", "PUBLISH_MESSAGE"])
-    with pytest.raises(ProjectScopeError):
-        require_active_session(
-            session,
-            "duo-open",
-            operation="task claim",
-            capability="CLAIM_TASK",
-        )
+    def test_subordinate_cannot_claim_primary_role_in_message(self):
+        session = active_session(["READ_SOURCE", "PUBLISH_MESSAGE"])
+        with self.assertRaises(ProjectScopeError):
+            validate_message(
+                message("PRIMARY"),
+                expected_project_id="duo-open",
+                sender_session=session,
+                now=datetime(2026, 10, 5, 16, 0, tzinfo=timezone.utc),
+            )
 
-
-def test_subordinate_cannot_claim_primary_role_in_message():
-    session = active_session(["READ_SOURCE", "PUBLISH_MESSAGE"])
-    with pytest.raises(ProjectScopeError):
-        validate_message(
+    def test_primary_class_binding_can_publish_as_primary(self):
+        session = active_session([
+            "READ_SOURCE",
+            "WRITE_SOURCE",
+            "READ_ARTIFACTS",
+            "WRITE_ARTIFACTS",
+            "WRITE_ACCEPTED_STATE",
+            "PUBLISH_MESSAGE",
+            "APPROVE_CHANGE",
+        ])
+        self.assertTrue(validate_message(
             message("PRIMARY"),
             expected_project_id="duo-open",
             sender_session=session,
             now=datetime(2026, 10, 5, 16, 0, tzinfo=timezone.utc),
-        )
+        ))
 
 
-def test_primary_class_binding_can_publish_as_primary():
-    session = active_session([
-        "READ_SOURCE",
-        "WRITE_SOURCE",
-        "READ_ARTIFACTS",
-        "WRITE_ARTIFACTS",
-        "WRITE_ACCEPTED_STATE",
-        "PUBLISH_MESSAGE",
-        "APPROVE_CHANGE",
-    ])
-    assert validate_message(
-        message("PRIMARY"),
-        expected_project_id="duo-open",
-        sender_session=session,
-        now=datetime(2026, 10, 5, 16, 0, tzinfo=timezone.utc),
-    )
+if __name__ == "__main__":
+    unittest.main()
