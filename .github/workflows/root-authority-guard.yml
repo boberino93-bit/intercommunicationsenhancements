@@ -1,0 +1,24 @@
+name: Root change authority guard
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  authorize-root-change:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enforce authorized GitHub actor
+        env:
+          AUTHORIZED_ACTOR: boberino93-bit
+        run: |
+          if [ "${GITHUB_ACTOR}" != "${AUTHORIZED_ACTOR}" ]; then
+            echo "::error::Unauthorized repository change actor: ${GITHUB_ACTOR}"
+            exit 1
+          fi
+          echo "Authorized repository change actor: ${GITHUB_ACTOR}"
