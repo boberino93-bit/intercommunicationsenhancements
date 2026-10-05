@@ -1,0 +1,40 @@
+{
+  "schema": "org-agent-mesh/v18-final-status/v1",
+  "status_predicate": "VERIFIED_REFERENCE_IMPLEMENTATION iff exact_head_complete_ci == SUCCESS",
+  "release_readiness_if_predicate_true": [
+    "VERIFIED",
+    "RELEASE_CANDIDATE",
+    "READY_FOR_DEPLOYMENT_AUTHORIZATION"
+  ],
+  "forbidden_claims_without_separate_authority": [
+    "APPROVED_FOR_DEPLOYMENT",
+    "DEPLOYED"
+  ],
+  "historical_evidence": {
+    "first_focused_suite": "11/11 PASS",
+    "expanded_v18_suite": "33/33 PASS",
+    "full_implementation_commit": "71f9c99b77cf2ebb05ee9d3da265a8217ea71ca0",
+    "full_implementation_ci_run": 37278416609,
+    "full_implementation_ci_conclusion": "success",
+    "evidence_normalized_commit": "a132d751e5e30dca44b6e91c88888799c2b2b5f6",
+    "evidence_normalized_ci_run": 37279294498,
+    "evidence_normalized_ci_conclusion": "success"
+  },
+  "control_sources": [
+    "org_agent_mesh/reliability_kernel.py",
+    "org_agent_mesh/reliability_v18_core.py",
+    "org_agent_mesh/reliability_v18_governance.py",
+    "org_agent_mesh/reliability_v18_evolution.py",
+    "org_agent_mesh/reliability_v18_recovery.py",
+    "org_agent_mesh/reliability_v18_security.py",
+    "reliability/V18_CONTROL_REGISTRIES.json",
+    "reliability/evidence/V18_VALIDATION_EVIDENCE.json",
+    "tests/test_reliability_kernel.py",
+    "tests/test_reliability_controls_v18.py"
+  ],
+  "authority_boundary": {
+    "human_root_assertion_minting": "external_only",
+    "kernel_may_expand_authority": false,
+    "production_deployment_authority": "separate_canonical_path"
+  }
+}
