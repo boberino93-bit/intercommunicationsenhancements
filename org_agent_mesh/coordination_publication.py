@@ -7,6 +7,7 @@ from .project_scope import ProjectScopeError, require_project_id, require_reposi
 
 
 CAPABILITY = "NON_AUTHORITATIVE_COORDINATION_PUBLICATION"
+LEGACY_CAPABILITY = "PUBLISH_MESSAGE"
 ALLOWED_ROLES = {"RESEARCH", "MANAGER"}
 DEFAULT_GITHUB_PREFIX = "agentbus-backup/coordination-messages/"
 
@@ -76,7 +77,7 @@ def require_coordination_publication(
 
     if role not in ALLOWED_ROLES:
         raise CoordinationPublicationError("role is not eligible for subordinate coordination publication")
-    if CAPABILITY not in capabilities:
+    if CAPABILITY not in capabilities and LEGACY_CAPABILITY not in capabilities:
         raise CoordinationPublicationError("coordination publication capability is missing")
     if route.project_id != project_id:
         raise ProjectScopeError("coordination route belongs to a foreign project")
