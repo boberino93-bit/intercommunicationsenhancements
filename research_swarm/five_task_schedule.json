@@ -4,11 +4,30 @@
   "timezone": "America/Vancouver",
   "cadence": "HOURLY",
   "host_overlap_serialization_assumed": false,
+  "activation_gate": {
+    "authority": "EXPLICIT_CURRENT_HUMAN_ACTION_ONLY",
+    "default_state": "PRESERVE_EXISTING_TASK_STATE",
+    "agents_may_enable": false,
+    "master_may_enable": false,
+    "primary_may_enable": false,
+    "manager_may_enable": false,
+    "researchers_may_enable": false,
+    "recovery_may_enable": false,
+    "migration_or_alignment_may_enable": false,
+    "bootstrap_or_project_activation_may_enable": false,
+    "automatic_reenable": false,
+    "disabled_is_control_gate": true,
+    "disabled_is_health_failure": false,
+    "prompt_or_revision_updates_must_preserve_enabled_state": true,
+    "logical_restart_does_not_imply_task_enablement": true,
+    "reference_gate": "org_agent_mesh.schedule_activation"
+  },
   "supervisory_governance": {
     "protocol_path": "protocols/supervisory_governance.md",
     "policy_path": "governance/SWARM_SUPERVISION_POLICY.json",
     "scheduled_launch_protocol": "protocols/scheduled_agent_launch.md",
     "control_module": "org_agent_mesh.supervision",
+    "schedule_activation_module": "org_agent_mesh.schedule_activation",
     "chat_project_router_module": "org_agent_mesh.chat_project_routing",
     "authority_order": ["USER", "MASTER", "PRIMARY", "SUBORDINATE"],
     "schedule_fire_is_authority": false,
@@ -23,11 +42,11 @@
     "budget_path": "research_swarm/storage_budget.json"
   },
   "tasks": [
-    {"role": "MASTER", "minute": 0, "prompt_path": "research_swarm/prompts/master.md", "roaming": true, "project_id": null, "chat_project": null, "lifecycle_scope": "GLOBAL"},
-    {"role": "MANAGER", "minute": 5, "prompt_path": "research_swarm/prompts/manager.md", "project_bound": true, "lifecycle_scope": "OWN_PROJECT_TREE_ONLY"},
-    {"role": "RESEARCHER_1", "minute": 10, "prompt_path": "research_swarm/prompts/researcher_1.md", "project_bound": true, "bias": "platform_android_samsung_display_continuity_foundational_constraints"},
-    {"role": "RESEARCHER_2", "minute": 20, "prompt_path": "research_swarm/prompts/researcher_2.md", "project_bound": true, "bias": "implementation_architecture_prototype_feasibility"},
-    {"role": "RESEARCHER_3", "minute": 30, "prompt_path": "research_swarm/prompts/researcher_3.md", "project_bound": true, "bias": "validation_failure_modes_ux_adversarial_independent_verification"}
+    {"role": "MASTER", "minute": 0, "prompt_path": "research_swarm/prompts/master.md", "roaming": true, "project_id": null, "chat_project": null, "lifecycle_scope": "GLOBAL", "self_enable_allowed": false},
+    {"role": "MANAGER", "minute": 5, "prompt_path": "research_swarm/prompts/manager.md", "project_bound": true, "lifecycle_scope": "OWN_PROJECT_TREE_ONLY", "self_enable_allowed": false},
+    {"role": "RESEARCHER_1", "minute": 10, "prompt_path": "research_swarm/prompts/researcher_1.md", "project_bound": true, "self_enable_allowed": false, "bias": "platform_android_samsung_display_continuity_foundational_constraints"},
+    {"role": "RESEARCHER_2", "minute": 20, "prompt_path": "research_swarm/prompts/researcher_2.md", "project_bound": true, "self_enable_allowed": false, "bias": "implementation_architecture_prototype_feasibility"},
+    {"role": "RESEARCHER_3", "minute": 30, "prompt_path": "research_swarm/prompts/researcher_3.md", "project_bound": true, "self_enable_allowed": false, "bias": "validation_failure_modes_ux_adversarial_independent_verification"}
   ],
   "overlap_dispositions": [
     "CONTINUE_EXISTING_RUN",
@@ -40,6 +59,10 @@
   ],
   "supervisory_actions": ["CONTINUE", "REDIRECT", "PAUSE", "STOP", "STOP_TREE"],
   "invariants": [
+    "SCHEDULE_TASK_ENABLEMENT_REQUIRES_EXPLICIT_CURRENT_HUMAN_ACTION",
+    "NO_AGENT_MAY_AUTO_ENABLE_OR_REENABLE_A_SWARM_TASK",
+    "ALIGNMENT_MIGRATION_RECOVERY_AND_BOOTSTRAP_MUST_PRESERVE_DISABLED_STATE",
+    "DISABLED_TASK_IS_A_HUMAN_CONTROL_GATE_NOT_A_HEALTH_FAILURE",
     "TIMER_IS_NOT_OWNERSHIP_AUTHORITY",
     "TIMER_IS_NOT_RESTART_AUTHORITY",
     "FRESH_CANONICAL_BOOTSTRAP_REQUIRED",
@@ -63,6 +86,7 @@
     "saved_task_enabled_state_must_be_preserved_during_prompt_alignment": true,
     "saved_prompts_must_pin_a_revision_containing_this_manifest_and_supervisory_overlay": true,
     "saved_prompts_must_load_supervisory_governance": true,
+    "saved_prompts_must_forbid_automatic_enable_or_reenable": true,
     "master_prompt_must_assert_roaming_identity": true,
     "project_agent_prompts_must_reconcile_project_and_intentional_stop_state": true,
     "host_without_chat_project_move_api_must_not_claim_project_placement_success": true
@@ -73,6 +97,7 @@
     "inspected_head": "6497e69218de0f585eb0b32ba6676bc2e7e723ac",
     "seed_frontier_only": ["ticket_02_attempt_scoped_inner_wake_lifetime", "ticket_03_exact_current_presentation_readiness_evidence", "ticket_04_terminal_native_cover_stale_work_fencing"],
     "requires_live_frontier_reconciliation": true,
-    "requires_supervisory_state_reconciliation": true
+    "requires_supervisory_state_reconciliation": true,
+    "requires_explicit_human_task_enablement": true
   }
 }
