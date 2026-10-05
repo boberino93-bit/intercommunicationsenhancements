@@ -17,11 +17,20 @@ PROJECT_STATES = ("ACTIVE", "DRAINING", "PAUSED")
 AGENT_STATES = ("UNBOUND", "BOUND", "INITIALIZED", "ACTIVE", "DRAINING", "TERMINATED")
 
 # Compatibility enforcement while legacy project bindings still carry the old
-# capability sets. A Primary-class binding is intentionally identified by a
-# conjunction of capabilities that subordinate roles do not possess. This
-# prevents legacy RESEARCH/MANAGER WRITE_* and CLAIM_TASK grants from remaining
-# effective merely because older overlays have not yet been regenerated.
+# capability sets. The long-term model should bind explicit role identity to the
+# session; until then, only the exact legacy Research/Manager capability family
+# is treated as subordinate. This deliberately avoids reclassifying MASTER or
+# other privileged execution profiles merely because they are not PRIMARY.
 _PRIMARY_CLASS_MARKERS = frozenset({"WRITE_SOURCE", "WRITE_ACCEPTED_STATE", "APPROVE_CHANGE"})
+_SUBORDINATE_COMPAT_CAPABILITIES = frozenset({
+    "READ_SOURCE",
+    "READ_ARTIFACTS",
+    "WRITE_ARTIFACTS",
+    "WRITE_WORKING_ARTIFACTS",
+    "PUBLISH_MESSAGE",
+    "CLAIM_TASK",
+    "REVIEW_CHANGE",
+})
 _SUBORDINATE_FORBIDDEN_DURABLE_CAPABILITIES = frozenset({
     "WRITE_SOURCE",
     "WRITE_ARTIFACTS",
@@ -80,13 +89,25 @@ def binding_is_primary_class(binding):
     return _PRIMARY_CLASS_MARKERS.issubset(set(binding.capabilities))
 
 
+def binding_is_subordinate_class(binding):
+    if not isinstance(binding, ProjectBinding):
+        return False
+    capabilities = set(binding.capabilities)
+    if _PRIMARY_CLASS_MARKERS.issubset(capabilities):
+        return False
+    return (
+        "PUBLISH_MESSAGE" in capabilities
+        and capabilities.issubset(_SUBORDINATE_COMPAT_CAPABILITIES)
+    )
+
+
 def enforce_subordinate_mutation_boundary(binding, capability, *, operation="mutation"):
-    """Deny legacy subordinate durable capabilities except the separate coordination path."""
-    if capability is None or binding_is_primary_class(binding):
+    """Deny legacy Research/Manager durable capabilities except constrained coordination."""
+    if capability is None or not binding_is_subordinate_class(binding):
         return True
     if capability in _SUBORDINATE_FORBIDDEN_DURABLE_CAPABILITIES:
         raise ProjectScopeError(
-            f"{operation} denied: non-primary execution may not use durable capability {capability!r}; "
+            f"{operation} denied: subordinate execution may not use durable capability {capability!r}; "
             "use the constrained non-authoritative coordination publication path where applicable"
         )
     return True
