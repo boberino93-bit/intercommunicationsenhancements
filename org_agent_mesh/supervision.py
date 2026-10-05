@@ -249,6 +249,8 @@ class Supervisor:
         self.registry.decisions.append(decision)
 
         if action == SupervisoryAction.CONTINUE:
+            if target.state in {AgentControlState.PAUSE_REQUESTED, AgentControlState.PAUSED}:
+                target.state = AgentControlState.RUNNING
             return decision
         if action == SupervisoryAction.REDIRECT:
             target.redirect_instruction = redirect_instruction.strip()
