@@ -1,0 +1,47 @@
+{
+  "schema": "org-agent-mesh/system-scaler-policy/v1",
+  "status": "STAGED_NOT_ACTIVE",
+  "target_population_ceiling": 100,
+  "scalable_role": "RESEARCH",
+  "fixed_roles": ["PRIMARY", "MANAGER"],
+  "allowed_actions": ["HOLD", "REQUEST_ADMIT", "REQUEST_DRAIN_TO_STANDBY"],
+  "authority_conveyed": false,
+  "direct_termination_allowed": false,
+  "direct_mutation_authority": false,
+  "stage_population_ceilings": [15, 30, 60, 100],
+  "scale_up": {
+    "healthy_windows_required": 3,
+    "cooldown_windows": 2,
+    "max_global_admissions_per_cycle": 7,
+    "max_project_admissions_per_cycle": 1,
+    "requires_capacity_state": "GREEN",
+    "requires_manager_backpressure": "NORMAL",
+    "requires_zero_collisions": true,
+    "requires_zero_unresolved_leases": true,
+    "requires_completion_integrity": true,
+    "requires_ledger_chain_valid": true,
+    "requires_fresh_handoff": true
+  },
+  "scale_down": {
+    "graceful_only": true,
+    "candidate_must_be_idle": true,
+    "candidate_must_be_lease_free": true,
+    "checkpoint_required": true,
+    "handoff_required": true,
+    "audit_obligation_preserved": true
+  },
+  "fail_closed_on": [
+    "UNKNOWN_CAPACITY",
+    "DEGRADED_READ_ONLY",
+    "UNAUTHORIZED_MUTATION_EVIDENCE",
+    "CROSS_PROJECT_WRITE_VIOLATION",
+    "STALE_HANDOFF",
+    "LEDGER_CHAIN_INVALID",
+    "COMPLETION_INTEGRITY_FAILURE",
+    "UNRESOLVED_LEASE",
+    "MANAGER_HARD_BACKPRESSURE"
+  ],
+  "live_activation_requires_separate_authorization": true,
+  "live_capacity_increase_requires_separate_authorization": true,
+  "schedule_activation_requires_separate_authorization": true
+}
