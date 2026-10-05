@@ -14,7 +14,7 @@ from org_agent_mesh.project_scope import ProjectBinding, ProjectScopeError, qual
 BASE = {
     "schema": "org-agent-mesh/message/v2", "protocol_version": PROTOCOL_VERSION, "id": "m1",
     "project_id": "project-a", "destination_project_id": "project-a", "timestamp_utc": "2099-01-01T00:00:00Z",
-    "from_agent": "worker", "from_agent_instance_id": "worker-1", "from_role": "SPECIALIST", "to": ["manager"],
+    "from_agent": "worker", "from_agent_instance_id": "worker-1", "from_role": "PRIMARY", "to": ["manager"],
     "kind": "FINDING", "priority": "normal", "subject": "s", "summary": "x", "applies_to_state": "v",
     "evidence": [], "artifacts": [], "reply_to": None, "supersedes": [], "requires_ack": False, "tags": [],
     "correlation_id": "c1", "causation_id": None, "idempotency_key": "idem-1", "expires_at_utc": None,
@@ -22,7 +22,14 @@ BASE = {
 
 
 def sender_session():
-    binding = ProjectBinding("project-a", "repo/project-a", "/work/project-a", "worker", "worker-1", PROTOCOL_VERSION, ("PUBLISH_MESSAGE",))
+    capabilities = (
+        "READ_SOURCE", "WRITE_SOURCE", "READ_ARTIFACTS", "WRITE_ARTIFACTS",
+        "WRITE_ACCEPTED_STATE", "PUBLISH_MESSAGE", "APPROVE_CHANGE",
+    )
+    binding = ProjectBinding(
+        "project-a", "repo/project-a", "/work/project-a", "worker", "worker-1",
+        PROTOCOL_VERSION, capabilities,
+    )
     return AgentSession("worker").bind(binding).initialize().activate()
 
 
