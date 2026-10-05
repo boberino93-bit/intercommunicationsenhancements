@@ -1,0 +1,51 @@
+{
+  "schema": "org-agent-mesh/regression-learning/v1",
+  "version": "1.0.0",
+  "status": "ACTIVE",
+  "levels": ["UNSCOPED_CHAT", "PROJECT_CHAT", "GLOBAL_PRIMARY"],
+  "provenance_weights": {
+    "OBSERVED": 1.0,
+    "RETRIEVED": 0.95,
+    "REPORTED_BY_AGENT": 0.65,
+    "INFERRED": 0.6,
+    "EXPECTED": 0.4,
+    "UNVERIFIED": 0.2
+  },
+  "append_only": true,
+  "hash_chain_required": true,
+  "event_authority_conveyed": false,
+  "project_chat_publication_policy": "governance/COORDINATION_PUBLICATION_POLICY.json",
+  "hotfix_candidate": {
+    "minimum_count": 2,
+    "minimum_confidence": 0.55
+  },
+  "service_pack_candidate": {
+    "minimum_count": 5,
+    "minimum_projects": 3,
+    "recurrence_after_remediation_triggers": true
+  },
+  "primary_maintenance_lane": {
+    "required_role": "PRIMARY",
+    "required_project": "intercommunicationsenhancements",
+    "reversible": true,
+    "bounded_scope": true,
+    "tests_required": true,
+    "post_change_verification_required": true,
+    "allowed_only_when_non_security_sensitive": true,
+    "protected_classes": [
+      "AUTHENTICATION",
+      "AUTHORIZATION",
+      "SECRETS",
+      "PRIVILEGE_ROLE_CONTROLS",
+      "RECOVERY",
+      "ROOT_GOVERNANCE",
+      "DESTRUCTIVE",
+      "CROSS_PROJECT_SOURCE_WRITE",
+      "SCHEDULE_ACTIVATION"
+    ],
+    "protected_classes_require_human_gate": true
+  },
+  "candidate_is_authorization": false,
+  "audit_finding_is_authorization": false,
+  "failure_mode": "FAIL_CLOSED_ON_PROMOTION_CONTINUE_SAFE_OBSERVATION"
+}
