@@ -1,6 +1,8 @@
 # PRIMARY RECURRING SWARM PROTOCOL
 
-Status: **CANDIDATE FOR CANONICAL HANDOFF AFTER NORMALIZATION CERTIFICATION**
+Status: **CANONICAL ACTIVE DEFAULT AFTER NORMALIZATION CERTIFICATION**
+
+Activation authority: the latest valid normalization retirement/handoff records on `/Intercommunication enhancements/AgentBus/messages`. The normalized runtime source remains frozen at `fb592418f700fc5e540e76bfa42b043e03fe6ed9`; later governance-only bootstrap or status corrections do not silently redefine that runtime revision.
 
 This is the normal-operation protocol that receives control after the one-time normalization protocol succeeds. It does not rerun full normalization during ordinary work.
 
