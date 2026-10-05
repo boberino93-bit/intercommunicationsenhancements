@@ -1,6 +1,6 @@
 {
   "schema": "org-agent-mesh/regression-learning/v1",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "status": "ACTIVE",
   "levels": ["UNSCOPED_CHAT", "PROJECT_CHAT", "GLOBAL_PRIMARY"],
   "provenance_weights": {
@@ -13,6 +13,7 @@
   },
   "append_only": true,
   "hash_chain_required": true,
+  "durable_head_snapshot_required_for_truncation_detection": true,
   "event_authority_conveyed": false,
   "project_chat_publication_policy": "governance/COORDINATION_PUBLICATION_POLICY.json",
   "hotfix_candidate": {
@@ -31,7 +32,16 @@
     "bounded_scope": true,
     "tests_required": true,
     "post_change_verification_required": true,
-    "allowed_only_when_non_security_sensitive": true,
+    "allowed_classes": [
+      "DOC_NORMALIZATION",
+      "TEST_FIXTURE_MAINTENANCE",
+      "REGRESSION_TEST_ADDITION",
+      "NON_AUTHORITATIVE_OBSERVABILITY",
+      "METADATA_CLEANUP",
+      "LINK_PRESENTATION_FIX",
+      "CI_STATE_INTERPRETATION"
+    ],
+    "unknown_class_action": "DENY_AND_REQUIRE_HUMAN_REVIEW",
     "protected_classes": [
       "AUTHENTICATION",
       "AUTHORIZATION",
