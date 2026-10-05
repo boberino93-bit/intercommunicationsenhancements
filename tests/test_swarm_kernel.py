@@ -1,8 +1,10 @@
 from datetime import datetime, timedelta, timezone
+import json
 from pathlib import Path
+import tempfile
 import unittest
 
-from swarm_kernel.kernel import KERNEL_VERSION, ProjectConfig, admission_state, backpressure_state, can_open_start_gate, circuit_state, convergence_gate, lease_transition_allowed, new_lease, preflight, ready_record, record_path, validate_binding
+from swarm_kernel.kernel import KERNEL_VERSION, SUPPORTED_PROJECT_KERNEL_VERSIONS, ProjectConfig, admission_state, backpressure_state, can_open_start_gate, circuit_state, convergence_gate, lease_transition_allowed, new_lease, preflight, ready_record, record_path, validate_binding
 
 ROOT = Path(__file__).resolve().parents[1]
 CFG = ProjectConfig("example", "owner/example", "main", "Example-AgentBus/")
@@ -21,6 +23,7 @@ class SwarmKernelTest(unittest.TestCase):
         record = ready_record(CFG, "run_1", "agent_a", "instance_1", "PRIMARY", "1.0.0", "abc123")
         self.assertEqual(record["agent_instance_id"], "instance_1")
         self.assertEqual(record["schema"], "swarm-kernel/ready/v2")
+        self.assertEqual(record["kernel_version"], CFG.kernel_version)
 
     def test_lease_is_execution_instance_fenced(self):
         now = datetime(2026, 1, 1, tzinfo=timezone.utc)
@@ -38,11 +41,44 @@ class SwarmKernelTest(unittest.TestCase):
         self.assertEqual(admission_state(CFG, CFG.max_active_specialists, capacity_known=True), "MAX_ACTIVE_SPECIALISTS_REACHED")
         self.assertEqual(admission_state(CFG, 1, capacity_known=True), "ADMIT")
 
-    def test_real_project_contract_matches_runtime_kernel_version(self):
+    def test_real_project_contract_matches_current_runtime_contract(self):
         cfg = ProjectConfig.load(ROOT / "swarm_kernel" / "project.json")
         self.assertEqual(KERNEL_VERSION, "1.2.1")
+        self.assertEqual(cfg.kernel_version, "1.2.1")
         self.assertEqual(cfg.project_id, "intercommunicationsenhancements")
         self.assertEqual(cfg.max_active_specialists, 8)
+
+    def test_legacy_project_contract_is_explicitly_supported(self):
+        payload = {
+            "kernel_version": "1.0.0",
+            "project_id": "legacy-project",
+            "repository": "owner/legacy-project",
+            "canonical_branch": "main",
+            "coordination_root": "Legacy-AgentBus/",
+            "state_root": ".swarm"
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "project.json"
+            path.write_text(json.dumps(payload), encoding="utf-8")
+            cfg = ProjectConfig.load(path)
+        self.assertIn(cfg.kernel_version, SUPPORTED_PROJECT_KERNEL_VERSIONS)
+        self.assertEqual(cfg.kernel_version, "1.0.0")
+        record = ready_record(cfg, "run_1", "agent_a", "instance_1", "RESEARCH", "1.0.0", "abc123")
+        self.assertEqual(record["kernel_version"], "1.0.0")
+
+    def test_unknown_future_project_contract_fails_closed(self):
+        payload = {
+            "kernel_version": "9.9.9",
+            "project_id": "future-project",
+            "repository": "owner/future-project",
+            "coordination_root": "Future-AgentBus/",
+            "state_root": ".swarm"
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "project.json"
+            path.write_text(json.dumps(payload), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "unsupported swarm-kernel version"):
+                ProjectConfig.load(path)
 
     def test_preflight_requires_handoff_instance_and_capacity(self):
         checks = {"identity_binding": True, "instance_binding": True, "run_epoch": True, "role_binding": True, "master_handoff_loaded": True, "package_parity": True, "capacity_admission": True, "recovery_state": True, "manager_presence": True, "foreign_write_policy": True, "tests": False}
