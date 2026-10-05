@@ -1,0 +1,24 @@
+{
+  "$id": "intercommunications/diagnostic-observation/v1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "agent_id": {"minLength":1,"type":"string"},
+    "agent_instance_id": {"minLength":1,"type":"string"},
+    "confidence": {"maximum":1,"minimum":0,"type":"number"},
+    "contaminated": {"type":"boolean"},
+    "context_tags": {"items":{"type":"string"},"type":"array"},
+    "created_at_utc": {"type":"string"},
+    "evidence_partition": {"enum":["TRAIN","HOLDOUT"]},
+    "evidence_refs": {"items":{"type":"string"},"type":"array"},
+    "global_run_id": {"type":"string"},
+    "observation_id": {"minLength":1,"type":"string"},
+    "outcome_reward": {"maximum":1,"minimum":-1,"type":"number"},
+    "project_id": {"minLength":1,"type":"string"},
+    "strategy_id": {"minLength":1,"type":"string"},
+    "verified": {"type":"boolean"},
+    "work_id": {"minLength":1,"type":"string"}
+  },
+  "required": ["observation_id","project_id","global_run_id","agent_id","agent_instance_id","work_id","strategy_id","outcome_reward","confidence","evidence_partition","evidence_refs","created_at_utc","verified","contaminated"],
+  "type": "object"
+}

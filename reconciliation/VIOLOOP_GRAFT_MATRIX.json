@@ -1,0 +1,12 @@
+{
+  "items": [
+    {"disposition":"ADOPT","duplicate_risk":"LOW if implemented as narrow verifier","existing_equivalent":"role/capability + policy certificate","proposal":"reasoning authority != consequence authority","unique_value":"exact per-action commit boundary"},
+    {"disposition":"ADOPT","duplicate_risk":"LOW","existing_equivalent":"no exact canonical equivalent found in v1.8 composition","proposal":"PreparedAction","unique_value":"freezes target/parameters/state before approval"},
+    {"disposition":"ADOPT_AS_PROJECTION_ONLY","duplicate_risk":"MEDIUM if treated as new authority","existing_equivalent":"human authorization / break-glass are broader or different-purpose","proposal":"CommitAuthorizationGrant","unique_value":"exact action/time/state grant"},
+    {"disposition":"REJECT","duplicate_risk":"HIGH","existing_equivalent":"existing control plane and executor boundary","proposal":"separate gateway agent role","unique_value":"none"},
+    {"disposition":"ADOPT","duplicate_risk":"LOW","existing_equivalent":"audit/evidence primitives","proposal":"causal consequence receipt","unique_value":"links prepared action, grant, attempt and observed effect"},
+    {"disposition":"REJECT; USE NARROW POLICY PROJECTION","duplicate_risk":"HIGH","existing_equivalent":"project/policy/cross-project controls","proposal":"separate authoritative egress plane","unique_value":"none if classifications project into existing controls"}
+  ],
+  "schema": "intercommunications/violoop-graft-matrix/v1",
+  "status": "IMPLEMENTATION_CANDIDATE"
+}
