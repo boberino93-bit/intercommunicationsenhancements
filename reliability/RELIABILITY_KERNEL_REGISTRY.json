@@ -1,0 +1,67 @@
+{
+  "schema": "org-agent-mesh/reliability-kernel-registry/v1",
+  "status": "IMPLEMENTATION_CANDIDATE",
+  "source_baseline": "72e87ce7cddca17fd78c8ece3ecb5f523c7021e2",
+  "normalized_runtime_revision": "fb592418f700fc5e540e76bfa42b043e03fe6ed9",
+  "policy_sources": [
+    {"rank": 1, "source": "authenticated current human instruction"},
+    {"rank": 2, "source": "current certified universal swarm governance"},
+    {"rank": 3, "source": "primary recurring swarm protocol"},
+    {"rank": 4, "source": "canonical current control-plane state"},
+    {"rank": 5, "source": "project/role/task policy and validated evidence"}
+  ],
+  "critical_invariants": [
+    {"id":"authority_subset","implementation":"org_agent_mesh.reliability_kernel.InvariantRegistry","state":"MACHINE_ENFORCED"},
+    {"id":"project_matches_binding","implementation":"org_agent_mesh.reliability_kernel.InvariantRegistry","state":"MACHINE_ENFORCED"},
+    {"id":"repository_matches_binding","implementation":"org_agent_mesh.reliability_kernel.InvariantRegistry","state":"MACHINE_ENFORCED"},
+    {"id":"policy_certificate_signature_and_expiry","implementation":"org_agent_mesh.reliability_kernel.CertificateVerifier","state":"MACHINE_ENFORCED"},
+    {"id":"ownership_epoch_freshness","implementation":"org_agent_mesh.reliability_kernel.CertificateVerifier","state":"MACHINE_ENFORCED"},
+    {"id":"policy_certificate_replay_protection","implementation":"org_agent_mesh.reliability_kernel.CertificateVerifier","state":"MACHINE_ENFORCED_REFERENCE"},
+    {"id":"proof_handoff_non_escalation","implementation":"org_agent_mesh.reliability_kernel.issue_handoff/verify_handoff","state":"MACHINE_ENFORCED"},
+    {"id":"safe_minimal_fail_closed","implementation":"org_agent_mesh.reliability_kernel.KernelState","state":"MACHINE_ENFORCED_REFERENCE"}
+  ],
+  "reason_codes": [
+    "RK_AUTHORITY_ESCALATION","RK_PROJECT_MISMATCH","RK_REPOSITORY_MISMATCH","RK_CERTIFICATE_INVALID","RK_CERTIFICATE_EXPIRED","RK_CERTIFICATE_REPLAY","RK_OWNERSHIP_STALE","RK_PROTECTED_AUTH_REQUIRED","RK_AUTHORIZATION_REPLAY","RK_ADMISSION_CAPACITY","RK_RESOURCE_BUDGET_EXHAUSTED","RK_SAFE_MINIMAL_DENY","RK_SCHEMA_INCOMPATIBLE","RK_HANDOFF_INVALID","RK_HANDOFF_STALE","RK_CONTROL_LOOP_COOLDOWN"
+  ],
+  "safe_minimal_mode": {
+    "allowed_effects": ["READ_ONLY","DIAGNOSTIC","EVIDENCE_PERSIST","CHECKPOINT_PERSIST","RECOVERY"],
+    "ordinary_mutation": "DENY"
+  },
+  "blast_radius_rings": ["SANDBOX","LOCAL_CANARY","PROJECT_CANARY","PROJECT_WIDE","UNIVERSAL"],
+  "schema_evolution": {
+    "registry_implementation": "org_agent_mesh.reliability_kernel.SchemaEvolutionRegistry",
+    "unknown_required_semantics": "FAIL_CLOSED",
+    "candidate_schemas": ["effective_policy_slice","policy_certificate","proof_carrying_handoff","assurance_case"]
+  },
+  "resource_governor": {
+    "implementation": "org_agent_mesh.reliability_kernel.ResourceGovernor",
+    "bounds": ["max_concurrent","max_weight"],
+    "fair_queueing": "FUTURE_RESEARCH"
+  },
+  "control_loop_stability": {
+    "implementation": "org_agent_mesh.reliability_kernel.HysteresisGate",
+    "supports": ["enter_threshold","exit_threshold","cooldown_seconds"]
+  },
+  "reliability_slos": [
+    {"id":"certificate_verification_success","target":"100% for consequential admitted effects","status":"CANDIDATE"},
+    {"id":"stale_ownership_write_acceptance","target":"0","status":"CANDIDATE"},
+    {"id":"cross_project_write_acceptance","target":"0","status":"CANDIDATE"},
+    {"id":"unbounded_fanout_incidents","target":"0","status":"CANDIDATE"}
+  ],
+  "recovery_objectives": [
+    {"state_class":"policy_and_authority","rpo":"0 accepted-state loss","rto":"environment-specific; must be measured","status":"POLICY_DEFINED_NOT_MEASURED"},
+    {"state_class":"checkpoint_and_handoff","rpo":"latest verified durable checkpoint","rto":"environment-specific; must be measured","status":"POLICY_DEFINED_NOT_MEASURED"}
+  ],
+  "unimplemented_or_unproven": [
+    "authenticated human break-glass service",
+    "public-key policy certificate infrastructure",
+    "transactional multi-node migration service",
+    "held-out capability-registry contamination controls",
+    "automatic ringed rollback actuator",
+    "catastrophic reconstruction drill",
+    "global SLO/error-budget service",
+    "supply-chain attestation service",
+    "credential broker/lifecycle service",
+    "fair multi-tenant scheduler"
+  ]
+}
