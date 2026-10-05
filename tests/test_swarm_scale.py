@@ -114,6 +114,22 @@ class SwarmScaleTests(unittest.TestCase):
         project = json.loads((ROOT / "swarm_kernel" / "project.json").read_text())
         self.assertIn("swarm_kernel/SWARM_SCALE_BOOTSTRAP_OVERLAY.md", project["required_bootstrap_overlays"])
 
+    def test_alignment_is_verified_but_stage15_is_not_claimed_passed(self):
+        policy = json.loads((ROOT / "governance" / "SWARM_SCALE_100_POLICY.json").read_text())
+        verification_path = ROOT / policy["alignment_verification"]
+        historical_path = ROOT / policy["historical_compatibility_audit"]
+        verification = json.loads(verification_path.read_text())
+        historical = json.loads(historical_path.read_text())
+        self.assertEqual(policy["projects_with_swarm_kernel_project_contract"], 7)
+        self.assertEqual(policy["projects_missing_swarm_kernel_project_contract"], 0)
+        self.assertTrue(policy["global_round_expected_set_aligned"])
+        self.assertTrue(policy["stage_15_ready"])
+        self.assertEqual(policy["stage_15_status"], "ELIGIBLE_TO_TEST_NOT_YET_PASSED")
+        self.assertEqual(verification["alignment_status"], "VERIFIED")
+        self.assertFalse(verification["stage_15_passed"])
+        self.assertTrue(verification["historical_audit_preserved"])
+        self.assertEqual(historical["global_stage_status"], "BLOCKED_PENDING_CONTRACT_ALIGNMENT")
+
 
 if __name__ == "__main__":
     unittest.main()
