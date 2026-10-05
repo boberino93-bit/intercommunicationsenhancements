@@ -1,0 +1,78 @@
+{
+  "schema": "org-agent-mesh/live-operations-registry/v1",
+  "status": "ACTIVE",
+  "authority": "READ_ONLY_OBSERVABILITY",
+  "canonical_snapshot": "/Intercommunication enhancements/AgentBus/ops/LIVE_OPERATIONS_SNAPSHOT.json",
+  "protocol": "protocols/live_operations_observability.md",
+  "implementation": "org_agent_mesh.operations_view",
+  "defaults": {
+    "stale_after_seconds": 1800,
+    "drift_grace_seconds": 900
+  },
+  "projects": [
+    {
+      "project_id": "intercommunicationsenhancements",
+      "repository": "boberino93-bit/intercommunicationsenhancements",
+      "repository_id": 1403662737,
+      "board_root": "/Intercommunication enhancements/AgentBus",
+      "message_board": "/Intercommunication enhancements/AgentBus/messages",
+      "ops_current": "/Intercommunication enhancements/AgentBus/ops/current.json",
+      "normalized": true
+    },
+    {
+      "project_id": "benefitflow",
+      "repository": "boberino93-bit/benefitflow",
+      "repository_id": 1403645790,
+      "board_root": "/BenefitFlow-AgentBus",
+      "message_board": "/BenefitFlow-AgentBus/forum/messages",
+      "ops_current": "/BenefitFlow-AgentBus/ops/current.json",
+      "normalized": true
+    },
+    {
+      "project_id": "warp-propulsion-lab",
+      "repository": "boberino93-bit/warp-propulsion-lab",
+      "repository_id": 1372658198,
+      "board_root": "/Warp-Propulsion-AgentBus",
+      "message_board": "/Warp-Propulsion-AgentBus/messages",
+      "ops_current": "/Warp-Propulsion-AgentBus/ops/current.json",
+      "normalized": true
+    },
+    {
+      "project_id": "duo-open",
+      "repository": "boberino93-bit/duo-open",
+      "repository_id": 1396743140,
+      "board_root": "/DuoOpen-AgentBus",
+      "message_board": "/DuoOpen-AgentBus/messages",
+      "ops_current": "/DuoOpen-AgentBus/ops/current.json",
+      "normalized": true
+    },
+    {
+      "project_id": "ai-behaviour-control-lab",
+      "repository": "boberino93-bit/ai-behaviour-control-lab",
+      "repository_id": 1375194437,
+      "board_root": "/AI-Behaviour-Control-Lab-AgentBus",
+      "message_board": "/AI-Behaviour-Control-Lab-AgentBus/messages",
+      "ops_current": "/AI-Behaviour-Control-Lab-AgentBus/ops/current.json",
+      "normalized": true
+    },
+    {
+      "project_id": "fold7-power-lab",
+      "repository": "boberino93-bit/samsungpowerbootstrap",
+      "repository_id": 1404088763,
+      "board_root": "/Fold7-PowerLab-AgentBus",
+      "message_board": "/Fold7-PowerLab-AgentBus/messages",
+      "ops_current": "/Fold7-PowerLab-AgentBus/ops/current.json",
+      "normalized": true
+    },
+    {
+      "project_id": "xrpthesis",
+      "repository": "boberino93-bit/XRPTHESIS",
+      "repository_id": 1405663336,
+      "board_root": "/XRPTHESIS-AgentBus",
+      "message_board": "/XRPTHESIS-AgentBus/messages",
+      "ops_current": "/XRPTHESIS-AgentBus/ops/current.json",
+      "normalized": false,
+      "onboarding_state": "OBSERVABILITY_BOOTSTRAPPED_MESH_NORMALIZATION_PENDING"
+    }
+  ]
+}
