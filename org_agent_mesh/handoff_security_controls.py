@@ -40,6 +40,34 @@ class LinkStatus(str, Enum):
     BROKEN = "BROKEN"
 
 
+class CompletionState(str, Enum):
+    COMPLETE = "COMPLETE"
+    INCOMPLETE_REMEDIATION_REQUIRED = "INCOMPLETE_REMEDIATION_REQUIRED"
+    INCOMPLETE_BLOCKED = "INCOMPLETE_BLOCKED"
+
+
+@dataclass(frozen=True)
+class CompletionAssessment:
+    objective_verified: bool
+    known_avoidable_residue: tuple[str, ...] = ()
+    remediation_authorized_and_possible: bool = True
+
+    def state(self) -> CompletionState:
+        if not self.objective_verified:
+            return CompletionState.INCOMPLETE_REMEDIATION_REQUIRED
+        if not self.known_avoidable_residue:
+            return CompletionState.COMPLETE
+        if self.remediation_authorized_and_possible:
+            return CompletionState.INCOMPLETE_REMEDIATION_REQUIRED
+        return CompletionState.INCOMPLETE_BLOCKED
+
+    def require_complete(self) -> None:
+        state = self.state()
+        if state is not CompletionState.COMPLETE:
+            residue = ",".join(self.known_avoidable_residue) or "OBJECTIVE_NOT_VERIFIED"
+            raise SecurityControlError(f"COMPLETION_INTEGRITY_BLOCKED:{state.value}:{residue}")
+
+
 @dataclass(frozen=True)
 class HandoffEnvelope:
     handoff_id: str
