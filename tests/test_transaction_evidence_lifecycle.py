@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta, timezone
 import unittest
 
-from org_agent_mesh.durable_record_guard import DurableRecordError, validate_durable_record
+from org_agent_mesh.durable_record_guard import DurableRecordGuardError, validate_durable_record
 from org_agent_mesh.evidence_lifecycle import (
     EvidenceLifecycleError,
     EvidenceReceipt,
@@ -71,13 +71,30 @@ class TransactionEvidenceLifecycleTests(unittest.TestCase):
                 now=now,
             )
 
-    def test_prohibited_durable_field_is_denied(self):
-        with self.assertRaises(DurableRecordError):
+    def test_nested_prohibited_durable_field_is_denied(self):
+        with self.assertRaises(DurableRecordGuardError):
             validate_durable_record(
-                {"result": "ok", "ephemeral_value": "present"},
+                {"outer": {"ephemeral_value": "present"}},
                 prohibited_fields={"ephemeral_value"},
                 context="test",
             )
+
+    def test_prohibited_label_with_live_value_is_denied(self):
+        with self.assertRaises(DurableRecordGuardError):
+            validate_durable_record(
+                {"body": "Sensitive-Label: live-value"},
+                prohibited_fields=set(),
+                prohibited_labels={"Sensitive-Label"},
+                context="test",
+            )
+
+    def test_redacted_label_is_allowed(self):
+        validate_durable_record(
+            {"body": "Sensitive-Label: removed"},
+            prohibited_fields=set(),
+            prohibited_labels={"Sensitive-Label"},
+            context="test",
+        )
 
 
 if __name__ == "__main__":
