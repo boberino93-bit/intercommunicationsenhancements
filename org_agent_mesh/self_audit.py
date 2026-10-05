@@ -188,6 +188,24 @@ def validate_append(existing_records: Sequence[Mapping[str, object]], new_record
             raise SelfAuditError("AUDIT_GENESIS_LINK_INVALID")
 
 
+def validate_ledger_transition(
+    existing_records: Sequence[Mapping[str, object]],
+    candidate_records: Sequence[Mapping[str, object]],
+) -> None:
+    if not verify_chain(existing_records):
+        raise SelfAuditError("AUDIT_EXISTING_CHAIN_INVALID")
+    if len(candidate_records) < len(existing_records):
+        raise SelfAuditError("AUDIT_HISTORY_SHRINK_DENIED")
+    if not verify_chain(candidate_records):
+        raise SelfAuditError("AUDIT_CANDIDATE_CHAIN_INVALID")
+    for index, historical in enumerate(existing_records):
+        candidate = candidate_records[index]
+        if candidate.get("audit_record_id") != historical.get("audit_record_id"):
+            raise SelfAuditError("AUDIT_HISTORY_REORDER_OR_REPLACE_DENIED")
+        if candidate.get("record_hash") != historical.get("record_hash"):
+            raise SelfAuditError("AUDIT_HISTORICAL_RECORD_MUTATION_DENIED")
+
+
 def ledger_head(records: Sequence[Mapping[str, object]]) -> dict[str, object]:
     if not verify_chain(records):
         raise SelfAuditError("AUDIT_CHAIN_INVALID")
