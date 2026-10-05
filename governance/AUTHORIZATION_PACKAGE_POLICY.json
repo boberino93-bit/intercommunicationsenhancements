@@ -1,0 +1,76 @@
+{
+  "schema": "org-agent-mesh/authorization-package/v1",
+  "version": "1.0.0",
+  "status": "ACTIVE_HARD_GATE",
+  "purpose": "ALLOW_HUMAN_PREAUTHORIZATION_OF_A_FIXED_ENUMERATED_MUTATION_PACKAGE_WITHOUT_CREATING_AMBIENT_SESSION_AUTHORITY",
+  "invariants": [
+    "PACKAGE_IS_NOT_SESSION_AUTHORIZATION",
+    "PACKAGE_SCOPE_IS_FROZEN_BEFORE_EXECUTION",
+    "EVERY_CHILD_ACTION_IS_SINGLE_USE",
+    "NO_POST_AUTHORIZATION_SCOPE_EXPANSION",
+    "AUTHENTICATION_IS_NOT_AUTHORIZATION",
+    "SCHEDULE_FIRE_IS_NOT_AUTHORIZATION"
+  ],
+  "package_requirements": {
+    "package_id_required": true,
+    "claimed_principal_required": true,
+    "authentication_disposition_required": true,
+    "human_explicit_package_approval_required": true,
+    "package_digest_required": true,
+    "issued_at_required": true,
+    "expires_at_required": true,
+    "children_must_be_enumerated_before_first_execution": true,
+    "child_target_required": true,
+    "child_mutation_class_required": true,
+    "child_consequence_class_required": true,
+    "child_action_digest_required": true,
+    "child_single_use": true,
+    "child_consumption_record_required": true
+  },
+  "allowed_child_grouping": [
+    "STRICTLY_NECESSARY_ATOMIC_STEPS_OF_ONE_BOUNDED_ACTION",
+    "PREDETERMINED_MULTI_REPOSITORY_MIGRATION_WITH_EXACT_TARGETS",
+    "PREDETERMINED_RELEASE_OR_DEPLOYMENT_SEQUENCE_WITH_EXACT_ARTIFACTS",
+    "PREDETERMINED_SCHEDULE_CONFIGURATION_PACKAGE_WITH_EXACT_TASK_IDS_AND_FIELDS"
+  ],
+  "forbidden": [
+    "OPEN_ENDED_FUTURE_WRITES",
+    "ANY_ACTION_I_DEEM_USEFUL",
+    "SESSION_WIDE_AUTHORITY",
+    "PROJECT_WIDE_UNBOUNDED_AUTHORITY",
+    "ADDING_NEW_CHILDREN_AFTER_HUMAN_APPROVAL",
+    "CHANGING_CHILD_TARGET_AFTER_HUMAN_APPROVAL",
+    "CHANGING_CHILD_CONSEQUENCE_CLASS_AFTER_HUMAN_APPROVAL",
+    "REUSING_CONSUMED_CHILD_CASE",
+    "TREATING_UNUSED_PACKAGE_CAPACITY_AS_AUTHORITY_FOR_UNLISTED_WORK"
+  ],
+  "high_consequence": {
+    "independent_external_principal_proof_required": true,
+    "one_proof_may_cover_multiple_children_only_if_the_proof_explicitly_binds_the_exact_package_id_and_digest": true,
+    "otherwise_each_high_consequence_child_requires_its_own_proof": true,
+    "package_approval_does_not_weaken_root_or_production_checks": true
+  },
+  "material_change": {
+    "new_target_requires_new_package_or_child_authorization": true,
+    "new_mutation_class_requires_new_package_or_child_authorization": true,
+    "new_consequence_class_requires_new_package_or_child_authorization": true,
+    "new_objective_requires_new_package_or_child_authorization": true,
+    "digest_mismatch_result": "DENY_AFFECTED_CHILD"
+  },
+  "delegation": {
+    "child_agent_may_execute_exact_unconsumed_child_case": true,
+    "child_agent_may_expand_package": false,
+    "child_agent_may_generate_human_approval": false
+  },
+  "audit": [
+    "package_id",
+    "package_digest",
+    "claimed_principal",
+    "authentication_disposition",
+    "child_case_id",
+    "child_target",
+    "child_action_digest",
+    "authorization_disposition",
+    "consumed_at_or_null"
+  ]
+}
