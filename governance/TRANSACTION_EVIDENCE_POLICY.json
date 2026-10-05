@@ -1,0 +1,18 @@
+{
+  "schema": "org-agent-mesh/transaction-evidence/v1",
+  "version": "1.0.0",
+  "status": "ACTIVE_HARD_GATE",
+  "module": "org_agent_mesh.evidence_lifecycle",
+  "requirements": {
+    "verified": true,
+    "subject_binding": true,
+    "transaction_binding": true,
+    "verifier_reference": true,
+    "issued_at": true,
+    "expires_at": true,
+    "single_use": true,
+    "replay_denied": true
+  },
+  "legacy_validation_without_transaction_evidence": "INSUFFICIENT_FOR_PROTECTED_OPERATION",
+  "failure_result": "DENY_AFFECTED_OPERATION_CONTINUE_SAFE_READ_ONLY"
+}
