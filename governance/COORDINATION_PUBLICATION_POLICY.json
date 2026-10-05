@@ -1,0 +1,19 @@
+{
+  "schema": "org-agent-mesh/coordination-publication/v1",
+  "version": "1.0.0",
+  "status": "ACTIVE",
+  "capability": "NON_AUTHORITATIVE_COORDINATION_PUBLICATION",
+  "roles": ["RESEARCH", "MANAGER"],
+  "mode": "APPEND_ONLY_PROJECT_SCOPED",
+  "authority_conveyed": false,
+  "github_backup_prefix": "agentbus-backup/coordination-messages/",
+  "projects": {
+    "intercommunicationsenhancements": ["boberino93-bit/intercommunicationsenhancements", "intercommunicationsenhancements::messages"],
+    "duo-open": ["boberino93-bit/duo-open", "/DuoOpen-AgentBus/messages"],
+    "benefitflow": ["boberino93-bit/benefitflow", "BenefitFlow-AgentBus/forum/messages/"],
+    "fold7-power-lab": ["boberino93-bit/samsungpowerbootstrap", "/Fold7-PowerLab-AgentBus/messages"],
+    "warp-propulsion-lab": ["boberino93-bit/warp-propulsion-lab", "/Warp-Propulsion-AgentBus/messages"],
+    "ai-behaviour-control-lab": ["boberino93-bit/ai-behaviour-control-lab", "/AI-Behaviour-Control-Lab-AgentBus/messages"],
+    "xrp-thesis": ["boberino93-bit/XRPTHESIS", null]
+  }
+}
