@@ -113,7 +113,7 @@
     "recover_task_context_before_asking_human_to_repeat_known_information",
     "execute_only_within_bound_project_and_task_scope",
     "check_authoritative_control_state_between_bounded_work_units",
-    "when_user_control_message_arrives_respond_then_resume_active_assignment_unless_message_changes_control_state",
+    "when_user_control_message_arrives_respond_then_resume_active_assignment",
     "continue_safe_in_scope_work_without_routine_confirmation_unless_valid_pause_or_stop_applies",
     "persist_handoff_to_bound_project"
   ],
