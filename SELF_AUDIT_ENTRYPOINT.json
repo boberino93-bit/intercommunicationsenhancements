@@ -1,0 +1,19 @@
+{
+  "schema": "org-agent-mesh/self-audit-entrypoint/v1",
+  "version": "1.0.0",
+  "status": "ACTIVE",
+  "authority": "OBSERVABILITY_ONLY",
+  "protocol": "governance/audit/AUDIT_PROTOCOL.md",
+  "framework": "governance/audit/templates/AGENT_SELF_AUDIT_FRAMEWORK.md",
+  "record_schema": "governance/audit/templates/AUDIT_RECORD_SCHEMA.json",
+  "ledger_root": "governance/audit/ledger/",
+  "ledger_head": "governance/audit/LEDGER_HEAD.json",
+  "framework_history_root": "governance/audit/framework-history/",
+  "runtime": "org_agent_mesh.self_audit",
+  "analytics": "org_agent_mesh.self_audit_analytics",
+  "bootstrap_overlay": "swarm_kernel/SELF_AUDIT_BOOTSTRAP_OVERLAY.md",
+  "framework_unavailable_result": "AUDIT_FRAMEWORK_UNAVAILABLE",
+  "historical_record_mutation": "DENY",
+  "audit_finding_is_authorization": false,
+  "framework_recommendation_is_activation": false
+}
