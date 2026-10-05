@@ -80,6 +80,29 @@ class NewProjectBootstrapKitTests(unittest.TestCase):
         self.assertEqual(bootstrap["authorized_roles"], ["primary", "manager", "research"])
         self.assertIn("recovery", bootstrap["execution_modes"])
 
+    def test_new_project_templates_inherit_mutation_and_roleless_hardening(self):
+        bootstrap_template = json.loads(
+            (ROOT / "templates" / "new-project" / "AGENT_BOOTSTRAP.template.json").read_text()
+        )
+        mutation = bootstrap_template["mutation_authorization"]
+        self.assertEqual(mutation["invariant"], "INTENT_IS_NOT_AUTHORIZATION")
+        self.assertTrue(mutation["required_before_every_external_mutation"])
+        self.assertFalse(mutation["role_is_authorization"])
+        self.assertFalse(mutation["claim_or_lease_is_authorization"])
+        roleless = bootstrap_template["roleless_agent_admission"]
+        self.assertTrue(roleless["required_for_generic_human_launch_without_explicit_role"])
+        self.assertFalse(roleless["primary_self_promotion"])
+        self.assertFalse(roleless["role_or_claim_grants_mutation_authority"])
+        self.assertEqual(roleless["self_admissible_roles"], ["research", "manager"])
+
+        order_template = json.loads(
+            (ROOT / "templates" / "new-project" / "BOOTSTRAP_ORDER.template.json").read_text()
+        )
+        self.assertEqual(order_template["schema"], "org-agent-mesh/bootstrap-order/v5")
+        self.assertEqual(order_template["mutation_authorization"]["invariant"], "INTENT_IS_NOT_AUTHORIZATION")
+        self.assertFalse(order_template["roleless_admission"]["primary_self_promotion"])
+        self.assertIn("valid mutation authorization source established", order_template["mutation_gate"])
+
     def test_scheduled_launch_contract_propagates_to_new_projects(self):
         bootstrap_template = json.loads(
             (ROOT / "templates" / "new-project" / "AGENT_BOOTSTRAP.template.json").read_text()
