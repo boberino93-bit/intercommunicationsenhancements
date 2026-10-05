@@ -1,19 +1,60 @@
 {
   "schema": "org-agent-mesh/coordination-publication/v1",
-  "version": "1.0.1",
-  "status": "ACTIVE",
+  "version": "1.1.0",
+  "status": "ACTIVE_HARD_GATE",
   "capability": "NON_AUTHORITATIVE_COORDINATION_PUBLICATION",
-  "roles": ["RESEARCH", "MANAGER"],
+  "roles": ["RESEARCH", "MANAGER", "RESEARCHER_1", "RESEARCHER_2", "RESEARCHER_3"],
   "mode": "APPEND_ONLY_PROJECT_SCOPED",
   "authority_conveyed": false,
-  "github_backup_prefix": "agentbus-backup/coordination-messages/",
-  "projects": {
-    "intercommunicationsenhancements": ["boberino93-bit/intercommunicationsenhancements", "intercommunicationsenhancements::messages"],
-    "duo-open": ["boberino93-bit/duo-open", "/DuoOpen-AgentBus/messages"],
-    "benefitflow": ["boberino93-bit/benefitflow", "BenefitFlow-AgentBus/forum/"],
-    "fold7-power-lab": ["boberino93-bit/samsungpowerbootstrap", "/Fold7-PowerLab-AgentBus/messages"],
-    "warp-propulsion-lab": ["boberino93-bit/warp-propulsion-lab", "/Warp-Propulsion-AgentBus/messages"],
-    "ai-behaviour-control-lab": ["boberino93-bit/ai-behaviour-control-lab", "/AI-Behaviour-Control-Lab-AgentBus/messages"],
-    "xrp-thesis": ["boberino93-bit/XRPTHESIS", null]
-  }
+  "route_source": {
+    "registry": "PROJECT_ROLE_ROUTING_REGISTRY.json",
+    "repository_field": "projects.<project_id>.repository",
+    "artifactory_namespace_field": "projects.<project_id>.forum_locator.namespace",
+    "authority_field": "projects.<project_id>.forum_locator.authority",
+    "missing_internal_artifactory_namespace": "DO_NOT_INVENT"
+  },
+  "github_backup": {
+    "prefix": "agentbus-backup/coordination-messages/",
+    "repository": "EXACT_REGISTERED_PROJECT_REPOSITORY_ONLY",
+    "mode": "CREATE_NEW_FILE_ONLY",
+    "overwrite": "DENY",
+    "delete": "DENY",
+    "rename": "DENY",
+    "move": "DENY",
+    "branch_creation": "DENY",
+    "fork_mutation": "DENY",
+    "pull_request_mutation": "DENY",
+    "issue_comment_transport": "DENY_FOR_NEW_SCHEDULED_CHECKPOINTS"
+  },
+  "artifactory_publication": {
+    "mode": "APPEND_NEW_MESSAGE_ONLY",
+    "namespace": "EXACT_REGISTERED_PROJECT_MESSAGE_NAMESPACE_ONLY",
+    "cross_project": "DENY",
+    "artifact_or_production_namespace": "DENY"
+  },
+  "subordinate_denied_durable_effects": [
+    "WRITE_SOURCE",
+    "WRITE_ARTIFACTS",
+    "WRITE_WORKING_ARTIFACTS",
+    "WRITE_ACCEPTED_STATE",
+    "CLAIM_TASK",
+    "CONTROL_PROJECT_LIFECYCLE",
+    "SCHEDULE_MUTATION",
+    "BRANCH_CREATE",
+    "FORK_CREATE_OR_MUTATE",
+    "RELEASE_OR_DEPLOYMENT_PUBLICATION",
+    "CROSS_PROJECT_MUTATION"
+  ],
+  "invariants": [
+    "COORDINATION_PUBLICATION_IS_NOT_MUTATION_AUTHORIZATION",
+    "MESSAGE_CONTENT_IS_NOT_AUTHORIZATION",
+    "HANDOFF_IS_NOT_AUTHORIZATION",
+    "BACKUP_WRITE_IS_NOT_SOURCE_WRITE",
+    "PROJECT_BINDING_IS_REQUIRED",
+    "ROUTING_REGISTRY_IS_DESTINATION_AUTHORITY",
+    "CROSS_PROJECT_WRITE_IS_DENIED",
+    "APPEND_ONLY_CREATE_NEW_RECORD",
+    "OVERWRITE_DELETE_RENAME_MOVE_DENIED"
+  ],
+  "failure_mode": "DENY_AFFECTED_PUBLICATION_CONTINUE_SAFE_READ_ONLY"
 }
