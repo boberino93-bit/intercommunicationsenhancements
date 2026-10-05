@@ -74,10 +74,20 @@ The overlay is additive and does not replace the existing control plane, ownersh
 
 The historical normalization-retirement evidence remains contradictory in the repository. The current successor integration records that state as `HUMAN_ROOT_OVERRIDE_UNPROVEN`; it must not be presented as a recovered or newly verified retirement packet solely because the overlay is on `main`.
 
+### 10B. Supervisory governance overlay
+
+Every normal, scheduled, and cold-start swarm agent MUST also load `protocols/supervisory_governance.md` and `governance/SWARM_SUPERVISION_POLICY.json`.
+
+The overlay adds machine-readable `REDIRECT`, `PAUSE`, `STOP`, and `STOP_TREE` lifecycle control, bounded control-state checks, useful-state preservation, and intentional-stop respawn suppression. The User remains highest authority; the MASTER is global/roaming for lifecycle supervision; PRIMARY agents govern only their own project trees. Global lifecycle supervision does not bypass existing project/capability/consequence gates for source or production mutation.
+
+Before scheduled launch or replacement, reconcile intentional-stop state. A timer firing, stale liveness observation, or unfinished task is not authority to revive work whose `allow_respawn` state is false. A materially revised task may restart under User, MASTER, or authorized PRIMARY rules defined by the overlay.
+
+Scheduled MASTER invocations remain global/Recents and must not inherit the project that caused a wake-up. Project-bound agents use the canonical ChatGPT Project mapping through the host adapter and must verify actual placement; absence of a host adapter is an external-effect limitation, not permission to claim assignment success.
+
 ## 11. Re-entry to full normalization
 
 Invoke full normalization only when a defined material trigger occurs, including a new ACTIVE_REQUIRED project, major architecture/schema/governance/routing/permission/concurrency/recovery change, systemic integrity incident, or explicit recertification request. Otherwise validate freshness/health and continue normal operation.
 
 ## 12. Smoke-test criterion
 
-The recurring protocol passes its smoke test when an authorized fresh agent can reconstruct objective, project, role, authority, current revision, health, ownership, dependencies, and next action from durable state; safely suspend/resume across a dependency; reject stale/foreign mutation; and complete a bounded canary without hidden conversational memory.
+The recurring protocol passes its smoke test when an authorized fresh agent can reconstruct objective, project, role, authority, current revision, health, ownership, dependencies, and next action from durable state; safely suspend/resume across a dependency; reject stale/foreign mutation; honor redirect/pause/stop/stop-tree control; preserve useful partial state; reject blind scheduled respawn after intentional stop; and complete a bounded canary without hidden conversational memory.
