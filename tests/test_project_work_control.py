@@ -1,8 +1,48 @@
+from datetime import datetime, timezone
 from pathlib import Path
 import json
 import unittest
 
+from org_agent_mesh.project_work_control import (
+    ProjectWorkControlError,
+    ProjectWorkState,
+    filter_unheld_projects,
+    resolve_project_work_state,
+)
+
 ROOT = Path(__file__).resolve().parents[1]
+NOW = datetime(2026, 10, 5, 14, 0, tzinfo=timezone.utc)
+
+
+def event(
+    event_id: str,
+    action: str,
+    *,
+    project_id: str = "warp-propulsion-lab",
+    hold_order_id: str = "HOLD-1",
+    issued_at: str = "2026-10-05T13:00:00Z",
+    effective_at: str = "2026-10-05T13:00:00Z",
+    expires_at: str | None = None,
+    resume_policy: str = "MANUAL",
+):
+    return {
+        "schema": "org-agent-mesh/project-work-control-event/v1",
+        "event_id": event_id,
+        "project_id": project_id,
+        "action": action,
+        "hold_order_id": hold_order_id,
+        "issued_at": issued_at,
+        "effective_at": effective_at,
+        "expires_at": expires_at,
+        "resume_policy": resume_policy,
+        "reason_code": "HUMAN_PRIORITY",
+        "human_reason": "bounded test hold",
+        "metadata": {"source": "test"},
+        "claimed_principal": "registered-human-principal",
+        "authentication_ref": "external-proof:test",
+        "authorization_case_id": "AUTH-test",
+        "preserve_partial_state": True,
+    }
 
 
 class ProjectWorkControlTests(unittest.TestCase):
@@ -54,6 +94,82 @@ class ProjectWorkControlTests(unittest.TestCase):
         self.assertTrue(package["package_requirements"]["child_single_use"])
         self.assertEqual(package["forbidden"][0], "OPEN_ENDED_FUTURE_WRITES")
         self.assertIn("ADDING_NEW_CHILDREN_AFTER_HUMAN_APPROVAL", package["forbidden"])
+
+    def test_hold_blocks_new_work_respawn_and_mutation(self):
+        decision = resolve_project_work_state("warp-propulsion-lab", [event("e1", "HOLD")], now=NOW)
+        self.assertEqual(decision.state, ProjectWorkState.HOLD)
+        self.assertFalse(decision.allow_new_work)
+        self.assertFalse(decision.allow_respawn)
+        self.assertFalse(decision.allow_mutation)
+        self.assertEqual(decision.reason, "PROJECT_HOLD_ACTIVE")
+
+    def test_matching_resume_reactivates_hold(self):
+        events = [
+            event("e1", "HOLD"),
+            event("e2", "RESUME", issued_at="2026-10-05T13:30:00Z"),
+        ]
+        self.assertEqual(
+            resolve_project_work_state("warp-propulsion-lab", events, now=NOW).state,
+            ProjectWorkState.ACTIVE,
+        )
+
+    def test_unrelated_resume_cannot_clear_hold(self):
+        events = [
+            event("e1", "HOLD"),
+            event("e2", "RESUME", hold_order_id="OTHER", issued_at="2026-10-05T13:30:00Z"),
+        ]
+        self.assertEqual(
+            resolve_project_work_state("warp-propulsion-lab", events, now=NOW).state,
+            ProjectWorkState.HOLD,
+        )
+
+    def test_manual_expiry_requires_authenticated_resume(self):
+        decision = resolve_project_work_state(
+            "warp-propulsion-lab",
+            [event("e1", "HOLD", expires_at="2026-10-05T13:30:00Z", resume_policy="MANUAL")],
+            now=NOW,
+        )
+        self.assertEqual(decision.state, ProjectWorkState.HOLD_EXPIRED_PENDING_HUMAN_RESUME)
+        self.assertFalse(decision.allow_new_work)
+
+    def test_auto_expiry_reactivates_only_when_explicitly_selected(self):
+        decision = resolve_project_work_state(
+            "warp-propulsion-lab",
+            [event("e1", "HOLD", expires_at="2026-10-05T13:30:00Z", resume_policy="AUTO_AT_EXPIRY")],
+            now=NOW,
+        )
+        self.assertEqual(decision.state, ProjectWorkState.ACTIVE)
+        self.assertEqual(decision.reason, "AUTO_RESUMED_AT_HOLD_EXPIRY")
+
+    def test_extend_updates_expiry(self):
+        events = [
+            event("e1", "HOLD", expires_at="2026-10-05T13:30:00Z"),
+            event("e2", "EXTEND_HOLD", issued_at="2026-10-05T13:20:00Z", expires_at="2026-10-05T15:00:00Z"),
+        ]
+        decision = resolve_project_work_state("warp-propulsion-lab", events, now=NOW)
+        self.assertEqual(decision.state, ProjectWorkState.HOLD)
+        self.assertEqual(decision.active_hold.expires_at.hour, 15)
+
+    def test_future_hold_does_not_apply_early(self):
+        decision = resolve_project_work_state(
+            "warp-propulsion-lab",
+            [event("e1", "HOLD", effective_at="2026-10-05T15:00:00Z")],
+            now=NOW,
+        )
+        self.assertEqual(decision.state, ProjectWorkState.ACTIVE)
+
+    def test_filter_unheld_projects_reallocates_portfolio_capacity(self):
+        events = [event("e1", "HOLD", project_id="warp-propulsion-lab")]
+        self.assertEqual(
+            filter_unheld_projects(["duo-open", "warp-propulsion-lab", "xrp-thesis"], events, now=NOW),
+            ["duo-open", "xrp-thesis"],
+        )
+
+    def test_invalid_hold_event_is_rejected(self):
+        bad = event("e1", "HOLD")
+        bad["preserve_partial_state"] = False
+        with self.assertRaises(ProjectWorkControlError):
+            resolve_project_work_state("warp-propulsion-lab", [bad], now=NOW)
 
 
 if __name__ == "__main__":
