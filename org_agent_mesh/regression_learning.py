@@ -28,6 +28,20 @@ PROTECTED_CLASSES = {
     "SCHEDULE_ACTIVATION",
 }
 
+ALLOWED_PRIMARY_MAINTENANCE_CLASSES = {
+    "DOC_NORMALIZATION",
+    "TEST_FIXTURE_MAINTENANCE",
+    "REGRESSION_TEST_ADDITION",
+    "NON_AUTHORITATIVE_OBSERVABILITY",
+    "METADATA_CLEANUP",
+    "LINK_PRESENTATION_FIX",
+    "CI_STATE_INTERPRETATION",
+}
+
+
+def _family_key(value: str) -> str:
+    return "_".join(value.strip().upper().split())
+
 
 @dataclass(frozen=True)
 class RegressionEvent:
@@ -46,8 +60,12 @@ class RegressionEvent:
 
     @staticmethod
     def fingerprint(family: str, signature: str) -> str:
-        normalized = f"{family.strip().lower()}|{' '.join(signature.lower().split())}"
+        normalized = f"{_family_key(family)}|{' '.join(signature.lower().split())}"
         return sha256(normalized.encode("utf-8")).hexdigest()
+
+    @property
+    def fingerprint_value(self) -> str:
+        return self.fingerprint(self.family, self.signature)
 
     def validate(self) -> None:
         if self.level not in LEVELS:
@@ -58,10 +76,18 @@ class RegressionEvent:
             raise ValueError("REGRESSION_EVENT_CANNOT_CONVEY_AUTHORITY")
         if not 1 <= self.severity <= 5:
             raise ValueError("SEVERITY_OUT_OF_RANGE")
-        if not self.event_id or not self.family or not self.signature or not self.evidence_ref:
+        if not self.event_id or not self.family.strip() or not self.signature.strip() or not self.evidence_ref:
             raise ValueError("REGRESSION_EVENT_INCOMPLETE")
         if self.level != "UNSCOPED_CHAT" and not self.project_id:
             raise ValueError("PROJECT_ID_REQUIRED")
+        if (self.remediated or self.post_remediation_recurrence) and not self.remediation_ref:
+            raise ValueError("REMEDIATION_REFERENCE_REQUIRED")
+
+
+@dataclass(frozen=True)
+class LedgerSnapshot:
+    record_count: int
+    head_hash: str
 
 
 @dataclass
@@ -85,6 +111,9 @@ class RegressionLedger:
         self.hashes.append(digest)
         return digest
 
+    def snapshot(self) -> LedgerSnapshot:
+        return LedgerSnapshot(len(self.events), self.hashes[-1] if self.hashes else "")
+
     def verify(self) -> bool:
         previous_hash = ""
         for event, expected in zip(self.events, self.hashes):
@@ -100,8 +129,12 @@ class RegressionLedger:
             previous_hash = digest
         return len(self.events) == len(self.hashes)
 
+    def verify_snapshot(self, expected: LedgerSnapshot) -> bool:
+        return self.verify() and self.snapshot() == expected
+
     def family_stats(self, family: str) -> dict[str, object]:
-        events = [event for event in self.events if event.family == family]
+        key = _family_key(family)
+        events = [event for event in self.events if _family_key(event.family) == key]
         if not events:
             return {
                 "count": 0,
@@ -157,8 +190,8 @@ def normalize_intake(
         event_id=event_id,
         level=level,
         project_id=project_id,
-        family=family,
-        signature=signature,
+        family=_family_key(family),
+        signature=" ".join(signature.split()),
         provenance=provenance,
         severity=severity,
         evidence_ref=evidence_ref,
@@ -176,7 +209,9 @@ def primary_maintenance_allowed(
     touches_security: bool = False,
     cross_project_write: bool = False,
 ) -> bool:
-    normalized = change_class.strip().upper()
+    normalized = _family_key(change_class)
+    if normalized not in ALLOWED_PRIMARY_MAINTENANCE_CLASSES:
+        return False
     if touches_security or cross_project_write or normalized in PROTECTED_CLASSES:
         return False
     return bool(reversible and tests_passed and bounded_scope)
