@@ -43,6 +43,23 @@ class CheckpointBusTests(unittest.TestCase):
         with self.assertRaises(CheckpointError):
             self.make_checkpoint(state="MANAGER_PROGRESS")
 
+    def test_all_three_research_stages_accept_research_progress(self):
+        for stage in ("RESEARCHER_1", "RESEARCHER_2", "RESEARCHER_3"):
+            cp = self.make_checkpoint(stage=stage, checkpoint_id=f"cp-{stage}")
+            self.assertEqual(cp.state, "RESEARCH_PROGRESS")
+
+    def test_project_hold_state_is_valid_for_every_stage(self):
+        stage_states = {
+            "RESEARCHER_1": "PROJECT_HOLD_ACTIVE",
+            "RESEARCHER_2": "PROJECT_HOLD_ACTIVE",
+            "RESEARCHER_3": "PROJECT_HOLD_ACTIVE",
+            "MANAGER": "PROJECT_HOLD_ACTIVE",
+            "PRIMARY": "PROJECT_HOLD_ACTIVE",
+        }
+        for stage, state in stage_states.items():
+            cp = self.make_checkpoint(stage=stage, state=state, checkpoint_id=f"hold-{stage}")
+            self.assertEqual(cp.state, state)
+
     def test_interactive_recovery_requires_target_cycle(self):
         with self.assertRaises(CheckpointError):
             self.make_checkpoint(trigger="USER_INTERACTIVE")
@@ -58,7 +75,7 @@ class CheckpointBusTests(unittest.TestCase):
             checkpoint_id="2026-10-05T04_RESEARCHER_1_run-1_1",
             sequence=1,
             phase="ANALYSIS",
-            created_at="2026-10-05T04:12:00-07:00",
+            created_at="2026-10-05T04:08:00-07:00",
         )
         selected = latest_for_cycle(
             [earlier, later],
@@ -89,13 +106,17 @@ class CheckpointBusTests(unittest.TestCase):
         second = self.make_checkpoint()
         self.assertTrue(validate_no_sequence_conflicts([first, second]))
 
-    def test_downstream_acceptance_contract(self):
-        upstream, states = accepted_upstream_states("MANAGER")
-        self.assertEqual(upstream, "RESEARCHER_1")
-        self.assertEqual(states, {"RESEARCH_PROGRESS", "RESEARCH_HANDOFF_READY"})
-        upstream, states = accepted_upstream_states("PRIMARY")
-        self.assertEqual(upstream, "MANAGER")
-        self.assertEqual(states, {"MANAGER_PROGRESS", "MANAGER_HANDOFF_READY"})
+    def test_downstream_acceptance_contract_is_five_stage_chain(self):
+        expected = {
+            "RESEARCHER_2": ("RESEARCHER_1", {"RESEARCH_PROGRESS", "RESEARCH_HANDOFF_READY"}),
+            "RESEARCHER_3": ("RESEARCHER_2", {"RESEARCH_PROGRESS", "RESEARCH_HANDOFF_READY"}),
+            "MANAGER": ("RESEARCHER_3", {"RESEARCH_PROGRESS", "RESEARCH_HANDOFF_READY"}),
+            "PRIMARY": ("MANAGER", {"MANAGER_PROGRESS", "MANAGER_HANDOFF_READY"}),
+        }
+        for stage, pair in expected.items():
+            self.assertEqual(accepted_upstream_states(stage), pair)
+        with self.assertRaises(CheckpointError):
+            accepted_upstream_states("RESEARCHER_1")
 
 
 if __name__ == "__main__":
