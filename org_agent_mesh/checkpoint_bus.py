@@ -69,7 +69,6 @@ class StageCheckpoint:
     blockers: tuple[str, ...] = ()
     unfinished_work: tuple[str, ...] = ()
     next_action: str = ""
-    readback_verified: bool = False
     recovery_of_cycle_id: str | None = None
 
     def __post_init__(self):
@@ -109,8 +108,6 @@ class StageCheckpoint:
             raise CheckpointError("summary must be a string")
         if not isinstance(self.next_action, str):
             raise CheckpointError("next_action must be a string")
-        if not isinstance(self.readback_verified, bool):
-            raise CheckpointError("readback_verified must be boolean")
         if self.trigger == "USER_INTERACTIVE" and not self.recovery_of_cycle_id:
             raise CheckpointError("interactive recovery checkpoints require recovery_of_cycle_id")
         if self.recovery_of_cycle_id is not None and not _CYCLE_RE.fullmatch(self.recovery_of_cycle_id):
@@ -139,7 +136,6 @@ class StageCheckpoint:
             "blockers": list(self.blockers),
             "unfinished_work": list(self.unfinished_work),
             "next_action": self.next_action,
-            "readback_verified": self.readback_verified,
         }
         if self.recovery_of_cycle_id is not None:
             payload["recovery_of_cycle_id"] = self.recovery_of_cycle_id
@@ -174,7 +170,6 @@ class StageCheckpoint:
             blockers=tuple(payload.get("blockers") or ()),
             unfinished_work=tuple(payload.get("unfinished_work") or ()),
             next_action=payload.get("next_action") or "",
-            readback_verified=payload.get("readback_verified", False),
             recovery_of_cycle_id=payload.get("recovery_of_cycle_id"),
         )
 
@@ -198,7 +193,6 @@ def latest_for_cycle(
     cycle_id: str,
     stage: str,
     accepted_states: set[str] | None = None,
-    require_readback: bool = True,
 ) -> StageCheckpoint | None:
     if stage not in STAGES:
         raise CheckpointError("unsupported stage")
@@ -212,7 +206,6 @@ def latest_for_cycle(
         if cp.cycle_id == cycle_id
         and cp.stage == stage
         and (accepted_states is None or cp.state in accepted_states)
-        and (cp.readback_verified or not require_readback)
     ]
     if not candidates:
         return None
