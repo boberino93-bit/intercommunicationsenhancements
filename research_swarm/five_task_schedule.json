@@ -1,6 +1,6 @@
 {
-  "schema": "intercommunications/research-swarm-serial-design-pipeline/v3",
-  "status": "DEPLOYMENT_AUTHORIZED_ROLLOUT_REQUIRED_BEFORE_FIRST_RUN",
+  "schema": "intercommunications/research-swarm-serial-design-pipeline/v4",
+  "status": "CHECKPOINT_TRANSPORT_V1_IMPLEMENTED_TASK_STATE_PRESERVED",
   "timezone": "America/Vancouver",
   "cadence": "HOURLY",
   "execution_model": "THREE_STAGE_SERIAL_PIPELINE",
@@ -28,13 +28,30 @@
     "protocol_path": "protocols/supervisory_governance.md",
     "policy_path": "governance/SWARM_SUPERVISION_POLICY.json",
     "scheduled_launch_protocol": "protocols/scheduled_agent_launch.md",
+    "checkpoint_protocol": "protocols/swarm_checkpoint_bus.md",
     "control_module": "org_agent_mesh.supervision",
     "schedule_activation_module": "org_agent_mesh.schedule_activation",
     "chat_project_router_module": "org_agent_mesh.chat_project_routing",
+    "checkpoint_reference_module": "org_agent_mesh.checkpoint_bus",
     "authority_order": ["USER", "MASTER", "PRIMARY", "SUBORDINATE"],
     "schedule_fire_is_authority": false,
     "intentional_stop_respawn_check_required": true,
     "bounded_work_unit_control_check_required": true
+  },
+  "checkpoint_transport": {
+    "schema": "intercommunications/swarm-stage-checkpoint/v1",
+    "schema_path": "research_swarm/checkpoint_envelope.schema.json",
+    "protocol_path": "protocols/swarm_checkpoint_bus.md",
+    "transport": "GITHUB_ISSUE_COMMENTS_APPEND_ONLY",
+    "repository": "boberino93-bit/intercommunicationsenhancements",
+    "issue_number": 25,
+    "source_mutation_required": false,
+    "project_evidence_authority_unchanged": true,
+    "preflight": "APPEND_SEQUENCE_ZERO_PROGRESS_THEN_READBACK_BEFORE_SUBSTANTIVE_WORK",
+    "cycle_id": "AMERICA_VANCOUVER_LOCAL_HOUR_FLOOR",
+    "partial_handoff_allowed": true,
+    "edit_or_delete_prior_checkpoints_allowed": false,
+    "cross_cycle_implicit_fallback_allowed": false
   },
   "storage_policy": {
     "physical_quota_gib": 20,
@@ -49,6 +66,9 @@
     "stale_upstream_behavior": "UPSTREAM_NOT_READY_AND_STOP",
     "repository_access": "CONNECTED_GITHUB_APP_API_ONLY",
     "local_clone_fallback_allowed": false,
+    "handoff_dependency": "DURABLE_CURRENT_CYCLE_CHECKPOINT_NOT_CHAT_OR_SCHEDULER_EVENT",
+    "manager_accepted_upstream_states": ["RESEARCH_PROGRESS", "RESEARCH_HANDOFF_READY"],
+    "primary_accepted_upstream_states": ["MANAGER_PROGRESS", "MANAGER_HANDOFF_READY"],
     "final_output": "PRIMARY_DESIGN_PROPOSAL"
   },
   "tasks": [
@@ -58,7 +78,9 @@
       "prompt_path": "research_swarm/prompts/researcher_1.md",
       "project_bound": true,
       "self_enable_allowed": false,
+      "progress_state": "RESEARCH_PROGRESS",
       "output_gate": "RESEARCH_HANDOFF_READY",
+      "preflight_checkpoint_required": true,
       "bias": "platform_android_samsung_display_continuity_foundational_constraints"
     },
     {
@@ -68,8 +90,10 @@
       "project_bound": true,
       "lifecycle_scope": "OWN_PROJECT_TREE_ONLY",
       "self_enable_allowed": false,
-      "requires_gate": "RESEARCH_HANDOFF_READY",
-      "output_gate": "MANAGER_HANDOFF_READY"
+      "requires_any_gate": ["RESEARCH_PROGRESS", "RESEARCH_HANDOFF_READY"],
+      "progress_state": "MANAGER_PROGRESS",
+      "output_gate": "MANAGER_HANDOFF_READY",
+      "preflight_checkpoint_required": true
     },
     {
       "role": "PRIMARY",
@@ -78,8 +102,10 @@
       "project_bound": true,
       "lifecycle_scope": "OWN_PROJECT_TREE_ONLY",
       "self_enable_allowed": false,
-      "requires_gate": "MANAGER_HANDOFF_READY",
-      "output_gate": "PRIMARY_PROPOSAL_READY"
+      "requires_any_gate": ["MANAGER_PROGRESS", "MANAGER_HANDOFF_READY"],
+      "progress_state": "PRIMARY_PROGRESS",
+      "output_gate": "PRIMARY_PROPOSAL_READY",
+      "preflight_checkpoint_required": true
     }
   ],
   "inactive_scheduled_roles": [
@@ -114,8 +140,14 @@
     "ONLY_ONE_RESEARCHER_IS_SCHEDULED_IN_THIS_PIPELINE",
     "RESEARCH_PRECEDES_MANAGER",
     "MANAGER_PRECEDES_PRIMARY",
-    "DOWNSTREAM_STAGE_REQUIRES_FRESH_UPSTREAM_HANDOFF",
+    "DOWNSTREAM_STAGE_REQUIRES_FRESH_UPSTREAM_CHECKPOINT",
+    "VALID_PARTIAL_PROGRESS_IS_CONSUMABLE_WITH_EXPLICIT_INCOMPLETE_LABEL",
+    "READY_IS_NOT_REQUIRED_WHEN_VALID_CURRENT_CYCLE_PROGRESS_EXISTS",
     "STALE_OR_MISSING_UPSTREAM_STATE_MUST_NOT_BE_SYNTHESIZED",
+    "CHECKPOINT_PREFLIGHT_MUST_PASS_BEFORE_SUBSTANTIVE_STAGE_WORK",
+    "CHECKPOINT_COMMENTS_ARE_APPEND_ONLY_AND_MUST_BE_READBACK_VERIFIED",
+    "CHECKPOINT_BUS_DOES_NOT_EXPAND_PRODUCTION_SOURCE_AUTHORITY",
+    "CROSS_CYCLE_CHECKPOINT_FALLBACK_REQUIRES_EXPLICIT_GOVERNED_CARRY_FORWARD",
     "CONNECTED_GITHUB_API_IS_THE_SCHEDULED_REPOSITORY_ACCESS_PATH",
     "NO_GIT_CLONE_FALLBACK_IN_SCHEDULED_TASKS",
     "PRIMARY_WRITES_THE_FINAL_DESIGN_PROPOSAL",
@@ -131,7 +163,7 @@
     "CHECK_CONTROL_STATE_BETWEEN_BOUNDED_WORK_UNITS",
     "PRESERVE_USEFUL_PARTIAL_STATE_ON_STOP_WHEN_PRACTICAL",
     "NO_HIDDEN_CONVERSATION_MEMORY_DEPENDENCY",
-    "NO_SECOND_CONTROL_PLANE",
+    "NO_SECOND_PRODUCTION_CONTROL_PLANE",
     "CLASS_D_REQUIRES_EXACT_ACTION_AUTHORIZATION",
     "NONBLOCKING_DECISIONS_DO_NOT_FREEZE_UNRELATED_SAFE_WORK",
     "COMBINED_INTERNAL_WORKING_SET_MUST_NOT_INTENTIONALLY_EXCEED_16_GIB",
@@ -141,6 +173,10 @@
   "automation_alignment": {
     "saved_task_enabled_state_must_be_preserved_during_prompt_alignment": true,
     "saved_prompts_must_load_current_governance": true,
+    "saved_prompts_must_load_checkpoint_protocol": true,
+    "saved_prompts_must_use_issue_25_for_stage_checkpoints": true,
+    "saved_prompts_must_preflight_checkpoint_write_and_readback": true,
+    "saved_prompts_must_accept_valid_partial_upstream_progress": true,
     "saved_prompts_must_forbid_automatic_enable_or_reenable": true,
     "saved_prompts_must_forbid_local_clone_fallback": true,
     "researcher_1_minute": 0,
@@ -163,6 +199,7 @@
     ],
     "requires_live_frontier_reconciliation": true,
     "requires_supervisory_state_reconciliation": true,
-    "requires_explicit_human_task_enablement": true
+    "requires_explicit_human_task_enablement": true,
+    "checkpoint_transport_issue": 25
   }
 }
