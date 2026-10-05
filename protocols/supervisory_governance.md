@@ -2,7 +2,7 @@
 
 Status: **CANONICAL ACTIVE OVERLAY**
 
-This protocol adds lifecycle supervision, intentional-stop persistence, and ChatGPT Project placement semantics to the existing Org Agent Mesh. It is additive. It does not replace project isolation, capability gates, consequence authorization, lease/fencing rules, the frozen normalized runtime baseline, or stronger safety controls.
+This protocol adds lifecycle supervision, intentional-stop persistence, human-gated scheduled-task activation, and ChatGPT Project placement semantics to the existing Org Agent Mesh. It is additive. It does not replace project isolation, capability gates, consequence authorization, lease/fencing rules, the frozen normalized runtime baseline, or stronger safety controls.
 
 ## 1. Authority
 
@@ -13,6 +13,8 @@ Lifecycle supervision order is:
 The User is the highest authority. The MASTER has global lifecycle supervision across registered project trees. A PRIMARY may supervise only its own project tree unless a stronger authorized control path explicitly delegates otherwise.
 
 Global lifecycle supervision does **not** grant unrestricted cross-project source mutation. Repository writes, production actions, destructive operations, credentials, releases, and other consequential effects remain governed by existing project/capability/consequence controls.
+
+Scheduled-task activation is a separate gate from lifecycle supervision. No autonomous role inherits task-enablement authority from MASTER/PRIMARY lifecycle authority.
 
 ## 2. Master is global and roaming
 
@@ -82,16 +84,50 @@ PAUSE persists current partial state and enters a machine-readable paused state.
 
 An intentional STOP or STOP_TREE sets `allow_respawn = false` for the affected execution. Schedulers, timers, liveness recovery, and unfinished-task scans must treat that state as intentional termination rather than missing work.
 
-A new execution may be authorized by:
+A new logical execution may be authorized by:
 
 - explicit User instruction; or
 - MASTER/authorized PRIMARY with a materially newer task revision.
 
 A clock firing, an incomplete status, or a stale prompt is insufficient authority to revive the old execution.
 
-## 10. Scheduled tasks
+Logical restart authority does **not** imply authority to enable a disabled recurring scheduled task. Those are separate gates.
 
-Every scheduled/cold-start swarm launch must:
+## 10. Scheduled-task activation gate
+
+Scheduled swarm tasks may be **enabled only by an explicit current human request**.
+
+This is a hard control-plane invariant, not a preference or optimization. The following actors may never turn a disabled swarm task on autonomously:
+
+- MASTER;
+- PRIMARY;
+- Manager;
+- Researcher;
+- recovery/reconciliation logic;
+- migration/alignment logic;
+- bootstrap/startup logic;
+- liveness or stale-task recovery;
+- another scheduled task;
+- generic system automation.
+
+Rules:
+
+1. disabled scheduled tasks are a deliberate human control gate, not a health failure;
+2. a disabled task must not be treated as stale, crashed, incomplete, or needing automatic recovery;
+3. no startup, migration, alignment, protocol-upgrade, project-activation, or swarm-recovery path may enable it;
+4. updates to prompts, cadence metadata, routing metadata, governance revisions, or task titles must preserve the current enabled/disabled state unless the human explicitly requested that state change in the current instruction;
+5. automatic re-enable after STOP, PAUSE, failure, restart, migration, or a new task revision is forbidden;
+6. Master/Primary lifecycle restart authority applies only after a scheduled invocation is already legitimately available; it cannot cross the disabled-task gate;
+7. disabling a task may be used as a containment/safety action by an authorized control path, but re-enabling still requires explicit human action;
+8. agent code must not call task-enable/resume operations on its own behalf;
+9. any attempted autonomous `disabled -> enabled` transition must fail closed and be auditable;
+10. the reference enforcement helper is `org_agent_mesh.schedule_activation`.
+
+The human enable action is intentionally manual because enabling multiple recurring agents can open concurrent mutation lanes and create code conflicts. Keeping enablement outside autonomous swarm authority preserves the human-controlled gate over when concurrency is allowed to begin.
+
+## 11. Scheduled launches
+
+Every scheduled/cold-start swarm launch that has already been human-enabled must:
 
 1. load current supervisory governance alongside the existing recurring/successor protocols;
 2. validate exact project/role launch context against the local contract;
@@ -101,18 +137,21 @@ Every scheduled/cold-start swarm launch must:
 6. keep scheduled MASTER invocations global/roaming;
 7. route scheduled project agents through the project-placement mechanism when a host adapter is available;
 8. preserve User > MASTER > PRIMARY authority;
-9. treat the schedule as a wake-up trigger, never an independent authority system.
+9. treat the schedule as a wake-up trigger, never an independent authority system;
+10. never modify its own or another task's enabled state.
 
-## 11. Alignment monitoring
+## 12. Alignment monitoring
 
 PRIMARY and MASTER supervisors should combine current user objective, project instructions, architecture, completed sibling work, evidence quality, remaining uncertainty, progress, duplication probability, resource cost, risk, and blockers. Do not reduce governance to a single arbitrary score threshold.
 
 PRIMARY optimizes for project success, not subordinate activity. MASTER optimizes for the user's portfolio objectives, not utilization or keeping every branch alive.
 
-## 12. Audit records
+Schedule alignment is configuration alignment only. It may update prompts or governance references while preserving disabled/enabled state; it is never permission to activate the swarm.
 
-Autonomous lifecycle interventions should record at least supervisor, target, project where applicable, action, reason code, concise explanation, state-preservation result, respawn disposition, and timestamp. Never record authentication tokens, session secrets, passwords, cookies, credentials, or private authentication material.
+## 13. Audit records
 
-## 13. Compatibility
+Autonomous lifecycle interventions should record at least supervisor, target, project where applicable, action, reason code, concise explanation, state-preservation result, respawn disposition, and timestamp. Scheduled-task state-change attempts should also record actor, prior state, requested state, whether explicit human authorization was present, and disposition. Never record authentication tokens, session secrets, passwords, cookies, credentials, or private authentication material.
+
+## 14. Compatibility
 
 This overlay intentionally reuses existing project identity, lease/fence, scheduling, consequence, recovery, handoff, and audit infrastructure. If this overlay conflicts with a stronger current safety/security/consequence rule, the stronger rule wins and the conflict must be surfaced rather than guessed away.
