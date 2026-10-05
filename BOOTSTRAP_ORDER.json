@@ -2,38 +2,15 @@
   "schema": "org-agent-mesh/bootstrap-order/v5",
   "routing_contract_version": "1.5.0",
   "mode": "FAIL_CLOSED_LOCAL_CONTINUE_GLOBAL",
-  "pre_provider_admission": {
-    "protocol": "protocols/scheduled_agent_launch.md",
-    "reference_runtime": "org_agent_mesh.launch_admission",
-    "required_for_dynamic_scheduled_launches": true,
-    "task_state_advancement_before_bootstrap_ready": "DENY",
-    "retryable_prebootstrap_results": ["TOO_MANY_REQUESTS", "RATE_LIMITED", "TEMPORARY_PROVIDER_UNAVAILABLE", "TIMEOUT_BEFORE_BOOTSTRAP"]
-  },
-  "continuation_contract": {
-    "protocol": "protocols/autonomous_continuation.md",
-    "routine_confirmation": "DENY",
-    "fail_closed_scope": "AFFECTED_MUTATION_OR_BRANCH_ONLY",
-    "continue_unaffected_safe_work": true,
-    "human_escalation": "TRUE_HUMAN_GATE_ONLY"
-  },
-  "mutation_authorization_contract": {
-    "protocol": "protocols/mutation_authorization.md",
-    "policy": "governance/MUTATION_AUTHORIZATION_POLICY.json",
-    "invariant": "INTENT_IS_NOT_AUTHORIZATION",
-    "required_before_every_external_mutation": true,
-    "ambiguous_authorization": "DENY_AFFECTED_WRITE_CONTINUE_SAFE_READ_ONLY"
-  },
-  "roleless_admission_contract": {
-    "protocol": "protocols/roleless_agent_admission.md",
-    "policy": "governance/ROLELESS_AGENT_ADMISSION_POLICY.json",
-    "generic_human_launch_without_explicit_role": "DEMAND_DRIVEN_ROLELESS_ADMISSION",
-    "primary_self_promotion": false,
-    "role_or_claim_grants_mutation_authority": false
-  },
+  "pre_provider_admission": {"protocol": "protocols/scheduled_agent_launch.md", "reference_runtime": "org_agent_mesh.launch_admission", "required_for_dynamic_scheduled_launches": true, "task_state_advancement_before_bootstrap_ready": "DENY", "retryable_prebootstrap_results": ["TOO_MANY_REQUESTS", "RATE_LIMITED", "TEMPORARY_PROVIDER_UNAVAILABLE", "TIMEOUT_BEFORE_BOOTSTRAP"]},
+  "continuation_contract": {"protocol": "protocols/autonomous_continuation.md", "routine_confirmation": "DENY", "fail_closed_scope": "AFFECTED_MUTATION_OR_BRANCH_ONLY", "continue_unaffected_safe_work": true, "human_escalation": "TRUE_HUMAN_GATE_ONLY"},
+  "authority_authentication_contract": {"protocol": "protocols/authority_authentication.md", "policy": "governance/AUTHORITY_AUTHENTICATION_POLICY.json", "principal_claim_required": true, "identity_inference_from_session_or_history": "DENY", "static_personal_fact_authentication": "DENY", "high_consequence_independent_proof_required": true, "no_session_wide_authority": true},
+  "mutation_authorization_contract": {"protocol": "protocols/mutation_authorization.md", "policy": "governance/MUTATION_AUTHORIZATION_POLICY.json", "invariant": "INTENT_IS_NOT_AUTHORIZATION", "required_before_every_external_mutation": true, "single_use_case_required": true, "prior_authorization_reuse": "DENY", "ambiguous_authorization": "DENY_AFFECTED_WRITE_CONTINUE_SAFE_READ_ONLY"},
+  "roleless_admission_contract": {"protocol": "protocols/roleless_agent_admission.md", "policy": "governance/ROLELESS_AGENT_ADMISSION_POLICY.json", "generic_human_launch_without_explicit_role": "DEMAND_DRIVEN_ROLELESS_ADMISSION", "primary_self_promotion": false, "role_or_claim_grants_mutation_authority": false},
   "steps": [
     {"order": 1, "id": "validate_current_human_project_intent", "step_scope": "resolve_launch_origin_and_validate_project_intent_without_treating_intent_as_mutation_authority", "active_project_context_policy": "USE_AS_STRONG_ROUTING_EVIDENCE_UNLESS_EXPLICIT_TARGET_CONFLICTS", "paths": ["protocols/scheduled_agent_launch.md", "protocols/universal_task_routing.md", "protocols/mutation_authorization.md"], "mutation_allowed": false},
     {"order": 2, "id": "load_and_validate_project_identity_lock", "path": "PROJECT_IDENTITY_LOCK.json", "mutation_allowed": false},
-    {"order": 3, "id": "load_mutation_authorization_and_supervisory_hard_gates", "paths": ["governance/MUTATION_AUTHORIZATION_POLICY.json", "protocols/mutation_authorization.md", "governance/SWARM_SUPERVISION_POLICY.json", "protocols/supervisory_governance.md"], "mutation_allowed": false},
+    {"order": 3, "id": "load_mutation_authorization_and_supervisory_hard_gates", "paths": ["governance/AUTHORITY_AUTHENTICATION_POLICY.json", "protocols/authority_authentication.md", "governance/MUTATION_AUTHORIZATION_POLICY.json", "protocols/mutation_authorization.md", "governance/SWARM_SUPERVISION_POLICY.json", "protocols/supervisory_governance.md"], "principal_claim_required_before_authorization": true, "mutation_allowed": false},
     {"order": 4, "id": "resolve_project_and_explicit_role_or_mark_roleless_admission", "paths": ["PROJECT_ROLE_ROUTING_REGISTRY.json", "bootstrap/PROJECT_ROLE_DISCOVERY.md", "protocols/roleless_agent_admission.md"], "generic_without_role": "ROLELESS_ADMISSION_PENDING", "mutation_allowed": false},
     {"order": 5, "id": "validate_agent_package_manifest_against_identity_lock", "path": "AGENT_PACKAGE_MANIFEST.json", "mutation_allowed": false, "allow_absent_when_local_contract_defines_equivalent": true},
     {"order": 6, "id": "bind_execution_instance_to_project_and_explicit_role_or_roleless_candidate", "mutation_allowed": false},
@@ -51,10 +28,10 @@
     {"order": 18, "id": "load_swarm_learning_context", "path": "protocols/swarm_learning.md", "inheritance_order": ["operating_doctrine", "task_scoped_validated_knowledge", "raw_experience_on_demand_only"], "mutation_allowed": false},
     {"order": 19, "id": "load_swarm_launch_kernel_if_task_requires_swarm", "paths": ["SWARM_LAUNCH_KERNEL_V1.md", "swarm_kernel/project.json", "swarm_kernel/AGENT_BOOTSTRAP_OVERLAY.md"], "mutation_allowed": false, "conditional": "task_classification.swarm_participation == true"},
     {"order": 20, "id": "acquire_or_validate_bounded_claim_lease_or_fence_before_exclusive_or_mutating_work", "path": "protocols/roleless_agent_admission.md", "mutation_allowed": false, "conditional": "exclusive_or_mutating_work_planned == true", "claim_is_mutation_authority": false},
-    {"order": 21, "id": "evaluate_current_mutation_authorization_envelope", "paths": ["protocols/mutation_authorization.md", "governance/MUTATION_AUTHORIZATION_POLICY.json"], "mutation_allowed": false, "result_required_before_any_external_side_effect": true},
-    {"order": 22, "id": "bind_global_run_role_instance_and_ready_barrier_if_swarm", "mutation_allowed": true, "conditional": "task_classification.swarm_participation == true && mutation_authorization_allows_this_write", "additional_guards": ["mutation_authorization_validation", "claim_or_fence_validation"]},
-    {"order": 23, "id": "execute_task_with_autonomous_continuation_and_per_mutation_scope_validation", "mutation_allowed": true, "additional_guards": ["project_role_registry_validation", "communication_namespace_conflict_block", "registered_repository_boundary", "master_handoff_loaded", "context_reference_is_orientation_only", "instance_fenced_lease_validation", "capacity_admission", "swarm_kernel_global_run_validation", "idempotency_validation", "manager_backpressure", "circuit_breaker", "learning_promotion_authority", "scheduled_occurrence_idempotency", "mutation_authorization_validation_before_each_external_side_effect", "stronger_exact_action_authorization_when_applicable", "localized_fail_closed", "continue_unaffected_safe_work", "no_routine_confirmation"]},
-    {"order": 24, "id": "persist_learning_checkpoint_and_handoff", "path": "protocols/swarm_learning.md", "mutation_allowed": true, "conditional": "(material_learning || completed_work_unit || blocker_state_changed) && mutation_authorization_allows_this_write", "additional_guards": ["project_scope_validation", "idempotency_validation", "evidence_provenance_validation", "learning_promotion_authority", "mutation_authorization_validation"]},
-    {"order": 25, "id": "checkpoint_master_handoff_after_material_transition_or_before_yield", "path": "MASTER_HANDOFF.json", "protocol": "protocols/agent_state_handoff.md", "mutation_allowed": true, "conditional": "(material_state_changed || yielding || handing_off || human_gate_reached) && mutation_authorization_allows_this_write", "additional_guards": ["mutation_authorization_validation"]}
+    {"order": 21, "id": "evaluate_current_mutation_authorization_envelope", "paths": ["protocols/authority_authentication.md", "governance/AUTHORITY_AUTHENTICATION_POLICY.json", "protocols/mutation_authorization.md", "governance/MUTATION_AUTHORIZATION_POLICY.json"], "mutation_allowed": false, "explicit_principal_claim_required": true, "single_use_case_id_required": true, "prior_case_reuse": "DENY", "high_consequence_independent_proof_required": true, "result_required_before_any_external_side_effect": true},
+    {"order": 22, "id": "bind_global_run_role_instance_and_ready_barrier_if_swarm", "mutation_allowed": true, "conditional": "task_classification.swarm_participation == true && current_single_use_authorization_case_allows_this_write", "additional_guards": ["authority_authentication_validation", "single_use_authorization_case_validation", "claim_or_fence_validation"]},
+    {"order": 23, "id": "execute_task_with_autonomous_continuation_and_per_mutation_scope_validation", "mutation_allowed": true, "additional_guards": ["project_role_registry_validation", "communication_namespace_conflict_block", "registered_repository_boundary", "master_handoff_loaded", "context_reference_is_orientation_only", "instance_fenced_lease_validation", "capacity_admission", "swarm_kernel_global_run_validation", "idempotency_validation", "manager_backpressure", "circuit_breaker", "learning_promotion_authority", "scheduled_occurrence_idempotency", "explicit_principal_claim_validation", "single_use_authorization_case_validation_before_each_external_side_effect", "authorization_case_replay_prevention", "high_consequence_independent_principal_proof_when_applicable", "localized_fail_closed", "continue_unaffected_safe_work", "no_routine_confirmation"]},
+    {"order": 24, "id": "persist_learning_checkpoint_and_handoff", "path": "protocols/swarm_learning.md", "mutation_allowed": true, "conditional": "(material_learning || completed_work_unit || blocker_state_changed) && current_single_use_authorization_case_allows_this_write", "additional_guards": ["project_scope_validation", "idempotency_validation", "evidence_provenance_validation", "learning_promotion_authority", "single_use_authorization_case_validation"]},
+    {"order": 25, "id": "checkpoint_master_handoff_after_material_transition_or_before_yield", "path": "MASTER_HANDOFF.json", "protocol": "protocols/agent_state_handoff.md", "mutation_allowed": true, "conditional": "(material_state_changed || yielding || handing_off || human_gate_reached) && current_single_use_authorization_case_allows_this_write", "additional_guards": ["single_use_authorization_case_validation"]}
   ]
 }
