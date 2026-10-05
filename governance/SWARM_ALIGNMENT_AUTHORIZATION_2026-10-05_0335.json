@@ -1,0 +1,30 @@
+{
+  "schema": "intercommunications/cross-system-swarm-alignment-authorization/v1",
+  "status": "AUTHORIZED",
+  "human_principal": {
+    "name": "Robert Leonard",
+    "github_login": "boberino93-bit"
+  },
+  "authorization_local_time": "2026-10-05T03:35:00-07:00",
+  "instruction": "Continue the swarm-governance implementation, incorporate the additional alignment requirements, and revisit previously modified systems when additional commits are needed to bring the architecture into alignment.",
+  "branch": "main",
+  "scope": [
+    "central_entrypoints",
+    "project_role_registry",
+    "scheduled_launch_protocol",
+    "five_task_swarm_manifest",
+    "saved_swarm_automation_prompts",
+    "previously_modified_registered_projects",
+    "supervisory_runtime_and_governance",
+    "chat_project_routing_contract",
+    "alignment_tests_and_audit_evidence"
+  ],
+  "constraints": {
+    "do_not_enable_or_disable_saved_tasks_merely_for_alignment": true,
+    "preserve_existing_security_consequence_and_project_mutation_boundaries": true,
+    "master_remains_global_roaming": true,
+    "scheduled_fire_is_not_authority": true,
+    "intentional_stop_prevents_blind_respawn": true,
+    "external_chat_project_placement_requires_host_verification": true
+  }
+}
