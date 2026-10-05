@@ -1,0 +1,194 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/org-agent-mesh/message-v3-experimental.schema.json",
+  "title": "Organization Agent Mesh Message v3 Experimental",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "protocol_version",
+    "message_class",
+    "message_id",
+    "project_id",
+    "destination_project_id",
+    "repository_identity",
+    "sender",
+    "causal",
+    "governance",
+    "payload",
+    "delivery",
+    "integrity"
+  ],
+  "properties": {
+    "schema": {"const": "org-agent-mesh/message/v3-experimental"},
+    "protocol_version": {"const": "3.0.0-experimental.1"},
+    "message_class": {"enum": ["CONTENT", "EVIDENCE", "CONTROL", "ACK", "HANDOFF"]},
+    "message_id": {"$ref": "#/$defs/resourceId"},
+    "project_id": {"$ref": "#/$defs/projectId"},
+    "destination_project_id": {"$ref": "#/$defs/projectId"},
+    "repository_identity": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+    },
+    "sender": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["agent_id", "agent_instance_id", "role_id", "principal_id", "session_attestation_id"],
+      "properties": {
+        "agent_id": {"$ref": "#/$defs/resourceId"},
+        "agent_instance_id": {"type": "string", "minLength": 1},
+        "role_id": {"enum": ["PRIMARY", "MANAGER", "RESEARCH", "USER", "MASTER", "SYSTEM"]},
+        "principal_id": {"type": "string", "minLength": 1},
+        "session_attestation_id": {"type": "string", "minLength": 1}
+      }
+    },
+    "causal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["timestamp_utc", "logical_clock", "stream_id", "correlation_id", "causation_id", "reply_to", "previous_envelope_digest"],
+      "properties": {
+        "timestamp_utc": {"type": "string", "format": "date-time"},
+        "logical_clock": {"type": "integer", "minimum": 0},
+        "stream_id": {"$ref": "#/$defs/resourceId"},
+        "correlation_id": {"oneOf": [{"$ref": "#/$defs/resourceId"}, {"type": "null"}]},
+        "causation_id": {"oneOf": [{"$ref": "#/$defs/resourceId"}, {"type": "null"}]},
+        "reply_to": {"oneOf": [{"$ref": "#/$defs/resourceId"}, {"type": "null"}]},
+        "previous_envelope_digest": {"oneOf": [{"$ref": "#/$defs/sha256Digest"}, {"type": "null"}]}
+      }
+    },
+    "governance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_revision", "governance_revision", "policy_digest", "assignment_revision", "ownership_epoch", "fence_token"],
+      "properties": {
+        "source_revision": {"oneOf": [{"type": "string", "pattern": "^[0-9a-f]{40}$"}, {"type": "null"}]},
+        "governance_revision": {"type": ["string", "null"]},
+        "policy_digest": {"oneOf": [{"$ref": "#/$defs/sha256Digest"}, {"type": "null"}]},
+        "assignment_revision": {"type": ["integer", "null"], "minimum": 0},
+        "ownership_epoch": {"type": ["integer", "null"], "minimum": 0},
+        "fence_token": {"type": ["string", "null"]}
+      }
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "subject", "summary", "body", "artifacts", "claims", "tags"],
+      "properties": {
+        "kind": {
+          "enum": [
+            "CLAIM",
+            "FINDING",
+            "BLOCKER",
+            "REQUEST",
+            "REVIEW_REQUEST",
+            "REVIEW_DISPOSITION",
+            "CONTRADICTION",
+            "HANDOFF",
+            "DECISION",
+            "SUPERSESSION",
+            "SERVICE_CHECKPOINT",
+            "RELEASE_CLOSE",
+            "LIFECYCLE_COMMAND",
+            "ACKNOWLEDGEMENT"
+          ]
+        },
+        "subject": {"type": "string"},
+        "summary": {"type": "string"},
+        "body": {},
+        "artifacts": {"type": "array", "items": {"type": "object"}},
+        "claims": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["claim_id", "status", "statement", "evidence_refs"],
+            "properties": {
+              "claim_id": {"$ref": "#/$defs/resourceId"},
+              "status": {"enum": ["OBSERVED", "INFERRED", "CLAIMED", "UNKNOWN"]},
+              "statement": {"type": "string"},
+              "evidence_refs": {"type": "array", "items": {"type": "string"}}
+            }
+          }
+        },
+        "tags": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "control": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["action", "target_agent_id", "target_agent_instance_id", "reason_code", "supervisor_attestation_id"],
+      "properties": {
+        "action": {"enum": ["CONTINUE", "REDIRECT", "PAUSE", "STOP", "STOP_TREE"]},
+        "target_agent_id": {"$ref": "#/$defs/resourceId"},
+        "target_agent_instance_id": {"type": ["string", "null"]},
+        "reason_code": {"type": "string", "minLength": 1},
+        "redirect_instruction": {"type": ["string", "null"]},
+        "supervisor_attestation_id": {"type": "string", "minLength": 1}
+      }
+    },
+    "handoff": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state_capsule_digest", "task_id", "intended_receiver", "requires_acceptance_ack"],
+      "properties": {
+        "state_capsule_digest": {"$ref": "#/$defs/sha256Digest"},
+        "task_id": {"oneOf": [{"$ref": "#/$defs/resourceId"}, {"type": "null"}]},
+        "intended_receiver": {"type": "string", "minLength": 1},
+        "requires_acceptance_ack": {"type": "boolean"}
+      }
+    },
+    "delivery": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["idempotency_key", "requires_ack", "delivery_class", "expires_at_utc"],
+      "properties": {
+        "idempotency_key": {"$ref": "#/$defs/resourceId"},
+        "requires_ack": {"type": "boolean"},
+        "delivery_class": {"enum": ["AT_MOST_ONCE_EFFECTIVE", "ACK_REQUIRED", "BEST_EFFORT_CONTENT"]},
+        "expires_at_utc": {"type": ["string", "null"], "format": "date-time"}
+      }
+    },
+    "integrity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["canonicalization", "envelope_digest", "signature_algorithm", "key_id", "signature"],
+      "properties": {
+        "canonicalization": {"const": "OAM-CJSON-EXPERIMENTAL-1"},
+        "envelope_digest": {"$ref": "#/$defs/sha256Digest"},
+        "signature_algorithm": {"enum": ["ED25519", "SESSION_ATTESTATION_ONLY"]},
+        "key_id": {"type": ["string", "null"]},
+        "signature": {"type": ["string", "null"]}
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"message_class": {"const": "CONTROL"}}},
+      "then": {"required": ["control"]}
+    },
+    {
+      "if": {"properties": {"message_class": {"const": "HANDOFF"}}},
+      "then": {"required": ["handoff"]}
+    },
+    {
+      "if": {"properties": {"message_class": {"enum": ["CONTENT", "EVIDENCE", "ACK"]}}},
+      "then": {
+        "not": {"required": ["control"]}
+      }
+    }
+  ],
+  "$defs": {
+    "projectId": {
+      "type": "string",
+      "pattern": "^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$"
+    },
+    "resourceId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?$"
+    },
+    "sha256Digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+  }
+}
