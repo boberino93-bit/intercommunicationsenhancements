@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "org-agent-mesh/regression-event/v1",
+  "type": "object",
+  "required": [
+    "event_id", "level", "project_id", "family", "signature",
+    "provenance", "severity", "evidence_ref", "authority_conveyed"
+  ],
+  "properties": {
+    "event_id": {"type": "string", "minLength": 1},
+    "level": {"enum": ["UNSCOPED_CHAT", "PROJECT_CHAT", "GLOBAL_PRIMARY"]},
+    "project_id": {"type": "string"},
+    "family": {"type": "string", "minLength": 1},
+    "signature": {"type": "string", "minLength": 1},
+    "provenance": {"enum": ["OBSERVED", "RETRIEVED", "REPORTED_BY_AGENT", "INFERRED", "EXPECTED", "UNVERIFIED"]},
+    "severity": {"type": "integer", "minimum": 1, "maximum": 5},
+    "evidence_ref": {"type": "string", "minLength": 1},
+    "remediated": {"type": "boolean"},
+    "remediation_ref": {"type": "string"},
+    "post_remediation_recurrence": {"type": "boolean"},
+    "authority_conveyed": {"const": false},
+    "previous_record_hash": {"type": "string"},
+    "record_hash": {"type": "string"}
+  },
+  "additionalProperties": false
+}
