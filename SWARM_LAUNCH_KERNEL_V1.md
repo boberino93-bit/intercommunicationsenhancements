@@ -1,6 +1,6 @@
 # Swarm Launch Kernel V1
 
-Kernel version: `1.1.0`
+Kernel version: `1.2.1`
 
 This project uses the common Swarm Launch Kernel for high-concurrency multi-agent research rounds.
 
