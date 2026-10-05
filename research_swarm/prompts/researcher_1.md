@@ -27,14 +27,14 @@ For the scheduled occurrence, derive `cycle_id` as the offset-aware `America/Van
 ### Checkpoint preflight — MUST happen before expensive work
 
 1. Read issue #25 and reconcile current-cycle Researcher checkpoints.
-2. Append sequence `0` as `RESEARCH_PROGRESS` with `phase = CHECKPOINT_READY`, compact identity/provenance, and `readback_verified = false`.
-3. Read issue #25 back and verify the exact checkpoint comment is visible.
-4. Publish/append the verified form only if needed by the transport contract, and thereafter treat the preflight as passed only when exact readback is established. All subsequent consumable checkpoints MUST carry `readback_verified = true` based on actual readback.
+2. Append sequence `0` as `RESEARCH_PROGRESS` with `phase = CHECKPOINT_READY` and compact identity/provenance.
+3. Re-fetch issue #25 and verify the exact sequence-0 checkpoint is observable by matching its `checkpoint_id` and content.
+4. Only after that external readback succeeds may substantive research begin.
 5. If append or readback fails, report `CHECKPOINT_IO_BLOCKED` and STOP before substantive research. Do not spend the stage producing work that cannot enter the pipeline.
 
 Never edit or delete an earlier checkpoint comment. Corrections are higher-sequence comments.
 
-After each meaningful bounded unit, append a higher-sequence `RESEARCH_PROGRESS` checkpoint and read it back. Before `:20`, append the latest compact progress checkpoint whenever runtime permits. When the research output is coherently complete, append `RESEARCH_HANDOFF_READY` referencing the latest progress/evidence. READY is not mandatory when the stage is incomplete; valid progress is intentionally consumable by Manager.
+After each meaningful bounded unit, append a higher-sequence `RESEARCH_PROGRESS` checkpoint and re-fetch the issue to verify persistence before relying on it as the handoff. Before `:20`, append the latest compact progress checkpoint whenever runtime permits. When the research output is coherently complete, append `RESEARCH_HANDOFF_READY` referencing the latest progress/evidence. READY is not mandatory when the stage is incomplete; valid progress is intentionally consumable by Manager.
 
 ## Startup / project state
 
@@ -54,6 +54,6 @@ Uncertainty, a pending nonblocking decision, failed optional path, unavailable o
 
 ## Close / handoff
 
-Before ending, append a readback-verified current-cycle checkpoint containing project, role/run/work identity, claim/lease/fence state, supervisory state, phase, last milestone, objective, material findings/provenance, contradictions, pending decisions, blockers/dependencies, failed approaches worth not repeating, source revisions, unfinished work, and the next synthesis question.
+Before ending, append a current-cycle checkpoint containing project, role/run/work identity, claim/lease/fence state, supervisory state, phase, last milestone, objective, material findings/provenance, contradictions, pending decisions, blockers/dependencies, failed approaches worth not repeating, source revisions, unfinished work, and the next synthesis question, then re-fetch issue #25 and verify that exact checkpoint is persisted.
 
 If complete, state `RESEARCH_HANDOFF_READY`. If incomplete, state `RESEARCH_PROGRESS`. Never claim work continued after execution ended, and never claim a checkpoint is durable unless issue #25 readback actually succeeded.
