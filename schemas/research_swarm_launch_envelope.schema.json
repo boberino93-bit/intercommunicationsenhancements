@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "org-agent-mesh/research-swarm-launch-envelope/v1",
+  "title": "Research Swarm Launch Envelope",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["project_id", "run_id", "task_id", "semantic_launch_id", "role", "allowed_capabilities", "priority_frontier_snapshot_ref", "source_boundaries", "prohibited_sources", "objective_class", "resource_budget", "verification_expectations", "checkpoint_location", "heartbeat_destination", "material_delta_destination", "stop_criteria", "escalation_conditions", "handoff_contract_ref", "policy_versions", "protocol_versions"],
+  "properties": {
+    "project_id": {"type": "string", "minLength": 1},
+    "run_id": {"type": "string", "minLength": 1},
+    "task_id": {"type": "string", "minLength": 1},
+    "semantic_launch_id": {"type": "string", "minLength": 32},
+    "role": {"enum": ["MASTER", "MANAGER", "RESEARCH"]},
+    "allowed_capabilities": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}},
+    "priority_frontier_snapshot_ref": {"type": "string", "minLength": 1},
+    "source_boundaries": {"type": "array", "items": {"type": "string"}},
+    "prohibited_sources": {"type": "array", "items": {"type": "string"}},
+    "objective_class": {"type": "string", "minLength": 1},
+    "resource_budget": {"type": "object", "additionalProperties": {"type": "integer", "minimum": 0}},
+    "verification_expectations": {"type": "array", "items": {"type": "string"}},
+    "checkpoint_location": {"type": "string", "minLength": 1},
+    "heartbeat_destination": {"type": "string", "minLength": 1},
+    "material_delta_destination": {"type": "string", "minLength": 1},
+    "stop_criteria": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "escalation_conditions": {"type": "array", "items": {"type": "string"}},
+    "handoff_contract_ref": {"type": "string", "minLength": 1},
+    "policy_versions": {"type": "array", "items": {"type": "string"}},
+    "protocol_versions": {"type": "array", "items": {"type": "string"}}
+  }
+}

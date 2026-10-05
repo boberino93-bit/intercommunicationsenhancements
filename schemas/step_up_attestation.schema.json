@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "intercommunications/step-up-attestation/v1",
+  "title": "Exact-action human step-up attestation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["attestation_id", "subject", "authority_class", "project_id", "authentication_strength", "action_digest", "issued_at_utc", "expires_at_utc", "nonce", "verifier_id", "signature", "status"],
+  "properties": {
+    "attestation_id": {"type": "string", "minLength": 1},
+    "subject": {"type": "string", "minLength": 1},
+    "authority_class": {"type": "string", "minLength": 1},
+    "project_id": {"type": "string", "minLength": 1},
+    "authentication_strength": {"enum": ["FIDO2", "WEBAUTHN", "HARDWARE_KEY", "MFA_ROOT_CONSOLE", "GITHUB_AUTHENTICATED_ROOT"]},
+    "action_digest": {"type": "string", "minLength": 1},
+    "issued_at_utc": {"type": "string", "format": "date-time"},
+    "expires_at_utc": {"type": "string", "format": "date-time"},
+    "nonce": {"type": "string", "minLength": 1},
+    "verifier_id": {"type": "string", "minLength": 1},
+    "signature": {"type": "string", "minLength": 1},
+    "status": {"enum": ["VALID", "REVOKED", "EXPIRED"]}
+  }
+}

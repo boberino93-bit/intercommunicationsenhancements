@@ -64,6 +64,16 @@ Passive evaluation measures mission completion, user intervention, useful coordi
 
 Scheduled/cold-start agents must receive explicit project-bound launch context, validate it against the local contract before mutation, preserve occurrence identity across retry, and must not advance task state before bootstrap is ready.
 
+### 10A. Post-normalization successor overlay
+
+Normal-operation agents MUST also load `protocols/post_normalization_successor.md` and its machine-readable registry at `reliability/SUCCESSOR_CONTROL_REGISTRIES.json` before creating new research claims or performing a protected universal-governance consequence.
+
+For research/cold-start work, the overlay requires a freshness-checked `PriorityFrontierSnapshot`, deterministic `get started` semantics, capability/data-boundary discovery, semantic launch identity before sharding, and `READ -> RECONCILE -> CLAIM -> EXECUTE` preflight ordering.
+
+The overlay is additive and does not replace the existing control plane, ownership/lease/fencing model, v1.8 Reliability Kernel, v1.8.1 consequence gateway, or communication-awareness protocol. If overlay metadata conflicts with a stronger current canonical control, the stronger canonical control wins and the conflict must be surfaced rather than guessed away.
+
+The historical normalization-retirement evidence remains contradictory in the repository. The current successor integration records that state as `HUMAN_ROOT_OVERRIDE_UNPROVEN`; it must not be presented as a recovered or newly verified retirement packet solely because the overlay is on `main`.
+
 ## 11. Re-entry to full normalization
 
 Invoke full normalization only when a defined material trigger occurs, including a new ACTIVE_REQUIRED project, major architecture/schema/governance/routing/permission/concurrency/recovery change, systemic integrity incident, or explicit recertification request. Otherwise validate freshness/health and continue normal operation.

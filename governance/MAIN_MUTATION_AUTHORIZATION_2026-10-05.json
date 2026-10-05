@@ -1,0 +1,49 @@
+{
+  "schema": "intercommunications/main-mutation-authorization-receipt/v1",
+  "status": "AUTHORIZED",
+  "project_id": "intercommunicationsenhancements",
+  "repository": "boberino93-bit/intercommunicationsenhancements",
+  "branch": "main",
+  "expected_pre_change_sha": "bc5f2b2bd68d3ade9b0723d6745052a96365d42d",
+  "human_principal": {
+    "name": "Robert Leonard",
+    "github_login": "boberino93-bit"
+  },
+  "authentication_evidence": {
+    "source": "CONNECTED_GITHUB_PRINCIPAL",
+    "resolved_login": "boberino93-bit",
+    "matches_root_authority_registry": true,
+    "conversational_identity_used_as_authenticator": false,
+    "underlying_secret_in_model_context": false
+  },
+  "current_instruction": "Execute the uploaded post-normalization successor directive; commit directly to main.",
+  "scope": [
+    "post_normalization_successor_overlay",
+    "cold_start_priority_frontier",
+    "research_swarm_bootstrap_contract",
+    "architecture_complexity_governance",
+    "step_up_attestation_verification",
+    "canonical_registry_and_tests",
+    "primary_recurring_protocol_linkage",
+    "package_dependency_closure"
+  ],
+  "predecessor_gate_state": "HUMAN_ROOT_OVERRIDE_UNPROVEN",
+  "claim_predecessor_retirement_packet_recovered": false,
+  "external_production_deployment_authorized_by_this_receipt": false,
+  "ref_update_policy": "FAST_FORWARD_COMPARE_AND_SET_EXPECTED_SHA",
+  "issued_date": "2026-10-05",
+  "material_change_digest": "sha256:6aee6820ec4e2814781d969735adb00dde31705ac28b1bfa3fbb63a0d5ca367f",
+  "authorized_material_paths": [
+    "org_agent_mesh/successor_bootstrap.py",
+    "org_agent_mesh/architecture_governance.py",
+    "tests/test_post_normalization_successor.py",
+    "schemas/priority_frontier_snapshot.schema.json",
+    "schemas/research_swarm_launch_envelope.schema.json",
+    "schemas/step_up_attestation.schema.json",
+    "protocols/post_normalization_successor.md",
+    "reliability/SUCCESSOR_CONTROL_REGISTRIES.json",
+    "protocols/primary_recurring_swarm_protocol.md",
+    "packaging/agent_package_dependencies.json"
+  ],
+  "digest_scope": "Canonical JSON over [{path,sha256}] for material implementation/configuration/test files; audit receipts excluded as non-effectful evidence."
+}
