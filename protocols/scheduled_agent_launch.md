@@ -2,15 +2,45 @@
 
 ## Purpose
 
-This protocol governs agent runs started by ChatGPT Scheduled Tasks, Work events, or another approved scheduler. It solves three problems that must not be conflated:
+This protocol governs agent runs started by ChatGPT Scheduled Tasks, Work events, or another approved scheduler. It solves four problems that must not be conflated:
 
-1. **Project-context continuity** — a scheduled project agent must start with the exact project identity, repository/forum/artifact namespace, role and bootstrap contract captured when the task was configured.
-2. **Provider admission/backpressure** — scheduled starts must not create an uncontrolled thundering herd that is rejected by the model/provider before project bootstrap can run.
-3. **Supervisory lifecycle continuity** — a schedule firing must not revive deliberately paused/stopped work, bypass USER/MASTER/PRIMARY authority, or incorrectly bind the roaming MASTER to a project.
+1. **Human-controlled activation** — disabled swarm tasks are a deliberate gate and may not be enabled automatically.
+2. **Project-context continuity** — a scheduled project agent must start with the exact project identity, repository/forum/artifact namespace, role and bootstrap contract captured when the task was configured.
+3. **Provider admission/backpressure** — scheduled starts must not create an uncontrolled thundering herd that is rejected by the model/provider before project bootstrap can run.
+4. **Supervisory lifecycle continuity** — a schedule firing must not revive deliberately paused/stopped work, bypass USER/MASTER/PRIMARY authority, or incorrectly bind the roaming MASTER to a project.
 
 A scheduled launch is not authorized merely because its prompt names a project. The launch context is routing evidence. Normal local identity, role, capability, bootstrap, supervisory-state, and mutation gates remain authoritative.
 
 Every scheduled swarm run must load `protocols/supervisory_governance.md` and `governance/SWARM_SUPERVISION_POLICY.json` in addition to the recurring/successor protocols required by its role.
+
+## Human-controlled activation gate
+
+A recurring swarm task may transition from disabled to enabled only because the human explicitly requested that enablement in the current instruction/action.
+
+No autonomous component may enable or re-enable a disabled swarm task, including:
+
+- MASTER;
+- PRIMARY/Manager;
+- Researchers;
+- recovery/reconciliation jobs;
+- bootstrap/startup logic;
+- migrations or governance alignment;
+- stale-task/liveness recovery;
+- another scheduled task;
+- generic system automation.
+
+A disabled scheduled task is a human concurrency gate, **not** a broken/stale agent and not a condition requiring repair.
+
+Configuration maintenance must preserve task state. Prompt updates, revision repinning, cadence metadata updates, title changes, project-routing changes, migrations, and protocol upgrades must leave `enabled/disabled` unchanged unless the human explicitly requested a state change.
+
+Logical runtime authority and scheduler activation authority are deliberately separate:
+
+- MASTER/PRIMARY may redirect, pause, stop, or authorize a materially revised logical execution within their lifecycle scope;
+- they may **not** turn the recurring task itself on;
+- a valid logical restart decision does not cross a disabled scheduler gate;
+- disabling may be used for containment by an authorized control path, but re-enabling still requires explicit human action.
+
+The reference enforcement helper is `org_agent_mesh.schedule_activation`. Any attempted autonomous `disabled -> enabled` transition must fail closed and be logged when observable.
 
 ## Project-bound context capture
 
@@ -64,11 +94,11 @@ If the scheduler binds an immutable existing conversation and does not expose a 
 
 A scheduled project-bound run follows:
 
-`SCHEDULE TRIGGER -> ADMISSION -> PROVIDER ACCEPTED -> PARSE LAUNCH CONTEXT -> VERIFY LOCAL CONTRACT -> LOAD SUPERVISORY STATE -> IDENTITY LOCK -> ROLE/BINDING -> PROJECT PLACEMENT VERIFY WHEN SUPPORTED -> READY BARRIER -> WORK`
+`HUMAN-ENABLED TASK -> SCHEDULE TRIGGER -> ADMISSION -> PROVIDER ACCEPTED -> PARSE LAUNCH CONTEXT -> VERIFY LOCAL CONTRACT -> LOAD SUPERVISORY STATE -> IDENTITY LOCK -> ROLE/BINDING -> PROJECT PLACEMENT VERIFY WHEN SUPPORTED -> READY BARRIER -> WORK`
 
 A scheduled MASTER run follows:
 
-`SCHEDULE TRIGGER -> ADMISSION -> PROVIDER ACCEPTED -> VERIFY ROAMING MASTER IDENTITY -> LOAD SUPERVISORY STATE -> READY BARRIER -> PORTFOLIO WORK`
+`HUMAN-ENABLED TASK -> SCHEDULE TRIGGER -> ADMISSION -> PROVIDER ACCEPTED -> VERIFY ROAMING MASTER IDENTITY -> LOAD SUPERVISORY STATE -> READY BARRIER -> PORTFOLIO WORK`
 
 Before mutation, the agent must compare the launch context against the target project's local contract. Verify project ID, routing-contract version, forum namespace, artifact namespace, repository identity/ID when present, and role authorization.
 
@@ -104,7 +134,8 @@ Default policy goals:
 - deterministically stagger recurring jobs to avoid synchronized wake-ups;
 - use bounded exponential backoff with deterministic jitter after retryable provider failures;
 - preserve the same logical occurrence/idempotency identity across retries;
-- cap attempts and surface terminal failure rather than retry forever.
+- cap attempts and surface terminal failure rather than retry forever;
+- never respond to provider failure by automatically enabling a disabled task.
 
 `TOO_MANY_REQUESTS`, `RATE_LIMITED`, temporary provider unavailability, and timeout before bootstrap are retryable launch failures. They are **not task execution failures**.
 
@@ -112,7 +143,7 @@ When the hosting scheduler does not expose a programmable admission hook before 
 
 ## Launch state machine
 
-Reference launch state:
+Reference launch state for a task that is already human-enabled:
 
 `PENDING -> ADMITTED -> PROVIDER_ACCEPTED -> BOOTSTRAP_READY -> COMPLETED`
 
@@ -128,9 +159,15 @@ Terminal path:
 
 `PENDING/ADMITTED -> TERMINAL_FAILURE`
 
+Disabled control-gate state:
+
+`DISABLED_BY_HUMAN_GATE -> REMAIN_DISABLED`
+
+No autonomous transition exists from `DISABLED_BY_HUMAN_GATE` to `PENDING`. Only explicit human enablement may create that transition.
+
 The project task registry must not advance the task's execution state merely because a scheduler fired. Advancement is permitted only after `BOOTSTRAP_READY`. This prevents a rejected provider call from being mistaken for completed or failed project work.
 
-A retry after `TOO_MANY_REQUESTS` therefore leaves the project task logically pending. An intentional stop remains intentionally stopped unless valid restart authority exists.
+A retry after `TOO_MANY_REQUESTS` therefore leaves the project task logically pending. An intentional stop remains intentionally stopped unless valid restart authority exists. A disabled task remains disabled regardless of liveness, unfinished work, priority changes, or protocol migrations.
 
 ## Deterministic staggering
 
@@ -147,24 +184,27 @@ Schedulers may retry after uncertain delivery. Every occurrence must therefore r
 - an occurrence already at `BOOTSTRAP_READY` or later must not begin a second independent mutation stream;
 - stale or duplicate launches should become safe no-ops or explicit recovery/reconciliation work;
 - intentionally stopped executions must not be classified as stale merely because heartbeat/liveness ceased;
-- a child of a stopped parent must not be spawned by a later timer.
+- a child of a stopped parent must not be spawned by a later timer;
+- a disabled scheduled task must never be auto-enabled to compensate for a missed, late, failed, or duplicate start.
 
 ## Supervisory control during execution
 
 Scheduled agents must check authoritative control state between bounded work units. Valid `REDIRECT`, `PAUSE`, `STOP`, or `STOP_TREE` actions take precedence over continuing the old assignment. Useful partial state should be preserved before termination when practical.
 
-PRIMARY/Manager control is limited to its own project tree. MASTER lifecycle supervision is global. User control remains highest authority. These lifecycle powers do not expand repository-write, destructive-action, credential, release, production, or other consequence authority.
+PRIMARY/Manager control is limited to its own project tree. MASTER lifecycle supervision is global. User control remains highest authority. These lifecycle powers do not expand repository-write, destructive-action, credential, release, production, scheduled-task-enable, or other consequence authority.
 
 ## Project switching
 
 A scheduled project-bound launch may not switch projects because the task text later resembles another project. A project change requires a new route/context capture or an explicit return to the universal unbound routing flow.
 
-MASTER is the exception only in the sense that it starts unbound/global and may inspect/supervise multiple projects; it still does not inherit cross-project mutation authority merely from being MASTER.
+MASTER is the exception only in the sense that it starts unbound/global and may inspect/supervise multiple projects; it still does not inherit cross-project mutation or scheduled-task-enable authority merely from being MASTER.
 
 ## Observability and learning
 
 Record, when observable:
 
+- current task enabled/disabled state;
+- any requested task-state change, actor, and whether explicit human enablement exists;
 - admission decision and wait reason;
 - provider rejection category;
 - attempt count and next eligible time;
@@ -176,8 +216,8 @@ Record, when observable:
 - duplicate occurrence detection;
 - final completion/failure/intentional-stop disposition.
 
-Provider throttling, context mismatch, unintended respawn attempts, or placement-verification failures are valid swarm-learning evidence. They do not automatically become doctrine; normal evidence/validation/promotion rules still apply.
+Provider throttling, context mismatch, unintended respawn attempts, unauthorized enablement attempts, or placement-verification failures are valid swarm-learning evidence. They do not automatically become doctrine; normal evidence/validation/promotion rules still apply.
 
 ## Required implementation truth
 
-The repository contains a reference admission controller, project-bound launch-context serializer/validator, supervisory lifecycle implementation, respawn guard, and ChatGPT Project routing adapter contract. Full prevention of provider-side request rejection additionally requires the actual scheduler/host to enforce admission before invoking the model. Actual ChatGPT Project movement additionally requires a supported host-side API or UI adapter. Where the host does not expose those hooks, deterministic schedule staggering, retry/reconciliation, correct identity scoping, intentional-stop checks after provider admission, and explicit external-effect status are the deployable mitigations. The repository must not claim control over provider or UI infrastructure it cannot actually exercise.
+The repository contains a reference admission controller, project-bound launch-context serializer/validator, supervisory lifecycle implementation, human-only schedule-activation gate, respawn guard, and ChatGPT Project routing adapter contract. Full prevention of provider-side request rejection additionally requires the actual scheduler/host to enforce admission before invoking the model. Actual ChatGPT Project movement additionally requires a supported host-side API or UI adapter. The repository's activation gate governs conformant swarm behavior, but it is not a platform-level ACL over every possible external automation client; therefore all swarm agents must obey the human-only activation rule and all alignment code must preserve current task state. Where the host does not expose stronger enforcement hooks, the system must not claim stronger platform control than it actually has.
