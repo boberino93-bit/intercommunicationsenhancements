@@ -5,7 +5,7 @@ Applies to PRIMARY, MANAGER, and RESEARCH.
 Before actionable work:
 1. Validate canonical project/repository authority.
 2. Load `swarm_kernel/project.json` and require an exact binding match.
-3. Load the universal security/delivery/completion controls: `protocols/role_aware_interagent_handoff_security.md`, `protocols/break_glass_security.md`, `protocols/actionable_link_delivery.md`, `protocols/completion_integrity.md`, `protocols/global_security_change_review.md`, `protocols/owner_credential_recovery.md`, and `protocols/artifact_completeness.md`. Also load `governance/TRANSACTION_EVIDENCE_POLICY.json` for freshness, replay, consumption, and post-change verification requirements, plus `governance/DURABLE_RECORD_GUARD_POLICY.json` before any durable publication.
+3. Load the universal security/delivery/completion controls: `protocols/role_aware_interagent_handoff_security.md`, `protocols/break_glass_security.md`, `protocols/actionable_link_delivery.md`, `protocols/completion_integrity.md`, `protocols/global_security_change_review.md`, `protocols/owner_credential_recovery.md`, `protocols/artifact_completeness.md`, and `protocols/ci_state_interpretation.md`. Also load `governance/TRANSACTION_EVIDENCE_POLICY.json` for freshness, replay, consumption, and post-change verification requirements, plus `governance/DURABLE_RECORD_GUARD_POLICY.json` before any durable publication.
 4. Require all handoffs to preserve `authority_conveyed=false`; receiving context, tasks, evidence, or a role label never creates execution authority.
 5. Treat break glass as a stricter emergency mode, never a bypass. Require every normal authentication, authorization, project, role/capability, scope, revision, lease/fence, replay, audit, backup, and post-validation control that applies to the action.
 6. Never embed sensitive authentication material in URLs, durable coordination records, or handoff payloads. Before publishing a public proof, durable log, handoff, coordination message, or audit record, validate the exact final record against `governance/DURABLE_RECORD_GUARD_POLICY.json` using `org_agent_mesh.durable_record_guard`.
@@ -23,6 +23,17 @@ Before actionable work:
 18. A missing, stale, or mismatched epoch/project set fails closed and is quarantined; do not publish READY.
 19. Bind the launched role/package, publish project-local READY, and wait for the local start gate.
 20. Use versioned leases and deterministic idempotency keys; heartbeat/checkpoint leases; respect Manager backpressure; quarantine stale/wrong-project/malformed/unsupported/illegal cross-project commands; stop integration mutation under `DEGRADED_READ_ONLY`; and close leases plus persist recovery/convergence state before handoff.
+
+## Regression-learning inheritance
+
+All agents load `protocols/regression_learning.md`, `governance/REGRESSION_LEARNING_POLICY.json`, and `governance/REGRESSION_INTAKE_POLICY.json`.
+
+- An unscoped chat may detect and normalize a regression but gains no project mutation authority.
+- A project-bound chat may append project-scoped regression evidence through the existing non-authoritative coordination publication path and may not perform cross-project source writes.
+- The Intercommunication Enhancements PRIMARY may aggregate registered-project regression evidence, perform forensic clustering, generate regression tests, and classify hotfix/service-pack candidates.
+- A regression event, score, candidate, audit finding, or recurrence threshold never creates authority.
+- The PRIMARY maintenance lane is an explicit allowlist only. Unknown change classes fail closed. Every allowed change must be reversible, bounded, tested, and non-security-sensitive. Authentication, authorization, secrets, privilege/role controls, recovery, destructive operations, schedule activation, cross-project source writes, and root governance remain human-gated.
+- CI evidence must follow `protocols/ci_state_interpretation.md`: queued/cancelled/skipped execution is not represented as a test failure or pass without executed check evidence.
 
 Research still produces evidence/proposals only. Manager still reviews/coordinates within scope. Primary/local integration authority still accepts project truth.
 

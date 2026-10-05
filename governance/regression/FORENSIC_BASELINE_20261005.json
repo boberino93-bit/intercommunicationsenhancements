@@ -1,0 +1,81 @@
+{
+  "schema": "org-agent-mesh/regression-forensic-baseline/v1",
+  "created_from": "Intercommunication Enhancements hardening history through 2026-10-05",
+  "authority_conveyed": false,
+  "findings": [
+    {
+      "family": "ARTIFACT_READINESS_PACKAGING",
+      "provenance": "OBSERVED",
+      "severity": 4,
+      "pattern": "User-facing authorization artifact was presented as ready while a required field was unresolved, and a later long prefilled URL was truncated by GitHub.",
+      "remediation_state": "PARTIALLY_REMEDIATED",
+      "remediation_refs": ["protocols/artifact_completeness.md", "fully populated compact authorization-link pattern"],
+      "recommended_candidate": "SERVICE_PACK_CANDIDATE",
+      "reason": "Repeated packaging/readiness failures across more than one authorization ceremony."
+    },
+    {
+      "family": "COMPLETION_INTEGRITY_RESIDUE",
+      "provenance": "OBSERVED",
+      "severity": 4,
+      "pattern": "Tool experiments created accidental durable artifacts that were initially left behind after the main feature work succeeded.",
+      "remediation_state": "REMEDIATED",
+      "remediation_refs": ["protocols/completion_integrity.md"],
+      "recommended_candidate": "HOTFIX_ALREADY_DEPLOYED"
+    },
+    {
+      "family": "STALE_PRESTATE_AUTHORIZATION",
+      "provenance": "OBSERVED",
+      "severity": 5,
+      "pattern": "Production state changed after an authorization case was issued, invalidating the case-bound pre-state.",
+      "remediation_state": "REMEDIATED",
+      "remediation_refs": ["governance/GLOBAL_SECURITY_CHANGE_POLICY.json", "expected pre-state binding"],
+      "recommended_candidate": "CONTROL_ALREADY_DEPLOYED"
+    },
+    {
+      "family": "DURABLE_AUTH_MATERIAL_EXPOSURE",
+      "provenance": "RETRIEVED",
+      "severity": 5,
+      "pattern": "One-time authorization values were historically persisted in public durable issue bodies.",
+      "remediation_state": "REMEDIATED_WITH_GUARD",
+      "remediation_refs": ["governance/DURABLE_RECORD_GUARD_POLICY.json", "org_agent_mesh/durable_record_guard.py"],
+      "recommended_candidate": "SECURITY_CONTROL_ALREADY_DEPLOYED"
+    },
+    {
+      "family": "CI_STATE_INTERPRETATION",
+      "provenance": "OBSERVED",
+      "severity": 3,
+      "pattern": "Queued/cancelled workflow states can be mistaken for code-test failure or success without job-level inspection.",
+      "remediation_state": "HOTFIX_STAGED_IN_THIS_RELEASE",
+      "remediation_refs": ["protocols/ci_state_interpretation.md", "job-level workflow status inspection", "independent validation kept distinct from hosted CI"],
+      "recommended_candidate": "HOTFIX_INCLUDED"
+    },
+    {
+      "family": "ROLE_ROUTING_DRIFT",
+      "provenance": "RETRIEVED",
+      "severity": 4,
+      "pattern": "Human-facing roleless routing prose diverged from the machine contract that forbids default PRIMARY self-promotion.",
+      "remediation_state": "REMEDIATED",
+      "remediation_refs": ["swarm_kernel/AGENT_BOOTSTRAP_OVERLAY.md", "PROJECT_ROLE_ROUTING_REGISTRY.json"],
+      "recommended_candidate": "CONTROL_ALREADY_DEPLOYED"
+    },
+    {
+      "family": "AUTHORIZATION_EXPIRY_LOOP",
+      "provenance": "OBSERVED",
+      "severity": 3,
+      "pattern": "Short-lived authorization windows expired while external CI remained queued, causing repeated authorization ceremonies.",
+      "remediation_state": "OPEN_FOR_GOVERNED_SECURITY_REVIEW",
+      "remediation_refs": [],
+      "recommended_candidate": "SERVICE_PACK_CANDIDATE",
+      "promotion_note": "Touches authorization lifecycle; candidate generation is allowed but implementation remains human-gated."
+    },
+    {
+      "family": "CONNECTOR_WRITE_REJECTION",
+      "provenance": "OBSERVED",
+      "severity": 2,
+      "pattern": "Connector safety-layer rejections required alternate representations or retries even when repository state was unchanged.",
+      "remediation_state": "OBSERVE",
+      "remediation_refs": ["completion-integrity read-back after failed writes"],
+      "recommended_candidate": "OBSERVE"
+    }
+  ]
+}

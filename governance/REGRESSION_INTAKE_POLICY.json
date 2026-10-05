@@ -1,0 +1,36 @@
+{
+  "schema": "org-agent-mesh/regression-intake/v1",
+  "version": "1.0.0",
+  "status": "ACTIVE",
+  "authority_conveyed": false,
+  "levels": {
+    "UNSCOPED_CHAT": {
+      "may_detect": true,
+      "may_normalize": true,
+      "may_mutate_project": false,
+      "may_promote_global": false,
+      "publication": "AUTHORIZED_GLOBAL_INTAKE_OR_HUMAN_RETURN_ONLY"
+    },
+    "PROJECT_CHAT": {
+      "may_detect": true,
+      "may_normalize": true,
+      "may_correlate_project_history": true,
+      "publication_policy": "governance/COORDINATION_PUBLICATION_POLICY.json",
+      "cross_project_source_write": false,
+      "may_promote_global": false
+    },
+    "GLOBAL_PRIMARY": {
+      "required_project": "intercommunicationsenhancements",
+      "may_aggregate_registered_project_events": true,
+      "may_forensically_cluster": true,
+      "may_generate_tests": true,
+      "may_generate_hotfix_candidates": true,
+      "may_generate_service_pack_candidates": true,
+      "promotion_policy": "governance/REGRESSION_LEARNING_POLICY.json"
+    }
+  },
+  "candidate_or_event_is_authorization": false,
+  "cross_project_observation_is_cross_project_write": false,
+  "cross_project_source_write_default": "DENY",
+  "failure_mode": "PRESERVE_EVENT_RETURN_SAFE_READ_ONLY"
+}
