@@ -1,6 +1,6 @@
 # Swarm Scale 100 Protocol
 
-Status: ACTIVE TARGET
+Status: ACTIVE TARGET — ALIGNMENT VERIFIED / STAGE 15 NOT YET PASSED
 Scope: Global Swarm scaling and staged validation
 
 ## Objective
@@ -23,7 +23,11 @@ Population may increase without increasing the other four quantities.
 
 ## Current 100-agent plan
 
-After all seven registered projects are contract-aligned, the existing per-project cap of eight active RESEARCH specialists yields:
+The seven registered projects are now contract-aligned on kernel `1.2.1` and the seven-project global round. The append-only verification record is `governance/SWARM_SCALE_100_ALIGNMENT_VERIFICATION_20261005.json`.
+
+The earlier `governance/SWARM_SCALE_100_COMPATIBILITY_AUDIT_20261005.json` is preserved as historical pre-remediation evidence. It is not current readiness state.
+
+Under the existing per-project cap of eight active RESEARCH specialists, the current topology yields:
 
 - 7 PRIMARY active slots
 - 7 MANAGER active slots
@@ -34,25 +38,25 @@ After all seven registered projects are contract-aligned, the existing per-proje
 
 Standby participants may reconstruct context, observe allowed telemetry, prepare non-mutating analysis, and wait for admission. They may not acquire mutating work merely because they are part of the population.
 
-## Contract alignment precondition
+## Contract alignment state
 
-A multi-project scale stage MUST NOT open until every participating registered project exposes a compatible local swarm contract and the global run fields that are required to be identical actually match.
+Contract alignment is VERIFIED. All seven registered projects expose a compatible local swarm contract and agree on the global fields required for one coordinated round while preserving project-local identity and coordination bindings.
 
-For one coordinated global run, `expected_global_round_projects`, `global_run_contract_version`, and other launch-contract fields designated identical must agree across all participating projects. A missing `swarm_kernel/project.json`, mismatched expected-project set, unsupported project-kernel version, or conflicting project/repository binding blocks that project's admission and therefore blocks a stage that expects that project.
+Alignment verification makes Stage 15 **eligible to test**. It does not mean Stage 15 has passed, does not authorize launching it, and does not authorize higher stages.
 
-The central runtime may explicitly support multiple historical project-kernel versions. **Backward-compatible parsing is not global-round alignment.** An older compatible project remains ineligible for the same coordinated round if its declared global project set or other identical launch-contract fields differ.
+A future mismatch in `expected_global_round_projects`, `global_run_contract_version`, kernel compatibility, repository/project binding, or another designated identical field fails closed and re-blocks the affected stage.
 
-Do not resolve alignment by silently taking an intersection, dropping projects, widening foreign-write authority, weakening fail-closed checks, or treating semantic similarity as contract compatibility.
-
-The current compatibility audit is `governance/SWARM_SCALE_100_COMPATIBILITY_AUDIT_20261005.json`. Stage 15 remains blocked until its alignment findings are remediated through the appropriate governed cross-project change path.
+Do not resolve future mismatch by silently taking an intersection, dropping projects, widening foreign-write authority, weakening fail-closed checks, or treating semantic similarity as contract compatibility.
 
 ## Staged validation ladder
 
-After contract alignment, the required progression is:
+The required progression is:
 
 `15 -> 30 -> 60 -> 100`
 
 Each stage must converge and pass its gate before the next stage is attempted. A failed stage produces regression evidence and remediation work; it does not authorize raising limits.
+
+Stage 15 has **not yet passed** and requires a separately authorized live validation run.
 
 ## Provider admission
 
