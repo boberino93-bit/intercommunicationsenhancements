@@ -1,0 +1,38 @@
+{
+  "schema": "intercommunications/research-swarm-five-task-schedule/v1",
+  "status": "RECOMMENDED_NOT_DEPLOYED",
+  "timezone": "America/Vancouver",
+  "cadence": "HOURLY",
+  "host_overlap_serialization_assumed": false,
+  "tasks": [
+    {"role": "MASTER", "minute": 0, "prompt_path": "research_swarm/prompts/master.md"},
+    {"role": "MANAGER", "minute": 5, "prompt_path": "research_swarm/prompts/manager.md"},
+    {"role": "RESEARCHER_1", "minute": 10, "prompt_path": "research_swarm/prompts/researcher_1.md", "bias": "platform_android_samsung_display_continuity_foundational_constraints"},
+    {"role": "RESEARCHER_2", "minute": 20, "prompt_path": "research_swarm/prompts/researcher_2.md", "bias": "implementation_architecture_prototype_feasibility"},
+    {"role": "RESEARCHER_3", "minute": 30, "prompt_path": "research_swarm/prompts/researcher_3.md", "bias": "validation_failure_modes_ux_adversarial_independent_verification"}
+  ],
+  "overlap_dispositions": [
+    "CONTINUE_EXISTING_RUN",
+    "COALESCE",
+    "TAKE_DIFFERENT_UNCLAIMED_LANE",
+    "ASSIST",
+    "INDEPENDENT_VALIDATION",
+    "WAIT_DEFER",
+    "RECOVER_STALE_LANE"
+  ],
+  "invariants": [
+    "TIMER_IS_NOT_OWNERSHIP_AUTHORITY",
+    "FRESH_CANONICAL_BOOTSTRAP_REQUIRED",
+    "NO_HIDDEN_CONVERSATION_MEMORY_DEPENDENCY",
+    "NO_SECOND_CONTROL_PLANE",
+    "CLASS_D_REQUIRES_EXACT_ACTION_AUTHORIZATION",
+    "NONBLOCKING_DECISIONS_DO_NOT_FREEZE_UNRELATED_SAFE_WORK"
+  ],
+  "first_canary": {
+    "project_id": "duo-open",
+    "repository": "boberino93-bit/duo-open",
+    "inspected_head": "6497e69218de0f585eb0b32ba6676bc2e7e723ac",
+    "seed_frontier_only": ["ticket_02_attempt_scoped_inner_wake_lifetime", "ticket_03_exact_current_presentation_readiness_evidence", "ticket_04_terminal_native_cover_stale_work_fencing"],
+    "requires_live_frontier_reconciliation": true
+  }
+}

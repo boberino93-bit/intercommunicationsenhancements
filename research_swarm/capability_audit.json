@@ -1,0 +1,26 @@
+{
+  "schema": "intercommunications/post-hardening-research-swarm-capability-audit/v1",
+  "audit_date": "2026-10-05",
+  "repository": "boberino93-bit/intercommunicationsenhancements",
+  "audited_base": "a6c699f7534ccc1e7a7bc4be8c4b935853fa9bd8",
+  "canary_repository": "boberino93-bit/duo-open",
+  "canary_head": "6497e69218de0f585eb0b32ba6676bc2e7e723ac",
+  "overall": "READY_FOR_CANARY_PROMPT_DEPLOYMENT_WITH_DOCUMENTED_PARTIAL_FALLBACKS",
+  "capabilities": [
+    {"id":"cold_start_bootstrap","status":"PROVEN","evidence":["protocols/post_normalization_successor.md","org_agent_mesh/successor_bootstrap.py"]},
+    {"id":"human_priority","status":"PROVEN","evidence":["org_agent_mesh/successor_bootstrap.py:HUMAN_PROJECT_PRIORITY"]},
+    {"id":"priority_frontier_snapshot","status":"PROVEN","evidence":["org_agent_mesh/successor_bootstrap.py:PriorityFrontierSnapshot"]},
+    {"id":"scheduled_trigger_dedupe","status":"PROVEN","evidence":["org_agent_mesh/scheduled_tasks.py"]},
+    {"id":"claim_lease_stale_takeover","status":"PROVEN_PRIMITIVE","evidence":["org_agent_mesh/scheduled_tasks.py"]},
+    {"id":"fenced_durable_writes","status":"PROVEN_PRIMITIVE","evidence":["org_agent_mesh/durable_state.py:FencedStateStore"]},
+    {"id":"semantic_research_task_identity","status":"PARTIAL","fallback":"normalize from canonical project/task/objective/target revision; never create parallel task truth"},
+    {"id":"durable_resume_checkpoint","status":"PROVEN_PRIMITIVE_PARTIAL_GENERIC_INTEGRATION","fallback":"project canonical handoff/checkpoint projection"},
+    {"id":"peer_discovery_liveness","status":"PROVEN_DUO_PARTIAL_GENERIC","evidence":["duo-open:AGENT_DISCOVERY_V7.json:DMSH3"],"fallback":"resolve project-native visibility; never invent full visibility"},
+    {"id":"material_finding_publication","status":"PROVEN_DUO_PARTIAL_GENERIC","evidence":["duo-open:AGENT_DISCOVERY_V7.json"]},
+    {"id":"exact_action_authorization","status":"PROVEN","evidence":["org_agent_mesh/launch_admission.py","governance/ROOT_CHANGE_AUTHORITY.json"]},
+    {"id":"scheduled_agent_self_authorizes_class_d","status":"NOT_PERMITTED","fallback":"queue exact human decision and continue unrelated safe work"},
+    {"id":"runtime_capability_resolution","status":"PROVEN_DYNAMIC","fallback":"resolve native/connectors per invocation"},
+    {"id":"host_overlap_serialization","status":"UNPROVEN","fallback":"semantic id + idempotency + claims + leases + fencing + coalescing"},
+    {"id":"durable_human_decision_batching","status":"PARTIAL","fallback":"manager bundle is projection over canonical pending decisions, not new approval ledger"}
+  ]
+}

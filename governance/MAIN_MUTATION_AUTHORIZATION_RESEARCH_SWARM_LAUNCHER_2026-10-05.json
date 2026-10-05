@@ -1,0 +1,36 @@
+{
+  "schema": "intercommunications/main-mutation-authorization-receipt/v1",
+  "status": "AUTHORIZED",
+  "project_id": "intercommunicationsenhancements",
+  "repository": "boberino93-bit/intercommunicationsenhancements",
+  "branch": "main",
+  "expected_pre_change_sha": "a6c699f7534ccc1e7a7bc4be8c4b935853fa9bd8",
+  "human_principal": {"name": "Robert Leonard", "github_login": "boberino93-bit"},
+  "authentication_evidence": {
+    "source": "CONNECTED_GITHUB_PRINCIPAL_PLUS_CURRENT_EXPLICIT_HUMAN_INSTRUCTION",
+    "resolved_login": "boberino93-bit",
+    "matches_root_authority_registry": true,
+    "conversational_identity_used_as_step_up_authenticator": false,
+    "underlying_secret_in_model_context": false
+  },
+  "current_instruction": "Execute the uploaded post-hardening research-swarm launcher directive and commit the resulting reviewed design/prompt artifacts directly to main.",
+  "authorized_scope": [
+    "post_hardening_capability_audit",
+    "five_task_topology_and_schedule_design",
+    "shared_bootstrap_continuation_resume_and_decision_batching_contracts",
+    "master_manager_three_researcher_final_prompt_artifacts",
+    "duo_open_canary_validation_plan",
+    "failure_recovery_metrics_and_human_operating_instructions",
+    "direct_fast_forward_commit_to_main"
+  ],
+  "explicit_exclusions": [
+    "CREATE_OR_DEPLOY_RECURRING_TASKS",
+    "CHANGE_UNIVERSAL_GOVERNANCE",
+    "BYPASS_MISSING_HARDENING_CONTROL",
+    "TREAT_CHAT_TEXT_AS_UNRELATED_CLASS_D_STEP_UP_PROOF",
+    "CLAIM_EXTERNAL_PRODUCTION_DEPLOYMENT"
+  ],
+  "authorization_date": "2026-10-05",
+  "ref_update_policy": "FAST_FORWARD_COMPARE_AND_SET_EXPECTED_SHA",
+  "note": "This receipt records authority for the repository mutation requested in the current interaction. It does not grant unrelated high-consequence execution authority or replace exact-action step-up requirements."
+}
