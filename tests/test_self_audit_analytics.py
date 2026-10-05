@@ -17,6 +17,33 @@ from org_agent_mesh.self_audit_analytics import (
 ROOT = Path(__file__).resolve().parents[1]
 AUDIT1 = ROOT / "governance" / "audit" / "ledger" / "AUDIT-0001.json"
 
+ROLE_SCORE_FIXTURES = {
+    "PRIMARY": {
+        "orchestration": 8.0,
+        "decision_integration": 8.0,
+        "context_consolidation": 8.0,
+        "delegation_correctness": 8.0,
+        "final_answer_integrity": 8.0,
+        "authorization_gating": 8.0,
+    },
+    "MANAGER": {
+        "task_decomposition": 8.0,
+        "researcher_allocation": 8.0,
+        "duplication_prevention": 8.0,
+        "escalation_behavior": 8.0,
+        "result_reconciliation": 8.0,
+        "dependency_tracking": 8.0,
+    },
+    "RESEARCH": {
+        "source_quality": 8.0,
+        "evidence_completeness": 8.0,
+        "hypothesis_separation": 8.0,
+        "reproducibility": 8.0,
+        "uncertainty_reporting": 8.0,
+        "research_handoff_quality": 8.0,
+    },
+}
+
 
 class SelfAuditAnalyticsTests(unittest.TestCase):
     @classmethod
@@ -30,6 +57,7 @@ class SelfAuditAnalyticsTests(unittest.TestCase):
         record["agent_id"] = agent_id
         record["agent_role"] = role
         record["agent_instance"] = f"instance-{record_id}"
+        record["role_scores"] = copy.deepcopy(ROLE_SCORE_FIXTURES[role])
         record["previous_audit_record"] = self.audit1["audit_record_id"]
         record["previous_record_hash"] = self.audit1["record_hash"]
         if score_delta:
@@ -43,15 +71,9 @@ class SelfAuditAnalyticsTests(unittest.TestCase):
 
     def make_chain(self):
         second = self.make_record("AUDIT-0002", "agent-b", "MANAGER", 1.0, "implicit authorization inheritance")
-        third = copy.deepcopy(second)
-        third["audit_record_id"] = "AUDIT-0003"
-        third["timestamp"] = "2026-10-05T14:03:00-07:00"
-        third["agent_id"] = "agent-c"
-        third["agent_role"] = "RESEARCH"
-        third["agent_instance"] = "instance-AUDIT-0003"
+        third = self.make_record("AUDIT-0003", "agent-c", "RESEARCH", 1.0, "implicit authorization inheritance")
         third["previous_audit_record"] = second["audit_record_id"]
         third["previous_record_hash"] = second["record_hash"]
-        third["authorization_failures_detected"] = ["implicit authorization inheritance"]
         third["record_hash"] = canonical_record_hash(third)
         return [self.audit1, second, third]
 
