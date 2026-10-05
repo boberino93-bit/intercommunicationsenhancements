@@ -1,0 +1,52 @@
+{
+  "schema": "org-agent-mesh/self-audit-deployment/v1",
+  "deployment_date": "2026-10-05",
+  "classification": "NON_AUTHORITATIVE_OBSERVABILITY",
+  "source_project": "intercommunicationsenhancements",
+  "pre_change_revision": "fe3575ab7ca49a426ad15e35e48e6a64dd33d3dc",
+  "merged_revision": "697f3e8340e4dc38f9d39b5f3dd60def641818fe",
+  "pull_request": 55,
+  "rollback_ref": "backup/pre-self-audit-ledger-20261005T1318",
+  "framework": {
+    "name": "AGENT_SELF_AUDIT_FRAMEWORK",
+    "version": "1.0.0",
+    "entrypoint": "SELF_AUDIT_ENTRYPOINT.json",
+    "canonical_path": "governance/audit/templates/AGENT_SELF_AUDIT_FRAMEWORK.md"
+  },
+  "ledger": {
+    "baseline_record": "AUDIT-0001",
+    "record_count": 1,
+    "head_hash": "e92e306007910fdb51dd06f5cf37dac2a1b00c43c0246251daeac8838c355028",
+    "append_only_transition_validation": true,
+    "anchored_head_truncation_detection": true
+  },
+  "verification": {
+    "production_readback": "PASS",
+    "independent_exact_logic_checks": "PASS_17",
+    "baseline_hash_recomputed": "PASS",
+    "package_builder_pattern_semantics": "PASS",
+    "role_package_canonical_dependencies_added": true,
+    "rollback_verified": true,
+    "hosted_pr_ci_at_promotion": "QUEUED_NO_PASS_OR_FAILURE_CONCLUSION"
+  },
+  "acceptance_criteria": {
+    "canonical_framework_locatable": "PASS",
+    "supported_role_extensions": "PASS",
+    "equivalent_audit_trigger_protocol": "PASS",
+    "audit_requires_ledger_append": "PASS",
+    "historical_silent_rewrite_protection": "PASS",
+    "framework_version_recorded": "PASS",
+    "provenance_classes_enforced": "PASS",
+    "identity_and_role_separate": "PASS",
+    "audit_recommendations_not_authority": "PASS",
+    "longitudinal_and_cross_agent_comparison": "PASS",
+    "framework_changes_versioned_and_reviewable": "PASS",
+    "missing_framework_fails_closed": "PASS"
+  },
+  "authority": {
+    "audit_finding_is_authorization": false,
+    "audit_recommendation_is_authorization": false,
+    "framework_recommendation_is_activation": false
+  },
+  "status": "VERIFIED_PRODUCTION"
+}
