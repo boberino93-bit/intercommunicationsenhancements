@@ -1,6 +1,6 @@
 {
-  "schema": "intercommunications/research-swarm-serial-design-pipeline/v5",
-  "status": "FIVE_STAGE_SERIAL_PIPELINE_WITH_PROJECT_HOLDS",
+  "schema": "intercommunications/research-swarm-serial-design-pipeline/v6",
+  "status": "FIVE_STAGE_SERIAL_PIPELINE_WITH_PROJECT_SCOPED_COORDINATION",
   "timezone": "America/Vancouver",
   "cadence": "HOURLY",
   "execution_model": "FIVE_STAGE_SERIAL_PIPELINE",
@@ -31,25 +31,32 @@
     "portfolio_agents_continue_other_unheld_projects": true
   },
   "checkpoint_transport": {
-    "schema": "intercommunications/swarm-stage-checkpoint/v1",
-    "schema_path": "research_swarm/checkpoint_envelope.schema.json",
+    "schema": "intercommunications/swarm-stage-checkpoint/v2",
+    "schema_path": "research_swarm/checkpoint_envelope_v2.schema.json",
     "protocol_path": "protocols/swarm_checkpoint_bus.md",
-    "transport": "GITHUB_ISSUE_COMMENTS_APPEND_ONLY",
-    "repository": "boberino93-bit/intercommunicationsenhancements",
-    "issue_number": 25,
-    "preflight": "APPEND_SEQUENCE_ZERO_PROGRESS_THEN_READBACK_BEFORE_SUBSTANTIVE_WORK",
+    "routing_registry_path": "PROJECT_ROLE_ROUTING_REGISTRY.json",
+    "coordination_policy_path": "governance/COORDINATION_PUBLICATION_POLICY.json",
+    "transport": "PROJECT_ARTIFACTORY_MESSAGE_FORUM_PLUS_GITHUB_BACKUP",
+    "github_backup_prefix": "agentbus-backup/coordination-messages/",
+    "artifactory_required_when_registered": true,
+    "github_backup_required": true,
+    "legacy_issue_25_transport": "HISTORICAL_READ_ONLY",
+    "preflight": "APPEND_PROJECT_SCOPED_SEQUENCE_ZERO_PROGRESS_TO_REGISTERED_TRANSPORTS_THEN_READBACK_BEFORE_SUBSTANTIVE_WORK",
     "cycle_id": "AMERICA_VANCOUVER_LOCAL_HOUR_FLOOR",
     "partial_handoff_allowed": true,
-    "edit_or_delete_prior_checkpoints_allowed": false,
-    "cross_cycle_implicit_fallback_allowed": false
+    "edit_delete_rename_move_prior_checkpoints_allowed": false,
+    "cross_project_fallback_allowed": false,
+    "cross_cycle_implicit_fallback_allowed": false,
+    "authority_conveyed": false
   },
   "pipeline": {
     "order": ["RESEARCHER_1", "RESEARCHER_2", "RESEARCHER_3", "MANAGER", "PRIMARY"],
     "upstream_freshness_required": true,
+    "same_project_chain_required": true,
     "stale_upstream_behavior": "UPSTREAM_NOT_READY_AND_STOP_STAGE_ONLY",
     "repository_access": "CONNECTED_GITHUB_APP_API_ONLY",
     "local_clone_fallback_allowed": false,
-    "handoff_dependency": "DURABLE_CURRENT_CYCLE_CHECKPOINT_NOT_CHAT_OR_SCHEDULER_EVENT",
+    "handoff_dependency": "DURABLE_CURRENT_PROJECT_CURRENT_CYCLE_CHECKPOINT_NOT_CHAT_OR_SCHEDULER_EVENT",
     "researcher_2_accepted_upstream_states": ["RESEARCH_PROGRESS", "RESEARCH_HANDOFF_READY"],
     "researcher_3_accepted_upstream_states": ["RESEARCH_PROGRESS", "RESEARCH_HANDOFF_READY"],
     "manager_accepted_upstream_states": ["RESEARCH_PROGRESS", "RESEARCH_HANDOFF_READY"],
@@ -57,72 +64,24 @@
     "final_output": "PRIMARY_DESIGN_PROPOSAL"
   },
   "tasks": [
-    {
-      "role": "RESEARCHER_1",
-      "minute": 0,
-      "window_end_minute": 10,
-      "prompt_path": "research_swarm/prompts/researcher_1.md",
-      "requires_upstream_role": null,
-      "progress_state": "RESEARCH_PROGRESS",
-      "output_gate": "RESEARCH_HANDOFF_READY",
-      "bias": "foundational_constraints_evidence_and_problem_definition"
-    },
-    {
-      "role": "RESEARCHER_2",
-      "minute": 10,
-      "window_end_minute": 20,
-      "prompt_path": "research_swarm/prompts/researcher_2.md",
-      "requires_upstream_role": "RESEARCHER_1",
-      "requires_any_gate": ["RESEARCH_PROGRESS", "RESEARCH_HANDOFF_READY"],
-      "progress_state": "RESEARCH_PROGRESS",
-      "output_gate": "RESEARCH_HANDOFF_READY",
-      "bias": "implementation_architecture_prototype_feasibility"
-    },
-    {
-      "role": "RESEARCHER_3",
-      "minute": 20,
-      "window_end_minute": 30,
-      "prompt_path": "research_swarm/prompts/researcher_3.md",
-      "requires_upstream_role": "RESEARCHER_2",
-      "requires_any_gate": ["RESEARCH_PROGRESS", "RESEARCH_HANDOFF_READY"],
-      "progress_state": "RESEARCH_PROGRESS",
-      "output_gate": "RESEARCH_HANDOFF_READY",
-      "bias": "validation_failure_modes_adversarial_independent_verification"
-    },
-    {
-      "role": "MANAGER",
-      "minute": 30,
-      "window_end_minute": 40,
-      "prompt_path": "research_swarm/prompts/manager.md",
-      "requires_upstream_role": "RESEARCHER_3",
-      "requires_any_gate": ["RESEARCH_PROGRESS", "RESEARCH_HANDOFF_READY"],
-      "progress_state": "MANAGER_PROGRESS",
-      "output_gate": "MANAGER_HANDOFF_READY"
-    },
-    {
-      "role": "PRIMARY",
-      "minute": 40,
-      "window_end_minute": 50,
-      "prompt_path": "research_swarm/prompts/primary.md",
-      "requires_upstream_role": "MANAGER",
-      "requires_any_gate": ["MANAGER_PROGRESS", "MANAGER_HANDOFF_READY"],
-      "progress_state": "PRIMARY_PROGRESS",
-      "output_gate": "PRIMARY_PROPOSAL_READY"
-    }
+    {"role": "RESEARCHER_1", "minute": 0, "window_end_minute": 10, "prompt_path": "research_swarm/prompts/researcher_1.md", "requires_upstream_role": null, "progress_state": "RESEARCH_PROGRESS", "output_gate": "RESEARCH_HANDOFF_READY", "bias": "foundational_constraints_evidence_and_problem_definition"},
+    {"role": "RESEARCHER_2", "minute": 10, "window_end_minute": 20, "prompt_path": "research_swarm/prompts/researcher_2.md", "requires_upstream_role": "RESEARCHER_1", "requires_any_gate": ["RESEARCH_PROGRESS", "RESEARCH_HANDOFF_READY"], "progress_state": "RESEARCH_PROGRESS", "output_gate": "RESEARCH_HANDOFF_READY", "bias": "implementation_architecture_prototype_feasibility"},
+    {"role": "RESEARCHER_3", "minute": 20, "window_end_minute": 30, "prompt_path": "research_swarm/prompts/researcher_3.md", "requires_upstream_role": "RESEARCHER_2", "requires_any_gate": ["RESEARCH_PROGRESS", "RESEARCH_HANDOFF_READY"], "progress_state": "RESEARCH_PROGRESS", "output_gate": "RESEARCH_HANDOFF_READY", "bias": "validation_failure_modes_adversarial_independent_verification"},
+    {"role": "MANAGER", "minute": 30, "window_end_minute": 40, "prompt_path": "research_swarm/prompts/manager.md", "requires_upstream_role": "RESEARCHER_3", "requires_any_gate": ["RESEARCH_PROGRESS", "RESEARCH_HANDOFF_READY"], "progress_state": "MANAGER_PROGRESS", "output_gate": "MANAGER_HANDOFF_READY"},
+    {"role": "PRIMARY", "minute": 40, "window_end_minute": 50, "prompt_path": "research_swarm/prompts/primary.md", "requires_upstream_role": "MANAGER", "requires_any_gate": ["MANAGER_PROGRESS", "MANAGER_HANDOFF_READY"], "progress_state": "PRIMARY_PROGRESS", "output_gate": "PRIMARY_PROPOSAL_READY"}
   ],
-  "inactive_scheduled_roles": [
-    {"role": "MASTER", "reason": "GLOBAL_SUPERVISION_NOT_PART_OF_SERIAL_DESIGN_PROPOSAL_PIPELINE"}
-  ],
+  "inactive_scheduled_roles": [{"role": "MASTER", "reason": "GLOBAL_SUPERVISION_NOT_PART_OF_SERIAL_DESIGN_PROPOSAL_PIPELINE"}],
   "runtime_rules": {
     "each_stage_gets_up_to_its_10_minute_window_but_may_finish_earlier": true,
-    "downstream_does_not_require_upstream_completion_if_valid_current_cycle_progress_exists": true,
+    "downstream_does_not_require_upstream_completion_if_valid_current_project_current_cycle_progress_exists": true,
     "downstream_must_re_read_upstream_stream_before_finalizing": true,
     "unfinished_work_must_be_preserved_in_checkpoint": true,
     "stage_may_continue_independent_safe_work_if_one_branch_waits_for_human": true,
     "simple_user_interruption_does_not_cancel_active_assignment": true,
     "explicit_authenticated_project_hold_overrides_continuation_for_that_project": true,
     "timer_is_not_mutation_authority": true,
-    "schedule_fire_is_not_mutation_authority": true
+    "schedule_fire_is_not_mutation_authority": true,
+    "coordination_publication_is_not_mutation_authority": true
   },
   "automation_alignment": {
     "researcher_1_minute": 0,
@@ -134,9 +93,11 @@
     "saved_prompts_must_load_current_governance": true,
     "saved_prompts_must_load_project_work_control": true,
     "saved_prompts_must_load_checkpoint_protocol": true,
+    "saved_prompts_must_load_coordination_publication_policy": true,
     "saved_prompts_must_accept_valid_partial_upstream_progress": true,
     "saved_prompts_must_forbid_automatic_enable_or_reenable": true,
-    "saved_prompts_must_forbid_local_clone_fallback": true
+    "saved_prompts_must_forbid_local_clone_fallback": true,
+    "configuration_update_must_preserve_each_live_enabled_state": true
   },
   "invariants": [
     "FIVE_SERIAL_STAGES_USE_TEN_MINUTE_OFFSETS",
@@ -146,12 +107,17 @@
     "MANAGER_PRECEDES_PRIMARY",
     "VALID_PARTIAL_PROGRESS_IS_CONSUMABLE_WITH_EXPLICIT_INCOMPLETE_LABEL",
     "CHECKPOINT_PREFLIGHT_MUST_PASS_BEFORE_SUBSTANTIVE_STAGE_WORK",
+    "CHECKPOINT_PROJECT_ID_MUST_MATCH_SELECTED_PROJECT",
     "PROJECT_HOLD_BLOCKS_HELD_PROJECT_WORK_WITHOUT_CANCELLING_PROJECT",
     "GLOBAL_SWARM_CONTINUES_OTHER_UNHELD_PROJECTS",
     "USER_INTERRUPTION_AUTO_RESUMES_UNLESS_EXPLICITLY_STOPPED_PAUSED_HELD_OR_REDIRECTED",
     "NO_AGENT_MAY_AUTO_ENABLE_OR_REENABLE_A_SWARM_TASK",
     "CONNECTED_GITHUB_API_IS_THE_SCHEDULED_REPOSITORY_ACCESS_PATH",
     "NO_GIT_CLONE_FALLBACK_IN_SCHEDULED_TASKS",
+    "ISSUE_25_IS_HISTORICAL_READ_ONLY_FOR_CHECKPOINT_TRANSPORT",
+    "SUBORDINATE_GITHUB_WRITES_ARE_BACKUP_PREFIX_ONLY",
+    "SUBORDINATE_ARTIFACTORY_WRITES_ARE_REGISTERED_MESSAGE_NAMESPACE_ONLY",
+    "COORDINATION_MESSAGES_NEVER_CONVEY_AUTHORITY",
     "PRIMARY_WRITES_THE_FINAL_DESIGN_PROPOSAL",
     "SCHEDULE_FIRE_IS_NOT_AUTHORIZATION",
     "NO_SESSION_WIDE_MUTATION_AUTHORITY"
