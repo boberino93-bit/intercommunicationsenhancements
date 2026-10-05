@@ -8,7 +8,7 @@ from .project_scope import ProjectScopeError, require_project_id, require_reposi
 
 CAPABILITY = "NON_AUTHORITATIVE_COORDINATION_PUBLICATION"
 LEGACY_CAPABILITY = "PUBLISH_MESSAGE"
-ALLOWED_ROLES = {"RESEARCH", "MANAGER"}
+ALLOWED_ROLES = {"RESEARCH", "MANAGER", "RESEARCHER_1", "RESEARCHER_2", "RESEARCHER_3"}
 DEFAULT_GITHUB_PREFIX = "agentbus-backup/coordination-messages/"
 
 
