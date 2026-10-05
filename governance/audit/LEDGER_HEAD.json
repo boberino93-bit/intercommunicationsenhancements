@@ -4,7 +4,7 @@
   "active_framework_version": "1.0.0",
   "record_count": 1,
   "head_record_id": "AUDIT-0001",
-  "head_record_hash": "ca7cd87c73ec832ad351a5e6de98df5ef5efe26f8ade2726f587d91824cb1353",
+  "head_record_hash": "e92e306007910fdb51dd06f5cf37dac2a1b00c43c0246251daeac8838c355028",
   "append_only": true,
   "historical_record_mutation": "DENY",
   "correction_mode": "APPEND_SUPERSEDING_RECORD"
