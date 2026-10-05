@@ -1,0 +1,76 @@
+{
+  "schema": "org-agent-mesh/supervisory-governance/v1",
+  "version": "1.0.0",
+  "status": "ACTIVE_OVERLAY",
+  "authority_order": ["USER", "MASTER", "PRIMARY", "SUBORDINATE"],
+  "scope_rule": "SUPERVISORY_LIFECYCLE_AUTHORITY_DOES_NOT_GRANT_CROSS_PROJECT_SOURCE_MUTATION",
+  "master": {
+    "agent_id": "master",
+    "roaming": true,
+    "project_id": null,
+    "chat_project": null,
+    "authority": "GLOBAL_LIFECYCLE_SUPERVISION"
+  },
+  "primary": {
+    "authority": "OWN_PROJECT_TREE_ONLY",
+    "cross_project_control": "DENY_UNLESS_MASTER_DELEGATES_THROUGH_AN_EXISTING_AUTHORIZED_CONTROL_PATH"
+  },
+  "chat_project_mapping": {
+    "intercommunicationsenhancements": "Intercommunication enhancements",
+    "duo-open": "Duo Screen",
+    "benefitflow": "Benefitflow",
+    "fold7-power-lab": "Samsung power bootstrap",
+    "warp-propulsion-lab": "Warp-Propulsion-lab",
+    "ai-behaviour-control-lab": "Ai Behavior Control Lab"
+  },
+  "control_states": [
+    "STARTING", "RUNNING", "REDIRECT_REQUESTED", "PAUSE_REQUESTED", "PAUSED",
+    "STOP_REQUESTED", "STOPPING", "STOPPED", "COMPLETED", "FAILED"
+  ],
+  "actions": ["CONTINUE", "REDIRECT", "PAUSE", "STOP", "STOP_TREE"],
+  "reason_codes": [
+    "GOAL_MISALIGNMENT", "INSTRUCTION_DRIFT", "SCOPE_CREEP", "REDUNDANT_WORK",
+    "LOW_INFORMATION_GAIN", "CIRCULAR_WORK", "INVALID_ASSUMPTIONS", "SUPERSEDED",
+    "POOR_METHODOLOGY", "EVIDENCE_QUALITY", "PROJECT_GOAL_CONFLICT",
+    "ARCHITECTURE_CONFLICT", "UNEXPECTED_RISK", "DESTRUCTIVE_BEHAVIOR",
+    "RESOURCE_IMBALANCE", "BLOCKED_EXECUTION", "AGENT_CONFLICT",
+    "PREMATURE_IMPLEMENTATION", "PREMATURE_RESEARCH", "QUALITY_DEGRADATION",
+    "PROJECT_STATE_CHANGED", "USER_OVERRIDE", "MASTER_DIRECTION", "OTHER"
+  ],
+  "runtime": {
+    "bounded_work_units_required": true,
+    "control_check_between_units_required": true,
+    "atomic_operation_may_finish_if_interruption_would_corrupt_state": true,
+    "stop_preserves_useful_partial_state": true,
+    "stop_means_delete": false
+  },
+  "respawn": {
+    "intentional_stop_sets_allow_respawn_false": true,
+    "timer_or_schedule_alone_may_respawn": false,
+    "user_may_restart": true,
+    "master_or_primary_restart_requires_newer_task_revision": true,
+    "parent_under_stop_may_spawn_children": false
+  },
+  "scheduled_tasks": {
+    "same_authority_model_required": true,
+    "schedule_fire_is_authority": false,
+    "project_bound_launch_context_required_for_project_agents": true,
+    "master_launch_must_remain_roaming": true,
+    "intentional_stop_must_be_checked_before_launch": true,
+    "stale_governance_revision_must_not_be_treated_as_current": true
+  },
+  "chat_assignment": {
+    "prefer_direct_project_create": true,
+    "move_fallback_allowed": true,
+    "bounded_move_attempts": 3,
+    "post_action_verification_required": true,
+    "unknown_mapping": "FAIL_CLOSED_LEAVE_UNCHANGED",
+    "master": "GLOBAL_RECENTS_NO_PROJECT",
+    "host_adapter_required_for_external_effect": true
+  },
+  "implementation": {
+    "supervision_module": "org_agent_mesh.supervision",
+    "chat_project_router_module": "org_agent_mesh.chat_project_routing",
+    "protocol": "protocols/supervisory_governance.md"
+  }
+}
