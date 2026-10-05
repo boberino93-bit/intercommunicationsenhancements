@@ -21,8 +21,7 @@
     "summary",
     "blockers",
     "unfinished_work",
-    "next_action",
-    "readback_verified"
+    "next_action"
   ],
   "properties": {
     "schema": {
@@ -125,9 +124,6 @@
     "next_action": {
       "type": "string",
       "maxLength": 4000
-    },
-    "readback_verified": {
-      "type": "boolean"
     }
   },
   "allOf": [
