@@ -82,12 +82,14 @@ def _event_time(event: Mapping[str, Any]) -> datetime:
 
 def _validated_event(event: Mapping[str, Any]) -> Mapping[str, Any]:
     required = {
+        "schema",
         "event_id",
         "project_id",
         "action",
         "hold_order_id",
         "issued_at",
         "effective_at",
+        "expires_at",
         "resume_policy",
         "reason_code",
         "human_reason",
@@ -100,10 +102,13 @@ def _validated_event(event: Mapping[str, Any]) -> Mapping[str, Any]:
     missing = sorted(required.difference(event))
     if missing:
         raise ProjectWorkControlError(f"missing event fields: {', '.join(missing)}")
-    if event.get("schema") not in (None, "org-agent-mesh/project-work-control-event/v1"):
+    if event.get("schema") != "org-agent-mesh/project-work-control-event/v1":
         raise ProjectWorkControlError("unsupported project work control schema")
     if event.get("preserve_partial_state") is not True:
         raise ProjectWorkControlError("project hold events must preserve partial state")
+    for field in ("event_id", "project_id", "hold_order_id", "claimed_principal", "authentication_ref", "authorization_case_id"):
+        if not str(event.get(field, "")).strip():
+            raise ProjectWorkControlError(f"{field} must be non-empty")
     WorkControlAction(str(event["action"]))
     ResumePolicy(str(event["resume_policy"]))
     _parse_datetime(event.get("effective_at"), field="effective_at")
@@ -155,7 +160,6 @@ def resolve_project_work_state(
             continue
 
         if active is None or active.hold_order_id != hold_id:
-            # An extension/resume for another or unknown hold cannot change current state.
             continue
 
         if action is WorkControlAction.RESUME:
@@ -180,44 +184,29 @@ def resolve_project_work_state(
             )
 
     if active is None:
-        return ProjectWorkDecision(
-            project_id=project_id,
-            state=ProjectWorkState.ACTIVE,
-            allow_new_work=True,
-            allow_respawn=True,
-            allow_mutation=True,
-            reason="NO_ACTIVE_HOLD",
-        )
+        return ProjectWorkDecision(project_id, ProjectWorkState.ACTIVE, True, True, True, "NO_ACTIVE_HOLD")
 
     if active.expires_at is not None and current_time >= active.expires_at:
         if active.resume_policy is ResumePolicy.AUTO_AT_EXPIRY:
-            return ProjectWorkDecision(
-                project_id=project_id,
-                state=ProjectWorkState.ACTIVE,
-                allow_new_work=True,
-                allow_respawn=True,
-                allow_mutation=True,
-                reason="AUTO_RESUMED_AT_HOLD_EXPIRY",
-                active_hold=None,
-            )
+            return ProjectWorkDecision(project_id, ProjectWorkState.ACTIVE, True, True, True, "AUTO_RESUMED_AT_HOLD_EXPIRY")
         return ProjectWorkDecision(
-            project_id=project_id,
-            state=ProjectWorkState.HOLD_EXPIRED_PENDING_HUMAN_RESUME,
-            allow_new_work=False,
-            allow_respawn=False,
-            allow_mutation=False,
-            reason="MANUAL_HOLD_EXPIRED_REQUIRES_AUTHENTICATED_RESUME",
-            active_hold=active,
+            project_id,
+            ProjectWorkState.HOLD_EXPIRED_PENDING_HUMAN_RESUME,
+            False,
+            False,
+            False,
+            "MANUAL_HOLD_EXPIRED_REQUIRES_AUTHENTICATED_RESUME",
+            active,
         )
 
     return ProjectWorkDecision(
-        project_id=project_id,
-        state=ProjectWorkState.HOLD,
-        allow_new_work=False,
-        allow_respawn=False,
-        allow_mutation=False,
-        reason="PROJECT_HOLD_ACTIVE",
-        active_hold=active,
+        project_id,
+        ProjectWorkState.HOLD,
+        False,
+        False,
+        False,
+        "PROJECT_HOLD_ACTIVE",
+        active,
     )
 
 
