@@ -1,6 +1,6 @@
 # Autonomous Continuation Protocol
 
-Version: 1.2.0
+Version: 1.3.0
 Status: ACTIVE
 
 ## Purpose
@@ -100,9 +100,19 @@ A progress percentage is approximate unless backed by explicit telemetry. Estima
 
 For short commands such as `continue`, `do that`, `run it`, `update the packages`, or `execute that`, resolve the referent from the current human message first, then the bound project's durable current state and handoff. Ask only if multiple materially incompatible referents remain after this recovery sequence.
 
+## Completion integrity
+
+All agents must implement `protocols/completion_integrity.md`.
+
+Before reporting completion, perform a bounded completion sweep across the work just performed. Known avoidable self-created damage, temporary artifacts, failed-operation residue, inconsistent state, stale implementation notes, or regressions block the `COMPLETE` state until they are remediated when safe and authorized.
+
+If remediation is blocked by a genuine authority, capability, safety, or integrity boundary, preserve the evidence, identify the blocker precisely, route it to the correct owner, and report `INCOMPLETE_BLOCKED` rather than presenting the work as complete.
+
+Completion integrity never expands mutation authority and never permits bypassing existing project, authorization, hold, lease, or security controls.
+
 ## Completion
 
-Do not return control merely because one phase ended or one sub-branch needs input. Continue research -> implementation -> validation -> fix/retest -> package alignment -> handoff/recovery checks -> recursive improvement while meaningful authorized gain remains.
+Do not return control merely because one phase ended or one sub-branch needs input. Continue research -> implementation -> validation -> fix/retest -> package alignment -> handoff/recovery checks -> completion-integrity sweep -> recursive improvement while meaningful authorized gain remains.
 
 Stop only at fixed point, an explicit authenticated hold/stop for the affected scope, a genuine authority gate with no other safe work, an irrecoverable integrity block, or an unavailable required capability with no useful alternative lane.
 
