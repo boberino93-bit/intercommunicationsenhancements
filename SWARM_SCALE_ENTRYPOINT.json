@@ -1,0 +1,14 @@
+{
+  "schema": "org-agent-mesh/swarm-scale-entrypoint/v1",
+  "version": "1.0.0",
+  "status": "ACTIVE_TARGET",
+  "target_population": 100,
+  "protocol": "protocols/swarm_scale_100.md",
+  "policy": "governance/SWARM_SCALE_100_POLICY.json",
+  "runtime": "org_agent_mesh.swarm_scale",
+  "bootstrap_overlay": "swarm_kernel/SWARM_SCALE_BOOTSTRAP_OVERLAY.md",
+  "stages": [15, 30, 60, 100],
+  "flat_burst": false,
+  "automatic_live_limit_increase": false,
+  "authority_conveyed": false
+}
