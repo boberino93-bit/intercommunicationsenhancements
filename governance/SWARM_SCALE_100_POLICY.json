@@ -1,0 +1,48 @@
+{
+  "schema": "org-agent-mesh/swarm-scale-policy/v1",
+  "status": "ACTIVE_TARGET",
+  "target_population": 100,
+  "staged_populations": [15, 30, 60, 100],
+  "current_project_count": 7,
+  "current_per_project_active_roles": {
+    "PRIMARY": 1,
+    "MANAGER": 1,
+    "RESEARCH": 8
+  },
+  "current_global_active_slot_ceiling": 70,
+  "population_100_standby_read_only": 30,
+  "launch_profiles": {
+    "15": {"provider_max_inflight": 2, "min_start_interval_seconds": 10},
+    "30": {"provider_max_inflight": 2, "min_start_interval_seconds": 8},
+    "60": {"provider_max_inflight": 3, "min_start_interval_seconds": 6},
+    "100": {"provider_max_inflight": 4, "min_start_interval_seconds": 5}
+  },
+  "launch_profile_semantics": "TEST_PROFILE_ONLY_NOT_AUTOMATIC_PROVIDER_CONFIGURATION",
+  "live_provider_default_change": "DENY_WITHOUT_SEPARATE_VALIDATED_CHANGE",
+  "live_specialist_cap_increase": "DENY_UNTIL_STAGE_EVIDENCE_SUPPORTS_CHANGE",
+  "standby_mode": "READ_ONLY_NO_MUTATING_CLAIM",
+  "flat_100_agent_burst": "DENY",
+  "hierarchical_admission": true,
+  "manager_backpressure_required": true,
+  "lease_and_fence_required_for_exclusive_work": true,
+  "completion_integrity_required": true,
+  "audit_and_regression_capture_required": true,
+  "stage_pass_requires": {
+    "ready_agents_equals_expected": true,
+    "accounted_agents_equals_expected": true,
+    "unauthorized_mutations": 0,
+    "cross_project_write_violations": 0,
+    "duplicate_commits": 0,
+    "unresolved_leases": 0,
+    "stale_handoffs": 0,
+    "lost_agents": 0,
+    "unaccounted_work_items": 0,
+    "completion_integrity_pass": true,
+    "ledger_chain_valid": true,
+    "manager_backpressure_recovered": true
+  },
+  "promotion_rule": "PASS_CURRENT_STAGE_BEFORE_NEXT_STAGE",
+  "security_or_authority_changes_remain_human_gated": true,
+  "schedule_activation_remains_human_gated": true,
+  "cross_project_source_writes_remain_denied_by_default": true
+}
