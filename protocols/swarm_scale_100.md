@@ -23,7 +23,7 @@ Population may increase without increasing the other four quantities.
 
 ## Current 100-agent plan
 
-With seven registered projects and the existing per-project cap of eight active RESEARCH specialists:
+After all seven registered projects are contract-aligned, the existing per-project cap of eight active RESEARCH specialists yields:
 
 - 7 PRIMARY active slots
 - 7 MANAGER active slots
@@ -34,9 +34,21 @@ With seven registered projects and the existing per-project cap of eight active 
 
 Standby participants may reconstruct context, observe allowed telemetry, prepare non-mutating analysis, and wait for admission. They may not acquire mutating work merely because they are part of the population.
 
+## Contract alignment precondition
+
+A multi-project scale stage MUST NOT open until every participating registered project exposes a compatible local swarm contract and the global run fields that are required to be identical actually match.
+
+For one coordinated global run, `expected_global_round_projects`, `global_run_contract_version`, and other launch-contract fields designated identical must agree across all participating projects. A missing `swarm_kernel/project.json`, mismatched expected-project set, unsupported project-kernel version, or conflicting project/repository binding blocks that project's admission and therefore blocks a stage that expects that project.
+
+The central runtime may explicitly support multiple historical project-kernel versions. **Backward-compatible parsing is not global-round alignment.** An older compatible project remains ineligible for the same coordinated round if its declared global project set or other identical launch-contract fields differ.
+
+Do not resolve alignment by silently taking an intersection, dropping projects, widening foreign-write authority, weakening fail-closed checks, or treating semantic similarity as contract compatibility.
+
+The current compatibility audit is `governance/SWARM_SCALE_100_COMPATIBILITY_AUDIT_20261005.json`. Stage 15 remains blocked until its alignment findings are remediated through the appropriate governed cross-project change path.
+
 ## Staged validation ladder
 
-The required progression is:
+After contract alignment, the required progression is:
 
 `15 -> 30 -> 60 -> 100`
 
@@ -76,7 +88,7 @@ Security, authentication, authorization, recovery, destructive operations, root 
 
 ## Regression learning
 
-Every scale-stage incident should be normalized into the regression-learning system. Recurring collision, stale-state, capacity, duplicate-work, handoff, or provider-admission failures should generate tests or service-pack candidates rather than being treated as one-off launch noise.
+Every scale-stage incident should be normalized into the regression-learning system. Recurring collision, stale-state, capacity, duplicate-work, handoff, contract-alignment, or provider-admission failures should generate tests or service-pack candidates rather than being treated as one-off launch noise.
 
 ## Success definition
 
