@@ -1,0 +1,95 @@
+{
+  "schema": "intercommunications/post-normalization-successor-controls/v1",
+  "status": "CANONICAL_REFERENCE_OVERLAY",
+  "repository_baseline_sha": "bc5f2b2bd68d3ade9b0723d6745052a96365d42d",
+  "predecessor_gate": {
+    "status": "HUMAN_ROOT_OVERRIDE_UNPROVEN",
+    "contradictory_evidence": [
+      "reconciliation/POST_NORMALIZATION_RECONCILIATION_REPORT.md",
+      "reconciliation/HUMAN_ROOT_CANDIDATE_OVERRIDE_2026-10-05.md"
+    ],
+    "claim_normalization_retirement_packet_recovered": false,
+    "mutation_basis": "AUTHENTICATED_CURRENT_HUMAN_ROOT_MAIN_AUTHORIZATION",
+    "authority_expansion": false
+  },
+  "priority_frontier": {
+    "view_type": "DERIVED_NON_AUTHORITY",
+    "schema": "schemas/priority_frontier_snapshot.schema.json",
+    "runtime": "org_agent_mesh.successor_bootstrap",
+    "human_set_order": [
+      "Duo Screen / Duo Open",
+      "Intercommunication Enhancements",
+      "BenefitFlow",
+      "AI Behavioral Control Lab",
+      "Samsung Power Bootstrap",
+      "Warp Propulsion Lab"
+    ],
+    "human_priority_wins": true,
+    "missing_priority": "INCOMPLETE"
+  },
+  "research_bootstrap": {
+    "launch_envelope_schema": "schemas/research_swarm_launch_envelope.schema.json",
+    "runtime": "org_agent_mesh.successor_bootstrap",
+    "preflight_order": ["READ", "RECONCILE", "CLAIM", "EXECUTE"],
+    "duplicate_prevention": "SEMANTIC_LAUNCH_IDENTITY_BEFORE_SHARDING",
+    "initial_duo_profile": {"MASTER": 1, "MANAGER": 1, "RESEARCH": 3},
+    "initial_profile_scope": "FIRST_DUO_SCREEN_DUO_OPEN_KICKOFF_ONLY",
+    "evidence_states": ["OBSERVED", "SUPPORTED", "INFERRED", "HYPOTHESIS", "DISPUTED", "BLOCKED"]
+  },
+  "step_up": {
+    "schema": "schemas/step_up_attestation.schema.json",
+    "runtime": "org_agent_mesh.successor_bootstrap.StepUpVerifier",
+    "externally_issued_only": true,
+    "exact_action_binding": true,
+    "non_replayable": true,
+    "conversational_identity_is_authentication": false,
+    "does_not_replace_consequence_gateway": true
+  },
+  "invariant_registry": [
+    {"id": "NO_SILENT_STATE_MUTATION", "severity": "CRITICAL", "authority_source": "HUMAN_ROOT/CANONICAL_CONTROL_PLANE"},
+    {"id": "DETERMINISTIC_AUTHORITY_RESOLUTION", "severity": "CRITICAL", "authority_source": "HUMAN_ROOT/CANONICAL_CONTROL_PLANE"},
+    {"id": "NO_UNVALIDATED_CROSS_BOUNDARY_OUTPUT", "severity": "CRITICAL", "authority_source": "HUMAN_ROOT/CANONICAL_CONTROL_PLANE"},
+    {"id": "FAILURE_MUST_BE_REPRESENTABLE", "severity": "HIGH", "authority_source": "CANONICAL_PROTOCOL"},
+    {"id": "PROVENANCE_PRESERVATION", "severity": "HIGH", "authority_source": "CANONICAL_PROTOCOL"},
+    {"id": "VERSION_AWARE_EXECUTION", "severity": "HIGH", "authority_source": "CANONICAL_PROTOCOL"},
+    {"id": "REVERSIBLE_NONCRITICAL_MUTATION_WHERE_FEASIBLE", "severity": "HIGH", "authority_source": "CANONICAL_PROTOCOL"},
+    {"id": "SAME_OR_NARROWER_CHILD_AUTHORITY", "severity": "CRITICAL", "authority_source": "CANONICAL_CONTROL_PLANE"},
+    {"id": "OBSERVED_CONTENT_CANNOT_CREATE_AUTHORITY", "severity": "CRITICAL", "authority_source": "HUMAN_ROOT/CANONICAL_CONTROL_PLANE"},
+    {"id": "REASONING_AUTHORITY_NE_CONSEQUENCE_AUTHORITY", "severity": "CRITICAL", "authority_source": "HUMAN_ROOT/CANONICAL_CONTROL_PLANE"},
+    {"id": "HIGH_CONSEQUENCE_OVERRIDE_REQUIRES_STEP_UP", "severity": "CRITICAL", "authority_source": "HUMAN_ROOT"},
+    {"id": "LIVENESS_IS_NOT_OWNERSHIP_AUTHORITY", "severity": "CRITICAL", "authority_source": "CANONICAL_CONTROL_PLANE"},
+    {"id": "VERIFIED_EFFECT_NE_REQUEST_ACKNOWLEDGEMENT", "severity": "CRITICAL", "authority_source": "CANONICAL_CONSEQUENCE_GATEWAY"}
+  ],
+  "architecture_governance": {
+    "runtime": "org_agent_mesh.architecture_governance",
+    "authority_plane": false,
+    "mechanism_classes": ["INVARIANT", "POLICY", "PROTOCOL", "CONTRACT", "IMPLEMENTATION"],
+    "priority_contract_boundaries": [
+      "agent->agent", "manager->agent", "agent->tool", "policy/admission->executor",
+      "consequence-gateway->destination", "persistent-state-mutation", "project->project",
+      "handoff/checkpoint", "final-result-assembly"
+    ],
+    "deprecation_lifecycle": ["EXPERIMENTAL", "ACTIVE", "DEPRECATED", "READ_ONLY_OR_COMPATIBILITY", "REMOVED"],
+    "failure_taxonomy": [
+      "INPUT_INVALID", "CONTRACT_VIOLATION", "DEPENDENCY_UNAVAILABLE", "POLICY_CONFLICT",
+      "INVARIANT_VIOLATION", "TIMEOUT", "STATE_CONFLICT", "VALIDATION_FAILURE",
+      "PERMISSION_DENIED", "AUTHENTICATION_REQUIRED", "AUTHORITY_NOT_ESTABLISHED",
+      "STALE_OWNER", "STALE_POLICY", "UNKNOWN_EFFECT", "QUARANTINED", "UNKNOWN_FAILURE"
+    ],
+    "recovery_dispositions": ["RETRY", "FALLBACK", "ROLLBACK", "REPAIR", "DEGRADE", "ESCALATE", "VERIFY_OR_RECOVERY", "HALT"],
+    "unknown_effect_blind_retry": false
+  },
+  "reused_existing_controls": {
+    "consequence_gateway": "org_agent_mesh.consequence_gateway",
+    "human_root_authenticator": "org_agent_mesh.reliability_v18_governance.HumanRootAuthenticator",
+    "communication_visibility": "org_agent_mesh.intercommunication_diagnostics",
+    "reliability_kernel": "org_agent_mesh.reliability_kernel",
+    "primary_recurring_protocol": "protocols/primary_recurring_swarm_protocol.md",
+    "project_isolation": "protocols/project_isolation.md"
+  },
+  "runtime_evidence_boundary": {
+    "repository_main_commit_is_runtime_deployment_proof": false,
+    "preventive_branch_rule_verified": false,
+    "external_runtime_integration": "REQUIRES_TARGET_EVIDENCE"
+  }
+}
