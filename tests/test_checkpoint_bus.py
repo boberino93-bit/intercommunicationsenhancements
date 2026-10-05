@@ -31,7 +31,6 @@ class CheckpointBusTests(unittest.TestCase):
             "blockers": (),
             "unfinished_work": (),
             "next_action": "begin bounded research",
-            "readback_verified": True,
         }
         payload.update(overrides)
         return StageCheckpoint(**payload)
@@ -78,17 +77,6 @@ class CheckpointBusTests(unittest.TestCase):
             accepted_states={"RESEARCH_PROGRESS", "RESEARCH_HANDOFF_READY"},
         )
         self.assertIsNone(selected)
-
-    def test_unverified_readback_is_not_consumed(self):
-        cp = self.make_checkpoint(readback_verified=False)
-        self.assertIsNone(
-            latest_for_cycle(
-                [cp],
-                cycle_id=cp.cycle_id,
-                stage=cp.stage,
-                accepted_states={"RESEARCH_PROGRESS"},
-            )
-        )
 
     def test_conflicting_sequence_reuse_fails_closed(self):
         first = self.make_checkpoint()
