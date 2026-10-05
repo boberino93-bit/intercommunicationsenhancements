@@ -10,7 +10,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
-KERNEL_VERSION = "1.1.0"
+KERNEL_VERSION = "1.2.1"
 SAFE_ID = re.compile(r"^[A-Za-z0-9._:-]{1,160}$")
 RUN_STATES = {"PREPARING", "READY", "ACTIVE", "DEGRADED_READ_ONLY", "CONVERGING", "COMPLETE", "ABORTED"}
 ROLES = {"PRIMARY", "MANAGER", "RESEARCH"}
