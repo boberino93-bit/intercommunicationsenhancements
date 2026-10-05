@@ -1,8 +1,10 @@
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 import unittest
 
-from swarm_kernel.kernel import ProjectConfig, admission_state, backpressure_state, can_open_start_gate, circuit_state, convergence_gate, lease_transition_allowed, new_lease, preflight, ready_record, record_path, validate_binding
+from swarm_kernel.kernel import KERNEL_VERSION, ProjectConfig, admission_state, backpressure_state, can_open_start_gate, circuit_state, convergence_gate, lease_transition_allowed, new_lease, preflight, ready_record, record_path, validate_binding
 
+ROOT = Path(__file__).resolve().parents[1]
 CFG = ProjectConfig("example", "owner/example", "main", "Example-AgentBus/")
 
 
@@ -35,6 +37,12 @@ class SwarmKernelTest(unittest.TestCase):
         self.assertEqual(admission_state(CFG, 0, capacity_known=False), "CAPACITY_UNKNOWN_READ_ONLY")
         self.assertEqual(admission_state(CFG, CFG.max_active_specialists, capacity_known=True), "MAX_ACTIVE_SPECIALISTS_REACHED")
         self.assertEqual(admission_state(CFG, 1, capacity_known=True), "ADMIT")
+
+    def test_real_project_contract_matches_runtime_kernel_version(self):
+        cfg = ProjectConfig.load(ROOT / "swarm_kernel" / "project.json")
+        self.assertEqual(KERNEL_VERSION, "1.2.1")
+        self.assertEqual(cfg.project_id, "intercommunicationsenhancements")
+        self.assertEqual(cfg.max_active_specialists, 8)
 
     def test_preflight_requires_handoff_instance_and_capacity(self):
         checks = {"identity_binding": True, "instance_binding": True, "run_epoch": True, "role_binding": True, "master_handoff_loaded": True, "package_parity": True, "capacity_admission": True, "recovery_state": True, "manager_presence": True, "foreign_write_policy": True, "tests": False}
