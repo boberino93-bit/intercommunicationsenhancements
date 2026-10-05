@@ -1,6 +1,6 @@
 {
   "schema": "org-agent-mesh/supervisory-governance/v1",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "status": "ACTIVE_OVERLAY",
   "authority_order": ["USER", "MASTER", "PRIMARY", "SUBORDINATE"],
   "scope_rule": "SUPERVISORY_LIFECYCLE_AUTHORITY_DOES_NOT_GRANT_CROSS_PROJECT_SOURCE_MUTATION",
@@ -47,9 +47,10 @@
   "respawn": {
     "intentional_stop_sets_allow_respawn_false": true,
     "timer_or_schedule_alone_may_respawn": false,
-    "user_may_restart": true,
+    "user_may_restart_logical_work": true,
     "master_or_primary_restart_requires_newer_task_revision": true,
-    "parent_under_stop_may_spawn_children": false
+    "parent_under_stop_may_spawn_children": false,
+    "logical_restart_does_not_imply_schedule_enablement": true
   },
   "scheduled_tasks": {
     "same_authority_model_required": true,
@@ -57,7 +58,21 @@
     "project_bound_launch_context_required_for_project_agents": true,
     "master_launch_must_remain_roaming": true,
     "intentional_stop_must_be_checked_before_launch": true,
-    "stale_governance_revision_must_not_be_treated_as_current": true
+    "stale_governance_revision_must_not_be_treated_as_current": true,
+    "activation_authority": "EXPLICIT_HUMAN_ACTION_ONLY",
+    "agents_may_enable_tasks": false,
+    "master_may_enable_tasks": false,
+    "primary_may_enable_tasks": false,
+    "manager_may_enable_tasks": false,
+    "researcher_may_enable_tasks": false,
+    "recovery_logic_may_enable_tasks": false,
+    "alignment_or_migration_may_enable_tasks": false,
+    "automatic_reenable_after_stop_pause_failure_or_migration": false,
+    "automatic_enable_on_startup_bootstrap_or_project_activation": false,
+    "task_updates_must_preserve_enabled_state_unless_current_human_explicitly_requests_change": true,
+    "disabled_is_a_control_gate_not_a_health_failure": true,
+    "disabled_task_must_not_be_treated_as_stale_or_needing_recovery": true,
+    "human_enablement_is_separate_from_runtime_restart_authority": true
   },
   "chat_assignment": {
     "prefer_direct_project_create": true,
@@ -70,6 +85,7 @@
   },
   "implementation": {
     "supervision_module": "org_agent_mesh.supervision",
+    "schedule_activation_module": "org_agent_mesh.schedule_activation",
     "chat_project_router_module": "org_agent_mesh.chat_project_routing",
     "protocol": "protocols/supervisory_governance.md"
   }
