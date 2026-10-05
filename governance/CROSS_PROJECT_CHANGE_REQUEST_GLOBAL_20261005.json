@@ -1,0 +1,14 @@
+{
+  "schema": "org-agent-mesh/cross-project-change-request/v1",
+  "request_id": "XPR-GLOBAL-SECURITY-20261005",
+  "source_project": "intercommunicationsenhancements",
+  "target_project": "GLOBAL_SWARM",
+  "required_source_role": "PRIMARY",
+  "change_summary": "Global review gate, owner recovery, authenticator-compatible recovery factor, artifact completeness, and inherited recovery/liveness hardening",
+  "authorization_case": "AUTH-GLOBAL-SECURITY-HARDENING-51491C3CB187",
+  "pre_change_revision": "004cdabd74d5735e22f27f1829b74cb6a3a01586",
+  "backup_ref": "backup/pre-global-security-hardening-20261005T1102",
+  "target_surfaces": ["UNIVERSAL_AGENT_ENTRYPOINT.md", "swarm_kernel/AGENT_BOOTSTRAP_OVERLAY.md"],
+  "rollback_available": true,
+  "status": "READY_FOR_PRODUCTION_VALIDATION"
+}

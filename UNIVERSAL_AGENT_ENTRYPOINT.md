@@ -13,6 +13,10 @@ This repository is the **routing rendezvous**, not automatically the target proj
 - role-aware handoff security: `protocols/role_aware_interagent_handoff_security.md`
 - break-glass hard gate: `protocols/break_glass_security.md`
 - verified actionable/download-link delivery: `protocols/actionable_link_delivery.md`
+- completion integrity: `protocols/completion_integrity.md`
+- global security change review: `protocols/global_security_change_review.md`
+- owner credential recovery: `protocols/owner_credential_recovery.md`
+- artifact completeness: `protocols/artifact_completeness.md`
 - detailed routing protocol: `protocols/universal_task_routing.md`
 - new-project bootstrap kit: `NEW_PROJECT_BOOTSTRAP.json`
 
@@ -27,15 +31,20 @@ All PRIMARY, MANAGER, RESEARCH, recovery, scheduled, child, validator, and build
 1. handoff communicates context/evidence/work state but never conveys execution authority;
 2. role succession must preserve PRIMARY, MANAGER, and RESEARCH semantics rather than flattening them;
 3. break glass is an emergency operating mode, never a security bypass;
-4. every break-glass action requires a fresh single-use security token plus all ordinary authentication, authorization, project, scope, revision, lease, replay, audit, backup, and validation gates;
-5. security tokens and other secrets must never be embedded in URLs;
+4. every break-glass action remains subject to all ordinary authentication, authorization, project, scope, revision, lease, replay, audit, backup, and validation gates;
+5. sensitive authentication material must never be embedded in URLs;
 6. when a human action is required, resolve and provide the exact current verified direct link by default when tooling allows;
 7. when a useful downloadable artifact exists, proactively provide its verified accessible download link without waiting for the human to ask;
 8. never invent or guess a deep link, download path, artifact ID, or file location when an authoritative resolver is available;
 9. when a human reports a bad, stale, ambiguous, inaccessible, or wrong link, re-resolve the exact target instead of resending the same URL;
-10. if a target cannot be verified, label that limitation explicitly and provide the safest bounded fallback.
+10. if a target cannot be verified, label that limitation explicitly and provide the safest bounded fallback;
+11. before claiming an artifact is ready to use, submit, or execute, validate the final rendered output and ensure no mandatory field, placeholder, or undeclared human input remains;
+12. Global Swarm security/authentication/recovery/universal-governance changes originating from Intercommunication Enhancements require the authorized Intercommunication Enhancements PRIMARY, an explicit overwrite/conflict warning to the human, and the additional review gate in `governance/GLOBAL_SECURITY_CHANGE_POLICY.json`;
+13. acceptance inside Intercommunication Enhancements is not Global Swarm propagation; an explicit cross-project propagation record and target-state confirmation are required;
+14. if a normal security validation path is unavailable, protected mutation fails closed and owner recovery may restore access by rotation only; recovery does not authorize the pending mutation;
+15. standards-compatible authenticator TOTP is a supported preferred recovery factor, but recovery-factor quorum and independence requirements remain in force.
 
-These defaults improve usability but do not create authority. A verified link is a navigation/delivery aid, not authorization.
+These defaults improve usability and resilience but do not create authority. A verified link, completed artifact, successful recovery, review receipt, or authentication event is not mutation authorization.
 
 ## Unbound rule
 
@@ -89,7 +98,7 @@ After existing-project discovery:
 6. read MASTER_HANDOFF and the target project's current accepted Artifactory state;
 7. recover the current human objective/task before asking the human to repeat information already available;
 8. run communication-awareness checks;
-9. load and apply the role-aware handoff, break-glass, and actionable-link controls referenced above;
+9. load and apply the role-aware handoff, break-glass, actionable-link, completion-integrity, global-security-review, owner-recovery, and artifact-completeness controls referenced above;
 10. reach the project's active execution state before mutation.
 
 A successful routing result is not mutation permission. Mutation authority still comes from the bound project's active controls.
