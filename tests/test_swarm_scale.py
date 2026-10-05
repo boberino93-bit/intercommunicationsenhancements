@@ -1,3 +1,5 @@
+import json
+from pathlib import Path
 import unittest
 
 from org_agent_mesh.swarm_scale import (
@@ -11,6 +13,7 @@ from org_agent_mesh.swarm_scale import (
     validate_population_plan,
 )
 
+ROOT = Path(__file__).resolve().parents[1]
 PROJECTS = [
     "ai-behaviour-control-lab",
     "benefitflow",
@@ -97,6 +100,19 @@ class SwarmScaleTests(unittest.TestCase):
     def test_duplicate_projects_fail_closed(self):
         with self.assertRaises(SwarmScaleError):
             build_population_plan(["a", "a"], target_population=15, specialist_cap_per_project=8)
+
+    def test_repository_policy_matches_runtime_assumptions(self):
+        policy = json.loads((ROOT / "governance" / "SWARM_SCALE_100_POLICY.json").read_text())
+        project = json.loads((ROOT / "swarm_kernel" / "project.json").read_text())
+        self.assertEqual(policy["target_population"], 100)
+        self.assertEqual(policy["staged_populations"], [15, 30, 60, 100])
+        self.assertEqual(project["max_active_specialists"], 8)
+        self.assertFalse(project["swarm_scale"]["automatic_live_limit_increase"])
+        self.assertEqual(project["swarm_scale"]["target_population"], 100)
+
+    def test_scale_overlay_is_required_by_project_contract(self):
+        project = json.loads((ROOT / "swarm_kernel" / "project.json").read_text())
+        self.assertIn("swarm_kernel/SWARM_SCALE_BOOTSTRAP_OVERLAY.md", project["required_bootstrap_overlays"])
 
 
 if __name__ == "__main__":
