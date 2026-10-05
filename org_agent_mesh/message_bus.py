@@ -6,6 +6,11 @@ from datetime import datetime, timezone
 
 from .constants import MESSAGE_KINDS, PROTOCOL_VERSION
 from .control_plane import require_active_session
+from .coordination_publication import (
+    CAPABILITY as COORDINATION_CAPABILITY,
+    CoordinationRoute,
+    require_coordination_publication,
+)
 from .project_scope import ProjectScopeError, require_project_id, require_resource_id
 
 REQUIRED = {
@@ -14,6 +19,7 @@ REQUIRED = {
     "applies_to_state", "evidence", "artifacts", "reply_to", "supersedes", "requires_ack", "tags",
     "correlation_id", "causation_id", "idempotency_key", "expires_at_utc"
 }
+SUBORDINATE_ROLES = {"RESEARCH", "MANAGER"}
 
 
 def _parse_utc(value):
@@ -41,6 +47,26 @@ def _atomic_create(path, payload):
         handle.write(payload)
         handle.flush()
         os.fsync(handle.fileno())
+
+
+def _bound_sender(message, sender_session, project_id):
+    binding = require_active_session(
+        sender_session,
+        project_id,
+        operation="message publication",
+    )
+    role = str(message["from_role"]).strip().upper()
+    if role in SUBORDINATE_ROLES:
+        binding.assert_capability(COORDINATION_CAPABILITY)
+    else:
+        binding.assert_capability("PUBLISH_MESSAGE")
+    if message["from_agent"] != binding.agent_id:
+        raise ProjectScopeError("claimed message agent does not match bound session")
+    if message["from_agent_instance_id"] != binding.agent_instance_id:
+        raise ProjectScopeError("claimed message execution instance does not match bound session")
+    if message.get("authority_conveyed") is True:
+        raise ProjectScopeError("coordination message cannot convey mutation authority")
+    return binding, role
 
 
 def validate_message(message, *, expected_project_id=None, sender_session=None, now=None):
@@ -85,16 +111,7 @@ def validate_message(message, *, expected_project_id=None, sender_session=None, 
         raise ValueError("from_agent_instance_id is required")
 
     if sender_session is not None:
-        binding = require_active_session(
-            sender_session,
-            project_id,
-            operation="message publication",
-            capability="PUBLISH_MESSAGE",
-        )
-        if message["from_agent"] != binding.agent_id:
-            raise ProjectScopeError("claimed message agent does not match bound session")
-        if message["from_agent_instance_id"] != binding.agent_instance_id:
-            raise ProjectScopeError("claimed message execution instance does not match bound session")
+        _bound_sender(message, sender_session, project_id)
 
     now = now or datetime.now(timezone.utc)
     if now.tzinfo is None:
@@ -105,13 +122,38 @@ def validate_message(message, *, expected_project_id=None, sender_session=None, 
     return True
 
 
-def append_message(messages_dir, message, *, sender_session, expected_project_id=None, now=None):
+def append_message(
+    messages_dir,
+    message,
+    *,
+    sender_session,
+    expected_project_id=None,
+    now=None,
+    coordination_route: CoordinationRoute | None = None,
+    target_repository: str | None = None,
+    target_artifactory_namespace: str | None = None,
+):
     validate_message(
         message,
         expected_project_id=expected_project_id,
         sender_session=sender_session,
         now=now,
     )
+    role = str(message["from_role"]).strip().upper()
+    if role in SUBORDINATE_ROLES:
+        if coordination_route is None or target_repository is None:
+            raise ProjectScopeError("subordinate publication requires a registered coordination route")
+        require_coordination_publication(
+            actor_project_id=message["project_id"],
+            actor_role=role,
+            actor_capabilities=sender_session.binding.capabilities,
+            route=coordination_route,
+            target_repository=target_repository,
+            target_artifactory_namespace=target_artifactory_namespace,
+            operation="CREATE_NEW_MESSAGE",
+            authority_conveyed=bool(message.get("authority_conveyed", False)),
+        )
+
     directory = Path(messages_dir)
     directory.mkdir(parents=True, exist_ok=True)
     key = _storage_key(message)
@@ -126,7 +168,17 @@ def append_message(messages_dir, message, *, sender_session, expected_project_id
     return path
 
 
-def supersede_message(messages_dir, old_message, replacement, *, sender_session, expected_project_id=None):
+def supersede_message(
+    messages_dir,
+    old_message,
+    replacement,
+    *,
+    sender_session,
+    expected_project_id=None,
+    coordination_route: CoordinationRoute | None = None,
+    target_repository: str | None = None,
+    target_artifactory_namespace: str | None = None,
+):
     replacement = dict(replacement)
     if old_message["project_id"] != replacement["project_id"]:
         raise ProjectScopeError("message supersession cannot cross projects")
@@ -139,6 +191,9 @@ def supersede_message(messages_dir, old_message, replacement, *, sender_session,
         replacement,
         sender_session=sender_session,
         expected_project_id=expected_project_id,
+        coordination_route=coordination_route,
+        target_repository=target_repository,
+        target_artifactory_namespace=target_artifactory_namespace,
     )
 
 
