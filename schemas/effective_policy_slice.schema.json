@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "org-agent-mesh/effective-policy-slice/v1",
+  "title": "Effective Policy Slice",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["policy_version","project_id","repository_identity","work_instance_id","agent_instance_id","authority_capabilities","allowed_effect_classes","execution_profile","ownership_epoch","schema_versions","protected_authorization_ids"],
+  "properties": {
+    "policy_version": {"type":"string","minLength":1},
+    "project_id": {"type":"string","pattern":"^[a-z0-9](?:[a-z0-9._-]{0,126}[a-z0-9])?$"},
+    "repository_identity": {"type":"string","pattern":"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"},
+    "work_instance_id": {"type":"string","minLength":1},
+    "agent_instance_id": {"type":"string","minLength":1},
+    "authority_capabilities": {"type":"array","items":{"type":"string"},"uniqueItems":true},
+    "allowed_effect_classes": {"type":"array","items":{"type":"string"},"uniqueItems":true},
+    "execution_profile": {"type":"string","minLength":1},
+    "ownership_epoch": {"type":"integer","minimum":0},
+    "schema_versions": {"type":"array","items":{"type":"array","prefixItems":[{"type":"string"},{"type":"string"}],"minItems":2,"maxItems":2}},
+    "protected_authorization_ids": {"type":"array","items":{"type":"string"},"uniqueItems":true}
+  }
+}
