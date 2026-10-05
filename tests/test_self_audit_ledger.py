@@ -10,6 +10,7 @@ from org_agent_mesh.self_audit import (
     ledger_head,
     role_extension,
     validate_append,
+    validate_ledger_transition,
     validate_record,
     verify_anchored_head,
     verify_chain,
@@ -61,6 +62,22 @@ class SelfAuditLedgerTests(unittest.TestCase):
     def test_valid_append_requires_previous_links(self):
         second = self.make_second()
         validate_append([self.audit1], second)
+
+    def test_valid_ledger_transition_may_only_append(self):
+        second = self.make_second()
+        validate_ledger_transition([self.audit1], [self.audit1, second])
+
+    def test_ledger_transition_cannot_shrink_history(self):
+        second = self.make_second()
+        with self.assertRaisesRegex(SelfAuditError, "HISTORY_SHRINK_DENIED"):
+            validate_ledger_transition([self.audit1, second], [self.audit1])
+
+    def test_ledger_transition_cannot_rewrite_historical_record(self):
+        changed = copy.deepcopy(self.audit1)
+        changed["overall_score"] = 8.5
+        changed["record_hash"] = canonical_record_hash(changed)
+        with self.assertRaisesRegex(SelfAuditError, "HISTORICAL_RECORD_MUTATION_DENIED"):
+            validate_ledger_transition([self.audit1], [changed])
 
     def test_duplicate_id_is_denied(self):
         duplicate = copy.deepcopy(self.audit1)
