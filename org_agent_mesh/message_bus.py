@@ -5,10 +5,8 @@ import os
 from datetime import datetime, timezone
 
 from .constants import MESSAGE_KINDS, PROTOCOL_VERSION
-from .control_plane import require_active_session
+from .control_plane import binding_is_primary_class, require_active_session
 from .coordination_publication import (
-    CAPABILITY as COORDINATION_CAPABILITY,
-    LEGACY_CAPABILITY as LEGACY_COORDINATION_CAPABILITY,
     CoordinationRoute,
     require_coordination_publication,
 )
@@ -20,7 +18,8 @@ REQUIRED = {
     "applies_to_state", "evidence", "artifacts", "reply_to", "supersedes", "requires_ack", "tags",
     "correlation_id", "causation_id", "idempotency_key", "expires_at_utc"
 }
-SUBORDINATE_ROLES = {"RESEARCH", "MANAGER"}
+SUBORDINATE_ROLES = {"RESEARCH", "MANAGER", "RESEARCHER_1", "RESEARCHER_2", "RESEARCHER_3"}
+PRIMARY_ROLES = {"PRIMARY"}
 
 
 def _parse_utc(value):
@@ -56,21 +55,27 @@ def _bound_sender(message, sender_session, project_id):
         project_id,
         operation="message publication",
     )
-    role = str(message["from_role"]).strip().upper()
-    if role in SUBORDINATE_ROLES:
-        if COORDINATION_CAPABILITY in binding.capabilities:
-            binding.assert_capability(COORDINATION_CAPABILITY)
-        else:
-            binding.assert_capability(LEGACY_COORDINATION_CAPABILITY)
-    else:
+    claimed_role = str(message["from_role"]).strip().upper()
+    primary_class = binding_is_primary_class(binding)
+
+    # Never let caller-controlled message metadata upgrade the bound execution.
+    if claimed_role in PRIMARY_ROLES and not primary_class:
+        raise ProjectScopeError("claimed Primary role is not supported by the bound execution capabilities")
+    if primary_class:
         binding.assert_capability("PUBLISH_MESSAGE")
+    else:
+        if claimed_role not in SUBORDINATE_ROLES:
+            raise ProjectScopeError("non-primary message must use an allowed subordinate role identity")
+        if "PUBLISH_MESSAGE" not in binding.capabilities:
+            raise ProjectScopeError("bound subordinate execution lacks legacy coordination publication capability")
+
     if message["from_agent"] != binding.agent_id:
         raise ProjectScopeError("claimed message agent does not match bound session")
     if message["from_agent_instance_id"] != binding.agent_instance_id:
         raise ProjectScopeError("claimed message execution instance does not match bound session")
     if message.get("authority_conveyed") is True:
         raise ProjectScopeError("coordination message cannot convey mutation authority")
-    return binding, role
+    return binding, claimed_role, primary_class
 
 
 def validate_message(message, *, expected_project_id=None, sender_session=None, now=None):
@@ -143,14 +148,14 @@ def append_message(
         sender_session=sender_session,
         now=now,
     )
-    role = str(message["from_role"]).strip().upper()
-    if role in SUBORDINATE_ROLES:
+    binding = sender_session.binding
+    if not binding_is_primary_class(binding):
         if coordination_route is None or target_repository is None:
             raise ProjectScopeError("subordinate publication requires a registered coordination route")
         require_coordination_publication(
             actor_project_id=message["project_id"],
-            actor_role=role,
-            actor_capabilities=sender_session.binding.capabilities,
+            actor_role=str(message["from_role"]).strip().upper(),
+            actor_capabilities=binding.capabilities,
             route=coordination_route,
             target_repository=target_repository,
             target_artifactory_namespace=target_artifactory_namespace,
