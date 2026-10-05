@@ -1,0 +1,43 @@
+{
+  "schema": "org-agent-mesh/agent-checkpoint/v1",
+  "project_id": "intercommunicationsenhancements",
+  "role": "PRIMARY",
+  "execution_mode": "QA",
+  "agent_id": "primary-remediation",
+  "agent_instance_id": "primary-remediation-20261005T190842Z",
+  "checkpoint_utc": "2026-10-05T19:13:00Z",
+  "current_task": "qa-remediation-20261005",
+  "working_branch": "hardening/security-qa-remediation-20261005",
+  "last_verified_repository_revision": "9227405e1339daf5cf8b6b092476f620d700d7ea",
+  "completed_work": [
+    "sanitized known exposed public authorization artifacts",
+    "added durable-record validation primitive",
+    "added evidence freshness and replay lifecycle primitive",
+    "added verified two-receipt transaction gate with post-change verification",
+    "added recovery request and evidence replay semantics",
+    "restored regression coverage for transaction lifecycle controls",
+    "aligned swarm launch overlay with roleless demand-driven admission",
+    "advanced the cross-project record to pending post-merge verification"
+  ],
+  "unresolved_work": [
+    "run exact-branch CI and targeted regressions",
+    "repair any validation failure",
+    "promote only validated branch state",
+    "perform production read-back and terminal cross-project reconciliation",
+    "close or supersede stale authorization proof artifacts"
+  ],
+  "blockers": [
+    "real external enrollment drill requires a trusted enrollment surface outside swarm context"
+  ],
+  "evidence_refs": [
+    "governance/CROSS_PROJECT_CHANGE_REQUEST_GLOBAL_20261005.json",
+    "governance/TRANSACTION_EVIDENCE_POLICY.json",
+    "org_agent_mesh/durable_record_guard.py",
+    "org_agent_mesh/evidence_lifecycle.py",
+    "org_agent_mesh/two_receipt_gate.py",
+    "swarm_kernel/AGENT_BOOTSTRAP_OVERLAY.md",
+    "tests/test_transaction_evidence_lifecycle.py",
+    "tests/test_two_receipt_gate.py"
+  ],
+  "continuation": "Validate the exact branch, fix failures before merge, then verify production and finalize terminal records."
+}
