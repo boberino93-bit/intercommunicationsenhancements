@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any, Mapping, Sequence
 
 KERNEL_VERSION = "1.2.1"
+SUPPORTED_PROJECT_KERNEL_VERSIONS = frozenset({"1.0.0", "1.1.0", "1.2.0", "1.2.1"})
 SAFE_ID = re.compile(r"^[A-Za-z0-9._:-]{1,160}$")
 RUN_STATES = {"PREPARING", "READY", "ACTIVE", "DEGRADED_READ_ONLY", "CONVERGING", "COMPLETE", "ABORTED"}
 ROLES = {"PRIMARY", "MANAGER", "RESEARCH"}
@@ -44,11 +45,13 @@ class ProjectConfig:
     manager_queue_soft_limit: int = 8
     manager_queue_hard_limit: int = 15
     max_active_specialists: int = 8
+    kernel_version: str = KERNEL_VERSION
 
     @classmethod
     def load(cls, path: str | Path) -> "ProjectConfig":
         data = json.loads(Path(path).read_text(encoding="utf-8"))
-        if data.get("kernel_version") != KERNEL_VERSION:
+        project_kernel_version = str(data.get("kernel_version", ""))
+        if project_kernel_version not in SUPPORTED_PROJECT_KERNEL_VERSIONS:
             raise ValueError("unsupported swarm-kernel version")
         cfg = cls(
             project_id=data["project_id"], repository=data["repository"],
@@ -56,7 +59,7 @@ class ProjectConfig:
             state_root=data.get("state_root", ".swarm"), lease_ttl_seconds=int(data.get("lease_ttl_seconds", 1800)),
             heartbeat_interval_seconds=int(data.get("heartbeat_interval_seconds", 300)), circuit_breaker_threshold=int(data.get("circuit_breaker_threshold", 3)),
             manager_queue_soft_limit=int(data.get("manager_queue_soft_limit", 8)), manager_queue_hard_limit=int(data.get("manager_queue_hard_limit", 15)),
-            max_active_specialists=int(data.get("max_active_specialists", 8)),
+            max_active_specialists=int(data.get("max_active_specialists", 8)), kernel_version=project_kernel_version,
         )
         require_safe_id(cfg.project_id, "project_id")
         if "/" not in cfg.repository:
@@ -98,7 +101,7 @@ def ready_record(cfg: ProjectConfig, global_run_id: str, agent_id: str, agent_in
     require_safe_id(agent_instance_id, "agent_instance_id")
     if role not in ROLES:
         raise ValueError("invalid role")
-    return {"schema": "swarm-kernel/ready/v2", "kernel_version": KERNEL_VERSION, "project_id": cfg.project_id, "repository": cfg.repository, "global_run_id": global_run_id, "agent_id": agent_id, "agent_instance_id": agent_instance_id, "role": role, "execution_mode": execution_mode, "package_version": package_version, "source_revision": source_revision, "status": "READY", "timestamp_utc": iso()}
+    return {"schema": "swarm-kernel/ready/v2", "kernel_version": cfg.kernel_version, "project_id": cfg.project_id, "repository": cfg.repository, "global_run_id": global_run_id, "agent_id": agent_id, "agent_instance_id": agent_instance_id, "role": role, "execution_mode": execution_mode, "package_version": package_version, "source_revision": source_revision, "status": "READY", "timestamp_utc": iso()}
 
 
 def can_open_start_gate(expected_agents: Sequence[str], ready_agents: Sequence[str], explicit_close: bool = False) -> tuple[bool, list[str]]:
@@ -178,7 +181,7 @@ def preflight(cfg: ProjectConfig, checks: Mapping[str, bool]) -> dict[str, Any]:
     required = ("identity_binding", "instance_binding", "run_epoch", "role_binding", "master_handoff_loaded", "package_parity", "capacity_admission", "recovery_state", "manager_presence", "foreign_write_policy", "tests")
     missing = [name for name in required if name not in checks]
     failed = [name for name in required if checks.get(name) is not True]
-    return {"schema": "swarm-kernel/preflight/v2", "project_id": cfg.project_id, "kernel_version": KERNEL_VERSION, "required_checks": list(required), "missing": missing, "failed": failed, "ready": not missing and not failed, "timestamp_utc": iso()}
+    return {"schema": "swarm-kernel/preflight/v2", "project_id": cfg.project_id, "kernel_version": cfg.kernel_version, "required_checks": list(required), "missing": missing, "failed": failed, "ready": not missing and not failed, "timestamp_utc": iso()}
 
 
 def convergence_gate(*, research_accounted: bool, manager_dispositions_complete: bool, primary_decisions_persisted: bool, package_parity_restored: bool, unresolved_leases: int, recovery_checkpoint_valid: bool, master_handoff_checkpointed: bool = True) -> dict[str, Any]:
@@ -189,4 +192,4 @@ def convergence_gate(*, research_accounted: bool, manager_dispositions_complete:
 def health_snapshot(cfg: ProjectConfig, global_run_id: str, *, state: str, active_agents: int, manager_queue_depth: int, collisions: int, failed_checks: int, last_accepted_integration: str | None, package_version: str, capacity_known: bool = True) -> dict[str, Any]:
     if state not in RUN_STATES:
         raise ValueError("invalid run state")
-    return {"schema": "swarm-kernel/health/v2", "kernel_version": KERNEL_VERSION, "project_id": cfg.project_id, "repository": cfg.repository, "global_run_id": global_run_id, "state": state, "active_agents": active_agents, "manager_queue_depth": manager_queue_depth, "backpressure": backpressure_state(cfg, manager_queue_depth), "admission": admission_state(cfg, active_agents, capacity_known=capacity_known), "collisions": collisions, "failed_checks": failed_checks, "last_accepted_integration": last_accepted_integration, "package_version": package_version, "cross_project_authority": "NONE", "telemetry_visibility": "READ_ONLY", "swarm_state_authority": "PROJECT_LOCAL_OPERATIONAL_RECOVERY_STATE", "timestamp_utc": iso()}
+    return {"schema": "swarm-kernel/health/v2", "kernel_version": cfg.kernel_version, "project_id": cfg.project_id, "repository": cfg.repository, "global_run_id": global_run_id, "state": state, "active_agents": active_agents, "manager_queue_depth": manager_queue_depth, "backpressure": backpressure_state(cfg, manager_queue_depth), "admission": admission_state(cfg, active_agents, capacity_known=capacity_known), "collisions": collisions, "failed_checks": failed_checks, "last_accepted_integration": last_accepted_integration, "package_version": package_version, "cross_project_authority": "NONE", "telemetry_visibility": "READ_ONLY", "swarm_state_authority": "PROJECT_LOCAL_OPERATIONAL_RECOVERY_STATE", "timestamp_utc": iso()}
