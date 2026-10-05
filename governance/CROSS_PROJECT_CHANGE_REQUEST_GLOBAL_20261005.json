@@ -4,11 +4,19 @@
   "source_project": "intercommunicationsenhancements",
   "target_project": "GLOBAL_SWARM",
   "required_source_role": "PRIMARY",
-  "change_summary": "Global review gate, owner recovery, authenticator-compatible recovery factor, artifact completeness, and inherited recovery/liveness hardening",
-  "authorization_case": "AUTH-GLOBAL-SECURITY-HARDENING-51491C3CB187",
-  "pre_change_revision": "004cdabd74d5735e22f27f1829b74cb6a3a01586",
-  "backup_ref": "backup/pre-global-security-hardening-20261005T1102",
-  "target_surfaces": ["UNIVERSAL_AGENT_ENTRYPOINT.md", "swarm_kernel/AGENT_BOOTSTRAP_OVERLAY.md"],
+  "change_summary": "Global review gate, owner recovery, authenticator-compatible recovery factor, artifact completeness, evidence lifecycle/replay hardening, durable-record protection, and roleless-routing alignment",
+  "authorization_case": "AUTH-QA-CONTINUE-79BB29D19C47",
+  "pre_change_revision": "9227405e1339daf5cf8b6b092476f620d700d7ea",
+  "backup_ref": "backup/pre-security-qa-remediation-20261005T1137",
+  "target_surfaces": [
+    "governance/GLOBAL_SECURITY_CHANGE_POLICY.json",
+    "governance/OWNER_CREDENTIAL_RECOVERY_POLICY.json",
+    "governance/TRANSACTION_EVIDENCE_POLICY.json",
+    "swarm_kernel/AGENT_BOOTSTRAP_OVERLAY.md"
+  ],
   "rollback_available": true,
-  "status": "READY_FOR_PRODUCTION_VALIDATION"
+  "post_change_target_verification_required": true,
+  "post_change_verification_ref": null,
+  "status": "PENDING_POST_MERGE_TARGET_VERIFICATION",
+  "known_external_blocker": "MICROSOFT_AUTHENTICATOR_ENROLLMENT_REQUIRES_SECURE_EXTERNAL_ENROLLMENT_SURFACE"
 }

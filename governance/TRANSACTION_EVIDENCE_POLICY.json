@@ -1,0 +1,24 @@
+{
+  "schema": "org-agent-mesh/transaction-evidence/v1",
+  "version": "1.1.0",
+  "status": "ACTIVE_HARD_GATE",
+  "module": "org_agent_mesh.evidence_lifecycle",
+  "applies_to": [
+    "HIGH_CONSEQUENCE_EXTERNAL_PROOF",
+    "OWNER_RECOVERY_FACTOR",
+    "GLOBAL_SECURITY_REVIEW_RECEIPT"
+  ],
+  "requirements": {
+    "verified": true,
+    "subject_binding": true,
+    "transaction_binding": true,
+    "verifier_reference": true,
+    "issued_at": true,
+    "expires_at": true,
+    "single_use": true,
+    "replay_denied": true
+  },
+  "high_consequence_external_proof_must_pass_lifecycle_before_legacy_disposition_check": true,
+  "legacy_validation_without_transaction_evidence": "INSUFFICIENT_FOR_PROTECTED_OPERATION",
+  "failure_result": "DENY_AFFECTED_OPERATION_CONTINUE_SAFE_READ_ONLY"
+}

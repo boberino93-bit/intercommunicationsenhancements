@@ -1,0 +1,28 @@
+{
+  "schema": "org-agent-mesh/durable-record-guard/v1",
+  "version": "1.0.0",
+  "status": "ACTIVE_HARD_GATE",
+  "module": "org_agent_mesh.durable_record_guard",
+  "apply_before_publication_to": [
+    "PUBLIC_AUTHORIZATION_PROOF",
+    "DURABLE_LOG",
+    "HANDOFF",
+    "COORDINATION_MESSAGE",
+    "AUDIT_RECORD"
+  ],
+  "prohibited_fields": [
+    "ephemeral_value",
+    "enrollment_material",
+    "recovery_value"
+  ],
+  "prohibited_labels": [
+    "Security-Token",
+    "Primary-Security-Token",
+    "Global-Security-Review-Token"
+  ],
+  "redacted_or_removed_markers_are_allowed": true,
+  "nested_records_must_be_scanned": true,
+  "text_payloads_must_be_scanned": true,
+  "violation_action": "FAIL_CLOSED_BEFORE_DURABLE_PUBLICATION",
+  "sanitization_does_not_restore_compromised_value_trust": true
+}
