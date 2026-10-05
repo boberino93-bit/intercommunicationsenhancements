@@ -24,34 +24,13 @@
     "next_action"
   ],
   "properties": {
-    "schema": {
-      "const": "intercommunications/swarm-stage-checkpoint/v1"
-    },
-    "checkpoint_id": {
-      "type": "string",
-      "minLength": 1,
-      "maxLength": 512
-    },
-    "cycle_id": {
-      "type": "string",
-      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:00:00[+-][0-9]{2}:[0-9]{2}$"
-    },
-    "recovery_of_cycle_id": {
-      "type": ["string", "null"],
-      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:00:00[+-][0-9]{2}:[0-9]{2}$"
-    },
-    "stage": {
-      "enum": ["RESEARCHER_1", "MANAGER", "PRIMARY"]
-    },
-    "run_id": {
-      "type": "string",
-      "minLength": 1,
-      "maxLength": 256
-    },
-    "sequence": {
-      "type": "integer",
-      "minimum": 0
-    },
+    "schema": {"const": "intercommunications/swarm-stage-checkpoint/v1"},
+    "checkpoint_id": {"type": "string", "minLength": 1, "maxLength": 512},
+    "cycle_id": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:00:00[+-][0-9]{2}:[0-9]{2}$"},
+    "recovery_of_cycle_id": {"type": ["string", "null"], "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:00:00[+-][0-9]{2}:[0-9]{2}$"},
+    "stage": {"enum": ["RESEARCHER_1", "RESEARCHER_2", "RESEARCHER_3", "MANAGER", "PRIMARY"]},
+    "run_id": {"type": "string", "minLength": 1, "maxLength": 256},
+    "sequence": {"type": "integer", "minimum": 0},
     "state": {
       "enum": [
         "RESEARCH_PROGRESS",
@@ -62,75 +41,25 @@
         "PRIMARY_PROPOSAL_READY",
         "CHECKPOINT_IO_BLOCKED",
         "UPSTREAM_NOT_READY",
+        "PROJECT_HOLD_ACTIVE",
         "INTENTIONAL_STOP",
         "INTEGRITY_QUARANTINE"
       ]
     },
-    "phase": {
-      "type": "string",
-      "minLength": 1,
-      "maxLength": 128
-    },
-    "trigger": {
-      "enum": ["SCHEDULED", "USER_INTERACTIVE", "RECOVERY", "RETRY"]
-    },
-    "created_at": {
-      "type": "string",
-      "format": "date-time"
-    },
-    "source_revisions": {
-      "type": "object",
-      "additionalProperties": {
-        "type": "string",
-        "minLength": 1
-      }
-    },
-    "upstream_checkpoint_ids": {
-      "type": "array",
-      "items": {
-        "type": "string",
-        "minLength": 1
-      },
-      "uniqueItems": true
-    },
-    "evidence_refs": {
-      "type": "array",
-      "items": {
-        "type": "string",
-        "minLength": 1
-      },
-      "uniqueItems": true
-    },
-    "summary": {
-      "type": "string",
-      "maxLength": 12000
-    },
-    "blockers": {
-      "type": "array",
-      "items": {
-        "type": "string",
-        "minLength": 1
-      },
-      "uniqueItems": true
-    },
-    "unfinished_work": {
-      "type": "array",
-      "items": {
-        "type": "string",
-        "minLength": 1
-      },
-      "uniqueItems": true
-    },
-    "next_action": {
-      "type": "string",
-      "maxLength": 4000
-    }
+    "phase": {"type": "string", "minLength": 1, "maxLength": 128},
+    "trigger": {"enum": ["SCHEDULED", "USER_INTERACTIVE", "RECOVERY", "RETRY"]},
+    "created_at": {"type": "string", "format": "date-time"},
+    "source_revisions": {"type": "object", "additionalProperties": {"type": "string", "minLength": 1}},
+    "upstream_checkpoint_ids": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+    "evidence_refs": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+    "summary": {"type": "string", "maxLength": 12000},
+    "blockers": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+    "unfinished_work": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+    "next_action": {"type": "string", "maxLength": 4000}
   },
   "allOf": [
     {
-      "if": {
-        "properties": {"stage": {"const": "RESEARCHER_1"}}
-      },
+      "if": {"properties": {"stage": {"enum": ["RESEARCHER_1", "RESEARCHER_2", "RESEARCHER_3"]}}},
       "then": {
         "properties": {
           "state": {
@@ -139,6 +68,7 @@
               "RESEARCH_HANDOFF_READY",
               "CHECKPOINT_IO_BLOCKED",
               "UPSTREAM_NOT_READY",
+              "PROJECT_HOLD_ACTIVE",
               "INTENTIONAL_STOP",
               "INTEGRITY_QUARANTINE"
             ]
@@ -147,9 +77,7 @@
       }
     },
     {
-      "if": {
-        "properties": {"stage": {"const": "MANAGER"}}
-      },
+      "if": {"properties": {"stage": {"const": "MANAGER"}}},
       "then": {
         "properties": {
           "state": {
@@ -158,6 +86,7 @@
               "MANAGER_HANDOFF_READY",
               "CHECKPOINT_IO_BLOCKED",
               "UPSTREAM_NOT_READY",
+              "PROJECT_HOLD_ACTIVE",
               "INTENTIONAL_STOP",
               "INTEGRITY_QUARANTINE"
             ]
@@ -166,9 +95,7 @@
       }
     },
     {
-      "if": {
-        "properties": {"stage": {"const": "PRIMARY"}}
-      },
+      "if": {"properties": {"stage": {"const": "PRIMARY"}}},
       "then": {
         "properties": {
           "state": {
@@ -177,6 +104,7 @@
               "PRIMARY_PROPOSAL_READY",
               "CHECKPOINT_IO_BLOCKED",
               "UPSTREAM_NOT_READY",
+              "PROJECT_HOLD_ACTIVE",
               "INTENTIONAL_STOP",
               "INTEGRITY_QUARANTINE"
             ]
@@ -185,12 +113,8 @@
       }
     },
     {
-      "if": {
-        "properties": {"trigger": {"const": "USER_INTERACTIVE"}}
-      },
-      "then": {
-        "required": ["recovery_of_cycle_id"]
-      }
+      "if": {"properties": {"trigger": {"const": "USER_INTERACTIVE"}}},
+      "then": {"required": ["recovery_of_cycle_id"]}
     }
   ]
 }

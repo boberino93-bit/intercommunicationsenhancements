@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/boberino93-bit/intercommunicationsenhancements/schemas/project_work_control_event.schema.json",
+  "title": "Project Work Control Event",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "event_id",
+    "project_id",
+    "action",
+    "hold_order_id",
+    "issued_at",
+    "effective_at",
+    "expires_at",
+    "resume_policy",
+    "reason_code",
+    "human_reason",
+    "metadata",
+    "claimed_principal",
+    "authentication_ref",
+    "authorization_case_id",
+    "preserve_partial_state"
+  ],
+  "properties": {
+    "schema": {"const": "org-agent-mesh/project-work-control-event/v1"},
+    "event_id": {"type": "string", "minLength": 1, "maxLength": 256},
+    "project_id": {"type": "string", "minLength": 1, "maxLength": 128},
+    "action": {"enum": ["HOLD", "EXTEND_HOLD", "RESUME"]},
+    "hold_order_id": {"type": "string", "minLength": 1, "maxLength": 256},
+    "issued_at": {"type": "string", "format": "date-time"},
+    "effective_at": {"type": "string", "format": "date-time"},
+    "expires_at": {"type": ["string", "null"], "format": "date-time"},
+    "resume_policy": {"enum": ["MANUAL", "AUTO_AT_EXPIRY"]},
+    "reason_code": {
+      "enum": [
+        "HUMAN_PRIORITY",
+        "COOLING_OFF_PERIOD",
+        "RESOURCE_REALLOCATION",
+        "SAFETY_REVIEW",
+        "EVIDENCE_REVIEW",
+        "DEPENDENCY_WAIT",
+        "SECURITY_REVIEW",
+        "PROJECT_REASSESSMENT",
+        "OTHER"
+      ]
+    },
+    "human_reason": {"type": "string", "maxLength": 4000},
+    "metadata": {"type": "object", "additionalProperties": true},
+    "claimed_principal": {"type": "string", "minLength": 1, "maxLength": 256},
+    "authentication_ref": {"type": "string", "minLength": 1, "maxLength": 1024},
+    "authorization_case_id": {"type": "string", "minLength": 1, "maxLength": 256},
+    "preserve_partial_state": {"const": true},
+    "source_revision": {"type": ["string", "null"]}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"action": {"enum": ["EXTEND_HOLD", "RESUME"]}}},
+      "then": {"required": ["hold_order_id"]}
+    }
+  ]
+}

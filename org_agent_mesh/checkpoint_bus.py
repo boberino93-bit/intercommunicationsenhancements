@@ -11,15 +11,18 @@ SCHEMA = "intercommunications/swarm-stage-checkpoint/v1"
 CHECKPOINT_ISSUE_REPOSITORY = "boberino93-bit/intercommunicationsenhancements"
 CHECKPOINT_ISSUE_NUMBER = 25
 
-STAGES = ("RESEARCHER_1", "MANAGER", "PRIMARY")
+STAGES = ("RESEARCHER_1", "RESEARCHER_2", "RESEARCHER_3", "MANAGER", "PRIMARY")
 STAGE_STATES = {
     "RESEARCHER_1": {"RESEARCH_PROGRESS", "RESEARCH_HANDOFF_READY"},
+    "RESEARCHER_2": {"RESEARCH_PROGRESS", "RESEARCH_HANDOFF_READY"},
+    "RESEARCHER_3": {"RESEARCH_PROGRESS", "RESEARCH_HANDOFF_READY"},
     "MANAGER": {"MANAGER_PROGRESS", "MANAGER_HANDOFF_READY"},
     "PRIMARY": {"PRIMARY_PROGRESS", "PRIMARY_PROPOSAL_READY"},
 }
 COMMON_STATES = {
     "CHECKPOINT_IO_BLOCKED",
     "UPSTREAM_NOT_READY",
+    "PROJECT_HOLD_ACTIVE",
     "INTENTIONAL_STOP",
     "INTEGRITY_QUARANTINE",
 }
@@ -213,8 +216,12 @@ def latest_for_cycle(
 
 
 def accepted_upstream_states(downstream_stage: str) -> tuple[str, set[str]]:
-    if downstream_stage == "MANAGER":
+    if downstream_stage == "RESEARCHER_2":
         return "RESEARCHER_1", {"RESEARCH_PROGRESS", "RESEARCH_HANDOFF_READY"}
+    if downstream_stage == "RESEARCHER_3":
+        return "RESEARCHER_2", {"RESEARCH_PROGRESS", "RESEARCH_HANDOFF_READY"}
+    if downstream_stage == "MANAGER":
+        return "RESEARCHER_3", {"RESEARCH_PROGRESS", "RESEARCH_HANDOFF_READY"}
     if downstream_stage == "PRIMARY":
         return "MANAGER", {"MANAGER_PROGRESS", "MANAGER_HANDOFF_READY"}
-    raise CheckpointError("Researcher has no scheduled upstream stage in this serial pipeline")
+    raise CheckpointError("RESEARCHER_1 has no scheduled upstream stage in this serial pipeline")
