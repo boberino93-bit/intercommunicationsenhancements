@@ -13,13 +13,22 @@
   "identity_source": "PROJECT_IDENTITY_LOCK.json",
   "required_bootstrap_overlays": [
     "swarm_kernel/AGENT_BOOTSTRAP_OVERLAY.md",
-    "swarm_kernel/SELF_AUDIT_BOOTSTRAP_OVERLAY.md"
+    "swarm_kernel/SELF_AUDIT_BOOTSTRAP_OVERLAY.md",
+    "swarm_kernel/SWARM_SCALE_BOOTSTRAP_OVERLAY.md"
   ],
   "self_audit": {
     "protocol": "governance/audit/AUDIT_PROTOCOL.md",
     "framework": "governance/audit/templates/AGENT_SELF_AUDIT_FRAMEWORK.md",
     "ledger_head": "governance/audit/LEDGER_HEAD.json",
     "framework_unavailable_result": "AUDIT_FRAMEWORK_UNAVAILABLE"
+  },
+  "swarm_scale": {
+    "entrypoint": "SWARM_SCALE_ENTRYPOINT.json",
+    "protocol": "protocols/swarm_scale_100.md",
+    "policy": "governance/SWARM_SCALE_100_POLICY.json",
+    "target_population": 100,
+    "stages": [15, 30, 60, 100],
+    "automatic_live_limit_increase": false
   },
   "global_run_binding": "EXTERNALLY_SUPPLIED_SHARED_VALUE_REQUIRED",
   "global_run_contract_version": 1,
