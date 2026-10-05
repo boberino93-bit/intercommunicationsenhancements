@@ -6,10 +6,11 @@ import json
 import re
 from typing import Iterable
 
+from .project_scope import require_project_id
 
-SCHEMA = "intercommunications/swarm-stage-checkpoint/v1"
-CHECKPOINT_ISSUE_REPOSITORY = "boberino93-bit/intercommunicationsenhancements"
-CHECKPOINT_ISSUE_NUMBER = 25
+
+CURRENT_SCHEMA = "intercommunications/swarm-stage-checkpoint/v2"
+LEGACY_SCHEMA = "intercommunications/swarm-stage-checkpoint/v1"
 
 STAGES = ("RESEARCHER_1", "RESEARCHER_2", "RESEARCHER_3", "MANAGER", "PRIMARY")
 STAGE_STATES = {
@@ -56,6 +57,7 @@ def cycle_id_from_time(value: datetime) -> str:
 
 @dataclass(frozen=True)
 class StageCheckpoint:
+    project_id: str
     checkpoint_id: str
     cycle_id: str
     stage: str
@@ -73,8 +75,12 @@ class StageCheckpoint:
     unfinished_work: tuple[str, ...] = ()
     next_action: str = ""
     recovery_of_cycle_id: str | None = None
+    authority_conveyed: bool = False
 
     def __post_init__(self):
+        object.__setattr__(self, "project_id", require_project_id(self.project_id))
+        if self.authority_conveyed is not False:
+            raise CheckpointError("scheduled coordination checkpoints cannot convey authority")
         if not isinstance(self.checkpoint_id, str) or not self.checkpoint_id.strip():
             raise CheckpointError("checkpoint_id is required")
         if not isinstance(self.cycle_id, str) or not _CYCLE_RE.fullmatch(self.cycle_id):
@@ -117,12 +123,13 @@ class StageCheckpoint:
             raise CheckpointError("recovery_of_cycle_id must be an offset-aware local hour floor")
 
     @property
-    def stream_key(self) -> tuple[str, str, str]:
-        return (self.cycle_id, self.stage, self.run_id)
+    def stream_key(self) -> tuple[str, str, str, str]:
+        return (self.project_id, self.cycle_id, self.stage, self.run_id)
 
     def as_dict(self) -> dict:
         payload = {
-            "schema": SCHEMA,
+            "schema": CURRENT_SCHEMA,
+            "project_id": self.project_id,
             "checkpoint_id": self.checkpoint_id,
             "cycle_id": self.cycle_id,
             "stage": self.stage,
@@ -139,6 +146,7 @@ class StageCheckpoint:
             "blockers": list(self.blockers),
             "unfinished_work": list(self.unfinished_work),
             "next_action": self.next_action,
+            "authority_conveyed": False,
         }
         if self.recovery_of_cycle_id is not None:
             payload["recovery_of_cycle_id"] = self.recovery_of_cycle_id
@@ -147,16 +155,14 @@ class StageCheckpoint:
     def canonical_json(self) -> str:
         return json.dumps(self.as_dict(), sort_keys=True, separators=(",", ":"), ensure_ascii=True)
 
-    def render_issue_comment(self) -> str:
-        return "SWARM_STAGE_CHECKPOINT\n```json\n" + json.dumps(self.as_dict(), sort_keys=True, indent=2) + "\n```"
-
     @classmethod
     def from_dict(cls, payload: dict) -> "StageCheckpoint":
         if not isinstance(payload, dict):
             raise CheckpointError("checkpoint payload must be an object")
-        if payload.get("schema") != SCHEMA:
-            raise CheckpointError("unsupported checkpoint schema")
+        if payload.get("schema") != CURRENT_SCHEMA:
+            raise CheckpointError("current checkpoint parser accepts v2 only")
         return cls(
+            project_id=payload.get("project_id"),
             checkpoint_id=payload.get("checkpoint_id"),
             cycle_id=payload.get("cycle_id"),
             stage=payload.get("stage"),
@@ -174,17 +180,45 @@ class StageCheckpoint:
             unfinished_work=tuple(payload.get("unfinished_work") or ()),
             next_action=payload.get("next_action") or "",
             recovery_of_cycle_id=payload.get("recovery_of_cycle_id"),
+            authority_conveyed=payload.get("authority_conveyed"),
+        )
+
+
+@dataclass(frozen=True)
+class LegacyStageCheckpoint:
+    """Read-only representation of historical issue-25 v1 records."""
+
+    checkpoint_id: str
+    cycle_id: str
+    stage: str
+    run_id: str
+    sequence: int
+    state: str
+    project_id: str | None = None
+
+    @classmethod
+    def from_dict(cls, payload: dict) -> "LegacyStageCheckpoint":
+        if not isinstance(payload, dict) or payload.get("schema") != LEGACY_SCHEMA:
+            raise CheckpointError("legacy checkpoint parser accepts v1 only")
+        return cls(
+            checkpoint_id=payload.get("checkpoint_id"),
+            cycle_id=payload.get("cycle_id"),
+            stage=payload.get("stage"),
+            run_id=payload.get("run_id"),
+            sequence=payload.get("sequence"),
+            state=payload.get("state"),
+            project_id=payload.get("project_id"),
         )
 
 
 def validate_no_sequence_conflicts(checkpoints: Iterable[StageCheckpoint]) -> bool:
-    seen: dict[tuple[str, str, str, int], str] = {}
+    seen: dict[tuple[str, str, str, str, int], str] = {}
     for checkpoint in checkpoints:
         key = (*checkpoint.stream_key, checkpoint.sequence)
         previous = seen.get(key)
         if previous is not None and previous != checkpoint.canonical_json():
             raise CheckpointConflictError(
-                f"conflicting checkpoint reuse for cycle/stage/run/sequence {key}"
+                f"conflicting checkpoint reuse for project/cycle/stage/run/sequence {key}"
             )
         seen[key] = checkpoint.canonical_json()
     return True
@@ -193,10 +227,12 @@ def validate_no_sequence_conflicts(checkpoints: Iterable[StageCheckpoint]) -> bo
 def latest_for_cycle(
     checkpoints: Iterable[StageCheckpoint],
     *,
+    project_id: str,
     cycle_id: str,
     stage: str,
     accepted_states: set[str] | None = None,
 ) -> StageCheckpoint | None:
+    project_id = require_project_id(project_id)
     if stage not in STAGES:
         raise CheckpointError("unsupported stage")
     if not _CYCLE_RE.fullmatch(cycle_id):
@@ -206,7 +242,8 @@ def latest_for_cycle(
     candidates = [
         cp
         for cp in items
-        if cp.cycle_id == cycle_id
+        if cp.project_id == project_id
+        and cp.cycle_id == cycle_id
         and cp.stage == stage
         and (accepted_states is None or cp.state in accepted_states)
     ]
