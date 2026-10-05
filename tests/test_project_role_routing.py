@@ -110,6 +110,7 @@ class ProjectRoleRoutingTests(unittest.TestCase):
         self.assertEqual(registry.get("mode"), "FAIL_CLOSED_LOCAL_CONTINUE_GLOBAL")
         self.assertIn("fold7-power-lab", registry["projects"])
         self.assertIn("ai-behaviour-control-lab", registry["projects"])
+        self.assertIn("xrp-thesis", registry["projects"])
         awareness = registry["communication_awareness"]
         self.assertTrue(awareness["required_on_startup"])
         self.assertEqual(registry["fresh_agent_context"]["authority"], "ORIENTATION_ONLY")
@@ -117,7 +118,12 @@ class ProjectRoleRoutingTests(unittest.TestCase):
         for project_id, project in registry["projects"].items():
             self.assertIsInstance(project.get("repository_id"), int)
             self.assertEqual(project.get("local_contract_path"), "AGENT_BOOTSTRAP.json")
-            self.assertEqual(project["forum_locator"]["authority"], "INTERNAL_ARTIFACTORY")
+            if project_id == "xrp-thesis":
+                self.assertEqual(project["forum_locator"]["authority"], "GITHUB_REPOSITORY")
+                self.assertEqual(project["forum_locator"]["namespace"], "boberino93-bit/XRPTHESIS")
+                self.assertEqual(project["forum_locator"]["repository_view"], {"mode": "CANONICAL", "path": "AGENTS.md"})
+            else:
+                self.assertEqual(project["forum_locator"]["authority"], "INTERNAL_ARTIFACTORY")
             self.assertEqual(project["roles"], ["primary", "manager", "research"])
             self.assertIn("MASTER_HANDOFF.json", project["handoff_paths"])
             self.assertIn("AGENT_CONTEXT_REFERENCE.md", project["handoff_paths"])
@@ -134,6 +140,30 @@ class ProjectRoleRoutingTests(unittest.TestCase):
         validate_local_contract(registry, project_id="intercommunicationsenhancements", contract=local_contract)
         self.assertEqual(local_contract["fresh_agent_context"]["authority"], "ORIENTATION_ONLY")
         self.assertTrue(local_contract["autonomous_continuation"]["localized_fail_closed"])
+
+    def test_repository_native_forum_is_allowlisted_only_for_xrp(self):
+        registry = json.loads((ROOT / "PROJECT_ROLE_ROUTING_REGISTRY.json").read_text())
+        project = registry["projects"]["benefitflow"]
+        project["forum_namespace"] = project["repository"]
+        project["forum_locator"] = {
+            "authority": "GITHUB_REPOSITORY",
+            "namespace": project["repository"],
+            "repository_view": {"mode": "CANONICAL", "path": "AGENTS.md"},
+        }
+        with self.assertRaisesRegex(RoutingError, "repository_native_forum_not_allowlisted"):
+            validate_registry(registry)
+
+    def test_xrp_repository_native_forum_must_be_canonical(self):
+        registry = json.loads((ROOT / "PROJECT_ROLE_ROUTING_REGISTRY.json").read_text())
+        registry["projects"]["xrp-thesis"]["forum_locator"]["repository_view"]["mode"] = "SNAPSHOT_BACKUP"
+        with self.assertRaisesRegex(RoutingError, "repository_native_forum_must_be_canonical"):
+            validate_registry(registry)
+
+    def test_xrp_repository_native_forum_path_is_fixed(self):
+        registry = json.loads((ROOT / "PROJECT_ROLE_ROUTING_REGISTRY.json").read_text())
+        registry["projects"]["xrp-thesis"]["forum_locator"]["repository_view"]["path"] = "README.md"
+        with self.assertRaisesRegex(RoutingError, "repository_native_forum_path_mismatch"):
+            validate_registry(registry)
 
     def test_v15_rejects_permissive_mode(self):
         registry = json.loads((ROOT / "PROJECT_ROLE_ROUTING_REGISTRY.json").read_text())
