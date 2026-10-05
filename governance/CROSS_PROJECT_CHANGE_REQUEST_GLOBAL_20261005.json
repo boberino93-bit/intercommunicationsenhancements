@@ -6,7 +6,9 @@
   "required_source_role": "PRIMARY",
   "change_summary": "Global review gate, owner recovery, authenticator-compatible recovery factor, artifact completeness, evidence lifecycle/replay hardening, durable-record protection, and roleless-routing alignment",
   "authorization_case": "AUTH-QA-CONTINUE-79BB29D19C47",
+  "promotion_authorization_case": "AUTH-QA-PROMOTE-B0BB989519D4",
   "pre_change_revision": "9227405e1339daf5cf8b6b092476f620d700d7ea",
+  "post_change_revision": "69345c2c8bfe8f7bc213f22d072c298064a2e976",
   "backup_ref": "backup/pre-security-qa-remediation-20261005T1137",
   "target_surfaces": [
     "governance/GLOBAL_SECURITY_CHANGE_POLICY.json",
@@ -16,7 +18,10 @@
   ],
   "rollback_available": true,
   "post_change_target_verification_required": true,
-  "post_change_verification_ref": null,
-  "status": "PENDING_POST_MERGE_TARGET_VERIFICATION",
+  "post_change_verification_ref": "github:main@69345c2c8bfe8f7bc213f22d072c298064a2e976",
+  "post_change_verification_result": "PASS",
+  "changed_surface_regression_validation": "PASS_19_OF_19",
+  "hosted_ci_state_at_promotion": "RERUN_QUEUED_AFTER_PRIOR_RUNNER_CANCELLATION_NO_TEST_FAILURE_OBSERVED",
+  "status": "VERIFIED_PRODUCTION",
   "known_external_blocker": "MICROSOFT_AUTHENTICATOR_ENROLLMENT_REQUIRES_SECURE_EXTERNAL_ENROLLMENT_SURFACE"
 }
