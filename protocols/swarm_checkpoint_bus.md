@@ -60,7 +60,6 @@ Each durable checkpoint comment contains exactly one machine-readable checkpoint
 - `blockers`
 - `unfinished_work`
 - `next_action`
-- `readback_verified`
 
 `checkpoint_id` MUST be unique and stable for the comment, preferably `<cycle_id>/<stage>/<run_id>/<sequence>` with characters normalized for transport safety.
 
@@ -93,15 +92,16 @@ Before substantive stage work, every scheduled invocation MUST prove checkpoint 
 1. Resolve identity, governance, project binding, current cycle, and issue #25.
 2. Read the issue and current-cycle checkpoints.
 3. Append a compact sequence-0 `*_PROGRESS` checkpoint with `phase = CHECKPOINT_READY`.
-4. Read the issue comments back and verify the exact new checkpoint is observable.
-5. Set `readback_verified = true` only after successful readback.
-6. Only then begin the expensive/substantive bounded work unit.
+4. Read the issue comments back and verify the exact new checkpoint is observable by matching its `checkpoint_id` and content.
+5. Only after that external readback succeeds may the stage begin expensive/substantive work.
+
+Readback is an observed transport property, not a self-referential field stored inside the immutable checkpoint comment. A checkpoint becomes consumable because the downstream reader can fetch and validate the persisted comment from issue #25.
 
 If write or readback fails, do not begin substantive work. Return/report `CHECKPOINT_IO_BLOCKED` with the exact failure. If the bus itself cannot be written, the failure may exist only in the task output; never falsely claim it was durably persisted.
 
 ## Rolling persistence
 
-After each meaningful bounded work unit, append a higher-sequence progress checkpoint. Also checkpoint before the stage boundary (`:20` for Researcher, `:40` for Manager, next `:00` for Primary) whenever runtime permits.
+After each meaningful bounded work unit, append a higher-sequence progress checkpoint and re-read the issue to verify persistence before relying on it as the handoff. Also checkpoint before the stage boundary (`:20` for Researcher, `:40` for Manager, next `:00` for Primary) whenever runtime permits.
 
 Do not begin another bounded unit when doing so would jeopardize preserving the current material result.
 
@@ -191,7 +191,7 @@ Those remain governed by the applicable project, repository, evidence, claim/fen
 
 The transport patch is considered operational when all of these are demonstrated:
 
-1. a scheduled stage can append and read back a checkpoint without mutating production source;
+1. a scheduled stage can append and externally read back a checkpoint without mutating production source;
 2. Manager can consume current-cycle `RESEARCH_PROGRESS` when READY is absent;
 3. Primary can consume current-cycle `MANAGER_PROGRESS` when READY is absent;
 4. stale prior-cycle state is rejected;
