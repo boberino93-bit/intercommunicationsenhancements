@@ -1,0 +1,60 @@
+{
+  "schema": "org-agent-mesh/stage15-preflight-policy/v1",
+  "status": "ACTIVE_FAIL_CLOSED",
+  "scope": "PRE_STAGE15_LAUNCH_SAFETY",
+  "runtime": "org_agent_mesh.stage15_preflight",
+  "evidence_schema": "schemas/stage15_evidence.schema.json",
+  "expected_project_count": 7,
+  "expected_projects": [
+    "ai-behaviour-control-lab",
+    "benefitflow",
+    "duo-open",
+    "fold7-power-lab",
+    "intercommunicationsenhancements",
+    "warp-propulsion-lab",
+    "xrp-thesis"
+  ],
+  "capacity": {
+    "required_per_project": true,
+    "schema": "org-agent-mesh/capacity-signal/v1",
+    "max_age_seconds": 900,
+    "max_future_skew_seconds": 5,
+    "admissible_states": ["GREEN"],
+    "missing_result": "BLOCK",
+    "unknown_result": "BLOCK",
+    "stale_result": "BLOCK",
+    "future_result": "BLOCK",
+    "repository_binding_required": true,
+    "project_binding_required": true
+  },
+  "operations": {
+    "required_per_project": true,
+    "max_age_seconds": 1800,
+    "max_future_skew_seconds": 5,
+    "exact_project_accounting_required": true,
+    "legacy_aliases": {"xrpthesis": "xrp-thesis"},
+    "legacy_alias_does_not_imply_normalization": true
+  },
+  "kernel_preflight": {
+    "required_per_project": true,
+    "caller_supplied_capacity_boolean_without_verified_capacity_evidence": "DENY"
+  },
+  "readiness_semantics": {
+    "contract_ready": "SEVEN_PROJECT_CONTRACT_ALIGNMENT_ONLY",
+    "preflight_ready": "FRESH_CAPACITY_PLUS_OPERATIONS_PLUS_KERNEL_PREFLIGHT",
+    "stage_passed": "POST_RUN_CONVERGENCE_GATE_ONLY",
+    "contract_ready_is_launch_authorization": false,
+    "preflight_ready_is_launch_authorization": false,
+    "stage_passed_is_launch_authorization": false
+  },
+  "evidence": {
+    "provenance_bound": true,
+    "deterministic_digest_required": true,
+    "authority_conveyed": false,
+    "launch_authorized": false,
+    "regression_learning_eligible": true
+  },
+  "stage15_launch_requires_separate_authorization": true,
+  "scaler_activation_is_separate": true,
+  "peer_repository_mutation": "DENY"
+}

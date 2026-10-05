@@ -1,14 +1,21 @@
 {
   "schema": "org-agent-mesh/swarm-scale-entrypoint/v1",
-  "version": "1.0.0",
-  "status": "ACTIVE_TARGET",
+  "version": "1.1.0",
+  "status": "ACTIVE_TARGET_PREFLIGHT_GATED",
   "target_population": 100,
   "protocol": "protocols/swarm_scale_100.md",
   "policy": "governance/SWARM_SCALE_100_POLICY.json",
   "runtime": "org_agent_mesh.swarm_scale",
   "bootstrap_overlay": "swarm_kernel/SWARM_SCALE_BOOTSTRAP_OVERLAY.md",
+  "stage15_preflight_protocol": "protocols/stage15_preflight.md",
+  "stage15_preflight_policy": "governance/STAGE15_PREFLIGHT_POLICY.json",
+  "stage15_preflight_runtime": "org_agent_mesh.stage15_preflight",
+  "stage15_evidence_schema": "schemas/stage15_evidence.schema.json",
   "stages": [15, 30, 60, 100],
   "flat_burst": false,
   "automatic_live_limit_increase": false,
+  "contract_ready_is_preflight_ready": false,
+  "preflight_ready_is_stage_passed": false,
+  "preflight_ready_is_launch_authorization": false,
   "authority_conveyed": false
 }
