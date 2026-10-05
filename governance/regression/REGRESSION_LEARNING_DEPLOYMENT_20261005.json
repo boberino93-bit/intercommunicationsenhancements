@@ -1,0 +1,28 @@
+{
+  "schema": "org-agent-mesh/regression-learning-deployment/v1",
+  "authorization_case": "AUTH-REGRESSION-LEARNING-C15AADAB6ACB",
+  "source_project": "intercommunicationsenhancements",
+  "target": "GLOBAL_SWARM",
+  "pre_change_revision": "fa2cb9919a2a5ceefba5e3f6cf6b79c03c2994db",
+  "merged_revision": "953533050cfaa0575a1bf9dfd04cb5c733d9401d",
+  "rollback_ref": "backup/pre-regression-learning-20261005T1306",
+  "pull_request": 54,
+  "verification": {
+    "production_readback": "PASS",
+    "regression_learning_policy_present": true,
+    "ci_state_interpretation_hotfix_present": true,
+    "rollback_verified": true,
+    "local_exact_logic_validation": "PASS",
+    "hosted_pr_ci_at_promotion": "QUEUED_NO_FAILURE_CONCLUSION"
+  },
+  "primary_maintenance_lane": {
+    "mode": "EXPLICIT_ALLOWLIST",
+    "unknown_classes_fail_closed": true,
+    "protected_classes_remain_human_gated": true
+  },
+  "forensic_outputs": {
+    "ci_state_interpretation": "HOTFIX_DEPLOYED",
+    "authorization_expiry_loop": "SERVICE_PACK_CANDIDATE_HUMAN_GATED"
+  },
+  "status": "VERIFIED_PRODUCTION"
+}
