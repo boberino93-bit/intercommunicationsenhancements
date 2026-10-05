@@ -77,12 +77,20 @@ class MutationAuthorizationGovernanceTests(unittest.TestCase):
         self.assertFalse(bootstrap["roleless_agent_admission"]["primary_self_promotion"])
         self.assertFalse(bootstrap["roleless_agent_admission"]["role_or_claim_grants_mutation_authority"])
 
-    def test_bootstrap_order_has_authorization_gate_before_mutation(self):
+    def test_bootstrap_order_has_authorization_gate_before_protected_mutation(self):
         order = load_json("BOOTSTRAP_ORDER.json")
         steps = {step["id"]: step for step in order["steps"]}
         auth_step = steps["evaluate_current_mutation_authorization_envelope"]
         self.assertFalse(auth_step["mutation_allowed"])
-        self.assertTrue(auth_step["result_required_before_any_external_side_effect"])
+        self.assertTrue(
+            auth_step[
+                "result_required_before_any_external_side_effect_except_valid_non_authoritative_coordination_publication"
+            ]
+        )
+        coordination = order["coordination_publication_contract"]
+        self.assertEqual(coordination["mode"], "APPEND_ONLY_PROJECT_SCOPED")
+        self.assertFalse(coordination["authority_conveyed"])
+        self.assertEqual(coordination["all_other_subordinate_durable_mutation"], "DENY")
 
     def test_protocol_forbids_ambient_authorization(self):
         text = (ROOT / "protocols" / "mutation_authorization.md").read_text()
