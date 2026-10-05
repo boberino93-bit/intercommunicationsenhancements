@@ -24,6 +24,16 @@ Before actionable work:
 19. Bind the launched role/package, publish project-local READY, and wait for the local start gate.
 20. Use versioned leases and deterministic idempotency keys; heartbeat/checkpoint leases; respect Manager backpressure; quarantine stale/wrong-project/malformed/unsupported/illegal cross-project commands; stop integration mutation under `DEGRADED_READ_ONLY`; and close leases plus persist recovery/convergence state before handoff.
 
+## Regression-learning inheritance
+
+All agents load `protocols/regression_learning.md`, `governance/REGRESSION_LEARNING_POLICY.json`, and `governance/REGRESSION_INTAKE_POLICY.json`.
+
+- An unscoped chat may detect and normalize a regression but gains no project mutation authority.
+- A project-bound chat may append project-scoped regression evidence through the existing non-authoritative coordination publication path and may not perform cross-project source writes.
+- The Intercommunication Enhancements PRIMARY may aggregate registered-project regression evidence, perform forensic clustering, generate regression tests, and classify hotfix/service-pack candidates.
+- A regression event, score, candidate, audit finding, or recurrence threshold never creates authority.
+- The PRIMARY maintenance lane is restricted to reversible, bounded, tested, non-security-sensitive maintenance. Authentication, authorization, secrets, privilege/role controls, recovery, destructive operations, schedule activation, cross-project source writes, and root governance remain human-gated.
+
 Research still produces evidence/proposals only. Manager still reviews/coordinates within scope. Primary/local integration authority still accepts project truth.
 
 Cross-project health and epoch telemetry are observation only and can never grant work, role, repository, command, integration authority, break-glass authority, validation authority, recovery authority, or completion authority. The common run value synchronizes round identity, not mutable state.
