@@ -1,9 +1,11 @@
 {
-  "schema": "intercommunications/research-swarm-five-task-schedule/v2",
+  "schema": "intercommunications/research-swarm-serial-design-pipeline/v3",
   "status": "DEPLOYMENT_AUTHORIZED_ROLLOUT_REQUIRED_BEFORE_FIRST_RUN",
   "timezone": "America/Vancouver",
   "cadence": "HOURLY",
+  "execution_model": "THREE_STAGE_SERIAL_PIPELINE",
   "host_overlap_serialization_assumed": false,
+  "stage_spacing_minutes": 20,
   "activation_gate": {
     "authority": "EXPLICIT_CURRENT_HUMAN_ACTION_ONLY",
     "default_state": "PRESERVE_EXISTING_TASK_STATE",
@@ -41,12 +43,58 @@
     "policy_path": "research_swarm/STORAGE_HYGIENE_POLICY.md",
     "budget_path": "research_swarm/storage_budget.json"
   },
+  "pipeline": {
+    "order": ["RESEARCHER_1", "MANAGER", "PRIMARY"],
+    "upstream_freshness_required": true,
+    "stale_upstream_behavior": "UPSTREAM_NOT_READY_AND_STOP",
+    "repository_access": "CONNECTED_GITHUB_APP_API_ONLY",
+    "local_clone_fallback_allowed": false,
+    "final_output": "PRIMARY_DESIGN_PROPOSAL"
+  },
   "tasks": [
-    {"role": "MASTER", "minute": 0, "prompt_path": "research_swarm/prompts/master.md", "roaming": true, "project_id": null, "chat_project": null, "lifecycle_scope": "GLOBAL", "self_enable_allowed": false},
-    {"role": "MANAGER", "minute": 5, "prompt_path": "research_swarm/prompts/manager.md", "project_bound": true, "lifecycle_scope": "OWN_PROJECT_TREE_ONLY", "self_enable_allowed": false},
-    {"role": "RESEARCHER_1", "minute": 10, "prompt_path": "research_swarm/prompts/researcher_1.md", "project_bound": true, "self_enable_allowed": false, "bias": "platform_android_samsung_display_continuity_foundational_constraints"},
-    {"role": "RESEARCHER_2", "minute": 20, "prompt_path": "research_swarm/prompts/researcher_2.md", "project_bound": true, "self_enable_allowed": false, "bias": "implementation_architecture_prototype_feasibility"},
-    {"role": "RESEARCHER_3", "minute": 30, "prompt_path": "research_swarm/prompts/researcher_3.md", "project_bound": true, "self_enable_allowed": false, "bias": "validation_failure_modes_ux_adversarial_independent_verification"}
+    {
+      "role": "RESEARCHER_1",
+      "minute": 0,
+      "prompt_path": "research_swarm/prompts/researcher_1.md",
+      "project_bound": true,
+      "self_enable_allowed": false,
+      "output_gate": "RESEARCH_HANDOFF_READY",
+      "bias": "platform_android_samsung_display_continuity_foundational_constraints"
+    },
+    {
+      "role": "MANAGER",
+      "minute": 20,
+      "prompt_path": "research_swarm/prompts/manager.md",
+      "project_bound": true,
+      "lifecycle_scope": "OWN_PROJECT_TREE_ONLY",
+      "self_enable_allowed": false,
+      "requires_gate": "RESEARCH_HANDOFF_READY",
+      "output_gate": "MANAGER_HANDOFF_READY"
+    },
+    {
+      "role": "PRIMARY",
+      "minute": 40,
+      "prompt_path": "research_swarm/prompts/primary.md",
+      "project_bound": true,
+      "lifecycle_scope": "OWN_PROJECT_TREE_ONLY",
+      "self_enable_allowed": false,
+      "requires_gate": "MANAGER_HANDOFF_READY",
+      "output_gate": "PRIMARY_PROPOSAL_READY"
+    }
+  ],
+  "inactive_scheduled_roles": [
+    {
+      "role": "MASTER",
+      "reason": "GLOBAL_SUPERVISION_NOT_PART_OF_SERIAL_DESIGN_PROPOSAL_PIPELINE"
+    },
+    {
+      "role": "RESEARCHER_2",
+      "reason": "SINGLE_SCHEDULED_RESEARCH_AGENT_FOR_SERIAL_HOST_CONSTRAINT"
+    },
+    {
+      "role": "RESEARCHER_3",
+      "reason": "SINGLE_SCHEDULED_RESEARCH_AGENT_FOR_SERIAL_HOST_CONSTRAINT"
+    }
   ],
   "overlap_dispositions": [
     "CONTINUE_EXISTING_RUN",
@@ -63,12 +111,20 @@
     "NO_AGENT_MAY_AUTO_ENABLE_OR_REENABLE_A_SWARM_TASK",
     "ALIGNMENT_MIGRATION_RECOVERY_AND_BOOTSTRAP_MUST_PRESERVE_DISABLED_STATE",
     "DISABLED_TASK_IS_A_HUMAN_CONTROL_GATE_NOT_A_HEALTH_FAILURE",
+    "ONLY_ONE_RESEARCHER_IS_SCHEDULED_IN_THIS_PIPELINE",
+    "RESEARCH_PRECEDES_MANAGER",
+    "MANAGER_PRECEDES_PRIMARY",
+    "DOWNSTREAM_STAGE_REQUIRES_FRESH_UPSTREAM_HANDOFF",
+    "STALE_OR_MISSING_UPSTREAM_STATE_MUST_NOT_BE_SYNTHESIZED",
+    "CONNECTED_GITHUB_API_IS_THE_SCHEDULED_REPOSITORY_ACCESS_PATH",
+    "NO_GIT_CLONE_FALLBACK_IN_SCHEDULED_TASKS",
+    "PRIMARY_WRITES_THE_FINAL_DESIGN_PROPOSAL",
+    "MASTER_IS_NOT_THE_FINAL_PROPOSAL_WRITER",
     "TIMER_IS_NOT_OWNERSHIP_AUTHORITY",
     "TIMER_IS_NOT_RESTART_AUTHORITY",
     "FRESH_CANONICAL_BOOTSTRAP_REQUIRED",
     "FRESH_SUPERVISORY_STATE_REQUIRED",
     "INTENTIONAL_STOP_BLOCKS_BLIND_RESPAWN",
-    "MASTER_REMAINS_GLOBAL_ROAMING_AND_UNASSIGNED_TO_CHAT_PROJECT",
     "PROJECT_AGENT_CHAT_PLACEMENT_REQUIRES_HOST_SIDE_VERIFICATION_WHEN_SUPPORTED",
     "PRIMARY_LIFECYCLE_CONTROL_IS_PROJECT_SCOPED",
     "LIFECYCLE_CONTROL_DOES_NOT_EXPAND_SOURCE_MUTATION_AUTHORITY",
@@ -84,10 +140,15 @@
   ],
   "automation_alignment": {
     "saved_task_enabled_state_must_be_preserved_during_prompt_alignment": true,
-    "saved_prompts_must_pin_a_revision_containing_this_manifest_and_supervisory_overlay": true,
-    "saved_prompts_must_load_supervisory_governance": true,
+    "saved_prompts_must_load_current_governance": true,
     "saved_prompts_must_forbid_automatic_enable_or_reenable": true,
-    "master_prompt_must_assert_roaming_identity": true,
+    "saved_prompts_must_forbid_local_clone_fallback": true,
+    "researcher_1_minute": 0,
+    "manager_minute": 20,
+    "primary_minute": 40,
+    "researcher_2_and_3_remain_inactive": true,
+    "global_master_not_part_of_serial_pipeline": true,
+    "primary_prompt_must_write_design_proposal": true,
     "project_agent_prompts_must_reconcile_project_and_intentional_stop_state": true,
     "host_without_chat_project_move_api_must_not_claim_project_placement_success": true
   },
@@ -95,7 +156,11 @@
     "project_id": "duo-open",
     "repository": "boberino93-bit/duo-open",
     "inspected_head": "6497e69218de0f585eb0b32ba6676bc2e7e723ac",
-    "seed_frontier_only": ["ticket_02_attempt_scoped_inner_wake_lifetime", "ticket_03_exact_current_presentation_readiness_evidence", "ticket_04_terminal_native_cover_stale_work_fencing"],
+    "seed_frontier_only": [
+      "ticket_02_attempt_scoped_inner_wake_lifetime",
+      "ticket_03_exact_current_presentation_readiness_evidence",
+      "ticket_04_terminal_native_cover_stale_work_fencing"
+    ],
     "requires_live_frontier_reconciliation": true,
     "requires_supervisory_state_reconciliation": true,
     "requires_explicit_human_task_enablement": true
