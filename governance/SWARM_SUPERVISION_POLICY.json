@@ -1,86 +1,51 @@
 {
   "schema": "org-agent-mesh/supervisory-governance/v1",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "status": "ACTIVE_OVERLAY",
   "authority_order": ["USER", "MASTER", "PRIMARY", "SUBORDINATE"],
   "scope_rule": "SUPERVISORY_LIFECYCLE_AUTHORITY_DOES_NOT_GRANT_CROSS_PROJECT_SOURCE_MUTATION",
-  "master": {
-    "agent_id": "master",
-    "roaming": true,
-    "project_id": null,
-    "chat_project": null,
-    "authority": "GLOBAL_LIFECYCLE_SUPERVISION"
-  },
-  "primary": {
-    "authority": "OWN_PROJECT_TREE_ONLY",
-    "cross_project_control": "DENY_UNLESS_MASTER_DELEGATES_THROUGH_AN_EXISTING_AUTHORIZED_CONTROL_PATH"
+  "master": {"agent_id": "master", "roaming": true, "project_id": null, "chat_project": null, "authority": "GLOBAL_LIFECYCLE_SUPERVISION"},
+  "primary": {"authority": "OWN_PROJECT_TREE_ONLY", "cross_project_control": "DENY_UNLESS_MASTER_DELEGATES_THROUGH_AN_EXISTING_AUTHORIZED_CONTROL_PATH"},
+  "authority_authentication": {
+    "policy_path": "governance/AUTHORITY_AUTHENTICATION_POLICY.json",
+    "protocol_path": "protocols/authority_authentication.md",
+    "principal_claim_required_before_authorization": true,
+    "supervisory_role_may_assume_human_identity": false,
+    "session_or_history_may_authenticate_human": false,
+    "static_personal_fact_authentication": "DENY",
+    "high_consequence_independent_external_proof_required": true,
+    "agent_may_satisfy_its_own_challenge": false
   },
   "mutation_authorization": {
     "policy_path": "governance/MUTATION_AUTHORIZATION_POLICY.json",
     "protocol_path": "protocols/mutation_authorization.md",
     "invariant": "INTENT_IS_NOT_AUTHORIZATION",
     "required_before_every_external_mutation": true,
+    "single_use_case_required": true,
+    "session_authorization": false,
+    "prior_authorization_reuse": false,
     "supervisory_role_grants_mutation_authority": false,
     "claim_or_lease_grants_mutation_authority": false,
-    "ambiguous_authorization_behavior": "DENY_AFFECTED_WRITE_CONTINUE_SAFE_READ_ONLY",
-    "stronger_exact_action_authorization_preserved": true
+    "authentication_grants_mutation_authority": false,
+    "ambiguous_authorization_behavior": "DENY_AFFECTED_WRITE_CONTINUE_SAFE_READ_ONLY"
   },
-  "roleless_agent_admission": {
-    "policy_path": "governance/ROLELESS_AGENT_ADMISSION_POLICY.json",
-    "protocol_path": "protocols/roleless_agent_admission.md",
-    "generic_agent_defaults_to_primary": false,
-    "demand_driven": true,
-    "primary_self_promotion": false,
-    "master_self_selection": false,
-    "role_selection_grants_mutation_authority": false
-  },
-  "chat_project_mapping": {
-    "intercommunicationsenhancements": "Intercommunication enhancements",
-    "duo-open": "Duo Screen",
-    "benefitflow": "Benefitflow",
-    "fold7-power-lab": "Samsung power bootstrap",
-    "warp-propulsion-lab": "Warp-Propulsion-lab",
-    "ai-behaviour-control-lab": "Ai Behavior Control Lab"
-  },
-  "control_states": [
-    "STARTING", "RUNNING", "REDIRECT_REQUESTED", "PAUSE_REQUESTED", "PAUSED",
-    "STOP_REQUESTED", "STOPPING", "STOPPED", "COMPLETED", "FAILED"
-  ],
+  "roleless_agent_admission": {"policy_path": "governance/ROLELESS_AGENT_ADMISSION_POLICY.json", "protocol_path": "protocols/roleless_agent_admission.md", "generic_agent_defaults_to_primary": false, "demand_driven": true, "primary_self_promotion": false, "master_self_selection": false, "role_selection_grants_mutation_authority": false},
+  "chat_project_mapping": {"intercommunicationsenhancements": "Intercommunication enhancements", "duo-open": "Duo Screen", "benefitflow": "Benefitflow", "fold7-power-lab": "Samsung power bootstrap", "warp-propulsion-lab": "Warp-Propulsion-lab", "ai-behaviour-control-lab": "Ai Behavior Control Lab"},
+  "control_states": ["STARTING", "RUNNING", "REDIRECT_REQUESTED", "PAUSE_REQUESTED", "PAUSED", "STOP_REQUESTED", "STOPPING", "STOPPED", "COMPLETED", "FAILED"],
   "actions": ["CONTINUE", "REDIRECT", "PAUSE", "STOP", "STOP_TREE"],
-  "reason_codes": [
-    "GOAL_MISALIGNMENT", "INSTRUCTION_DRIFT", "SCOPE_CREEP", "REDUNDANT_WORK",
-    "LOW_INFORMATION_GAIN", "CIRCULAR_WORK", "INVALID_ASSUMPTIONS", "SUPERSEDED",
-    "POOR_METHODOLOGY", "EVIDENCE_QUALITY", "PROJECT_GOAL_CONFLICT",
-    "ARCHITECTURE_CONFLICT", "UNEXPECTED_RISK", "DESTRUCTIVE_BEHAVIOR",
-    "RESOURCE_IMBALANCE", "BLOCKED_EXECUTION", "AGENT_CONFLICT",
-    "PREMATURE_IMPLEMENTATION", "PREMATURE_RESEARCH", "QUALITY_DEGRADATION",
-    "PROJECT_STATE_CHANGED", "USER_OVERRIDE", "MASTER_DIRECTION", "AUTHORIZATION_MISSING",
-    "AUTHORIZATION_AMBIGUOUS", "AUTHORIZATION_SCOPE_MISMATCH", "ROLE_ADMISSION_CONFLICT", "OTHER"
-  ],
-  "runtime": {
-    "bounded_work_units_required": true,
-    "control_check_between_units_required": true,
-    "atomic_operation_may_finish_if_interruption_would_corrupt_state": true,
-    "stop_preserves_useful_partial_state": true,
-    "stop_means_delete": false,
-    "authorization_check_before_each_external_side_effect": true
-  },
-  "respawn": {
-    "intentional_stop_sets_allow_respawn_false": true,
-    "timer_or_schedule_alone_may_respawn": false,
-    "user_may_restart_logical_work": true,
-    "master_or_primary_restart_requires_newer_task_revision": true,
-    "parent_under_stop_may_spawn_children": false,
-    "logical_restart_does_not_imply_schedule_enablement": true
-  },
+  "reason_codes": ["GOAL_MISALIGNMENT", "INSTRUCTION_DRIFT", "SCOPE_CREEP", "REDUNDANT_WORK", "LOW_INFORMATION_GAIN", "CIRCULAR_WORK", "INVALID_ASSUMPTIONS", "SUPERSEDED", "POOR_METHODOLOGY", "EVIDENCE_QUALITY", "PROJECT_GOAL_CONFLICT", "ARCHITECTURE_CONFLICT", "UNEXPECTED_RISK", "DESTRUCTIVE_BEHAVIOR", "RESOURCE_IMBALANCE", "BLOCKED_EXECUTION", "AGENT_CONFLICT", "PREMATURE_IMPLEMENTATION", "PREMATURE_RESEARCH", "QUALITY_DEGRADATION", "PROJECT_STATE_CHANGED", "USER_OVERRIDE", "MASTER_DIRECTION", "AUTHENTICATION_MISSING", "AUTHENTICATION_INSUFFICIENT", "AUTHORIZATION_MISSING", "AUTHORIZATION_AMBIGUOUS", "AUTHORIZATION_SCOPE_MISMATCH", "AUTHORIZATION_REPLAY", "ROLE_ADMISSION_CONFLICT", "OTHER"],
+  "runtime": {"bounded_work_units_required": true, "control_check_between_units_required": true, "atomic_operation_may_finish_if_interruption_would_corrupt_state": true, "stop_preserves_useful_partial_state": true, "stop_means_delete": false, "authorization_check_before_each_external_side_effect": true, "principal_claim_check_before_authorization": true, "authorization_case_replay_check_before_each_external_side_effect": true},
+  "respawn": {"intentional_stop_sets_allow_respawn_false": true, "timer_or_schedule_alone_may_respawn": false, "user_may_restart_logical_work": true, "master_or_primary_restart_requires_newer_task_revision": true, "parent_under_stop_may_spawn_children": false, "logical_restart_does_not_imply_schedule_enablement": true, "respawn_does_not_inherit_prior_mutation_case": true},
   "scheduled_tasks": {
     "same_authority_model_required": true,
     "schedule_fire_is_authority": false,
+    "task_contract_is_future_mutation_authority": false,
+    "each_distinct_mutation_case_requires_fresh_human_authorization": true,
     "project_bound_launch_context_required_for_project_agents": true,
     "master_launch_must_remain_roaming": true,
     "intentional_stop_must_be_checked_before_launch": true,
     "stale_governance_revision_must_not_be_treated_as_current": true,
-    "activation_authority": "EXPLICIT_HUMAN_ACTION_ONLY",
+    "activation_authority": "EXPLICIT_CURRENT_HUMAN_SINGLE_USE_CASE_PLUS_HIGH_CONSEQUENCE_PROOF",
     "agents_may_enable_tasks": false,
     "master_may_enable_tasks": false,
     "primary_may_enable_tasks": false,
@@ -90,26 +55,11 @@
     "alignment_or_migration_may_enable_tasks": false,
     "automatic_reenable_after_stop_pause_failure_or_migration": false,
     "automatic_enable_on_startup_bootstrap_or_project_activation": false,
-    "task_updates_must_preserve_enabled_state_unless_current_human_explicitly_requests_change": true,
+    "task_updates_must_preserve_enabled_state_unless_current_human_has_authorized_current_case": true,
     "disabled_is_a_control_gate_not_a_health_failure": true,
     "disabled_task_must_not_be_treated_as_stale_or_needing_recovery": true,
     "human_enablement_is_separate_from_runtime_restart_authority": true
   },
-  "chat_assignment": {
-    "prefer_direct_project_create": true,
-    "move_fallback_allowed": true,
-    "bounded_move_attempts": 3,
-    "post_action_verification_required": true,
-    "unknown_mapping": "FAIL_CLOSED_LEAVE_UNCHANGED",
-    "master": "GLOBAL_RECENTS_NO_PROJECT",
-    "host_adapter_required_for_external_effect": true
-  },
-  "implementation": {
-    "supervision_module": "org_agent_mesh.supervision",
-    "schedule_activation_module": "org_agent_mesh.schedule_activation",
-    "chat_project_router_module": "org_agent_mesh.chat_project_routing",
-    "mutation_authorization_policy": "governance/MUTATION_AUTHORIZATION_POLICY.json",
-    "roleless_agent_admission_policy": "governance/ROLELESS_AGENT_ADMISSION_POLICY.json",
-    "protocol": "protocols/supervisory_governance.md"
-  }
+  "chat_assignment": {"prefer_direct_project_create": true, "move_fallback_allowed": true, "bounded_move_attempts": 3, "post_action_verification_required": true, "unknown_mapping": "FAIL_CLOSED_LEAVE_UNCHANGED", "master": "GLOBAL_RECENTS_NO_PROJECT", "host_adapter_required_for_external_effect": true},
+  "implementation": {"supervision_module": "org_agent_mesh.supervision", "schedule_activation_module": "org_agent_mesh.schedule_activation", "chat_project_router_module": "org_agent_mesh.chat_project_routing", "authority_authentication_module": "org_agent_mesh.authority_authentication", "authority_authentication_policy": "governance/AUTHORITY_AUTHENTICATION_POLICY.json", "mutation_authorization_policy": "governance/MUTATION_AUTHORIZATION_POLICY.json", "roleless_agent_admission_policy": "governance/ROLELESS_AGENT_ADMISSION_POLICY.json", "protocol": "protocols/supervisory_governance.md"}
 }

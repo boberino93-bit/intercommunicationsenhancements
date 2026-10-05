@@ -1,11 +1,12 @@
 {
-  "schema": "intercommunications/root-change-authority/v1",
-  "production_baseline_sha": "099103eaf2d22f7e118fa51958e8a06cfe737ea5",
+  "schema": "intercommunications/root-change-authority/v2",
   "sole_human_change_authority": true,
   "human_root_change_principals": [
     {
+      "principal_id": "robert_leonard",
       "name": "Robert Leonard",
-      "github_login": "boberino93-bit"
+      "github_login": "boberino93-bit",
+      "status": "ACTIVE"
     }
   ],
   "scope": [
@@ -15,6 +16,29 @@
     "root_authority_change",
     "deployment_authorization"
   ],
+  "authentication": {
+    "policy": "governance/AUTHORITY_AUTHENTICATION_POLICY.json",
+    "protocol": "protocols/authority_authentication.md",
+    "explicit_principal_claim_required": true,
+    "identity_must_not_be_inferred_from_session_or_history": true,
+    "knowledge_based_personal_questions_allowed": false,
+    "high_consequence_independent_proof_required": true,
+    "default_external_proof": "HUMAN_PERFORMED_REGISTERED_GITHUB_CHALLENGE",
+    "agent_may_create_or_modify_its_own_proof": false,
+    "recovery": {
+      "registered_github_principal_challenge": true,
+      "manual_account_recovery_outside_swarm": true,
+      "static_personal_fact_recovery": false
+    }
+  },
+  "authorization": {
+    "single_use_case_required": true,
+    "session_authorization": false,
+    "conversation_authorization": false,
+    "prior_case_reuse": false,
+    "every_distinct_mutation_case_requires_fresh_human_authorization": true,
+    "case_policy": "governance/MUTATION_AUTHORIZATION_POLICY.json"
+  },
   "delegation": {
     "allowed": false,
     "automatic_delegation": false,
@@ -24,7 +48,10 @@
     "agent_may_mint_root_authority": false,
     "learning_may_modify_root_authority": false,
     "confidence_or_consensus_may_create_authority": false,
-    "root_change_requires_authenticated_human_principal": true
+    "root_change_requires_authenticated_human_principal": true,
+    "claimed_identity_is_not_authenticated_identity": true,
+    "authenticated_identity_is_not_authorization": true,
+    "authorization_is_not_reusable": true
   },
   "repository_enforcement": {
     "codeowners_path": ".github/CODEOWNERS",

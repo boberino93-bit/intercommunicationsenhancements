@@ -80,13 +80,24 @@ class NewProjectBootstrapKitTests(unittest.TestCase):
         self.assertEqual(bootstrap["authorized_roles"], ["primary", "manager", "research"])
         self.assertIn("recovery", bootstrap["execution_modes"])
 
-    def test_new_project_templates_inherit_mutation_and_roleless_hardening(self):
+    def test_new_project_templates_inherit_mutation_roleless_and_authentication_hardening(self):
         bootstrap_template = json.loads(
             (ROOT / "templates" / "new-project" / "AGENT_BOOTSTRAP.template.json").read_text()
         )
+        authentication = bootstrap_template["authority_authentication"]
+        self.assertTrue(authentication["explicit_principal_claim_required_before_authorization"])
+        self.assertTrue(authentication["never_assume_current_speaker_is_authorized"])
+        self.assertEqual(authentication["static_personal_fact_authentication"], "DENY")
+        self.assertTrue(authentication["high_consequence_independent_external_proof_required"])
+        self.assertFalse(authentication["agent_may_answer_its_own_challenge"])
+
         mutation = bootstrap_template["mutation_authorization"]
         self.assertEqual(mutation["invariant"], "INTENT_IS_NOT_AUTHORIZATION")
         self.assertTrue(mutation["required_before_every_external_mutation"])
+        self.assertTrue(mutation["single_use_case_required"])
+        self.assertFalse(mutation["session_wide_authorization"])
+        self.assertFalse(mutation["conversation_wide_authorization"])
+        self.assertFalse(mutation["prior_authorization_reuse"])
         self.assertFalse(mutation["role_is_authorization"])
         self.assertFalse(mutation["claim_or_lease_is_authorization"])
         roleless = bootstrap_template["roleless_agent_admission"]
@@ -100,8 +111,17 @@ class NewProjectBootstrapKitTests(unittest.TestCase):
         )
         self.assertEqual(order_template["schema"], "org-agent-mesh/bootstrap-order/v5")
         self.assertEqual(order_template["mutation_authorization"]["invariant"], "INTENT_IS_NOT_AUTHORIZATION")
+        self.assertTrue(order_template["mutation_authorization"]["single_use_case_required"])
         self.assertFalse(order_template["roleless_admission"]["primary_self_promotion"])
-        self.assertIn("valid mutation authorization source established", order_template["mutation_gate"])
+        required_gates = {
+            "explicit registered authority principal claim present",
+            "current single-use authorization case present",
+            "human authorization explicitly names current case id",
+            "current case matches target mutation class bounded scope consequence and action digest",
+            "current case is unconsumed and unexpired",
+            "high-consequence independent principal proof satisfied when applicable",
+        }
+        self.assertTrue(required_gates.issubset(set(order_template["mutation_gate"])))
 
     def test_scheduled_launch_contract_propagates_to_new_projects(self):
         bootstrap_template = json.loads(
@@ -113,6 +133,9 @@ class NewProjectBootstrapKitTests(unittest.TestCase):
         self.assertTrue(scheduled["capture_from_local_contract"])
         self.assertTrue(scheduled["validate_against_local_contract_before_mutation"])
         self.assertEqual(scheduled["task_state_advancement_before_bootstrap_ready"], "DENY")
+        self.assertFalse(scheduled["schedule_fire_is_authority"])
+        self.assertFalse(scheduled["task_contract_is_future_mutation_authority"])
+        self.assertTrue(scheduled["each_distinct_scheduled_mutation_case_requires_fresh_human_authorization"])
 
         order_template = json.loads(
             (ROOT / "templates" / "new-project" / "BOOTSTRAP_ORDER.template.json").read_text()

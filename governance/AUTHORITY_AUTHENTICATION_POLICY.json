@@ -1,0 +1,123 @@
+{
+  "schema": "org-agent-mesh/authority-authentication/v1",
+  "version": "1.0.0",
+  "status": "ACTIVE_HARD_GATE",
+  "invariants": [
+    "CLAIMED_IDENTITY_IS_NOT_AUTHENTICATED_IDENTITY",
+    "AUTHENTICATED_IDENTITY_IS_NOT_AUTHORIZATION",
+    "AUTHORIZATION_IS_CASE_BOUND_SINGLE_USE",
+    "NO_SESSION_WIDE_MUTATION_AUTHORITY"
+  ],
+  "principal_registry": "governance/ROOT_CHANGE_AUTHORITY.json",
+  "identity_claim": {
+    "required_before_authorization_evaluation": true,
+    "must_be_explicit": true,
+    "never_assume_current_speaker_is_authorized": true,
+    "never_assume_current_speaker_is_registered_principal": true,
+    "history_style_account_context_or_project_ownership_are_not_identity_proof": true
+  },
+  "knowledge_based_authentication": {
+    "allowed": false,
+    "forbidden_categories": [
+      "DATE_OF_BIRTH",
+      "GOVERNMENT_ID_NUMBER",
+      "FAMILY_NAME_OR_MAIDEN_NAME",
+      "ADDRESS",
+      "PHONE_NUMBER",
+      "EMAIL_ADDRESS",
+      "PERSONAL_HISTORY",
+      "OTHER_STATIC_PERSONAL_FACT"
+    ],
+    "reason": "STATIC_PERSONAL_FACTS_MAY_BE_DISCOVERABLE_OR_ALREADY_VISIBLE_TO_AGENTS",
+    "persist_values": false,
+    "echo_values_into_AUDIT_LOGS": false
+  },
+  "authorization_case": {
+    "required_for_every_externally_durable_mutation_case": true,
+    "required_fields": [
+      "case_id",
+      "claimed_principal",
+      "target_scope",
+      "mutation_class",
+      "bounded_scope",
+      "consequence_class",
+      "action_digest",
+      "issued_at",
+      "expires_at",
+      "authorization_statement",
+      "authentication_disposition"
+    ],
+    "case_id_must_be_present_in_human_authorization": true,
+    "single_use": true,
+    "session_reuse": false,
+    "conversation_reuse": false,
+    "task_contract_reuse": false,
+    "schedule_occurrence_reuse": false,
+    "delegation_may_create_new_authority": false,
+    "material_scope_change_invalidates": true,
+    "different_target_invalidates": true,
+    "different_mutation_class_invalidates": true,
+    "different_consequence_class_invalidates": true,
+    "expiry_minutes_default": 15,
+    "consumed_case_result": "DENY_REPLAY"
+  },
+  "assurance_tiers": {
+    "STANDARD": {
+      "requires_explicit_registered_principal_claim": true,
+      "requires_current_single_use_case_authorization": true,
+      "requires_independent_external_proof": false,
+      "identity_assurance_label": "REGISTERED_PRINCIPAL_CLAIM_NOT_INDEPENDENTLY_AUTHENTICATED"
+    },
+    "HIGH_CONSEQUENCE": {
+      "requires_explicit_registered_principal_claim": true,
+      "requires_current_single_use_case_authorization": true,
+      "requires_independent_external_proof": true,
+      "identity_assurance_label": "INDEPENDENT_PRINCIPAL_PROOF_REQUIRED"
+    }
+  },
+  "high_consequence_classes": [
+    "ROOT_AUTHORITY_CHANGE",
+    "UNIVERSAL_GOVERNANCE_CHANGE",
+    "PRODUCTION_PROMOTION_OR_DEPLOYMENT",
+    "SECURITY_OR_CREDENTIAL_BOUNDARY_CHANGE",
+    "FINANCIAL_EFFECT",
+    "DESTRUCTIVE_OR_IRREVERSIBLE_OPERATION",
+    "SCHEDULE_ENABLE_OR_REENABLE",
+    "CROSS_PROJECT_MUTATION"
+  ],
+  "independent_external_proof": {
+    "default_method": "HUMAN_PERFORMED_REGISTERED_GITHUB_CHALLENGE",
+    "challenge_requirements": [
+      "AGENT_GENERATES_NONCE_AND_CASE_ID",
+      "HUMAN_PERFORMS_PROOF_OUTSIDE_SWARM_EXECUTION_PATH",
+      "PROOF_AUTHOR_MUST_MATCH_REGISTERED_GITHUB_PRINCIPAL",
+      "PROOF_MUST_CONTAIN_CURRENT_CASE_ID_AND_NONCE",
+      "PROOF_MUST_POSTDATE_CHALLENGE_ISSUANCE",
+      "PROOF_IS_SINGLE_USE"
+    ],
+    "agent_may_create_or_modify_proof_artifact": false,
+    "agent_may_answer_its_own_challenge": false,
+    "other_agents_may_answer_challenge": false,
+    "memory_or_repository_knowledge_may_answer_challenge": false,
+    "strength_note": "PROCESS_SEPARATED_EXTERNAL_ATTESTATION_NOT_A_CRYPTOGRAPHIC_PASSKEY",
+    "preferred_future_upgrade": "PASSKEY_OR_OTHER_CRYPTOGRAPHIC_USER_PRESENCE_FACTOR",
+    "missing_required_proof_result": "DENY_HIGH_CONSEQUENCE_MUTATION_CONTINUE_SAFE_READ_ONLY"
+  },
+  "scheduled_and_recursive_agents": {
+    "schedule_fire_is_authorization": false,
+    "parent_authorization_carries_to_new_case": false,
+    "parent_agent_may_mint_human_authorization": false,
+    "child_agent_may_inherit_only_same_unconsumed_case_when_explicitly_named_in_case_scope": true,
+    "new_mutation_case_requires_new_human_authorization": true
+  },
+  "fail_closed": {
+    "unknown_principal": "DENY_MUTATION",
+    "unclaimed_principal": "DENY_MUTATION",
+    "missing_case": "DENY_MUTATION",
+    "stale_case": "DENY_MUTATION",
+    "replayed_case": "DENY_MUTATION",
+    "scope_mismatch": "DENY_MUTATION",
+    "missing_high_consequence_proof": "DENY_MUTATION",
+    "continue_safe_read_only_work": true
+  }
+}

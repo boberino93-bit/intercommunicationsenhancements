@@ -10,6 +10,8 @@ class UserControlContractError(ValueError):
 
 PROTOCOL_PATH = "protocols/user_control_messages.md"
 PERCENTAGE_POLICY = "APPROXIMATE_FROM_KNOWN_REMAINING_PHASES_UNLESS_TELEMETRY_EXISTS"
+LEGACY_RESUME_STEP = "when_user_control_message_arrives_respond_then_resume_active_assignment"
+AUTHORIZATION_AWARE_RESUME_STEP = "when_user_control_message_arrives_respond_then_resume_only_non_mutating_work_unless_a_current_case_exists"
 
 
 def _safe_protocol_path(value: Any) -> str:
@@ -110,5 +112,7 @@ def validate_global_entrypoint_control_policy(entrypoint: Mapping[str, Any]) -> 
         if policy.get(key) != value:
             raise UserControlContractError(f"unsafe_global_control_policy_{key}")
     sequence = entrypoint.get("sequence")
-    if not isinstance(sequence, list) or "when_user_control_message_arrives_respond_then_resume_active_assignment" not in sequence:
+    if not isinstance(sequence, list):
+        raise UserControlContractError("global_control_resume_step_missing")
+    if LEGACY_RESUME_STEP not in sequence and AUTHORIZATION_AWARE_RESUME_STEP not in sequence:
         raise UserControlContractError("global_control_resume_step_missing")
