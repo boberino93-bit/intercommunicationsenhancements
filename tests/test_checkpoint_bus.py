@@ -4,6 +4,7 @@ import unittest
 from org_agent_mesh.checkpoint_bus import (
     CheckpointConflictError,
     CheckpointError,
+    LegacyStageCheckpoint,
     StageCheckpoint,
     accepted_upstream_states,
     cycle_id_from_time,
@@ -15,6 +16,7 @@ from org_agent_mesh.checkpoint_bus import (
 class CheckpointBusTests(unittest.TestCase):
     def make_checkpoint(self, **overrides):
         payload = {
+            "project_id": "duo-open",
             "checkpoint_id": "2026-10-05T04_RESEARCHER_1_run-1_0",
             "cycle_id": "2026-10-05T04:00:00-07:00",
             "stage": "RESEARCHER_1",
@@ -31,6 +33,7 @@ class CheckpointBusTests(unittest.TestCase):
             "blockers": (),
             "unfinished_work": (),
             "next_action": "begin bounded research",
+            "authority_conveyed": False,
         }
         payload.update(overrides)
         return StageCheckpoint(**payload)
@@ -42,6 +45,10 @@ class CheckpointBusTests(unittest.TestCase):
     def test_stage_state_mismatch_rejected(self):
         with self.assertRaises(CheckpointError):
             self.make_checkpoint(state="MANAGER_PROGRESS")
+
+    def test_authority_conveyance_is_rejected(self):
+        with self.assertRaises(CheckpointError):
+            self.make_checkpoint(authority_conveyed=True)
 
     def test_all_three_research_stages_accept_research_progress(self):
         for stage in ("RESEARCHER_1", "RESEARCHER_2", "RESEARCHER_3"):
@@ -79,32 +86,78 @@ class CheckpointBusTests(unittest.TestCase):
         )
         selected = latest_for_cycle(
             [earlier, later],
+            project_id="duo-open",
             cycle_id=earlier.cycle_id,
             stage="RESEARCHER_1",
             accepted_states={"RESEARCH_PROGRESS", "RESEARCH_HANDOFF_READY"},
         )
         self.assertEqual(selected.checkpoint_id, later.checkpoint_id)
 
+    def test_foreign_project_is_not_selected_even_when_newer(self):
+        local = self.make_checkpoint(sequence=0)
+        foreign = self.make_checkpoint(
+            project_id="xrp-thesis",
+            checkpoint_id="foreign-newer",
+            sequence=99,
+            created_at="2026-10-05T04:09:00-07:00",
+        )
+        selected = latest_for_cycle(
+            [local, foreign],
+            project_id="duo-open",
+            cycle_id=local.cycle_id,
+            stage="RESEARCHER_1",
+            accepted_states={"RESEARCH_PROGRESS", "RESEARCH_HANDOFF_READY"},
+        )
+        self.assertEqual(selected.project_id, "duo-open")
+        self.assertEqual(selected.checkpoint_id, local.checkpoint_id)
+
     def test_stale_prior_cycle_is_not_selected(self):
         stale = self.make_checkpoint(cycle_id="2026-10-05T03:00:00-07:00")
         selected = latest_for_cycle(
             [stale],
+            project_id="duo-open",
             cycle_id="2026-10-05T04:00:00-07:00",
             stage="RESEARCHER_1",
             accepted_states={"RESEARCH_PROGRESS", "RESEARCH_HANDOFF_READY"},
         )
         self.assertIsNone(selected)
 
-    def test_conflicting_sequence_reuse_fails_closed(self):
+    def test_conflicting_sequence_reuse_fails_closed_within_project(self):
         first = self.make_checkpoint()
         second = self.make_checkpoint(summary="different content with same sequence")
         with self.assertRaises(CheckpointConflictError):
             validate_no_sequence_conflicts([first, second])
 
+    def test_same_stream_identity_in_different_projects_does_not_collide(self):
+        first = self.make_checkpoint()
+        second = self.make_checkpoint(project_id="xrp-thesis", summary="different project")
+        self.assertTrue(validate_no_sequence_conflicts([first, second]))
+
     def test_identical_duplicate_is_idempotent(self):
         first = self.make_checkpoint()
         second = self.make_checkpoint()
         self.assertTrue(validate_no_sequence_conflicts([first, second]))
+
+    def test_v2_round_trip_preserves_project_and_non_authority(self):
+        checkpoint = self.make_checkpoint()
+        rebuilt = StageCheckpoint.from_dict(checkpoint.as_dict())
+        self.assertEqual(rebuilt.project_id, "duo-open")
+        self.assertFalse(rebuilt.authority_conveyed)
+
+    def test_legacy_v1_is_readable_only_through_legacy_parser(self):
+        legacy_payload = {
+            "schema": "intercommunications/swarm-stage-checkpoint/v1",
+            "checkpoint_id": "legacy-1",
+            "cycle_id": "2026-10-05T03:00:00-07:00",
+            "stage": "RESEARCHER_1",
+            "run_id": "old-run",
+            "sequence": 0,
+            "state": "RESEARCH_PROGRESS",
+        }
+        legacy = LegacyStageCheckpoint.from_dict(legacy_payload)
+        self.assertEqual(legacy.checkpoint_id, "legacy-1")
+        with self.assertRaises(CheckpointError):
+            StageCheckpoint.from_dict(legacy_payload)
 
     def test_downstream_acceptance_contract_is_five_stage_chain(self):
         expected = {
