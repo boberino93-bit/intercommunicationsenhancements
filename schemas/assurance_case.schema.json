@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "org-agent-mesh/assurance-case/v1",
+  "title": "Protected Transition Assurance Case",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["assurance_case_id","project_id","artifact_id","artifact_hash","requested_transition","policy_certificate_id","preconditions","validator_evidence_ids","known_risks","rollback_reference","blast_radius_ring","health_gates","terminal_acceptance_criteria","readiness"],
+  "properties": {
+    "assurance_case_id": {"type":"string"},
+    "project_id": {"type":"string"},
+    "artifact_id": {"type":"string"},
+    "artifact_hash": {"type":"string"},
+    "requested_transition": {"type":"string"},
+    "policy_certificate_id": {"type":"string"},
+    "human_authorization_id": {"type":["string","null"]},
+    "preconditions": {"type":"array","items":{"type":"string"}},
+    "validator_evidence_ids": {"type":"array","items":{"type":"string"}},
+    "known_risks": {"type":"array","items":{"type":"string"}},
+    "rollback_reference": {"type":"string"},
+    "blast_radius_ring": {"type":"string","enum":["SANDBOX","LOCAL_CANARY","PROJECT_CANARY","PROJECT_WIDE","UNIVERSAL"]},
+    "health_gates": {"type":"array","items":{"type":"string"}},
+    "monitoring_period_seconds": {"type":"integer","minimum":0},
+    "terminal_acceptance_criteria": {"type":"array","items":{"type":"string"}},
+    "readiness": {"type":"string","enum":["DRAFT","VALIDATION_PENDING","VERIFIED","READY_FOR_DEPLOYMENT_AUTHORIZATION","APPROVED_FOR_DEPLOYMENT","DEPLOYED"]}
+  }
+}
