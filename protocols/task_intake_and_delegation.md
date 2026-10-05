@@ -18,6 +18,10 @@ Allowed intake modes:
 
 `AMBIGUOUS_PROJECT` fails closed for mutation. A caller-supplied project name or repository is intent evidence, not authorization. When the human has explicitly named the target project or explicitly requested creation of a new project, do not ask them to repeat that information; validate it against local identity/state instead.
 
+Routing, task classification and understanding the desired outcome still do **not** authorize external mutation. Apply `protocols/mutation_authorization.md` before each durable side effect. `INTENT != AUTHORIZATION`.
+
+A broad capability question or discussion may be sufficient to analyze, design, inspect and prepare a proposed patch, but it is not sufficient by itself to write, publish, merge, deploy, enable or otherwise mutate external state.
+
 ## 2. New-project isolation rule
 
 A framework repository, template repository or source project is not the new project's state store.
@@ -36,6 +40,8 @@ The new project must have, at minimum, durable records for:
 8. initial research-assistance/topology decision.
 
 If the runtime cannot establish the required isolated coordination state, initialization is incomplete and risky project mutation remains blocked.
+
+Any writes needed to create that state must themselves be inside an explicit human-approved new-project mutation envelope. An explicit request to discuss or design a project is not equivalent to authorization to create external project state.
 
 ## 3. Problem definition before solution selection
 
@@ -91,7 +97,9 @@ Research assistance is justified when additional independent capacity is likely 
 
 Research capacity follows executable parallel fronts rather than raw question count. Manager capacity follows integration and coordination load rather than a fixed researcher ratio.
 
-Any adaptive or experimental sizing algorithm is advisory evidence only. It does not grant spawn, mutation or restructuring authority. Only the bound `ACTIVE` Primary execution instance may authorize Research/Manager allocation or topology changes.
+Any adaptive or experimental sizing algorithm is advisory evidence only. It does not grant spawn, mutation or restructuring authority. Only the bound `ACTIVE` Primary execution instance may authorize Research/Manager allocation or topology changes inside its existing human-approved scope.
+
+Generic human-launched project agents without an explicit role follow `protocols/roleless_agent_admission.md`; they do not default to Primary.
 
 ## 6. Delegation contract
 
@@ -105,6 +113,7 @@ Every delegated Research or Manager assignment must have an explicit durable del
 - allowed tools;
 - capability ceiling;
 - write boundaries;
+- mutation-authorization source/envelope when writes are permitted;
 - source-of-truth references;
 - evidence requirements;
 - output contract;
@@ -114,6 +123,8 @@ Every delegated Research or Manager assignment must have an explicit durable del
 - parent task/trace linkage when available.
 
 A child agent must not infer expanded scope from conversation semantics. Scope expansion returns to Primary for authorization.
+
+Delegation may narrow an existing human-approved mutation envelope but may not create or expand mutation authority beyond it. Role assignment and claim ownership do not substitute for the mutation-authorization source.
 
 ## 7. Evidence and authority separation
 
@@ -127,6 +138,8 @@ Durable findings should distinguish at least:
 - `IMPLEMENTATION_RECOMMENDATION` — proposed action that is not itself authority.
 
 Research findings never become accepted configuration or implementation authority merely because multiple agents agree. Promotion remains a Primary/local-policy decision and may require independent review or human approval.
+
+An implementation recommendation is never mutation authorization.
 
 ## 8. Dynamic swarm review
 
@@ -145,11 +158,15 @@ Scale up only for sustained unmet parallel demand, missing capability or verific
 
 Research and Manager agents may recommend changes but may not authorize them.
 
+Generic roleless admissions should consume verified unclaimed demand rather than causing the topology to scale merely because capacity is available.
+
 ## 9. Risk gate
 
 When the project concerns security boundaries, safety-critical systems, destructive operations, privileged access, firmware/kernel/hardware changes, financial/production effects or other high-consequence mutation, architecture and recovery boundaries must be understood before risky modification begins.
 
 The intake must explicitly record whether risky modification is blocked and the evidence required to unblock it.
+
+The stronger exact-action authorization applicable to the high-consequence mutation must also be satisfied; broad task authorization is not enough when a stricter gate applies.
 
 ## 10. Completion and recovery
 
@@ -163,9 +180,10 @@ Useful state must survive agent loss. Preserve project-scoped:
 - decisions and rationale;
 - unresolved fronts and blockers;
 - current swarm/topology state;
-- handoff/recovery instructions.
+- handoff/recovery instructions;
+- mutation-authorization disposition needed to understand why a material write did or did not occur.
 
-A replacement Primary reruns the identity gate, loads durable project state and continues from those records rather than reconstructing authority or facts from chat history.
+A replacement Primary reruns the identity gate, loads durable project state and continues from those records rather than reconstructing authority or facts from chat history. It must not reconstruct mutation authorization from likely intent; it loads a valid active human-approved contract or obtains fresh explicit authorization where required.
 
 ## 11. First-output rule for new projects
 
@@ -176,6 +194,7 @@ The first substantive Primary output for a new project should state:
 3. technical/operational research decomposition;
 4. whether a research swarm is warranted;
 5. if warranted, the proposed Research/Manager topology and rationale;
-6. the safety/recovery gate preventing premature risky implementation.
+6. the safety/recovery gate preventing premature risky implementation;
+7. the mutation-authorization state for any requested external setup or implementation.
 
 This output is a status/decision record. It does not replace durable project-scoped state.
