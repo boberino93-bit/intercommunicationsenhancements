@@ -1,0 +1,51 @@
+{
+  "schema": "org-agent-mesh/project-work-control/v1",
+  "version": "1.0.0",
+  "status": "ACTIVE_CONTROL_PLANE",
+  "timezone": "America/Vancouver",
+  "default_project_state": "ACTIVE",
+  "protocol_path": "protocols/project_work_holds.md",
+  "event_schema_path": "schemas/project_work_control_event.schema.json",
+  "message_bus": {
+    "transport": "GITHUB_ISSUE_COMMENTS_APPEND_ONLY",
+    "repository": "boberino93-bit/intercommunicationsenhancements",
+    "issue_number": 25,
+    "event_prefix": "PROJECT_WORK_CONTROL",
+    "readback_required": true,
+    "edit_or_delete_control_events_allowed": false
+  },
+  "projects": {
+    "intercommunicationsenhancements": {"state": "ACTIVE", "active_hold": null},
+    "duo-open": {"state": "ACTIVE", "active_hold": null},
+    "benefitflow": {"state": "ACTIVE", "active_hold": null},
+    "fold7-power-lab": {"state": "ACTIVE", "active_hold": null},
+    "warp-propulsion-lab": {"state": "ACTIVE", "active_hold": null},
+    "ai-behaviour-control-lab": {"state": "ACTIVE", "active_hold": null},
+    "xrp-thesis": {"state": "ACTIVE", "active_hold": null}
+  },
+  "rules": {
+    "authenticated_registered_human_may_issue_hold": true,
+    "hold_is_cancellation": false,
+    "hold_is_failure": false,
+    "hold_is_stale_liveness": false,
+    "hold_deletes_state": false,
+    "active_agents_checkpoint_then_stop_project_work": true,
+    "new_project_claims_while_held": "DENY",
+    "new_project_mutations_while_held": "DENY",
+    "new_project_research_while_held": "DENY_EXCEPT_MINIMAL_INTEGRITY_PRESERVING_HANDOFF",
+    "project_respawn_while_held": "DENY",
+    "global_agents_may_continue_other_unheld_projects": true,
+    "scheduled_tasks_must_check_before_project_selection": true,
+    "scheduled_tasks_must_recheck_between_bounded_units": true,
+    "held_project_specific_occurrence": "CHECKPOINT_PROJECT_HOLD_ACTIVE_AND_NOOP",
+    "timer_or_schedule_may_override_hold": false,
+    "primary_or_master_may_override_human_hold": false,
+    "manual_resume_requires_authenticated_registered_human": true,
+    "auto_resume_allowed_only_when_hold_order_explicitly_sets_AUTO_AT_EXPIRY": true,
+    "auto_resume_does_not_enable_a_disabled_scheduler_task": true,
+    "expired_manual_hold_state": "HOLD_EXPIRED_PENDING_HUMAN_RESUME",
+    "control_message_takes_effect_when_validated_even_if_registry_projection_lags": true,
+    "unverified_hold_signal_behavior": "FAIL_CLOSED_ON_AFFECTED_PROJECT_MUTATION_WHILE_VERIFYING",
+    "reason_and_metadata_preserved": true
+  }
+}
