@@ -11,7 +11,7 @@ class UserControlContractError(ValueError):
 PROTOCOL_PATH = "protocols/user_control_messages.md"
 PERCENTAGE_POLICY = "APPROXIMATE_FROM_KNOWN_REMAINING_PHASES_UNLESS_TELEMETRY_EXISTS"
 LEGACY_RESUME_STEP = "when_user_control_message_arrives_respond_then_resume_active_assignment"
-AUTHORIZATION_AWARE_RESUME_STEP = "when_user_control_message_arrives_respond_then_resume_only_non_mutating_work_unless_a_current_case_exists"
+AUTHORIZATION_AWARE_RESUME_STEP = "when_user_control_message_arrives_respond_then_resume_only_non_mutating_or_valid_coordination_work_unless_a_current_mutation_case_exists"
 
 
 def _safe_protocol_path(value: Any) -> str:
