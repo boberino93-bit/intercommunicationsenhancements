@@ -48,4 +48,4 @@ incident/audit evidence -> normalize -> fingerprint -> append -> correlate -> me
 
 ## Relationship to self-audit
 
-Agent self-audit records are a future high-value evidence source for this learner. Audit findings remain recommendations/evidence only and cannot authorize their own remediation.
+Validated records from `governance/audit/ledger/` are an active evidence source for regression analysis. The learner must preserve the audit record ID, framework version, provenance classes, and source record hash when deriving a regression event. Audit findings, scores, and recommendations remain non-authoritative evidence and cannot authorize their own remediation.
