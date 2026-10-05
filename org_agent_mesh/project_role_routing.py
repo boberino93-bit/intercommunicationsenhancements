@@ -12,6 +12,10 @@ class RoutingError(ValueError):
 PERSISTENT_AUTHORITY_ROLES = ("primary", "manager", "research")
 LEGACY_FAIL_CLOSED_MODE = "FAIL_CLOSED"
 LOCAL_CONTINUATION_MODE = "FAIL_CLOSED_LOCAL_CONTINUE_GLOBAL"
+REPOSITORY_NATIVE_FORUM_AUTHORITY = "GITHUB_REPOSITORY"
+REPOSITORY_NATIVE_FORUM_PROJECTS = frozenset({"xrp-thesis"})
+REPOSITORY_NATIVE_FORUM_MODE = "CANONICAL"
+REPOSITORY_NATIVE_FORUM_PATHS = {"xrp-thesis": "AGENTS.md"}
 
 
 @dataclass(frozen=True)
@@ -94,8 +98,6 @@ def _validate_communication_awareness(registry: Mapping[str, Any]) -> None:
     if not isinstance(required, list) or set(required) != expected or len(required) != len(expected):
         raise RoutingError("invalid_full_visibility_requirements")
 
-    # 1.5 moves some duplicate safety declarations out of the central registry.
-    # Older contracts continue to require those declarations exactly as before.
     if version < (1, 5, 0):
         template = awareness.get("assessment_ack_template")
         if not isinstance(template, str) or not template.startswith("COMMUNICATIONS ASSESSED:"):
@@ -197,21 +199,39 @@ def _validate_forum_locator(project: Mapping[str, Any], *, project_id: str) -> N
     locator = project.get("forum_locator")
     if not isinstance(locator, Mapping):
         raise RoutingError("missing_forum_locator")
-    if locator.get("authority") != "INTERNAL_ARTIFACTORY":
-        raise RoutingError("invalid_forum_authority")
+    authority = locator.get("authority")
     if locator.get("namespace") != namespace:
         raise RoutingError("forum_locator_namespace_mismatch")
     view = locator.get("repository_view")
     if not isinstance(view, Mapping):
         raise RoutingError("missing_forum_repository_view")
     mode, path = view.get("mode"), view.get("path")
-    if mode not in {"LIVE_MIRROR", "SNAPSHOT_BACKUP", "NONE"}:
-        raise RoutingError("invalid_forum_repository_view_mode")
-    if mode == "NONE":
-        if path is not None:
-            raise RoutingError("forum_repository_view_path_must_be_null")
-    else:
+
+    if authority == "INTERNAL_ARTIFACTORY":
+        if mode not in {"LIVE_MIRROR", "SNAPSHOT_BACKUP", "NONE"}:
+            raise RoutingError("invalid_forum_repository_view_mode")
+        if mode == "NONE":
+            if path is not None:
+                raise RoutingError("forum_repository_view_path_must_be_null")
+        else:
+            _safe_repo_path(path, field="forum_repository_view_path")
+        return
+
+    if authority == REPOSITORY_NATIVE_FORUM_AUTHORITY:
+        if project_id not in REPOSITORY_NATIVE_FORUM_PROJECTS:
+            raise RoutingError("repository_native_forum_not_allowlisted")
+        repository = project.get("repository")
+        if namespace != repository:
+            raise RoutingError("repository_native_forum_namespace_mismatch")
+        if mode != REPOSITORY_NATIVE_FORUM_MODE:
+            raise RoutingError("repository_native_forum_must_be_canonical")
+        expected_path = REPOSITORY_NATIVE_FORUM_PATHS[project_id]
+        if path != expected_path:
+            raise RoutingError("repository_native_forum_path_mismatch")
         _safe_repo_path(path, field="forum_repository_view_path")
+        return
+
+    raise RoutingError("invalid_forum_authority")
 
 
 def _validate_project_contract_version(project: Mapping[str, Any], registry_version: tuple[int, int, int], registry_version_text: str) -> None:
@@ -342,12 +362,7 @@ def _validate_v15_local_contract(contract: Mapping[str, Any], registry: Mapping[
     if continuation.get("continue_unaffected_work") is not True:
         raise RoutingError("local_unaffected_work_continuation_disabled")
     gates = continuation.get("human_interrupt_only_for")
-    required_gates = {
-        "NON_DELEGABLE_AUTHORITY",
-        "IRRECOVERABLE_DATA_INTEGRITY",
-        "SECURITY_BOUNDARY_DECISION",
-        "REQUIRED_EXTERNAL_CAPABILITY",
-    }
+    required_gates = {"NON_DELEGABLE_AUTHORITY", "IRRECOVERABLE_DATA_INTEGRITY", "SECURITY_BOUNDARY_DECISION", "REQUIRED_EXTERNAL_CAPABILITY"}
     if not isinstance(gates, list) or not required_gates.issubset(set(gates)):
         raise RoutingError("unsafe_local_human_interrupt_policy")
 
