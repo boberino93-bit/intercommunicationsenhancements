@@ -5,6 +5,7 @@ import unittest
 
 from org_agent_mesh.universal_intake import (
     UniversalIntakeError,
+    admit_roleless_role,
     complete_project_binding,
     discover_project,
     resolve_unbound_intake,
@@ -23,7 +24,7 @@ class UniversalIntakeTests(unittest.TestCase):
         validate_global_intake_registry(self.registry)
         config = self.registry["global_intake"]
         self.assertEqual(config["mode"], "READ_ONLY_UNTIL_BOUND")
-        self.assertEqual(config["default_human_task_role"], "primary")
+        self.assertEqual(config["generic_human_task_role_mode"], "ROLELESS_DEMAND_DRIVEN_ADMISSION")
         self.assertEqual(
             config["fallback_resolution"],
             "REGISTERED_FORUM_HANDOFF_EXACT_IDENTIFIER_ONLY",
@@ -41,14 +42,15 @@ class UniversalIntakeTests(unittest.TestCase):
         with self.assertRaisesRegex(UniversalIntakeError, "invalid_unresolved_action"):
             validate_global_intake_registry(registry)
 
-    def test_human_alias_resolves_duo_screen_without_topic_guessing(self):
+    def test_generic_human_task_resolves_project_but_not_role(self):
         result = resolve_unbound_intake(
             self.registry,
             task_text="Please fix the diagnostics in the duo screen project.",
         )
         self.assertEqual(result.discovery.project_id, "duo-open")
-        self.assertEqual(result.role_id, "primary")
-        self.assertEqual(result.role_source, "global_human_task_default")
+        self.assertIsNone(result.role_id)
+        self.assertEqual(result.role_source, "roleless_demand_pending")
+        self.assertTrue(result.roleless_admission_pending)
         self.assertFalse(result.mutation_ready)
 
     def test_repository_url_is_strong_evidence(self):
@@ -122,20 +124,101 @@ class UniversalIntakeTests(unittest.TestCase):
         ):
             validate_global_intake_registry(registry)
 
-    def test_complete_binding_reuses_existing_project_route_gate(self):
+    def test_primary_cannot_be_self_admissible(self):
+        registry = copy.deepcopy(self.registry)
+        registry["projects"]["duo-open"]["self_admissible_roles"] = ["primary"]
+        with self.assertRaisesRegex(UniversalIntakeError, "privileged_role_cannot_be_self_admissible"):
+            validate_global_intake_registry(registry)
+
+    def test_roleless_admission_selects_highest_positive_local_pressure(self):
         intake = resolve_unbound_intake(
             self.registry,
             explicit_project_id="intercommunicationsenhancements",
         )
         local_contract = json.loads((ROOT / "AGENT_BOOTSTRAP.json").read_text())
+        admitted = admit_roleless_role(
+            self.registry,
+            intake=intake,
+            local_contract=local_contract,
+            role_pressure={"research": 7, "manager": 3, "primary": 1000},
+            state_is_fresh=True,
+        )
+        self.assertEqual(admitted.role_id, "research")
+        self.assertEqual(admitted.role_source, "roleless_demand_driven")
+        self.assertFalse(admitted.mutation_ready)
+
+    def test_roleless_admission_ignores_privileged_pressure(self):
+        intake = resolve_unbound_intake(
+            self.registry,
+            explicit_project_id="intercommunicationsenhancements",
+        )
+        local_contract = json.loads((ROOT / "AGENT_BOOTSTRAP.json").read_text())
+        with self.assertRaisesRegex(UniversalIntakeError, "no_material_work"):
+            admit_roleless_role(
+                self.registry,
+                intake=intake,
+                local_contract=local_contract,
+                role_pressure={"research": 0, "manager": 0, "primary": 1000},
+                state_is_fresh=True,
+            )
+
+    def test_roleless_admission_requires_fresh_state(self):
+        intake = resolve_unbound_intake(
+            self.registry,
+            explicit_project_id="intercommunicationsenhancements",
+        )
+        local_contract = json.loads((ROOT / "AGENT_BOOTSTRAP.json").read_text())
+        with self.assertRaisesRegex(UniversalIntakeError, "stale_role_demand_state"):
+            admit_roleless_role(
+                self.registry,
+                intake=intake,
+                local_contract=local_contract,
+                role_pressure={"research": 1},
+                state_is_fresh=False,
+            )
+
+    def test_generic_binding_requires_roleless_admission_first(self):
+        intake = resolve_unbound_intake(
+            self.registry,
+            explicit_project_id="intercommunicationsenhancements",
+        )
+        local_contract = json.loads((ROOT / "AGENT_BOOTSTRAP.json").read_text())
+        with self.assertRaisesRegex(UniversalIntakeError, "roleless_admission_required"):
+            complete_project_binding(
+                self.registry,
+                intake=intake,
+                local_contract=local_contract,
+            )
+
+    def test_complete_binding_after_roleless_admission_reuses_route_gate(self):
+        intake = resolve_unbound_intake(
+            self.registry,
+            explicit_project_id="intercommunicationsenhancements",
+        )
+        local_contract = json.loads((ROOT / "AGENT_BOOTSTRAP.json").read_text())
+        intake = admit_roleless_role(
+            self.registry,
+            intake=intake,
+            local_contract=local_contract,
+            role_pressure={"research": 1, "manager": 2},
+            state_is_fresh=True,
+        )
         route = complete_project_binding(
             self.registry,
             intake=intake,
             local_contract=local_contract,
         )
         self.assertEqual(route.project_id, "intercommunicationsenhancements")
-        self.assertEqual(route.role_id, "primary")
+        self.assertEqual(route.role_id, "manager")
         self.assertEqual(route.repository, "boberino93-bit/intercommunicationsenhancements")
+
+    def test_other_projects_fail_closed_until_local_roleless_admission_is_enabled(self):
+        intake = resolve_unbound_intake(
+            self.registry,
+            explicit_project_id="duo-open",
+        )
+        self.assertTrue(intake.roleless_admission_pending)
+        self.assertEqual(self.registry["projects"]["duo-open"]["self_admissible_roles"], [])
 
     def test_role_packages_include_universal_entrypoint_contract(self):
         dependency_map = json.loads(
@@ -146,6 +229,7 @@ class UniversalIntakeTests(unittest.TestCase):
         self.assertIn("UNIVERSAL_AGENT_ENTRYPOINT.md", shared)
         self.assertIn("org_agent_mesh/*.py", shared)
         self.assertIn("protocols/*.md", shared)
+        self.assertIn("governance/*.json", shared)
 
 
 if __name__ == "__main__":
