@@ -1,16 +1,21 @@
 {
   "schema": "org-agent-mesh/swarm-scale-policy/v1",
-  "status": "ACTIVE_TARGET",
+  "status": "ACTIVE_TARGET_BLOCKED_PENDING_CONTRACT_ALIGNMENT",
   "target_population": 100,
   "staged_populations": [15, 30, 60, 100],
-  "current_project_count": 7,
-  "current_per_project_active_roles": {
+  "registered_project_count": 7,
+  "projects_with_swarm_kernel_project_contract": 5,
+  "projects_missing_swarm_kernel_project_contract": 2,
+  "global_round_expected_set_aligned": false,
+  "stage_15_ready": false,
+  "stage_15_blocker": "CROSS_PROJECT_SWARM_CONTRACT_ALIGNMENT_REQUIRED",
+  "theoretical_per_project_active_roles": {
     "PRIMARY": 1,
     "MANAGER": 1,
     "RESEARCH": 8
   },
-  "current_global_active_slot_ceiling": 70,
-  "population_100_standby_read_only": 30,
+  "theoretical_global_active_slot_ceiling_after_alignment": 70,
+  "population_100_standby_read_only_after_alignment": 30,
   "launch_profiles": {
     "15": {"provider_max_inflight": 2, "min_start_interval_seconds": 10},
     "30": {"provider_max_inflight": 2, "min_start_interval_seconds": 8},
@@ -41,7 +46,7 @@
     "ledger_chain_valid": true,
     "manager_backpressure_recovered": true
   },
-  "promotion_rule": "PASS_CURRENT_STAGE_BEFORE_NEXT_STAGE",
+  "promotion_rule": "ALIGN_CONTRACTS_THEN_PASS_CURRENT_STAGE_BEFORE_NEXT_STAGE",
   "security_or_authority_changes_remain_human_gated": true,
   "schedule_activation_remains_human_gated": true,
   "cross_project_source_writes_remain_denied_by_default": true
