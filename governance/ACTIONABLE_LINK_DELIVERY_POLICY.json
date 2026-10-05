@@ -1,0 +1,48 @@
+{
+  "schema": "intercommunications/actionable-link-delivery-policy/v1",
+  "version": "1.0.0",
+  "status": "ACTIVE_HARDENING_CONTROL",
+  "default_behavior": {
+    "provide_direct_link_when_human_action_required": true,
+    "provide_download_link_unsolicited_when_downloadable_artifact_exists": true,
+    "prefer_exact_deep_link_over_generic_navigation": true,
+    "verify_target_before_presenting_as_verified": true
+  },
+  "verification_requirements": [
+    "TARGET_EXISTS",
+    "TARGET_MATCHES_INTENDED_PROJECT_OR_SYSTEM",
+    "TARGET_IS_CURRENT_NOT_SUPERSEDED",
+    "TARGET_STATE_SUPPORTS_INTENDED_ACTION",
+    "LINK_RESOLVES_TO_EXACT_OBJECT_OR_DOWNLOAD",
+    "ACCESSIBILITY_CHECKED_WHEN_TOOLING_ALLOWS",
+    "CASE_OR_REVISION_IDENTIFIERS_MATCH_CURRENT_STATE"
+  ],
+  "link_classes": [
+    "VERIFIED_DIRECT",
+    "VERIFIED_DOWNLOAD",
+    "VERIFIED_NAVIGATION",
+    "UNVERIFIED_DIRECT",
+    "STALE",
+    "INACCESSIBLE",
+    "AMBIGUOUS",
+    "BROKEN"
+  ],
+  "download_behavior": {
+    "surface_without_user_prompt": true,
+    "must_point_to_actual_downloadable_artifact": true,
+    "must_not_invent_sandbox_or_file_paths": true,
+    "must_not_claim_accessibility_without_verification_when_verification_is_possible": true
+  },
+  "security": {
+    "secrets_in_url_allowed": false,
+    "security_tokens_in_url_allowed": false,
+    "credentials_in_url_allowed": false,
+    "authorization_bypass_via_link_allowed": false
+  },
+  "failure_behavior": {
+    "bad_link_report_requires_re_resolution": true,
+    "resend_same_unverified_link_allowed": false,
+    "verification_unavailable_requires_explicit_disclosure": true
+  },
+  "protocol": "protocols/actionable_link_delivery.md"
+}
