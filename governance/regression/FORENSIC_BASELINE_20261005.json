@@ -45,9 +45,9 @@
       "provenance": "OBSERVED",
       "severity": 3,
       "pattern": "Queued/cancelled workflow states can be mistaken for code-test failure or success without job-level inspection.",
-      "remediation_state": "PROCESS_IMPROVED",
-      "remediation_refs": ["job-level workflow status inspection", "independent changed-surface validation"],
-      "recommended_candidate": "HOTFIX_CANDIDATE"
+      "remediation_state": "HOTFIX_STAGED_IN_THIS_RELEASE",
+      "remediation_refs": ["protocols/ci_state_interpretation.md", "job-level workflow status inspection", "independent validation kept distinct from hosted CI"],
+      "recommended_candidate": "HOTFIX_INCLUDED"
     },
     {
       "family": "ROLE_ROUTING_DRIFT",
@@ -63,9 +63,10 @@
       "provenance": "OBSERVED",
       "severity": 3,
       "pattern": "Short-lived authorization windows expired while external CI remained queued, causing repeated authorization ceremonies.",
-      "remediation_state": "OPEN_FOR_ERGONOMIC_IMPROVEMENT",
+      "remediation_state": "OPEN_FOR_GOVERNED_SECURITY_REVIEW",
       "remediation_refs": [],
-      "recommended_candidate": "SERVICE_PACK_CANDIDATE"
+      "recommended_candidate": "SERVICE_PACK_CANDIDATE",
+      "promotion_note": "Touches authorization lifecycle; candidate generation is allowed but implementation remains human-gated."
     },
     {
       "family": "CONNECTOR_WRITE_REJECTION",
