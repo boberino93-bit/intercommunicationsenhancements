@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "org-agent-mesh/live-operations-observation/v1",
+  "title": "Live operations project observation",
+  "type": "object",
+  "required": [
+    "project_id",
+    "repository_identity",
+    "registered",
+    "normalized",
+    "roles",
+    "blockers"
+  ],
+  "properties": {
+    "project_id": {"type": "string", "minLength": 1},
+    "repository_identity": {"type": "string", "minLength": 1},
+    "registered": {"type": "boolean"},
+    "normalized": {"type": "boolean"},
+    "repository_revision": {"type": ["string", "null"]},
+    "repository_observed_at_utc": {"type": ["string", "null"], "format": "date-time"},
+    "coordination_repository_revision": {"type": ["string", "null"]},
+    "coordination_observed_at_utc": {"type": ["string", "null"], "format": "date-time"},
+    "coordination_checkpoint_ref": {"type": ["string", "null"]},
+    "unattributed_activity": {"type": "boolean", "default": false},
+    "blockers": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "roles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["agent_id", "role", "state", "observed_at_utc"],
+        "properties": {
+          "agent_id": {"type": "string", "minLength": 1},
+          "role": {"enum": ["PRIMARY", "MANAGER", "RESEARCH", "MASTER"]},
+          "state": {
+            "enum": [
+              "BLOCKED",
+              "COMPLETED",
+              "FAILED",
+              "IDLE_READY",
+              "PAUSED",
+              "PAUSE_REQUESTED",
+              "REDIRECT_REQUESTED",
+              "RUNNING",
+              "STARTING",
+              "STOPPED",
+              "STOPPING",
+              "STOP_REQUESTED",
+              "UNKNOWN",
+              "WAITING_MANAGER",
+              "WAITING_PRIMARY",
+              "WAITING_UPSTREAM"
+            ]
+          },
+          "observed_at_utc": {"type": "string", "format": "date-time"},
+          "task_id": {"type": ["string", "null"]},
+          "checkpoint_ref": {"type": ["string", "null"]}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
