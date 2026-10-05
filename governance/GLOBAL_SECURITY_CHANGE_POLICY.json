@@ -1,0 +1,21 @@
+{
+  "schema": "org-agent-mesh/global-security-change-review/v1",
+  "version": "1.0.0",
+  "status": "ACTIVE_HARD_GATE",
+  "source_project": "intercommunicationsenhancements",
+  "required_role": "PRIMARY",
+  "protected_targets": ["GLOBAL_SWARM_SECURITY", "GLOBAL_SWARM_AUTHENTICATION", "GLOBAL_SWARM_RECOVERY", "GLOBAL_SWARM_UNIVERSAL_GOVERNANCE"],
+  "warning_acknowledgement_required": true,
+  "warning_must_disclose_possible_conflict_or_supersession": true,
+  "required_security_validation_receipts": 2,
+  "security_validation_receipts_must_have_distinct_ids": true,
+  "existing_authority_authentication_gates_remain_required": true,
+  "pre_change_backup_required": true,
+  "expected_pre_state_binding_required": true,
+  "cross_project_change_record_required": true,
+  "post_change_target_verification_required": true,
+  "mfa_normal_operation": "OPTIONAL_UNLESS_OTHER_POLICY_REQUIRES",
+  "credential_failure_action": "FAIL_CLOSED_ALLOW_OWNER_RECOVERY_ONLY",
+  "recovery_result_is_mutation_authority": false,
+  "source_acceptance_is_target_propagation": false
+}
