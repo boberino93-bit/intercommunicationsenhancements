@@ -16,6 +16,32 @@ from .project_scope import (
 PROJECT_STATES = ("ACTIVE", "DRAINING", "PAUSED")
 AGENT_STATES = ("UNBOUND", "BOUND", "INITIALIZED", "ACTIVE", "DRAINING", "TERMINATED")
 
+# Compatibility enforcement while legacy project bindings still carry the old
+# capability sets. A Primary-class binding is intentionally identified by a
+# conjunction of capabilities that subordinate roles do not possess. This
+# prevents legacy RESEARCH/MANAGER WRITE_* and CLAIM_TASK grants from remaining
+# effective merely because older overlays have not yet been regenerated.
+_PRIMARY_CLASS_MARKERS = frozenset({"WRITE_SOURCE", "WRITE_ACCEPTED_STATE", "APPROVE_CHANGE"})
+_SUBORDINATE_FORBIDDEN_DURABLE_CAPABILITIES = frozenset({
+    "WRITE_SOURCE",
+    "WRITE_ARTIFACTS",
+    "WRITE_WORKING_ARTIFACTS",
+    "WRITE_ACCEPTED_STATE",
+    "CLAIM_TASK",
+    "APPROVE_CHANGE",
+    "CONTROL_PROJECT_LIFECYCLE",
+    "SEND_EXTERNAL_COMMUNICATION",
+    "MODIFY_EXTERNAL_SYSTEM",
+    "DELETE_DATA",
+    "ACCESS_SENSITIVE_DATA",
+    "APPROVE_RELEASE",
+    "AUTHORIZE_FINANCIAL_ACTION",
+    "AUTHORIZE_POLICY_CHANGE",
+    "CROSS_PROJECT_EXCHANGE",
+    "BUILD_DEPLOYMENT_PACKAGE",
+    "PUBLISH_DEPLOYMENT_PACKAGE",
+})
+
 
 class LeaseConflict(RuntimeError):
     pass
@@ -46,6 +72,24 @@ def _utc_iso(value):
 
 def _parse_utc(value):
     return datetime.fromisoformat(value.replace("Z", "+00:00")).astimezone(timezone.utc)
+
+
+def binding_is_primary_class(binding):
+    if not isinstance(binding, ProjectBinding):
+        return False
+    return _PRIMARY_CLASS_MARKERS.issubset(set(binding.capabilities))
+
+
+def enforce_subordinate_mutation_boundary(binding, capability, *, operation="mutation"):
+    """Deny legacy subordinate durable capabilities except the separate coordination path."""
+    if capability is None or binding_is_primary_class(binding):
+        return True
+    if capability in _SUBORDINATE_FORBIDDEN_DURABLE_CAPABILITIES:
+        raise ProjectScopeError(
+            f"{operation} denied: non-primary execution may not use durable capability {capability!r}; "
+            "use the constrained non-authoritative coordination publication path where applicable"
+        )
+    return True
 
 
 class AgentSession:
@@ -94,6 +138,7 @@ class AgentSession:
             raise AgentLifecycleError("agent must be ACTIVE and project-bound before mutation")
         self.binding.assert_target(target_project_id, operation)
         if capability is not None:
+            enforce_subordinate_mutation_boundary(self.binding, capability, operation=operation)
             self.binding.assert_capability(capability)
         return True
 
