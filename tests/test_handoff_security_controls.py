@@ -4,6 +4,8 @@ from datetime import datetime, timezone
 from org_agent_mesh.handoff_security_controls import (
     ActionableLink,
     BreakGlassTokenBinding,
+    CompletionAssessment,
+    CompletionState,
     HandoffEnvelope,
     LinkStatus,
     SecurityControlError,
@@ -138,6 +140,29 @@ class HandoffSecurityControlTests(unittest.TestCase):
     def test_required_controls_fail_closed(self):
         with self.assertRaisesRegex(SecurityControlError, "MISSING_REQUIRED_CONTROLS:B"):
             require_all_controls(["A", "B"], ["A"])
+
+    def test_completion_is_blocked_by_known_avoidable_residue(self):
+        assessment = CompletionAssessment(
+            objective_verified=True,
+            known_avoidable_residue=("accidental_issue",),
+            remediation_authorized_and_possible=True,
+        )
+        self.assertEqual(assessment.state(), CompletionState.INCOMPLETE_REMEDIATION_REQUIRED)
+        with self.assertRaisesRegex(SecurityControlError, "COMPLETION_INTEGRITY_BLOCKED"):
+            assessment.require_complete()
+
+    def test_completion_reports_blocked_when_cleanup_needs_authority(self):
+        assessment = CompletionAssessment(
+            objective_verified=True,
+            known_avoidable_residue=("external_cleanup",),
+            remediation_authorized_and_possible=False,
+        )
+        self.assertEqual(assessment.state(), CompletionState.INCOMPLETE_BLOCKED)
+
+    def test_completion_passes_after_cleanup(self):
+        assessment = CompletionAssessment(objective_verified=True)
+        self.assertEqual(assessment.state(), CompletionState.COMPLETE)
+        assessment.require_complete()
 
 
 if __name__ == "__main__":
