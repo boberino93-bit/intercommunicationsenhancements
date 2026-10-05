@@ -54,6 +54,29 @@ class OwnerRecoveryLifecycleTests(unittest.TestCase):
             "ROTATE_CREDENTIAL_AND_RETURN_TO_NORMAL_AUTHORIZATION",
         )
 
+    def test_single_factor_is_denied(self):
+        decision, now = self.make_decision()
+        one_factor = OwnerRecoveryDecision(
+            request_id=decision.request_id,
+            owner_id=decision.owner_id,
+            target_scope=decision.target_scope,
+            factors=(decision.factors[0],),
+        )
+        with self.assertRaisesRegex(OwnerRecoveryError, "RECOVERY_FACTOR_QUORUM_NOT_MET"):
+            one_factor.validate(self.policy, now=now, ledger=RecoveryReplayLedger())
+
+    def test_same_device_dual_totp_is_not_independent(self):
+        decision, now = self.make_decision()
+        second = self.make_factor("E2", "AUTHENTICATOR_TOTP", "device-a", "owner", "REC-1", now)
+        same_device = OwnerRecoveryDecision(
+            request_id=decision.request_id,
+            owner_id=decision.owner_id,
+            target_scope=decision.target_scope,
+            factors=(decision.factors[0], second),
+        )
+        with self.assertRaises(OwnerRecoveryError):
+            same_device.validate(self.policy, now=now, ledger=RecoveryReplayLedger())
+
     def test_expired_factor_is_denied(self):
         now = datetime.now(timezone.utc)
         decision, _ = self.make_decision(now=now)
