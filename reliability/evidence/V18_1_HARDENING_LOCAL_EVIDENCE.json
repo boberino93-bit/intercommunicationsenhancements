@@ -1,0 +1,8 @@
+{
+  "base_head": "f753ebbaa131d58752368a14f1c38e48a647a7db",
+  "claims": {"canonical": false, "deployment_authority": false, "learning_authority": false},
+  "components": ["diagnostic_learning", "intercommunication_diagnostics", "consequence_gateway", "operational_diagnostics"],
+  "local_focused_tests": {"failed": 0, "passed": 25},
+  "schema": "intercommunications/v18-1-hardening-evidence/v1",
+  "status": "LOCAL_VALIDATION_COMPLETE_EXACT_HEAD_CI_PENDING"
+}

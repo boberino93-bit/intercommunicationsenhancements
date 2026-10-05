@@ -1,0 +1,5 @@
+{
+  "$id":"intercommunications/prepared-action/v1","$schema":"https://json-schema.org/draft/2020-12/schema","additionalProperties":false,
+  "properties":{"action_digest":{"minLength":1,"type":"string"},"action_id":{"minLength":1,"type":"string"},"capability_digest":{"minLength":1,"type":"string"},"effect_class":{"minLength":1,"type":"string"},"expires_at_utc":{"type":"string"},"fence_token":{"minLength":1,"type":"string"},"ownership_epoch":{"minimum":0,"type":"integer"},"parameters_digest":{"minLength":1,"type":"string"},"policy_digest":{"minLength":1,"type":"string"},"precondition_digest":{"minLength":1,"type":"string"},"prepared_at_utc":{"type":"string"},"preparer_instance_id":{"minLength":1,"type":"string"},"project_id":{"minLength":1,"type":"string"},"target":{"minLength":1,"type":"string"},"work_id":{"minLength":1,"type":"string"}},
+  "required":["action_id","project_id","work_id","preparer_instance_id","effect_class","target","parameters_digest","policy_digest","capability_digest","precondition_digest","ownership_epoch","fence_token","prepared_at_utc","expires_at_utc","action_digest"],"type":"object"
+}

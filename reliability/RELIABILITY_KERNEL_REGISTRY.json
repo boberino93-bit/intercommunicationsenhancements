@@ -1,0 +1,29 @@
+{
+  "schema": "org-agent-mesh/reliability-kernel-registry/v1",
+  "status": "SUPERSEDED_BY_V18_CONTROL_REGISTRIES",
+  "source_baseline": "72e87ce7cddca17fd78c8ece3ecb5f523c7021e2",
+  "normalized_runtime_revision": "fb592418f700fc5e540e76bfa42b043e03fe6ed9",
+  "superseded_by": "reliability/V18_CONTROL_REGISTRIES.json",
+  "note": "This legacy registry described the first v1.8 tranche. It is retained for provenance only. Current machine-readable policy-source hierarchy, reason codes, schema/protocol evolution, rollout rings, recovery objectives, SLOs, dependency graph, and full reference control status live in reliability/V18_CONTROL_REGISTRIES.json.",
+  "preserved_first_tranche_controls": {
+    "policy_compiler": "org_agent_mesh.reliability_kernel.PolicyCompiler",
+    "policy_certificate_verifier": "org_agent_mesh.reliability_kernel.CertificateVerifier",
+    "invariant_registry": "org_agent_mesh.reliability_kernel.InvariantRegistry",
+    "proof_carrying_handoff": "org_agent_mesh.reliability_kernel.issue_handoff/verify_handoff",
+    "safe_minimal_filter": "org_agent_mesh.reliability_kernel.KernelState",
+    "hysteresis": "org_agent_mesh.reliability_kernel.HysteresisGate"
+  },
+  "expanded_v18_controls": {
+    "admission_fairness_backpressure": "org_agent_mesh.reliability_v18_governance",
+    "governance_liveness_break_glass_degraded_modes": "org_agent_mesh.reliability_v18_governance",
+    "schema_migration_capability_evidence_holdouts_rollout": "org_agent_mesh.reliability_v18_evolution",
+    "reconstruction_recovery_slo_integrity_cycles_time": "org_agent_mesh.reliability_v18_recovery",
+    "supply_chain_credentials_assurance": "org_agent_mesh.reliability_v18_security",
+    "reason_codes_shared_primitives": "org_agent_mesh.reliability_v18_core"
+  },
+  "authority_boundary": {
+    "human_assertion_minting": "EXTERNAL_TRUST_ROOT_ONLY",
+    "production_deployment_authority": "SEPARATE_CANONICAL_DEPLOYMENT_PATH",
+    "reliability_kernel_may_expand_authority": false
+  }
+}

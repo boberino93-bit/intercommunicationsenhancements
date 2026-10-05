@@ -1,0 +1,86 @@
+{
+  "dependency_graph": {
+    "bootstrap_root": ["identity", "durable_storage", "integrity_verifier"],
+    "edges": {
+      "control_plane": ["identity", "durable_storage", "schema_registry", "policy_compiler"],
+      "durable_storage": [],
+      "executor": ["control_plane", "policy_compiler", "schema_registry"],
+      "git_backup": ["durable_storage"],
+      "identity": [],
+      "integrity_verifier": [],
+      "observability": ["durable_storage"],
+      "policy_compiler": ["identity", "durable_storage"],
+      "recovery": ["identity", "durable_storage", "integrity_verifier"],
+      "schema_registry": ["durable_storage", "integrity_verifier"]
+    },
+    "schema": "org-agent-mesh/v18-dependency-graph/v1",
+    "status": "IMPLEMENTATION_CANDIDATE"
+  },
+  "policy_source_registry": {
+    "conflict_rule": "fail_closed_on_unresolved_critical_conflict",
+    "non_policy_inputs": ["retrieved content", "memory", "skills", "generated plans", "model suggestions", "external documentation"],
+    "precedence": [
+      {"authority_class":"HUMAN_ROOT_AUTHORITY","level":0,"may_expand_authority":true,"policy_id":"human-root","source":"external authenticated root authority"},
+      {"authority_class":"UNIVERSAL_CONSTITUTION","level":1,"may_expand_authority":false,"policy_id":"post-normalization-v1.8","source":"Execute this script.txt / v1.8 directive"},
+      {"authority_class":"MASTER_PROJECT_PROMOTED_UNIVERSAL_POLICY","level":2,"may_expand_authority":false,"policy_id":"primary-recurring-swarm","source":"protocols/primary_recurring_swarm_protocol.md"},
+      {"authority_class":"PROJECT_POLICY","level":3,"may_expand_authority":false,"policy_id":"project-identity-and-routing","source":"PROJECT_IDENTITY_LOCK.json + PROJECT_ROLE_ROUTING_REGISTRY.json"},
+      {"authority_class":"ROLE_POLICY","level":4,"may_expand_authority":false,"policy_id":"role-policy","source":"roles/*.md + bootstrap/*.md"},
+      {"authority_class":"TASK_WORK_INSTANCE_POLICY","level":5,"may_expand_authority":false,"policy_id":"task-intake","source":"protocols/task_intake_and_delegation.md + schemas/task_intake.schema.json"},
+      {"authority_class":"EXECUTION_PROFILE_POLICY","level":6,"may_expand_authority":false,"policy_id":"execution-profile","source":"Reliability Kernel effective policy slice"},
+      {"authority_class":"TOOL_RESOURCE_POLICY","level":7,"may_expand_authority":false,"policy_id":"resource-policy","source":"reliability/V18_CONTROL_REGISTRIES.json + runtime resource governor"}
+    ],
+    "schema": "org-agent-mesh/v18-policy-source-registry/v1",
+    "status": "IMPLEMENTATION_CANDIDATE"
+  },
+  "reason_codes": {
+    "codes": ["ADMIT_OK","QUEUE_FAIRNESS","DEFER_RESOURCE_CAPACITY","THROTTLE_ERROR_BUDGET","SHED_OPTIONAL_WORK","PRIORITY_INHERITANCE","GOVERNANCE_DEADLOCK_SUSPECTED","SAFE_MODE_CONTROL_PLANE_INCONSISTENT","REQUIRE_HUMAN_BREAK_GLASS","BREAK_GLASS_AUTH_INVALID","BREAK_GLASS_REPLAY","BREAK_GLASS_EXPIRED","BLOCK_SCHEMA_INCOMPATIBLE","MIGRATION_PAUSED","MIGRATION_ROLLBACK","CAPABILITY_EVIDENCE_UNTRUSTED","CAPABILITY_EVIDENCE_ANOMALOUS","EVALUATION_CONTAMINATED","HOLD_ROLLOUT_REGRESSION","BLOCK_ROLLOUT_RING_SKIP","AUTOMATIC_ROLLBACK","BACKUP_CORRUPT","RECOVERY_INCOMPLETE","REJECT_HANDOFF_STALE","CONTROL_LOOP_COOLDOWN","ROUTING_CHURN_FREEZE","PAUSE_ERROR_BUDGET_EXHAUSTED","STATE_INTEGRITY_MISMATCH","DEPENDENCY_CYCLE","CLOCK_ROLLBACK","CLOCK_SKEW","SUPPLY_CHAIN_MISMATCH","CREDENTIAL_SCOPE_MISMATCH","CREDENTIAL_REVOKED","CREDENTIAL_EXPIRED","ASSURANCE_CASE_INCOMPLETE","DEGRADED_MODE_DENY"],
+    "schema": "org-agent-mesh/v18-reason-code-registry/v1",
+    "status": "IMPLEMENTATION_CANDIDATE"
+  },
+  "recovery_objectives": {
+    "objectives": [
+      {"max_backup_lag_seconds":30,"max_checkpoint_age_seconds":30,"max_dormant_wake_latency_seconds":30,"max_heartbeat_age_seconds":30,"max_stale_claim_age_seconds":30,"max_unverified_effect_age_seconds":30,"rpo_seconds":30,"rto_seconds":5,"system_class":"reference-control-plane"},
+      {"max_backup_lag_seconds":300,"max_checkpoint_age_seconds":300,"max_dormant_wake_latency_seconds":300,"max_heartbeat_age_seconds":120,"max_stale_claim_age_seconds":300,"max_unverified_effect_age_seconds":120,"note":"target requires authorized production drill before production verification","rpo_seconds":300,"rto_seconds":900,"system_class":"production-control-plane-target"}
+    ],
+    "schema": "org-agent-mesh/v18-recovery-objectives/v1",
+    "status": "IMPLEMENTATION_CANDIDATE"
+  },
+  "rollout_policy": {
+    "rings": [
+      {"human_review_required":false,"index":0,"max_error_rate":0.05,"max_slo_burn":0.5,"min_evidence":1,"next_ring_gate":"sequential_only","population":"local","ring":"RING_0_LOCAL","rollback_trigger":"threshold_or_security_failure","security_trigger":"any_critical_violation"},
+      {"human_review_required":false,"index":1,"max_error_rate":0.05,"max_slo_burn":0.5,"min_evidence":1,"next_ring_gate":"sequential_only","population":"bounded","ring":"RING_1_ISOLATED","rollback_trigger":"threshold_or_security_failure","security_trigger":"any_critical_violation"},
+      {"human_review_required":false,"index":2,"max_error_rate":0.05,"max_slo_burn":0.5,"min_evidence":1,"next_ring_gate":"sequential_only","population":"bounded","ring":"RING_2_PROJECT_CANARY","rollback_trigger":"threshold_or_security_failure","security_trigger":"any_critical_violation"},
+      {"human_review_required":false,"index":3,"max_error_rate":0.02,"max_slo_burn":0.5,"min_evidence":10,"next_ring_gate":"sequential_only","population":"bounded","ring":"RING_3_SMALL_COHORT","rollback_trigger":"threshold_or_security_failure","security_trigger":"any_critical_violation"},
+      {"human_review_required":false,"index":4,"max_error_rate":0.02,"max_slo_burn":0.5,"min_evidence":10,"next_ring_gate":"sequential_only","population":"bounded","ring":"RING_4_BROADER_SWARM","rollback_trigger":"threshold_or_security_failure","security_trigger":"any_critical_violation"},
+      {"human_review_required":true,"index":5,"max_error_rate":0.02,"max_slo_burn":0.5,"min_evidence":10,"next_ring_gate":"sequential_only","population":"bounded","ring":"RING_5_DEFAULT","rollback_trigger":"threshold_or_security_failure","security_trigger":"any_critical_violation"}
+    ],
+    "schema":"org-agent-mesh/v18-rollout-policy/v1","status":"IMPLEMENTATION_CANDIDATE"
+  },
+  "schema":"org-agent-mesh/v18-control-registries/v1",
+  "schema_protocol_registry": {
+    "compatibility_gate":"explicit_registry_required_not_parse_success",
+    "records":[
+      {"compatibility":"BIDIRECTIONAL","minimum_reader":1,"minimum_writer":1,"owner":"reliability-kernel","required_migration":null,"rollback_compatible":true,"schema_id":"effective_policy_slice","status":"CANDIDATE","validators":["schemas/effective_policy_slice.schema.json"],"version":1},
+      {"compatibility":"BIDIRECTIONAL","minimum_reader":1,"minimum_writer":1,"owner":"reliability-kernel","required_migration":null,"rollback_compatible":true,"schema_id":"policy_certificate","status":"CANDIDATE","validators":["schemas/policy_certificate.schema.json"],"version":1},
+      {"compatibility":"BIDIRECTIONAL","minimum_reader":1,"minimum_writer":1,"owner":"reliability-kernel","required_migration":null,"rollback_compatible":true,"schema_id":"proof_carrying_handoff","status":"CANDIDATE","validators":["schemas/proof_carrying_handoff.schema.json"],"version":1},
+      {"compatibility":"BIDIRECTIONAL","minimum_reader":1,"minimum_writer":1,"owner":"reliability-kernel","required_migration":null,"rollback_compatible":true,"schema_id":"assurance_case","status":"CANDIDATE","validators":["schemas/assurance_case.schema.json"],"version":1},
+      {"compatibility":"BACKWARD_COMPATIBLE","minimum_reader":1,"minimum_writer":1,"owner":"control-plane","required_migration":null,"rollback_compatible":true,"schema_id":"master_handoff","status":"ACTIVE","validators":["schemas/master_handoff.schema.json"],"version":1},
+      {"compatibility":"BACKWARD_COMPATIBLE","minimum_reader":1,"minimum_writer":1,"owner":"control-plane","required_migration":null,"rollback_compatible":true,"schema_id":"message","status":"ACTIVE","validators":["schemas/message.schema.json"],"version":1}
+    ],
+    "schema":"org-agent-mesh/v18-schema-protocol-registry/v1","status":"IMPLEMENTATION_CANDIDATE"
+  },
+  "slo_registry": {
+    "schema":"org-agent-mesh/v18-slo-registry/v1",
+    "slos":[
+      {"comparison":">=","degraded_mode_threshold":0.995,"error_budget":0.001,"metric":"success_rate","recovery_action":"DEGRADED_READ_MOSTLY","severity":"CRITICAL","slo_id":"canonical_write_success","target":0.999,"window_seconds":3600},
+      {"comparison":">=","degraded_mode_threshold":0.995,"error_budget":0.001,"metric":"success_rate","recovery_action":"DEGRADED_NO_EXTERNAL_MUTATION","severity":"CRITICAL","slo_id":"effect_verification_success","target":0.999,"window_seconds":3600},
+      {"comparison":"<=","degraded_mode_threshold":600,"error_budget":0.01,"metric":"age_seconds","recovery_action":"DEGRADED_READ_MOSTLY","severity":"HIGH","slo_id":"backup_freshness","target":300,"window_seconds":3600},
+      {"comparison":"<=","degraded_mode_threshold":300,"error_budget":0.01,"metric":"age_seconds","recovery_action":"DEGRADED_NO_NEW_FANOUT","severity":"HIGH","slo_id":"heartbeat_freshness","target":120,"window_seconds":900},
+      {"comparison":">=","degraded_mode_threshold":0.999,"error_budget":0.0001,"metric":"success_rate","recovery_action":"SAFE_MINIMAL_MODE","severity":"CRITICAL","slo_id":"policy_certificate_validation","target":0.9999,"window_seconds":3600},
+      {"comparison":">=","degraded_mode_threshold":0.995,"error_budget":0.001,"metric":"success_rate","recovery_action":"DEGRADED_READ_MOSTLY","severity":"HIGH","slo_id":"handoff_verification","target":0.999,"window_seconds":3600},
+      {"comparison":"<=","degraded_mode_threshold":600,"error_budget":0.01,"metric":"seconds","recovery_action":"HUMAN_REVIEW","severity":"CRITICAL","slo_id":"recovery_time","target":300,"window_seconds":86400}
+    ],
+    "status":"IMPLEMENTATION_CANDIDATE"
+  },
+  "status":"IMPLEMENTATION_CANDIDATE"
+}

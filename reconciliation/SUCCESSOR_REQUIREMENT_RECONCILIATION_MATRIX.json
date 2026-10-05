@@ -1,0 +1,21 @@
+{
+  "predecessor_gate": "HUMAN_ROOT_OVERRIDE_FOR_NON_PRODUCTION_CANDIDATE_MUTATION",
+  "requirements": [
+    {"current_mechanism":"VisibilityCoordinator + HeartbeatPolicy","decision":"ADOPT","requirement":"30-60 second liveness","status":"IMPLEMENTED_PENDING_EXACT_HEAD_CI"},
+    {"current_mechanism":"EmissionDecision","decision":"ADOPT","requirement":"ephemeral heartbeat vs durable material delta","status":"IMPLEMENTED_PENDING_EXACT_HEAD_CI"},
+    {"current_mechanism":"PeerDiscoveryIndex","decision":"ADOPT","requirement":"peer discovery before overlap","status":"IMPLEMENTED_PENDING_EXACT_HEAD_CI"},
+    {"current_mechanism":"ReadOnlyObservabilityAggregator","decision":"ADOPT_AS_DERIVED_VIEW","gap":"live organization transport integration","requirement":"aggregate observability","status":"IMPLEMENTED_REFERENCE_SCOPE"},
+    {"current_mechanism":"DiagnosticLearningEngine","decision":"ADOPT","requirement":"learning may improve strategy but not create authority","status":"IMPLEMENTED_PENDING_EXACT_HEAD_CI"},
+    {"current_mechanism":"EvidencePartition + quarantine + drift checks","decision":"ADOPT","requirement":"holdout/evaluator contamination control","status":"IMPLEMENTED_PENDING_EXACT_HEAD_CI"},
+    {"current_mechanism":"PreparedAction + CommitGrantVerifier + ConsequenceGateway","decision":"ADOPT_STAGED","requirement":"prepare/commit separation","status":"IMPLEMENTED_TEST_ONLY_REFERENCE"},
+    {"current_mechanism":"issuer_instance_id != preparer_instance_id","decision":"ADOPT","requirement":"self-authorization denied","status":"IMPLEMENTED_PENDING_EXACT_HEAD_CI"},
+    {"current_mechanism":"action digest + project/actor/target/effect/state bindings","decision":"ADOPT","requirement":"exact-action binding","status":"IMPLEMENTED_PENDING_EXACT_HEAD_CI"},
+    {"current_mechanism":"UNKNOWN_EFFECT -> VERIFY_OR_RECOVERY","decision":"ADOPT","requirement":"unknown effect no blind retry","status":"IMPLEMENTED_PENDING_EXACT_HEAD_CI"},
+    {"current_mechanism":"EgressPolicy + EgressReceipt","decision":"ADOPT_STAGED","requirement":"egress classification/receipt","status":"IMPLEMENTED_REFERENCE_SCOPE"},
+    {"current_mechanism":"SchedulerAdmissionEvidence diagnostic","decision":"MEASURE_DO_NOT_OVERCLAIM","gap":"host pre-invocation hook","requirement":"provider admission prevention","status":"ENVIRONMENT_DEPENDENT"},
+    {"current_mechanism":"DistributedBackendEvidence diagnostic","decision":"CONFORMANCE_REQUIRED","requirement":"multi-node durable ownership/CAS","status":"UNPROVEN_FOR_PRODUCTION_BACKEND"},
+    {"current_mechanism":"RepositoryGovernanceEvidence diagnostic","decision":"HARDEN_WHEN_ADMIN_PATH_AVAILABLE","requirement":"repository branch enforcement","status":"EXTERNAL_CONFIGURATION_REQUIRED"}
+  ],
+  "schema": "intercommunications/successor-requirement-reconciliation/v1",
+  "status": "IMPLEMENTATION_CANDIDATE"
+}
