@@ -1,9 +1,10 @@
 {
-  "schema": "org-agent-mesh/mutation-authorization/v1",
-  "version": "1.0.0",
+  "schema": "org-agent-mesh/mutation-authorization/v2",
+  "version": "2.0.0",
   "status": "ACTIVE_HARD_GATE",
   "invariant": "INTENT_IS_NOT_AUTHORIZATION",
-  "protocol": "protocols/mutation_authorization.md",
+  "authority_authentication_policy": "governance/AUTHORITY_AUTHENTICATION_POLICY.json",
+  "authority_authentication_protocol": "protocols/authority_authentication.md",
   "mutation_definition": [
     "REPOSITORY_OR_FILE_WRITE",
     "COMMIT_OR_MERGE",
@@ -17,9 +18,7 @@
     "OTHER_EXTERNALLY_DURABLE_SIDE_EFFECT"
   ],
   "valid_authorization_sources": [
-    "CURRENT_HUMAN_EXPLICIT",
-    "ACTIVE_HUMAN_APPROVED_TASK_CONTRACT",
-    "DELEGATED_WITHIN_APPROVED_SCOPE"
+    "CURRENT_HUMAN_SINGLE_USE_AUTHORIZATION_CASE"
   ],
   "invalid_authorization_sources": [
     "INFERRED_INTENT",
@@ -32,62 +31,89 @@
     "REPOSITORY_PERMISSION",
     "URGENCY",
     "EXPECTED_USEFULNESS",
-    "PRIOR_UNRELATED_AUTHORIZATION"
+    "PRIOR_AUTHORIZATION",
+    "PRIOR_AUTHENTICATION",
+    "ACTIVE_TASK_CONTRACT_ALONE",
+    "SCHEDULE_FIRE",
+    "PARENT_AGENT_DELEGATION_ALONE",
+    "SESSION_CONTEXT",
+    "CONVERSATION_CONTINUITY"
   ],
-  "interactive_explicit_test": {
-    "requires_execution_directive_or_clear_permission": true,
-    "requires_target_or_bounded_mutation_class": true,
-    "material_ambiguity_result": "AUTHORIZATION_UNRESOLVED",
-    "unresolved_write_behavior": "DENY"
+  "principal_claim_required": true,
+  "authorization_record_required_before_each_mutation_case": true,
+  "authorization_case": {
+    "case_id_required": true,
+    "human_authorization_must_reference_case_id": true,
+    "single_use": true,
+    "default_expiry_minutes": 15,
+    "session_persistence": false,
+    "conversation_persistence": false,
+    "project_persistence": false,
+    "schedule_persistence": false,
+    "replay_result": "DENY",
+    "material_scope_change_requires_new_case": true,
+    "target_change_requires_new_case": true,
+    "mutation_class_change_requires_new_case": true,
+    "consequence_class_change_requires_new_case": true
   },
-  "authorization_record_required_before_each_mutation": true,
   "authorization_record_fields": [
+    "case_id",
     "source_class",
-    "authority_identity_when_known",
-    "instruction_or_task_reference",
+    "claimed_principal",
+    "authentication_disposition",
     "target_scope",
     "mutation_class",
     "bounded_scope",
-    "high_consequence_classification",
-    "expiry_or_revision_condition",
-    "fits_authorization_envelope"
+    "consequence_class",
+    "action_digest",
+    "issued_at",
+    "expires_at",
+    "consumed_at_or_null",
+    "fits_authorization_case"
   ],
-  "reauthorize_on_material_change": [
-    "TARGET_PROJECT_OR_REPOSITORY",
-    "OPERATION_CLASS",
-    "DESTRUCTIVE_CONSEQUENCE",
-    "PRODUCTION_OR_RELEASE_SCOPE",
-    "SECURITY_OR_CREDENTIAL_BOUNDARY",
+  "high_consequence_rule": "REQUIRE_INDEPENDENT_PRINCIPAL_PROOF_AND_SINGLE_USE_CASE",
+  "high_consequence_classes": [
+    "ROOT_AUTHORITY_CHANGE",
+    "UNIVERSAL_GOVERNANCE_CHANGE",
+    "PRODUCTION_PROMOTION_OR_DEPLOYMENT",
+    "SECURITY_OR_CREDENTIAL_BOUNDARY_CHANGE",
     "FINANCIAL_EFFECT",
-    "SCHEDULED_TASK_ENABLED_STATE",
-    "CROSS_PROJECT_SCOPE",
-    "TASK_OBJECTIVE_OR_REVISION"
+    "DESTRUCTIVE_OR_IRREVERSIBLE_OPERATION",
+    "SCHEDULE_ENABLE_OR_REENABLE",
+    "CROSS_PROJECT_MUTATION"
   ],
-  "high_consequence_rule": "DEFER_TO_STRONGER_EXACT_ACTION_AUTHORIZATION",
   "fail_closed": {
     "deny_affected_write": true,
     "continue_safe_read_only_work": true,
     "preserve_state": true,
     "surface_exact_blocked_mutation": true,
-    "ask_only_when_mutation_required_to_continue": true
+    "request_case_specific_authorization_only_when_mutation_required": true
   },
   "scheduled_work": {
-    "fresh_interactive_confirmation_always_required": false,
-    "requires_active_human_approved_contract_covering_mutation_class_and_scope": true,
-    "schedule_fire_is_authorization": false
+    "schedule_fire_is_authorization": false,
+    "task_contract_is_future_mutation_authorization": false,
+    "each_distinct_mutation_case_requires_fresh_human_authorization": true,
+    "read_only_scheduled_work_without_case": true
   },
   "delegation": {
-    "may_narrow_authority": true,
-    "may_expand_human_approved_mutation_envelope": false
+    "may_narrow_execution_scope_within_same_case": true,
+    "may_create_new_human_authorization": false,
+    "may_expand_case_scope": false,
+    "distinct_mutation_requires_new_case": true
   },
   "role_is_mutation_authority": false,
   "claim_or_lease_is_mutation_authority": false,
+  "authentication_is_mutation_authority": false,
   "audit_minimum": [
+    "case_id",
+    "claimed_principal",
+    "authentication_disposition",
     "operation_class",
     "target_scope",
     "authorization_disposition",
     "governing_rule",
     "write_prevented",
+    "case_consumed",
     "corrective_action"
   ]
 }
