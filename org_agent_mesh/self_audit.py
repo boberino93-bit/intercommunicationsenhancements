@@ -98,6 +98,15 @@ def canonical_record_hash(record: Mapping[str, object]) -> str:
     return sha256(encoded.encode("utf-8")).hexdigest()
 
 
+def _validate_score_mapping(scores: object, required_keys: set[str] | tuple[str, ...], missing_error: str) -> None:
+    if not isinstance(scores, Mapping) or not set(required_keys).issubset(scores.keys()):
+        raise SelfAuditError(missing_error)
+    for key in required_keys:
+        value = scores[key]
+        if not isinstance(value, (int, float)) or isinstance(value, bool) or not 0 <= value <= 10:
+            raise SelfAuditError("AUDIT_SCORE_OUT_OF_RANGE")
+
+
 def validate_record(record: Mapping[str, object], *, expected_framework_version: str = ACTIVE_FRAMEWORK_VERSION) -> None:
     if record.get("framework_name") != FRAMEWORK_NAME:
         raise SelfAuditError("AUDIT_FRAMEWORK_NAME_MISMATCH")
@@ -107,22 +116,28 @@ def validate_record(record: Mapping[str, object], *, expected_framework_version:
         raise SelfAuditError("AUDIT_RECORD_ID_INVALID")
     if not record.get("agent_id") or not record.get("agent_role") or not record.get("agent_instance"):
         raise SelfAuditError("AUDIT_AGENT_IDENTITY_INCOMPLETE")
-    scores = record.get("scores")
-    if not isinstance(scores, Mapping) or not REQUIRED_SCORE_KEYS.issubset(scores.keys()):
-        raise SelfAuditError("AUDIT_REQUIRED_SCORES_MISSING")
-    for key in REQUIRED_SCORE_KEYS:
-        value = scores[key]
-        if not isinstance(value, (int, float)) or not 0 <= value <= 10:
-            raise SelfAuditError("AUDIT_SCORE_OUT_OF_RANGE")
+
+    _validate_score_mapping(record.get("scores"), REQUIRED_SCORE_KEYS, "AUDIT_REQUIRED_SCORES_MISSING")
+
+    required_role_scores = role_extension(str(record.get("agent_role", "")))
+    if required_role_scores:
+        _validate_score_mapping(
+            record.get("role_scores"),
+            required_role_scores,
+            "AUDIT_REQUIRED_ROLE_SCORES_MISSING",
+        )
+
     overall = record.get("overall_score")
-    if not isinstance(overall, (int, float)) or not 0 <= overall <= 10:
+    if not isinstance(overall, (int, float)) or isinstance(overall, bool) or not 0 <= overall <= 10:
         raise SelfAuditError("AUDIT_OVERALL_SCORE_INVALID")
+
     evidence = record.get("evidence")
     if not isinstance(evidence, list) or not evidence:
         raise SelfAuditError("AUDIT_EVIDENCE_REQUIRED")
     for item in evidence:
         if not isinstance(item, Mapping) or item.get("provenance") not in PROVENANCE_CLASSES or not item.get("ref"):
             raise SelfAuditError("AUDIT_EVIDENCE_INVALID")
+
     expected_hash = record.get("record_hash")
     if not isinstance(expected_hash, str) or expected_hash != canonical_record_hash(record):
         raise SelfAuditError("AUDIT_RECORD_HASH_MISMATCH")
