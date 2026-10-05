@@ -1,0 +1,37 @@
+{
+  "schema": "intercommunications/cross-project-swarm-governance-authorization/v1",
+  "status": "AUTHORIZED",
+  "human_principal": {
+    "name": "Robert Leonard",
+    "github_login": "boberino93-bit"
+  },
+  "authorization_local_time": "2026-10-05T03:16:00-07:00",
+  "instruction": "Commit the swarm-governance changes directly to main and to all adjoining registered projects and swarm protocols across the board.",
+  "branch": "main",
+  "repositories": [
+    "boberino93-bit/intercommunicationsenhancements",
+    "boberino93-bit/duo-open",
+    "boberino93-bit/benefitflow",
+    "boberino93-bit/samsungpowerbootstrap",
+    "boberino93-bit/warp-propulsion-lab",
+    "boberino93-bit/ai-behaviour-control-lab"
+  ],
+  "scope": [
+    "global_master_roaming_supervision",
+    "project_primary_supervision",
+    "runtime_redirect_pause_stop_stop_tree",
+    "intentional_stop_state_preservation",
+    "respawn_suppression",
+    "project_chat_mapping_and_router_contract",
+    "scheduled_swarm_compatibility",
+    "registered_project_bootstrap_linkage",
+    "governance_tests_and_audit_evidence"
+  ],
+  "constraints": {
+    "user_remains_highest_authority": true,
+    "master_lifecycle_authority_does_not_grant_unrestricted_cross_project_source_mutation": true,
+    "existing_consequence_and_security_controls_remain_in_force": true,
+    "frozen_normalized_runtime_baseline_is_not_rewritten_by_this_overlay": true,
+    "external_chat_project_assignment_requires_host_side_verification": true
+  }
+}
