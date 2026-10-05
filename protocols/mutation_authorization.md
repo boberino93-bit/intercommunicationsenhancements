@@ -4,13 +4,17 @@ Status: **CANONICAL HARD GATE**
 
 ## Purpose
 
-Prevent an agent from converting human intent, enthusiasm, capability questions, design discussion, or inferred preference into durable write authority.
+Prevent an agent from converting human intent, identity assumptions, prior permission, enthusiasm, capability questions, schedules, delegation, or inferred preference into durable write authority.
 
-The central invariant is:
+The central invariants are:
 
 `INTENT != AUTHORIZATION`
 
-An agent may understand what the human wants without being authorized to mutate anything.
+`AUTHENTICATION != AUTHORIZATION`
+
+`AUTHORIZATION IS SINGLE-USE AND CASE-BOUND`
+
+This protocol is coupled to `protocols/authority_authentication.md` and `governance/AUTHORITY_AUTHENTICATION_POLICY.json`.
 
 ## 1. Mutation boundary
 
@@ -18,118 +22,115 @@ A mutation is any externally durable side effect, including repository/file crea
 
 Read-only discovery, inspection, search, analysis, comparison, simulation, local scratch work, and proposal generation do not cross the mutation boundary.
 
-## 2. Authorization sources
+## 2. Required authorization source
 
-A mutation may proceed only when the proposed operation is covered by one of these valid sources:
+The only standalone mutation authorization source is a current human single-use authorization case.
 
-1. `CURRENT_HUMAN_EXPLICIT` — the current human instruction unambiguously directs or authorizes the mutation class and target scope.
-2. `ACTIVE_HUMAN_APPROVED_TASK_CONTRACT` — a still-active durable task/launch contract previously approved by the human explicitly authorizes that mutation class and target scope.
-3. `DELEGATED_WITHIN_APPROVED_SCOPE` — a higher project authority delegates an operation that is already inside a valid human-approved mutation envelope and the delegation does not expand that envelope.
+Before a mutation case can be authorized:
 
-Role, seniority, project ownership, tool availability, write permission, repository admin permission, urgency, expected usefulness, prior unrelated authorization, or agreement with the goal are not authorization sources.
+1. the authority principal must be explicitly claimed;
+2. the claimed principal must match the registered authority applicable to the requested action;
+3. the agent must create a bounded authorization case with a unique case ID;
+4. the human must explicitly authorize that case ID;
+5. high-consequence cases must also satisfy the independent-authentication requirement in the authority-authentication policy.
 
-## 3. Explicit authorization test
+Prior authorization, prior authentication, an active task contract, schedule firing, parent-agent delegation, role, seniority, repository permission, urgency, project ownership, conversation continuity, or agreement with the goal are not authorization sources.
 
-For interactive human-launched work, authorization is explicit only when a reasonable reader can identify both:
+## 3. No ambient or persistent authorization
 
-- an execution directive or clear permission to perform the external change; and
-- the mutation target or bounded mutation class.
+There is no session-wide, conversation-wide, project-wide, task-wide, schedule-wide, or role-wide mutation authority.
 
-Examples that normally qualify when scope is clear:
+A previous authorization—even one issued seconds earlier in the same conversation—MUST NOT authorize a distinct mutation case.
 
-- "Implement this fix and commit it."
-- "Update the repository to enforce this rule."
-- "Make these changes now."
-- "I authorize you to modify the governance files for this issue."
+Every distinct mutation case requires its own case ID and fresh human authorization. The case is single-use.
 
-Examples that do **not** by themselves authorize mutation:
+## 4. Authorization case requirements
 
-- "Can you harden this?"
-- "Are you able to fix this?"
-- "What would you change?"
-- "I'd love this to work automatically."
-- "We should improve this."
-- praise, excitement, agreement, or discussion of a desired future state.
+Before execution, the acting agent MUST establish a case record containing at least:
 
-If the language is materially ambiguous, classify the operation `AUTHORIZATION_UNRESOLVED` and fail closed on the write.
-
-## 4. Authorization record before write
-
-Before each mutation boundary crossing, the acting agent must establish an in-memory authorization record containing at least:
-
-- authorization source class;
-- human or delegating authority identity when known;
-- current instruction/task reference;
+- case ID;
+- claimed principal;
+- authentication disposition;
 - target project/repository/system;
-- permitted mutation class;
+- mutation class;
 - bounded scope;
-- destructive/high-consequence classification;
-- expiry/revision condition when applicable;
-- whether the proposed action exactly fits the authorization envelope.
+- consequence class;
+- action digest or equivalent immutable action description;
+- issue time;
+- expiry time;
+- explicit human authorization referencing the case ID;
+- consumption state.
 
-The record need not expose private conversation content in durable logs. Audit records should store the minimum evidence necessary to explain why the gate passed or failed.
+The default case lifetime is 15 minutes unless a stricter policy applies.
 
-## 5. Per-action validation
+## 5. Case scope and consumption
 
-Authorization is not a one-time bootstrap checkbox. Revalidate before every externally durable operation.
+A case may cover multiple low-level writes only when those writes are explicitly enumerated or are strictly necessary atomic steps of the one bounded action described by the case.
 
-A new authorization decision is required when any of these materially change:
+A new case is required when any of these materially change:
 
 - target repository/project/system;
-- operation class;
-- destructive consequence;
+- mutation class;
+- destructive or irreversible consequence;
 - production/release scope;
 - credential/security boundary;
 - financial effect;
 - scheduled-task enabled state;
 - cross-project scope;
-- task objective or revision.
+- task objective or revision;
+- any other material scope element.
 
-A safe operation may be decomposed into multiple writes under one authorization envelope only when all writes are clearly necessary to complete the explicitly authorized bounded change.
+A case is consumed or invalidated by successful completion, cancellation, denial, expiry, material scope change, or attempted replay. A consumed case MUST NOT be reused.
 
-## 6. High-consequence exact-action rule
+## 6. Scheduled and delegated work
 
-Existing stronger exact-action authorization requirements remain in force. Destructive operations, production deployment/release, security-boundary changes, financial actions, credential-sensitive actions, cross-project mutation, scheduled-task enable/re-enable, and other project-defined high-consequence operations require the stronger applicable authorization rule even when a broad mutation authorization exists.
+Scheduled tasks may launch, inspect, research, analyze, validate, simulate, prepare patches, and formulate authorization cases without mutation authority.
 
-A broad instruction such as "harden the system" must never silently authorize unrelated destructive cleanup, production deployment, credential changes, schedule activation, or cross-project mutation.
+A schedule firing is never authorization. A previously approved schedule or task contract is not future write permission. Each distinct scheduled mutation case requires fresh human authorization.
 
-## 7. Fail-closed behavior
+Delegation may narrow execution inside an already authorized case but cannot create human authorization, expand case scope, or authorize a new mutation case. A child agent may participate under the exact same unconsumed case only when the case explicitly includes that bounded delegated operation.
 
-When mutation authorization is absent, stale, ambiguous, conflicting, or out of scope:
+## 7. High-consequence step-up
+
+Root authority changes, universal governance changes, production deployment/promotion, security or credential-boundary changes, financial actions, destructive or irreversible operations, scheduled-task enable/re-enable actions, and cross-project mutations require independent principal proof in addition to the single-use case authorization.
+
+The default process-separated proof is defined in `protocols/authority_authentication.md`. Static personal information is not acceptable authentication.
+
+## 8. Fail-closed behavior
+
+When the principal claim, required authentication, case authorization, case freshness, non-replay state, target, or scope is absent, ambiguous, conflicting, stale, or invalid:
 
 1. do not perform the affected write;
 2. continue useful read-only inspection, analysis, validation, or patch preparation when safe;
 3. preserve current project state;
-4. surface the exact blocked mutation and authorization gap;
-5. ask for authorization only when the mutation is actually required to continue.
+4. surface the exact blocked mutation and case/authentication gap;
+5. ask only for the case-specific human action actually required.
 
-Do not repeatedly ask for permission to perform read-only work.
-
-## 8. Scheduled and delegated work
-
-A scheduled task may act without a fresh interactive confirmation only when the human-approved scheduled task contract itself explicitly grants the relevant mutation class and target scope and remains enabled/valid under scheduled-task governance.
-
-A scheduler firing is not authorization. A child agent inherits only the mutation envelope explicitly present in its delegation contract and the parent human-approved scope. Delegation may narrow authority but may not expand it.
+Do not repeatedly ask permission for read-only work.
 
 ## 9. Role separation
 
-Role assignment and mutation authorization are independent dimensions.
+Being PRIMARY, Manager, Researcher, validator, builder, MASTER, recovery agent, project owner, or scheduler does not grant mutation authority. Authentication does not grant mutation authority. A lease or claim does not grant mutation authority.
 
-Being PRIMARY, Manager, Researcher, validator, builder, MASTER, or project agent never by itself grants permission to mutate external state. Likewise, mutation authorization does not grant a higher role or broader project scope.
+No agent, consensus, learning system, or child process may manufacture, waive, extend, or reuse human authorization.
 
-## 10. Audit and learning
+## 10. Audit
 
-Authorization failures and near misses are governance evidence. Record compact, non-secret audit events for material cases with:
+Material authorization decisions SHOULD record compact non-secret evidence including:
 
-- attempted operation class;
+- case ID;
+- claimed principal;
+- authentication disposition;
+- operation class;
 - target scope;
 - authorization disposition (`ALLOW`, `DENY`, `UNRESOLVED`);
 - governing rule;
 - whether a write was prevented;
+- whether the case was consumed;
 - corrective action.
 
-Do not store passwords, tokens, cookies, private credentials, or unnecessary verbatim conversation text.
+Do not store passwords, tokens, government identifiers, dates of birth, family names, static personal authentication answers, cookies, or unnecessary verbatim conversation text.
 
 ## 11. Precedence
 
-This protocol is additive. If another current policy is stricter, the stricter rule wins. No lower-level task prompt may weaken this gate.
+This protocol is additive. If another current policy is stricter, the stricter rule wins. No lower-level task prompt or project-local contract may weaken this gate.
