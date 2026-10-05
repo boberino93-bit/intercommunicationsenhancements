@@ -101,7 +101,7 @@ class MutationAuthorizationGovernanceTests(unittest.TestCase):
     def test_protocol_contains_near_miss_regression_examples(self):
         text = (ROOT / "protocols" / "mutation_authorization.md").read_text()
         self.assertIn("Can you harden this?", text)
-        self.assertIn("does **not** by themselves authorize mutation", text)
+        self.assertIn("do **not** by themselves authorize mutation", text)
         self.assertIn("Implement this fix and commit it.", text)
 
 
