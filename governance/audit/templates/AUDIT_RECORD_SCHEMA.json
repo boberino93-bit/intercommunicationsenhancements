@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "org-agent-mesh/agent-self-audit-record/v1",
+  "type": "object",
+  "required": [
+    "audit_record_id", "timestamp", "project", "agent_id", "agent_role", "agent_instance",
+    "task_id", "audit_trigger", "framework_name", "framework_version", "system_version",
+    "scores", "overall_score", "strengths", "weaknesses", "critical_findings",
+    "security_findings", "behavioral_findings", "architecture_findings", "evidence",
+    "corrective_actions", "recommended_framework_changes", "authorization_events_detected",
+    "authorization_failures_detected", "previous_audit_record", "previous_record_hash", "record_hash"
+  ],
+  "properties": {
+    "audit_record_id": {"type": "string", "pattern": "^AUDIT-[0-9]{4,}$"},
+    "timestamp": {"type": "string", "minLength": 1},
+    "project": {"type": "string", "minLength": 1},
+    "agent_id": {"type": "string", "minLength": 1},
+    "agent_role": {"type": "string", "minLength": 1},
+    "role_version": {"type": ["string", "null"]},
+    "agent_instance": {"type": "string", "minLength": 1},
+    "parent_agent_id": {"type": ["string", "null"]},
+    "task_id": {"type": "string", "minLength": 1},
+    "audit_trigger": {"type": "string", "minLength": 1},
+    "framework_name": {"const": "AGENT_SELF_AUDIT_FRAMEWORK"},
+    "framework_version": {"type": "string", "minLength": 1},
+    "system_version": {"type": "string", "minLength": 1},
+    "context_snapshot_id": {"type": ["string", "null"]},
+    "scores": {"type": "object"},
+    "role_scores": {"type": "object"},
+    "overall_score": {"type": "number", "minimum": 0, "maximum": 10},
+    "strengths": {"type": "array", "items": {"type": "string"}},
+    "weaknesses": {"type": "array", "items": {"type": "string"}},
+    "critical_findings": {"type": "array", "items": {"type": "string"}},
+    "security_findings": {"type": "array", "items": {"type": "string"}},
+    "behavioral_findings": {"type": "array", "items": {"type": "string"}},
+    "architecture_findings": {"type": "array", "items": {"type": "string"}},
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["provenance", "ref"],
+        "properties": {
+          "provenance": {"enum": ["OBSERVED", "RETRIEVED", "REPORTED_BY_AGENT", "INFERRED", "EXPECTED", "UNVERIFIED"]},
+          "ref": {"type": "string", "minLength": 1},
+          "supports": {"type": "array", "items": {"type": "string"}}
+        },
+        "additionalProperties": false
+      }
+    },
+    "corrective_actions": {"type": "array", "items": {"type": "string"}},
+    "recommended_framework_changes": {"type": "array", "items": {"type": "string"}},
+    "authorization_events_detected": {"type": "array", "items": {"type": "string"}},
+    "authorization_failures_detected": {"type": "array", "items": {"type": "string"}},
+    "previous_audit_record": {"type": ["string", "null"]},
+    "previous_record_hash": {"type": ["string", "null"]},
+    "supersedes_record": {"type": ["string", "null"]},
+    "record_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+  },
+  "additionalProperties": false
+}
