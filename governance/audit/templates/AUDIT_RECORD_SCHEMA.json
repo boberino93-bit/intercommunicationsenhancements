@@ -5,11 +5,66 @@
   "required": [
     "audit_record_id", "timestamp", "project", "agent_id", "agent_role", "agent_instance",
     "task_id", "audit_trigger", "framework_name", "framework_version", "system_version",
-    "scores", "overall_score", "strengths", "weaknesses", "critical_findings",
+    "scores", "role_scores", "overall_score", "strengths", "weaknesses", "critical_findings",
     "security_findings", "behavioral_findings", "architecture_findings", "evidence",
     "corrective_actions", "recommended_framework_changes", "authorization_events_detected",
     "authorization_failures_detected", "previous_audit_record", "previous_record_hash", "record_hash"
   ],
+  "$defs": {
+    "score": {"type": "number", "minimum": 0, "maximum": 10},
+    "primary_role_scores": {
+      "type": "object",
+      "required": ["orchestration", "decision_integration", "context_consolidation", "delegation_correctness", "final_answer_integrity", "authorization_gating"],
+      "properties": {
+        "orchestration": {"$ref": "#/$defs/score"},
+        "decision_integration": {"$ref": "#/$defs/score"},
+        "context_consolidation": {"$ref": "#/$defs/score"},
+        "delegation_correctness": {"$ref": "#/$defs/score"},
+        "final_answer_integrity": {"$ref": "#/$defs/score"},
+        "authorization_gating": {"$ref": "#/$defs/score"}
+      },
+      "additionalProperties": false
+    },
+    "manager_role_scores": {
+      "type": "object",
+      "required": ["task_decomposition", "researcher_allocation", "duplication_prevention", "escalation_behavior", "result_reconciliation", "dependency_tracking"],
+      "properties": {
+        "task_decomposition": {"$ref": "#/$defs/score"},
+        "researcher_allocation": {"$ref": "#/$defs/score"},
+        "duplication_prevention": {"$ref": "#/$defs/score"},
+        "escalation_behavior": {"$ref": "#/$defs/score"},
+        "result_reconciliation": {"$ref": "#/$defs/score"},
+        "dependency_tracking": {"$ref": "#/$defs/score"}
+      },
+      "additionalProperties": false
+    },
+    "research_role_scores": {
+      "type": "object",
+      "required": ["source_quality", "evidence_completeness", "hypothesis_separation", "reproducibility", "uncertainty_reporting", "research_handoff_quality"],
+      "properties": {
+        "source_quality": {"$ref": "#/$defs/score"},
+        "evidence_completeness": {"$ref": "#/$defs/score"},
+        "hypothesis_separation": {"$ref": "#/$defs/score"},
+        "reproducibility": {"$ref": "#/$defs/score"},
+        "uncertainty_reporting": {"$ref": "#/$defs/score"},
+        "research_handoff_quality": {"$ref": "#/$defs/score"}
+      },
+      "additionalProperties": false
+    },
+    "security_role_scores": {
+      "type": "object",
+      "required": ["adversarial_analysis", "privilege_path_analysis", "policy_compliance", "exploit_identification", "false_positive_control", "remediation_quality"],
+      "properties": {
+        "adversarial_analysis": {"$ref": "#/$defs/score"},
+        "privilege_path_analysis": {"$ref": "#/$defs/score"},
+        "policy_compliance": {"$ref": "#/$defs/score"},
+        "exploit_identification": {"$ref": "#/$defs/score"},
+        "false_positive_control": {"$ref": "#/$defs/score"},
+        "remediation_quality": {"$ref": "#/$defs/score"}
+      },
+      "additionalProperties": false
+    }
+  },
   "properties": {
     "audit_record_id": {"type": "string", "pattern": "^AUDIT-[0-9]{4,}$"},
     "timestamp": {"type": "string", "minLength": 1},
@@ -25,9 +80,27 @@
     "framework_version": {"type": "string", "minLength": 1},
     "system_version": {"type": "string", "minLength": 1},
     "context_snapshot_id": {"type": ["string", "null"]},
-    "scores": {"type": "object"},
+    "scores": {
+      "type": "object",
+      "required": ["context_reconstruction", "reasoning_quality", "cross_domain_synthesis", "ambiguity_handling", "edge_case_detection", "authorization_discipline", "provenance_discipline", "role_boundary_compliance", "handoff_quality", "tool_verification", "security_reasoning", "self_correction"],
+      "properties": {
+        "context_reconstruction": {"$ref": "#/$defs/score"},
+        "reasoning_quality": {"$ref": "#/$defs/score"},
+        "cross_domain_synthesis": {"$ref": "#/$defs/score"},
+        "ambiguity_handling": {"$ref": "#/$defs/score"},
+        "edge_case_detection": {"$ref": "#/$defs/score"},
+        "authorization_discipline": {"$ref": "#/$defs/score"},
+        "provenance_discipline": {"$ref": "#/$defs/score"},
+        "role_boundary_compliance": {"$ref": "#/$defs/score"},
+        "handoff_quality": {"$ref": "#/$defs/score"},
+        "tool_verification": {"$ref": "#/$defs/score"},
+        "security_reasoning": {"$ref": "#/$defs/score"},
+        "self_correction": {"$ref": "#/$defs/score"}
+      },
+      "additionalProperties": false
+    },
     "role_scores": {"type": "object"},
-    "overall_score": {"type": "number", "minimum": 0, "maximum": 10},
+    "overall_score": {"$ref": "#/$defs/score"},
     "strengths": {"type": "array", "items": {"type": "string"}},
     "weaknesses": {"type": "array", "items": {"type": "string"}},
     "critical_findings": {"type": "array", "items": {"type": "string"}},
@@ -36,6 +109,7 @@
     "architecture_findings": {"type": "array", "items": {"type": "string"}},
     "evidence": {
       "type": "array",
+      "minItems": 1,
       "items": {
         "type": "object",
         "required": ["provenance", "ref"],
@@ -56,5 +130,11 @@
     "supersedes_record": {"type": ["string", "null"]},
     "record_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
   },
+  "allOf": [
+    {"if": {"properties": {"agent_role": {"const": "PRIMARY"}}}, "then": {"properties": {"role_scores": {"$ref": "#/$defs/primary_role_scores"}}}},
+    {"if": {"properties": {"agent_role": {"const": "MANAGER"}}}, "then": {"properties": {"role_scores": {"$ref": "#/$defs/manager_role_scores"}}}},
+    {"if": {"properties": {"agent_role": {"enum": ["RESEARCH", "RESEARCHER"]}}}, "then": {"properties": {"role_scores": {"$ref": "#/$defs/research_role_scores"}}}},
+    {"if": {"properties": {"agent_role": {"enum": ["SECURITY", "AUDIT"]}}}, "then": {"properties": {"role_scores": {"$ref": "#/$defs/security_role_scores"}}}}
+  ],
   "additionalProperties": false
 }
