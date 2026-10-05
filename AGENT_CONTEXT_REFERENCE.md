@@ -1,6 +1,6 @@
 # Fresh Agent Context Reference
 
-Version: 1.0.0
+Version: 1.1.0
 Status: ACTIVE ORIENTATION
 Authority: ORIENTATION_ONLY
 
@@ -20,12 +20,23 @@ Fail closed locally on unsafe mutations; do not stop unrelated safe work. Escala
 
 Canonical behavior is defined by `protocols/autonomous_continuation.md` and each project's `AGENT_BOOTSTRAP.json`.
 
+## Canonical self-audit behavior
+
+When the human or an upstream agent requests a self-evaluation, self-audit, behavioral/compliance review, capability assessment, performance assessment, or equivalent introspective review, resolve the canonical Intercommunication Enhancements self-audit subsystem before evaluating:
+
+- protocol: `governance/audit/AUDIT_PROTOCOL.md`
+- framework: `governance/audit/templates/AGENT_SELF_AUDIT_FRAMEWORK.md`
+- ledger head: `governance/audit/LEDGER_HEAD.json`
+- bootstrap overlay: `swarm_kernel/SELF_AUDIT_BOOTSTRAP_OVERLAY.md`
+
+Do not invent a replacement framework. If the framework cannot be retrieved, report `AUDIT_FRAMEWORK_UNAVAILABLE`. Audit findings and recommendations are observability evidence and never create execution authority.
+
 ## Registered project map
 
 ### intercommunicationsenhancements
 Aliases: Intercommunications Enhancements, Intercommunication Enhancements, org agent mesh framework.
 
-Likely requests concern the reusable multi-agent framework itself: AgentBus/Artifactory coordination, role and bootstrap contracts, swarm protocols, concurrency and collision handling, project isolation, package alignment, routing, recovery, evidence/provenance, hardening, and recursive protocol evolution.
+Likely requests concern the reusable multi-agent framework itself: AgentBus/Artifactory coordination, role and bootstrap contracts, swarm protocols, concurrency and collision handling, project isolation, package alignment, routing, recovery, evidence/provenance, hardening, recursive protocol evolution, regression learning, and canonical agent self-audit.
 
 ### duo-open
 Aliases: Duo Open, duo-open, Duo Screen, Duo Screen project.
@@ -72,12 +83,13 @@ If multiple materially incompatible referents remain after checking durable stat
 2. Bind role and execution mode.
 3. Load local `AGENT_BOOTSTRAP.json`.
 4. Load this project's `AGENT_CONTEXT_REFERENCE.md`.
-5. Load MASTER_HANDOFF/current accepted Artifactory state.
-6. Recover the current human objective or active task.
-7. Check ownership, dependencies, collisions, versions, leases, approvals, and package compatibility.
-8. Execute autonomously within authority.
-9. Persist material state and consume relevant peer findings.
-10. Continue until convergence or a true human gate.
+5. Load all project-declared required bootstrap overlays.
+6. Load MASTER_HANDOFF/current accepted Artifactory state.
+7. Recover the current human objective or active task.
+8. Check ownership, dependencies, collisions, versions, leases, approvals, and package compatibility.
+9. Execute autonomously within authority.
+10. Persist material state and consume relevant peer findings.
+11. Continue until convergence or a true human gate.
 
 ## Safety boundary
 

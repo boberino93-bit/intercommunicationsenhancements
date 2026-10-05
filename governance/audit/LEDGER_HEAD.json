@@ -1,0 +1,11 @@
+{
+  "schema": "org-agent-mesh/agent-self-audit-ledger-head/v1",
+  "framework_name": "AGENT_SELF_AUDIT_FRAMEWORK",
+  "active_framework_version": "1.0.0",
+  "record_count": 1,
+  "head_record_id": "AUDIT-0001",
+  "head_record_hash": "e92e306007910fdb51dd06f5cf37dac2a1b00c43c0246251daeac8838c355028",
+  "append_only": true,
+  "historical_record_mutation": "DENY",
+  "correction_mode": "APPEND_SUPERSEDING_RECORD"
+}
