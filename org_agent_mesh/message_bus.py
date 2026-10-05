@@ -8,6 +8,7 @@ from .constants import MESSAGE_KINDS, PROTOCOL_VERSION
 from .control_plane import require_active_session
 from .coordination_publication import (
     CAPABILITY as COORDINATION_CAPABILITY,
+    LEGACY_CAPABILITY as LEGACY_COORDINATION_CAPABILITY,
     CoordinationRoute,
     require_coordination_publication,
 )
@@ -57,7 +58,10 @@ def _bound_sender(message, sender_session, project_id):
     )
     role = str(message["from_role"]).strip().upper()
     if role in SUBORDINATE_ROLES:
-        binding.assert_capability(COORDINATION_CAPABILITY)
+        if COORDINATION_CAPABILITY in binding.capabilities:
+            binding.assert_capability(COORDINATION_CAPABILITY)
+        else:
+            binding.assert_capability(LEGACY_COORDINATION_CAPABILITY)
     else:
         binding.assert_capability("PUBLISH_MESSAGE")
     if message["from_agent"] != binding.agent_id:
