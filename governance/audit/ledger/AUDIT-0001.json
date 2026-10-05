@@ -5,7 +5,7 @@
   "agent_id": "primary-intercommunicationsenhancements",
   "agent_role": "PRIMARY",
   "role_version": "routing-contract-1.5.0",
-  "agent_instance": "chat-primary-20261005",
+  "agent_instance": "historical-primary-instance-unverified",
   "parent_agent_id": null,
   "task_id": "SELF-AUDIT-LEDGER-BASELINE",
   "audit_trigger": "Historical self-evaluation that generated the Agent Self-Audit Ledger requirement",
@@ -72,6 +72,11 @@
       "provenance": "INFERRED",
       "ref": "Baseline score reconstruction from qualitative findings; no historical numeric scoring existed",
       "supports": ["scores", "role_scores", "overall_score"]
+    },
+    {
+      "provenance": "UNVERIFIED",
+      "ref": "The originating self-evaluation did not preserve a stable runtime instance identifier; this record uses a historical placeholder label.",
+      "supports": ["agent_instance"]
     }
   ],
   "corrective_actions": [
@@ -93,5 +98,5 @@
   "previous_audit_record": null,
   "previous_record_hash": null,
   "supersedes_record": null,
-  "record_hash": "ca7cd87c73ec832ad351a5e6de98df5ef5efe26f8ade2726f587d91824cb1353"
+  "record_hash": "e92e306007910fdb51dd06f5cf37dac2a1b00c43c0246251daeac8838c355028"
 }
