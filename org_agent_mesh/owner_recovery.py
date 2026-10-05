@@ -1,7 +1,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Any, Iterable, Mapping
+
+from .durable_record_guard import validate_durable_record
+from .evidence_lifecycle import EvidenceReceipt, validate_evidence_receipt
 
 
 class OwnerRecoveryError(ValueError):
@@ -14,6 +18,44 @@ class RecoveryFactorEvidence:
     evidence_id: str
     independence_domain: str
     verified: bool
+    owner_id: str = ""
+    request_id: str = ""
+    verifier_ref: str = ""
+    issued_at: datetime | None = None
+    expires_at: datetime | None = None
+    consumed: bool = False
+    metadata: Mapping[str, Any] | None = None
+
+    def lifecycle_receipt(self) -> EvidenceReceipt:
+        if self.issued_at is None or self.expires_at is None:
+            raise OwnerRecoveryError("RECOVERY_EVIDENCE_FRESHNESS_REQUIRED")
+        return EvidenceReceipt(
+            receipt_id=self.evidence_id,
+            subject_id=self.owner_id,
+            transaction_id=self.request_id,
+            verifier_ref=self.verifier_ref,
+            issued_at=self.issued_at,
+            expires_at=self.expires_at,
+            verified=self.verified,
+            consumed=self.consumed,
+        )
+
+
+@dataclass(frozen=True)
+class RecoveryReplayLedger:
+    consumed_evidence_ids: frozenset[str] = frozenset()
+    consumed_request_ids: frozenset[str] = frozenset()
+
+    def consume(self, decision: "OwnerRecoveryDecision") -> "RecoveryReplayLedger":
+        if decision.request_id in self.consumed_request_ids:
+            raise OwnerRecoveryError("RECOVERY_REQUEST_REPLAY_DENIED")
+        evidence_ids = [item.evidence_id for item in decision.factors if item.verified]
+        if any(item in self.consumed_evidence_ids for item in evidence_ids):
+            raise OwnerRecoveryError("RECOVERY_EVIDENCE_REPLAY_DENIED")
+        return RecoveryReplayLedger(
+            consumed_evidence_ids=frozenset(set(self.consumed_evidence_ids) | set(evidence_ids)),
+            consumed_request_ids=frozenset(set(self.consumed_request_ids) | {decision.request_id}),
+        )
 
 
 @dataclass(frozen=True)
@@ -23,10 +65,32 @@ class OwnerRecoveryDecision:
     target_scope: str
     factors: tuple[RecoveryFactorEvidence, ...]
 
-    def validate(self, policy: Mapping[str, Any]) -> str:
+    def validate(self, policy: Mapping[str, Any], *, now: datetime, ledger: RecoveryReplayLedger | None = None) -> str:
         if not self.request_id or not self.owner_id or not self.target_scope:
             raise OwnerRecoveryError("RECOVERY_REQUEST_INCOMPLETE")
+        ledger = ledger or RecoveryReplayLedger()
+        if self.request_id in ledger.consumed_request_ids:
+            raise OwnerRecoveryError("RECOVERY_REQUEST_REPLAY_DENIED")
         verified = [item for item in self.factors if item.verified]
+        if len({item.evidence_id for item in verified}) != len(verified):
+            raise OwnerRecoveryError("RECOVERY_EVIDENCE_IDS_MUST_BE_UNIQUE")
+        prohibited_fields = set(policy.get("durable_prohibited_fields", []))
+        for item in verified:
+            try:
+                validate_evidence_receipt(
+                    item.lifecycle_receipt(),
+                    expected_subject_id=self.owner_id,
+                    expected_transaction_id=self.request_id,
+                    now=now,
+                    consumed_receipt_ids=ledger.consumed_evidence_ids,
+                )
+            except ValueError as exc:
+                raise OwnerRecoveryError(str(exc)) from exc
+            if item.metadata is not None and prohibited_fields:
+                try:
+                    validate_durable_record(item.metadata, prohibited_fields=prohibited_fields, context="recovery_evidence")
+                except ValueError as exc:
+                    raise OwnerRecoveryError(str(exc)) from exc
         minimum = int(policy.get("minimum_factor_quorum", 2))
         if len(verified) < minimum:
             raise OwnerRecoveryError("RECOVERY_FACTOR_QUORUM_NOT_MET")
