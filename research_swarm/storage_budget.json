@@ -1,0 +1,29 @@
+{
+  "schema": "intercommunications/research-swarm-storage-budget/v1",
+  "status": "ACTIVE",
+  "effective_date": "2026-10-05",
+  "scope": "ALL_REGISTERED_RESEARCH_SWARM_PROJECTS_COMBINED",
+  "physical_quota_gib": 20,
+  "reserved_headroom_fraction": 0.20,
+  "reserved_headroom_gib": 4,
+  "operating_cap_gib": 16,
+  "watermarks_gib": {
+    "normal_max_exclusive": 12.8,
+    "elevated_min": 12.8,
+    "high_min": 14.4,
+    "critical_min": 15.2,
+    "operating_cap": 16
+  },
+  "target_after_cap_cleanup_gib": 14.4,
+  "policy_path": "research_swarm/STORAGE_HYGIENE_POLICY.md",
+  "rules": [
+    "BACKUP_BEFORE_PRUNE",
+    "PRESERVE_CURRENT_TRUTH_AND_RESUMABILITY",
+    "NO_REDUNDANT_LARGE_ARTIFACTS",
+    "PREFER_CANONICAL_COPY_PLUS_REFERENCES_WHERE_BOUNDARIES_PERMIT",
+    "DO_NOT_DELETE_WITHOUT_PROJECT_LOCAL_AUTHORITY",
+    "UNKNOWN_STORAGE_USAGE_REDUCES_GROWTH_AND_BLOCKS_UNVERIFIED_DELETION",
+    "AT_16_GIB_NONESSENTIAL_GROWTH_STOPS",
+    "GITHUB_HISTORY_DOES_NOT_JUSTIFY_DELETING_UNBACKED_CURRENT_TRUTH"
+  ]
+}

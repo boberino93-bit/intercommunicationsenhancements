@@ -1,9 +1,16 @@
 {
   "schema": "intercommunications/research-swarm-five-task-schedule/v1",
-  "status": "RECOMMENDED_NOT_DEPLOYED",
+  "status": "DEPLOYMENT_AUTHORIZED_ROLLOUT_REQUIRED_BEFORE_FIRST_RUN",
   "timezone": "America/Vancouver",
   "cadence": "HOURLY",
   "host_overlap_serialization_assumed": false,
+  "storage_policy": {
+    "physical_quota_gib": 20,
+    "operating_cap_gib": 16,
+    "reserved_headroom_fraction": 0.20,
+    "policy_path": "research_swarm/STORAGE_HYGIENE_POLICY.md",
+    "budget_path": "research_swarm/storage_budget.json"
+  },
   "tasks": [
     {"role": "MASTER", "minute": 0, "prompt_path": "research_swarm/prompts/master.md"},
     {"role": "MANAGER", "minute": 5, "prompt_path": "research_swarm/prompts/manager.md"},
@@ -26,7 +33,10 @@
     "NO_HIDDEN_CONVERSATION_MEMORY_DEPENDENCY",
     "NO_SECOND_CONTROL_PLANE",
     "CLASS_D_REQUIRES_EXACT_ACTION_AUTHORIZATION",
-    "NONBLOCKING_DECISIONS_DO_NOT_FREEZE_UNRELATED_SAFE_WORK"
+    "NONBLOCKING_DECISIONS_DO_NOT_FREEZE_UNRELATED_SAFE_WORK",
+    "COMBINED_INTERNAL_WORKING_SET_MUST_NOT_INTENTIONALLY_EXCEED_16_GIB",
+    "VERIFY_BACKUP_BEFORE_PRUNING_HISTORICAL_INTERNAL_DATA",
+    "NO_FILLER_ARTIFACTS_WHEN_NO_MATERIAL_DELTA"
   ],
   "first_canary": {
     "project_id": "duo-open",
