@@ -4,6 +4,8 @@ import json
 import unittest
 
 from org_agent_mesh.user_control import (
+    AUTHORIZATION_AWARE_RESUME_STEP,
+    LEGACY_RESUME_STEP,
     UserControlContractError,
     validate_global_entrypoint_control_policy,
     validate_local_control_message_contract,
@@ -55,7 +57,11 @@ class UserControlMessageContractTests(unittest.TestCase):
         self.assertTrue(control["preserve_active_assignment"])
         self.assertTrue(control["automatic_resume"])
         self.assertFalse(control["require_continue_reprompt"])
-        self.assertIn("when_user_control_message_arrives_respond_then_resume_active_assignment", self.entrypoint["sequence"])
+        sequence = self.entrypoint["sequence"]
+        self.assertTrue(LEGACY_RESUME_STEP in sequence or AUTHORIZATION_AWARE_RESUME_STEP in sequence)
+        if AUTHORIZATION_AWARE_RESUME_STEP in sequence:
+            self.assertIn("single_use_authorization_case_required", self.entrypoint["mutation_authorization_policy"])
+            self.assertTrue(self.entrypoint["mutation_authorization_policy"]["single_use_authorization_case_required"])
 
     def test_runtime_validators_accept_current_contracts(self):
         validate_registry_control_message_contract(self.registry)
@@ -91,6 +97,13 @@ class UserControlMessageContractTests(unittest.TestCase):
         entrypoint["control_message_policy"]["require_continue_reprompt"] = True
         with self.assertRaisesRegex(UserControlContractError, "unsafe_global_control_policy_require_continue_reprompt"):
             validate_global_entrypoint_control_policy(entrypoint)
+
+    def test_authorization_aware_resume_marker_is_valid_without_legacy_marker(self):
+        entrypoint = copy.deepcopy(self.entrypoint)
+        entrypoint["sequence"] = [step for step in entrypoint["sequence"] if step != LEGACY_RESUME_STEP]
+        if AUTHORIZATION_AWARE_RESUME_STEP not in entrypoint["sequence"]:
+            entrypoint["sequence"].append(AUTHORIZATION_AWARE_RESUME_STEP)
+        validate_global_entrypoint_control_policy(entrypoint)
 
     def test_autonomous_continuation_and_universal_entrypoint_reference_protocol(self):
         continuation = (ROOT / "protocols" / "autonomous_continuation.md").read_text(encoding="utf-8")
