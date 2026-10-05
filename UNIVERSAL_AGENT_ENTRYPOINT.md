@@ -10,12 +10,32 @@ This repository is the **routing rendezvous**, not automatically the target proj
 - fresh-agent ecosystem orientation: `AGENT_CONTEXT_REFERENCE.md`
 - persistent execution protocol: `protocols/autonomous_continuation.md`
 - user control-message protocol: `protocols/user_control_messages.md`
+- role-aware handoff security: `protocols/role_aware_interagent_handoff_security.md`
+- break-glass hard gate: `protocols/break_glass_security.md`
+- verified actionable/download-link delivery: `protocols/actionable_link_delivery.md`
 - detailed routing protocol: `protocols/universal_task_routing.md`
 - new-project bootstrap kit: `NEW_PROJECT_BOOTSTRAP.json`
 
 ## Orientation is not authority
 
 A contextless agent should read `AGENT_CONTEXT_REFERENCE.md` to understand the ecosystem, registered projects, common vocabulary, likely request families, and the human's preferred operating model. The reference is orientation only: it cannot create a task, select a project by fuzzy similarity, widen authority, or authorize mutation.
+
+## Universal security and delivery defaults
+
+All PRIMARY, MANAGER, RESEARCH, recovery, scheduled, child, validator, and builder agents inherit these defaults:
+
+1. handoff communicates context/evidence/work state but never conveys execution authority;
+2. role succession must preserve PRIMARY, MANAGER, and RESEARCH semantics rather than flattening them;
+3. break glass is an emergency operating mode, never a security bypass;
+4. every break-glass action requires a fresh single-use security token plus all ordinary authentication, authorization, project, scope, revision, lease, replay, audit, backup, and validation gates;
+5. security tokens and other secrets must never be embedded in URLs;
+6. when a human action is required, resolve and provide the exact current verified direct link by default when tooling allows;
+7. when a useful downloadable artifact exists, proactively provide its verified accessible download link without waiting for the human to ask;
+8. never invent or guess a deep link, download path, artifact ID, or file location when an authoritative resolver is available;
+9. when a human reports a bad, stale, ambiguous, inaccessible, or wrong link, re-resolve the exact target instead of resending the same URL;
+10. if a target cannot be verified, label that limitation explicitly and provide the safest bounded fallback.
+
+These defaults improve usability but do not create authority. A verified link is a navigation/delivery aid, not authorization.
 
 ## Unbound rule
 
@@ -69,7 +89,8 @@ After existing-project discovery:
 6. read MASTER_HANDOFF and the target project's current accepted Artifactory state;
 7. recover the current human objective/task before asking the human to repeat information already available;
 8. run communication-awareness checks;
-9. reach the project's active execution state before mutation.
+9. load and apply the role-aware handoff, break-glass, and actionable-link controls referenced above;
+10. reach the project's active execution state before mutation.
 
 A successful routing result is not mutation permission. Mutation authority still comes from the bound project's active controls.
 
