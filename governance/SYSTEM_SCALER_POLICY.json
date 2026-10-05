@@ -1,5 +1,5 @@
 {
-  "schema": "org-agent-mesh/system-scaler-policy/v1",
+  "schema": "org-agent-mesh/system-scaler-policy/v2",
   "status": "STAGED_NOT_ACTIVE",
   "target_population_ceiling": 100,
   "scalable_role": "RESEARCH",
@@ -9,11 +9,20 @@
   "direct_termination_allowed": false,
   "direct_mutation_authority": false,
   "stage_population_ceilings": [15, 30, 60, 100],
+  "telemetry": {
+    "run_binding_required": true,
+    "exact_project_set_required": true,
+    "measured_at_required": true,
+    "max_signal_age_seconds": 120,
+    "max_future_skew_seconds": 5,
+    "stale_or_mismatched_signal_result": "GLOBAL_HOLD_NO_MEMORY_ADVANCE"
+  },
   "scale_up": {
     "healthy_windows_required": 3,
     "cooldown_windows": 2,
     "max_global_admissions_per_cycle": 7,
     "max_project_admissions_per_cycle": 1,
+    "requires_eligible_work_demand": true,
     "requires_capacity_state": "GREEN",
     "requires_manager_backpressure": "NORMAL",
     "requires_zero_collisions": true,
@@ -24,14 +33,30 @@
   },
   "scale_down": {
     "graceful_only": true,
+    "stage_contraction_precedes_admission": true,
+    "partial_contraction_must_report_remaining_excess": true,
     "candidate_must_be_idle": true,
     "candidate_must_be_lease_free": true,
     "checkpoint_required": true,
     "handoff_required": true,
-    "audit_obligation_preserved": true
+    "audit_obligation_preserved": true,
+    "max_global_drains_per_cycle": 7
+  },
+  "capacity_semantics": {
+    "GREEN": "MAY_SCALE_WITH_ALL_OTHER_GATES",
+    "AMBER": "HOLD_ADMISSIONS",
+    "PRESERVE": "HOLD_ADMISSIONS",
+    "RESERVE_ONLY": "BLOCK_ADMISSIONS_AND_OPTIONALLY_REQUEST_SAFE_GRACEFUL_DRAIN",
+    "EXHAUSTED": "GLOBAL_HOLD_CHECKPOINT_PERSISTENCE_NOT_ASSUMED",
+    "UNKNOWN": "GLOBAL_HOLD"
   },
   "fail_closed_on": [
     "UNKNOWN_CAPACITY",
+    "EXHAUSTED_CAPACITY",
+    "STALE_TELEMETRY",
+    "FUTURE_TELEMETRY",
+    "RUN_ID_MISMATCH",
+    "PROJECT_SET_MISMATCH",
     "DEGRADED_READ_ONLY",
     "UNAUTHORIZED_MUTATION_EVIDENCE",
     "CROSS_PROJECT_WRITE_VIOLATION",
@@ -39,8 +64,12 @@
     "LEDGER_CHAIN_INVALID",
     "COMPLETION_INTEGRITY_FAILURE",
     "UNRESOLVED_LEASE",
-    "MANAGER_HARD_BACKPRESSURE"
+    "MANAGER_HARD_BACKPRESSURE_WITHOUT_SAFE_DRAIN"
   ],
+  "idempotency": {
+    "input_snapshot_digest_required": true,
+    "decision_digest_required": true
+  },
   "live_activation_requires_separate_authorization": true,
   "live_capacity_increase_requires_separate_authorization": true,
   "schedule_activation_requires_separate_authorization": true
