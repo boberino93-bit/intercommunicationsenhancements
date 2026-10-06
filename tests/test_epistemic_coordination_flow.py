@@ -1,4 +1,4 @@
-from .epistemic_test_support import *
+from epistemic_test_support import *
 
 
 class CoordinationAndTelemetryTests(unittest.TestCase):
