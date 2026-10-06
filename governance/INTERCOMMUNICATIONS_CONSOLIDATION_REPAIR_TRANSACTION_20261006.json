@@ -1,0 +1,16 @@
+{
+  "schema":"org-agent-mesh/global-security-change-transaction/v1",
+  "transaction_id":"AUTH-INTERCOMM-CONSOLIDATION-REPAIR-V1-DF223C735930",
+  "authorization_issue":88,
+  "status_after_publication":"CONSUMED",
+  "production_expected":"d74b1057a0730263061b3e936da5d4aaa87b78d0",
+  "feature_parent_expected":"78e34f94e2553d7971c5250a937ffabe825e196a",
+  "rollback_expected":"d74b1057a0730263061b3e936da5d4aaa87b78d0",
+  "scope":"preservation-safe repair of draft PR 87 only",
+  "authority_conveyed":false,
+  "production_merge_authorized":false,
+  "activation_authorized":false,
+  "launch_authorized":false,
+  "agentbus_mutation_authorized":false,
+  "peer_propagation_authorized":false
+}

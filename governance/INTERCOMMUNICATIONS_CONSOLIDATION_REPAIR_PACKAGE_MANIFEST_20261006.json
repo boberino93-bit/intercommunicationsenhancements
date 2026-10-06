@@ -1,0 +1,12 @@
+{
+  "schema":"org-agent-mesh/security-change-package-manifest/v1",
+  "transaction_id":"AUTH-INTERCOMM-CONSOLIDATION-REPAIR-V1-DF223C735930",
+  "action_digest":"sha256:ffd10c9f61e7a4646d16d41dd6ea6c3c59b9cb2187f12434d9120b8a9496dcb9",
+  "package_manifest_digest":"sha256:2c5b4e58f2be465215cd68c60cd72ac63eca8ba02261bf2dd25434f2471f7482",
+  "security_validation_bundle_digest":"sha256:1d63f0c7808891963e6579270a2205eb6f97cc45f6b76ab545925817e5b71daf",
+  "feature_branch":"feature/intercommunications-consolidation-v1-20261006",
+  "pull_request":87,
+  "preservation_requirements":["FULL_PRODUCTION_ROUTING_CONTROLS","FULL_HANDOFF_HISTORY","CANONICAL_CHECKPOINT_PROTOCOL_SEMANTICS","NO_AUTHORITY_EXPANSION","NO_ACTIVATION"],
+  "validation_required":"EXACT_HEAD_HOSTED_CI_AND_READBACK",
+  "authority_conveyed":false
+}

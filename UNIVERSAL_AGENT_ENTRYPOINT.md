@@ -82,7 +82,9 @@ Do not use fuzzy topic similarity as write authority. If evidence points to more
 
 If the human explicitly assigns a role, use it only if the target project authorizes it.
 
-For a normal human-launched generic agent with an actionable task and no role assignment, the universal default is `primary`. Persistent authority roles are PRIMARY, MANAGER, and RESEARCH. Recovery, QA, build, testing, implementation, review, and similar functions are execution modes rather than extra persistent authority classes.
+For a normal human-launched generic agent with an actionable task and no role assignment, enter `ROLELESS_DEMAND_DRIVEN_ADMISSION`. The launch supplies available capacity, not PRIMARY authority. After project binding, the agent may select only a role that the target project's current local admission policy marks self-admissible. PRIMARY is never a generic default, is never self-promoted, and requires a current explicit human role assignment or an equally strict project-local authority path.
+
+Persistent authority roles are PRIMARY, MANAGER, and RESEARCH. Recovery, QA, build, testing, implementation, review, and similar functions are execution modes rather than extra persistent authority classes.
 
 If no actionable human task and no role are present, remain unbound; the context reference may orient the agent but does not authorize unsolicited work.
 
