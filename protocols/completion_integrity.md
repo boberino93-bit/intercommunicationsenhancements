@@ -1,37 +1,13 @@
 # Global Completion Integrity Directive
 
-Version: 1.0.0
-Status: ACTIVE HARD GATE
+Version: 2.0.0-candidate
+Status: STAGED HARD GATE / NON-ACTIVATING
 Scope: UNIVERSAL / ALL PROJECTS / ALL AGENTS
 
-## Invariant
+Work is not complete while avoidable residue or self-created defects remain. For material externally relevant work, completion/readiness is also impossible until dual durable persistence is confirmed.
 
-Work is not complete while the acting agent knows it has left avoidable damage, temporary artifacts, failed-operation residue, inconsistent state, or self-created defects behind.
+`READY`, `HANDOFF_READY`, `COMPLETE`, `PROPOSAL_READY`, `MANAGER_REVIEW_READY`, `PRIMARY_REVIEW_READY`, `RESEARCH_HANDOFF_READY`, `MANAGER_HANDOFF_READY`, and `PRIMARY_PROPOSAL_READY` require a receipt in state `DUAL_PERSISTENCE_CONFIRMED` whose project, record ID and digest match the work record.
 
-A successful primary feature is insufficient by itself. Completion requires restoration of integrity across the bounded change surface.
+A single successful sink, queued write, unverified backup, mismatched digest, or historical checkpoint without a matching receipt cannot satisfy the barrier. Reconcile the project-local Message Forum and canonical GitHub backup. One-sided persistence enters recovery; same ID plus same digest is an idempotent retry; same ID plus different digest is quarantine. Corrections are new records with supersession references.
 
-## Completion sweep
-
-Before declaring completion, inspect the bounded change surface for accidental or abandoned artifacts, partial writes, stale implementation notes, broken links, retry residue, regressions, inconsistent state, and other known defects created by the work.
-
-## Completion states
-
-- `COMPLETE`: objective met, verification passed, and no known avoidable self-created residue remains.
-- `INCOMPLETE_REMEDIATION_REQUIRED`: known avoidable residue remains and remediation is still possible within authority.
-- `INCOMPLETE_BLOCKED`: residue remains but remediation is blocked by a real authority, capability, safety, or integrity boundary.
-
-An agent must not label work complete when cleanup is knowingly outstanding.
-
-## Remediation duty
-
-When safe and authorized, remediate self-created damage before completion. If remediation is blocked, preserve evidence, identify the exact blocker, route it to the correct owner, and report `INCOMPLETE_BLOCKED`.
-
-This directive does not expand authority. All normal project, authorization, hold, lease, audit, and security controls continue to apply.
-
-## Post-change verification
-
-Verify both the intended state and the absence of known avoidable self-created degradation in the bounded change surface.
-
-## Inheritance
-
-PRIMARY, MANAGER, RESEARCH, MASTER, scheduled, recovery, child, builder, validator, and newly seeded agents inherit this directive. Local policy may strengthen it but may not weaken it.
+This directive does not expand authority. Persistence receipts, handoffs, readiness, roles, claims, leases and audit findings do not authorize protected effects. All authority, HOLD/STOP/PAUSE, fencing, Reliability Kernel and `ConsequenceGateway` controls remain in force.
