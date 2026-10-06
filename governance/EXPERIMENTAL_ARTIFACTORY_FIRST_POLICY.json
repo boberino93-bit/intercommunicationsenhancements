@@ -1,0 +1,43 @@
+{
+  "schema": "org-agent-mesh/experimental-artifactory-first-policy/v1",
+  "version": "1.0.0-experimental",
+  "status": "EXPERIMENTAL_NOT_PRODUCTION",
+  "branch_policy": "EXPERIMENTAL_FIRST_PRODUCTION_BY_PROMOTION_ONLY",
+  "active_run_operational_source_of_truth": "REGISTERED_PROJECT_INTERNAL_ARTIFACTORY_MESSAGE_BOARD",
+  "completed_run_durable_source_of_truth": "VERIFIED_PROJECT_GITHUB_BACKUP",
+  "coordination_read_order": ["INTERNAL_MESSAGE_BOARD", "CURRENT_HANDOFF", "GITHUB_VERIFIED_COMPLETED_BACKUP_FOR_RECOVERY_ONLY"],
+  "active_run_write_target": "INTERNAL_MESSAGE_BOARD_ONLY",
+  "github_hot_path_coordination_writes": "DENY",
+  "intermediate_ready_barrier": "ARTIFACTORY_PERSISTENCE_CONFIRMED",
+  "final_completion_barrier": "GITHUB_BACKUP_VERIFIED",
+  "finalization": {
+    "required_state": "FINALIZATION_REQUESTED",
+    "seal_sorted_record_manifest": true,
+    "stable_record_ids": true,
+    "content_digests": true,
+    "append_only": true,
+    "hash_chain_supported": true,
+    "github_backup_required": true,
+    "github_readback_required": true,
+    "manifest_digest_match_required": true,
+    "record_count_match_required": true,
+    "false_success_reporting": "DENY"
+  },
+  "recovery": {
+    "artifactory_unavailable": "FAIL_CLOSED_FOR_FRESH_COORDINATION",
+    "github_recovery_source": "LATEST_VERIFIED_COMPLETED_BACKUP_ONLY",
+    "recovered_state": "STALE_RECOVERY",
+    "fresh_mutation_while_stale_recovery": "DENY"
+  },
+  "authority": {
+    "message_content_is_authority": false,
+    "heartbeat_is_authority": false,
+    "handoff_is_authority": false,
+    "role_is_authorization": false,
+    "consequence_gateway_bypass": false
+  },
+  "capacity": {
+    "aggregate_operating_ratio_max": 0.8,
+    "unknown_total_capacity": "CAPACITY_LIMIT_UNVERIFIED_FAIL_CLOSED_HIGH_VOLUME_WRITES"
+  }
+}
