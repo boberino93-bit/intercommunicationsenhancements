@@ -1,0 +1,18 @@
+{
+  "schema": "org-agent-mesh/hybrid-capacity-schedule/v1",
+  "status": "STAGED_DISABLED",
+  "enabled": false,
+  "activation_authorized": false,
+  "authorization_case": "AUTH-HYBRID-SHADOW-HARDENED-V2B-379F47DE59FC",
+  "slots": [
+    {"slot": "AGENT_SLOT_1", "minute": 0, "launch_mode": "PROJECT_CAPACITY"},
+    {"slot": "AGENT_SLOT_2", "minute": 10, "launch_mode": "PROJECT_CAPACITY"},
+    {"slot": "AGENT_SLOT_3", "minute": 20, "launch_mode": "PROJECT_CAPACITY"},
+    {"slot": "AGENT_SLOT_4", "minute": 30, "launch_mode": "PROJECT_CAPACITY", "reservation": "INTEGRATION_OR_VALIDATION_IF_DEMANDED"},
+    {"slot": "AGENT_SLOT_5", "minute": 40, "launch_mode": "PORTFOLIO_CAPACITY", "experimental": true}
+  ],
+  "primary_schedulable": false,
+  "provider_admission_reused": true,
+  "fixed_role_schedule_superseded_now": false,
+  "note": "Definition only. No scheduler state is enabled or changed by this artifact."
+}
