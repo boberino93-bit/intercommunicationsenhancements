@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "org-agent-mesh/research-epistemic-broadcast/v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "message_id", "project_id", "intent", "discovery", "source_identity_refs", "source_instance_refs", "evidence_tiers", "claims_affected", "confidence", "authority_conveyed"],
+  "properties": {
+    "schema": {"const": "org-agent-mesh/research-epistemic-broadcast/v1"},
+    "message_id": {"type": "string", "minLength": 1},
+    "project_id": {"type": "string", "minLength": 1},
+    "intent": {"enum": ["DISCOVERY_BROADCAST", "VERIFICATION_REQUEST", "CONTRADICTION_RAISED", "SOURCE_DUPLICATE_NOTICE", "HYPOTHESIS_PROPOSED", "HYPOTHESIS_TEST_RESULT", "RECONCILIATION_UPDATE", "MODEL_REVISION_NOTICE"]},
+    "discovery": {"type": "string", "minLength": 1},
+    "source_identity_refs": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "source_instance_refs": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "evidence_tiers": {"type": "array", "items": {"type": "integer", "minimum": 1, "maximum": 6}},
+    "temporal_scope": {"type": ["string", "null"]},
+    "environment": {"type": ["string", "null"]},
+    "version": {"type": ["string", "null"]},
+    "claims_affected": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "confidence": {"type": "integer", "minimum": 0, "maximum": 100},
+    "authority_conveyed": {"const": false}
+  }
+}
