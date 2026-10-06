@@ -1,1 +1,39 @@
-{"$schema":"https://json-schema.org/draft/2020-12/schema","title":"Dual Persistence Receipt","type":"object","required":["schema","receipt_id","record_id","content_digest","project_id","prepared_at","state","authority_conveyed","artifactory_ack","github_ack"],"properties":{"schema":{"const":"org-agent-mesh/dual-persistence-receipt/v1"},"receipt_id":{"type":"string","minLength":1},"record_id":{"type":"string","minLength":1},"content_digest":{"type":"string","pattern":"^sha256:[0-9a-f]{64}$"},"project_id":{"type":"string","minLength":1},"prepared_at":{"type":"string","format":"date-time"},"state":{"enum":["PERSISTENCE_PREPARED","ARTIFACTORY_ONLY_RECOVERY_REQUIRED","GITHUB_ONLY_RECOVERY_REQUIRED","DIGEST_MISMATCH_QUARANTINED","RECORD_ID_DIGEST_CONFLICT_QUARANTINED","DUAL_PERSISTENCE_CONFIRMED"]},"authority_conveyed":{"const":false},"artifactory_ack":{"type":["object","null"]},"github_ack":{"type":["object","null"]}},"additionalProperties":true}
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "org-agent-mesh/dual-persistence-receipt/v1",
+  "title": "Dual Persistence Receipt",
+  "type": "object",
+  "$defs": {
+    "sink_ack": {
+      "type": "object",
+      "required": ["sink", "project_id", "record_id", "content_digest", "location", "acknowledged_at", "operation", "append_only"],
+      "properties": {
+        "sink": {"enum": ["ARTIFACTORY_MESSAGE_FORUM", "GITHUB_PROJECT_BACKUP"]},
+        "project_id": {"type": "string", "minLength": 1},
+        "record_id": {"type": "string", "minLength": 1},
+        "content_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "location": {"type": "string", "minLength": 1},
+        "acknowledged_at": {"type": "string", "format": "date-time"},
+        "operation": {"const": "CREATE_NEW_RECORD"},
+        "append_only": {"const": true}
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": ["schema", "receipt_id", "project_id", "record_id", "content_digest", "prepared_at", "state", "authority_conveyed", "artifactory_ack", "github_ack"],
+  "properties": {
+    "schema": {"const": "org-agent-mesh/dual-persistence-receipt/v1"},
+    "receipt_id": {"type": "string", "minLength": 1},
+    "project_id": {"type": "string", "minLength": 1},
+    "record_id": {"type": "string", "minLength": 1},
+    "content_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "prepared_at": {"type": "string", "format": "date-time"},
+    "state": {"enum": ["PERSISTENCE_PREPARED", "ARTIFACTORY_ONLY_RECOVERY_REQUIRED", "GITHUB_ONLY_RECOVERY_REQUIRED", "DIGEST_MISMATCH_QUARANTINED", "RECORD_ID_DIGEST_CONFLICT_QUARANTINED", "DUAL_PERSISTENCE_CONFIRMED"]},
+    "authority_conveyed": {"const": false},
+    "artifactory_ack": {"oneOf": [{"$ref": "#/$defs/sink_ack"}, {"type": "null"}]},
+    "github_ack": {"oneOf": [{"$ref": "#/$defs/sink_ack"}, {"type": "null"}]},
+    "previous_receipt_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "recovery_of_receipt_id": {"type": "string", "minLength": 1}
+  },
+  "additionalProperties": false
+}

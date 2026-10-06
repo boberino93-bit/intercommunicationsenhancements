@@ -1,1 +1,56 @@
-{"schema":"org-agent-mesh/dual-persistence-policy/v1","version":"1.0.0","status":"STAGED_HARD_GATE_NON_ACTIVATING","invariant":"MATERIAL_EXTERNALLY_RELEVANT_WORK_REQUIRES_BOTH_PROJECT_LOCAL_FORUM_AND_CANONICAL_GITHUB_BACKUP","runtime":"org_agent_mesh.dual_persistence","record_schema":"schemas/material_work_record.schema.json","receipt_schema":"schemas/dual_persistence_receipt.schema.json","sinks":["ARTIFACTORY_MESSAGE_FORUM","GITHUB_PROJECT_BACKUP"],"required_barrier":"DUAL_PERSISTENCE_CONFIRMED","terminal_or_handoff_states":["READY","HANDOFF_READY","COMPLETE","PROPOSAL_READY","MANAGER_REVIEW_READY","PRIMARY_REVIEW_READY","RESEARCH_HANDOFF_READY","MANAGER_HANDOFF_READY","PRIMARY_PROPOSAL_READY"],"idempotency":{"same_record_id_same_digest":"SAFE_RETRY","same_record_id_different_digest":"QUARANTINE_CONFLICT"},"partial_failure":{"one_sink_succeeds":"RECOVERY_REQUIRED_NOT_READY","digest_mismatch":"QUARANTINE","reconciler":"READ_ONLY_COMPARE_BOTH_PLANES"},"append_only":true,"correction_model":"NEW_RECORD_WITH_SUPERSEDES_REFERENCE","hash_chain":"TAMPER_EVIDENT_PREVIOUS_RECORD_DIGEST","durable_record_guard_required_before_hash_and_publication":true,"authority_conveyed":false,"protected_effect_authority":"UNCHANGED_CONSEQUENCE_GATEWAY_ONLY","immutability_claim":"APPLICATION_APPEND_ONLY_PLUS_TAMPER_EVIDENT_HASH_CHAIN;NOT_WORM","activation":{"schedule_enablement":false,"stage15_launch":false,"peer_propagation":false,"production_promotion":false}}
+{
+  "schema": "org-agent-mesh/dual-persistence-policy/v1",
+  "version": "1.1.0-candidate",
+  "status": "STAGED_HARD_GATE_NON_ACTIVATING",
+  "invariant": "MATERIAL_EXTERNALLY_RELEVANT_WORK_REQUIRES_BOTH_PROJECT_LOCAL_FORUM_AND_CANONICAL_GITHUB_BACKUP",
+  "runtime": "org_agent_mesh.dual_persistence",
+  "record_schema": "schemas/material_work_record.schema.json",
+  "receipt_schema": "schemas/dual_persistence_receipt.schema.json",
+  "health_schema": "schemas/persistence_health.schema.json",
+  "sinks": ["ARTIFACTORY_MESSAGE_FORUM", "GITHUB_PROJECT_BACKUP"],
+  "required_barrier": "DUAL_PERSISTENCE_CONFIRMED",
+  "terminal_or_handoff_states": ["READY", "HANDOFF_READY", "COMPLETE", "PROPOSAL_READY", "MANAGER_REVIEW_READY", "PRIMARY_REVIEW_READY", "RESEARCH_HANDOFF_READY", "MANAGER_HANDOFF_READY", "PRIMARY_PROPOSAL_READY"],
+  "binding": {
+    "project_id": "EXACT_MATCH_REQUIRED",
+    "record_id": "EXACT_MATCH_REQUIRED",
+    "content_digest": "EXACT_MATCH_REQUIRED",
+    "sink_ack_project_binding": true,
+    "sink_ack_record_binding": true,
+    "sink_ack_digest_binding": true
+  },
+  "idempotency": {
+    "scope_key": ["project_id", "record_id"],
+    "same_record_id_same_digest": "SAFE_RETRY",
+    "same_record_id_different_digest": "QUARANTINE_CONFLICT"
+  },
+  "partial_failure": {
+    "one_sink_succeeds": "RECOVERY_REQUIRED_NOT_READY",
+    "missing_sink_retry": "SAME_PROJECT_RECORD_AND_DIGEST_ONLY",
+    "digest_mismatch": "QUARANTINE",
+    "reconciler": "READ_ONLY_COMPARE_BOTH_PLANES"
+  },
+  "append_only": true,
+  "correction_model": "NEW_RECORD_WITH_SUPERSEDES_REFERENCE",
+  "hash_chain": {
+    "mode": "TAMPER_EVIDENT_PREVIOUS_RECORD_DIGEST",
+    "stream_scope": ["project_id", "run_id", "agent_id", "work_id"],
+    "global_hot_file_required": false,
+    "sharded_record_files": true,
+    "sealed_manifests_recommended": true
+  },
+  "durable_record_guard_required_before_hash_and_publication": true,
+  "authority_conveyed": false,
+  "protected_effect_authority": "UNCHANGED_CONSEQUENCE_GATEWAY_ONLY",
+  "immutability_claim": "APPLICATION_APPEND_ONLY_PLUS_TAMPER_EVIDENT_HASH_CHAIN;REPOSITORY_RULE_NOT_YET_VERIFIED;NOT_WORM",
+  "stage15": {
+    "fresh_persistence_health_required": true,
+    "zero_loss_required": true,
+    "normalized_route_required": true
+  },
+  "activation": {
+    "schedule_enablement": false,
+    "stage15_launch": false,
+    "peer_propagation": false,
+    "production_promotion": false
+  }
+}

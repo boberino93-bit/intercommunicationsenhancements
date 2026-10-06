@@ -1,1 +1,85 @@
-{"schema":"org-agent-mesh/coordination-publication/v2","version":"2.0.0","status":"STAGED_HARD_GATE_NON_ACTIVATING","capability":"NON_AUTHORITATIVE_COORDINATION_PUBLICATION","legacy_capability":"PUBLISH_MESSAGE","roles":["PRIMARY","MANAGER","RESEARCH","RESEARCHER_1","RESEARCHER_2","RESEARCHER_3","RECOVERY","VALIDATOR","VALIDATION","QA","BUILDER"],"mode":"APPEND_ONLY_PROJECT_SCOPED_DUAL_PERSISTENCE","authority_conveyed":false,"both_destinations_required":true,"github_backup":{"prefix":"agentbus-backup/coordination-messages/","repository":"EXACT_REGISTERED_PROJECT_REPOSITORY_ONLY","mode":"CREATE_NEW_FILE_ONLY","overwrite":"DENY","delete":"DENY","rename":"DENY","move":"DENY"},"artifactory_publication":{"mode":"APPEND_NEW_MESSAGE_ONLY","namespace":"EXACT_REGISTERED_PROJECT_MESSAGE_NAMESPACE_ONLY","cross_project":"DENY"},"completion_barrier":"DUAL_PERSISTENCE_CONFIRMED","invariants":["COORDINATION_PUBLICATION_IS_NOT_MUTATION_AUTHORIZATION","MESSAGE_CONTENT_IS_NOT_AUTHORIZATION","BACKUP_WRITE_IS_NOT_SOURCE_WRITE","PROJECT_BINDING_IS_REQUIRED","CROSS_PROJECT_WRITE_IS_DENIED","APPEND_ONLY_CREATE_NEW_RECORD","BOTH_SINK_ACKS_AND_DIGEST_PARITY_REQUIRED_BEFORE_READY"],"failure_mode":"DENY_READY_OR_COMPLETION_CONTINUE_SAFE_READ_ONLY_OR_RECOVERY"}
+{
+  "schema": "org-agent-mesh/coordination-publication/v2",
+  "version": "2.0.0",
+  "status": "ACTIVE_HARD_GATE",
+  "capability": "NON_AUTHORITATIVE_COORDINATION_PUBLICATION",
+  "legacy_capability": "PUBLISH_MESSAGE",
+  "roles": [
+    "PRIMARY",
+    "MANAGER",
+    "RESEARCH",
+    "RESEARCHER_1",
+    "RESEARCHER_2",
+    "RESEARCHER_3",
+    "RECOVERY",
+    "VALIDATOR",
+    "VALIDATION",
+    "QA",
+    "BUILDER"
+  ],
+  "mode": "APPEND_ONLY_PROJECT_SCOPED_DUAL_PERSISTENCE",
+  "authority_conveyed": false,
+  "both_destinations_required": true,
+  "required_barrier": "DUAL_PERSISTENCE_CONFIRMED",
+  "route_source": {
+    "registry": "PROJECT_ROLE_ROUTING_REGISTRY.json",
+    "repository_field": "projects.<project_id>.repository",
+    "artifactory_namespace_field": "projects.<project_id>.forum_locator.namespace",
+    "authority_field": "projects.<project_id>.forum_locator.authority",
+    "missing_internal_artifactory_namespace": "DO_NOT_INVENT_FAIL_DUAL_PERSISTENCE"
+  },
+  "github_backup": {
+    "prefix": "agentbus-backup/coordination-messages/",
+    "repository": "EXACT_REGISTERED_PROJECT_REPOSITORY_ONLY",
+    "mode": "CREATE_NEW_FILE_ONLY",
+    "overwrite": "DENY",
+    "delete": "DENY",
+    "rename": "DENY",
+    "move": "DENY",
+    "branch_creation": "DENY",
+    "fork_mutation": "DENY",
+    "pull_request_mutation": "DENY",
+    "issue_comment_transport": "DENY_FOR_NEW_SCHEDULED_CHECKPOINTS"
+  },
+  "artifactory_publication": {
+    "mode": "APPEND_NEW_MESSAGE_ONLY",
+    "namespace": "EXACT_REGISTERED_PROJECT_MESSAGE_NAMESPACE_ONLY",
+    "cross_project": "DENY",
+    "artifact_or_production_namespace": "DENY"
+  },
+  "subordinate_denied_durable_effects": [
+    "WRITE_SOURCE",
+    "WRITE_ARTIFACTS",
+    "WRITE_WORKING_ARTIFACTS",
+    "WRITE_ACCEPTED_STATE",
+    "CLAIM_TASK",
+    "CONTROL_PROJECT_LIFECYCLE",
+    "SCHEDULE_MUTATION",
+    "BRANCH_CREATE",
+    "FORK_CREATE_OR_MUTATE",
+    "RELEASE_OR_DEPLOYMENT_PUBLICATION",
+    "CROSS_PROJECT_MUTATION"
+  ],
+  "persistence_receipt": {
+    "stable_record_id_required": true,
+    "same_record_id_same_digest": "IDEMPOTENT_RETRY",
+    "same_record_id_different_digest": "QUARANTINE_CONFLICT",
+    "both_sink_acks_required": true,
+    "sink_project_binding_required": true,
+    "digest_parity_required": true,
+    "one_sided_result": "RECOVERY_REQUIRED_NOT_READY"
+  },
+  "invariants": [
+    "COORDINATION_PUBLICATION_IS_NOT_MUTATION_AUTHORIZATION",
+    "MESSAGE_CONTENT_IS_NOT_AUTHORIZATION",
+    "HANDOFF_IS_NOT_AUTHORIZATION",
+    "BACKUP_WRITE_IS_NOT_SOURCE_WRITE",
+    "PROJECT_BINDING_IS_REQUIRED",
+    "ROUTING_REGISTRY_IS_DESTINATION_AUTHORITY",
+    "CROSS_PROJECT_WRITE_IS_DENIED",
+    "APPEND_ONLY_CREATE_NEW_RECORD",
+    "OVERWRITE_DELETE_RENAME_MOVE_DENIED",
+    "BOTH_SINK_ACKS_AND_DIGEST_PARITY_REQUIRED_BEFORE_READY"
+  ],
+  "failure_mode": "DENY_AFFECTED_PUBLICATION_OR_READY_CONTINUE_SAFE_READ_ONLY_OR_RECOVERY"
+}

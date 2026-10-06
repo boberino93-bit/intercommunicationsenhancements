@@ -1,1 +1,53 @@
-{"schema":"org-agent-mesh/global-security-change-transaction/v1","transaction_id":"AUTH-DUAL-PERSISTENCE-HARDENING-V1-BBE9CB5EF1E8","status":"AUTHORIZED_CANDIDATE_IMPLEMENTATION_NON_ACTIVATING","authorization_proof":"https://github.com/boberino93-bit/intercommunicationsenhancements/issues/83","claimed_principal":"robert_leonard","authenticated_github_principal":"boberino93-bit","expected_pre_state":"d74b1057a0730263061b3e936da5d4aaa87b78d0","backup_ref":"backup/pre-dual-persistence-hardening-20261006","feature_ref":"feature/dual-persistence-hardening-v1-20261006","warning_acknowledged":true,"security_validation_receipts":[{"receipt_id":"SECVAL-DP-A-20261006","path_id":"FORENSIC_REVIEW_A","scope":"dual persistence/admission failure semantics","verifier_ref":"forensic_architecture_review_generic_capacity_admission.md","verified":true},{"receipt_id":"SECVAL-DP-B-20261006","path_id":"SILOED_REVIEW_B","scope":"partial-write recovery/authority separation","verifier_ref":"independent_siloed_forensic_architecture_review.md","verified":true}],"source_only":true,"cross_project_propagation":{"authorized":false,"performed":false,"result":"TARGET_PROPAGATION_REQUIRES_SEPARATE_AUTHORIZATION"},"production_promotion":false,"schedule_activation":false,"stage15_launch":false,"scaler_activation":false,"authority_conveyed":false}
+{
+  "schema": "org-agent-mesh/global-security-change-transaction/v1",
+  "transaction_id": "AUTH-DUAL-PERSISTENCE-HARDENING-V1-BBE9CB5EF1E8",
+  "status": "ATTEMPT_1_FAILED_INTEGRATED_VALIDATION_REPAIR_REQUIRED_NON_ACTIVATING",
+  "authorization_proof": "https://github.com/boberino93-bit/intercommunicationsenhancements/issues/83",
+  "claimed_principal": "robert_leonard",
+  "authenticated_github_principal": "boberino93-bit",
+  "expected_pre_state": "d74b1057a0730263061b3e936da5d4aaa87b78d0",
+  "backup_ref": "backup/pre-dual-persistence-hardening-20261006",
+  "feature_ref": "feature/dual-persistence-hardening-v1-20261006",
+  "attempt_1_head": "a4158ab161b3a2c8ce82cf2cdb6c2fabd3809890",
+  "attempt_1_pr": 84,
+  "warning_acknowledged": true,
+  "attempt_1_validation": {
+    "root_authority_guard": "PASS",
+    "integrated_package_workflow": "FAIL",
+    "tests_run": 530,
+    "tests_passed": 526,
+    "tests_failed": 1,
+    "tests_errored": 3,
+    "failure_class": "PRESERVATION_REGRESSION_IN_EXISTING_MUTATION_AUTHORIZATION_POLICY",
+    "promotion_disposition": "DENY"
+  },
+  "independent_review_inputs": [
+    {
+      "path_id": "FORENSIC_REVIEW_A",
+      "file_id": "file_00000000322081fd8d79d75fe9d2642f",
+      "version_id": "1",
+      "name": "forensic_architecture_review_generic_capacity_admission.md",
+      "independence_basis": "SILOED_REVIEW_DECLARED_NO_TOOLS_REPOSITORIES_EXTERNAL_SOURCES_MEMORY_OR_OTHER_REVIEWS"
+    },
+    {
+      "path_id": "SILOED_REVIEW_B",
+      "file_id": "file_00000000ed5081fdb8c09884a37336ad",
+      "version_id": "1",
+      "name": "independent_siloed_forensic_architecture_review.md",
+      "independence_basis": "SILOED_REVIEW_SUPPLIED_PROPOSAL_AS_ENTIRE_EVIDENCE_BASE"
+    }
+  ],
+  "fresh_security_validation_receipts_required_for_repair": true,
+  "prior_receipt_claims_are_final_validation": false,
+  "source_only": true,
+  "cross_project_propagation": {
+    "authorized": false,
+    "performed": false,
+    "result": "TARGET_PROPAGATION_REQUIRES_SEPARATE_AUTHORIZATION"
+  },
+  "production_promotion": false,
+  "schedule_activation": false,
+  "stage15_launch": false,
+  "scaler_activation": false,
+  "authority_conveyed": false
+}
