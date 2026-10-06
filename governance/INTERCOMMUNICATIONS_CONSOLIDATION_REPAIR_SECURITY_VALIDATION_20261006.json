@@ -1,0 +1,14 @@
+{
+  "schema":"org-agent-mesh/security-validation-receipt-bundle/v1",
+  "transaction_id":"AUTH-INTERCOMM-CONSOLIDATION-REPAIR-V1-DF223C735930",
+  "issued_at":"2026-10-05T22:49:17-07:00",
+  "expires_at":"2026-10-05T23:04:17-07:00",
+  "receipts":[
+    {"receipt_id":"SECVAL-INTERCOMM-REPAIR-A-DF223C735930","path_id":"HOSTED_MANAGER_STRUCTURAL_REVIEW","evidence":"workflow 37420150346 / job 112127464185","result":"FAIL_BOUND_FINDINGS_USED_FOR_REPAIR","verified":true},
+    {"receipt_id":"SECVAL-INTERCOMM-REPAIR-B-DF223C735930","path_id":"HOSTED_RESEARCH_ADVERSARIAL_REVIEW","evidence":"workflow 37420150346 / job 112127464493","result":"PASS_CORE_ISOLATION_RECOVERY_CONTROLS","verified":true}
+  ],
+  "distinct_receipt_ids":true,
+  "distinct_paths":true,
+  "single_use":true,
+  "authority_conveyed":false
+}
