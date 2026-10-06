@@ -43,7 +43,6 @@ class AuthorityAndSchemaTests(unittest.TestCase):
 
     def test_checkpoint_v3_preserves_v2_stage_state_semantics(self):
         schema = json.loads((ROOT / "schemas/swarm_stage_checkpoint_v3.schema.json").read_text())
-        validator = Draft202012Validator(schema)
         payload = {
             "schema": "intercommunications/swarm-stage-checkpoint/v3", "project_id": "p", "authority_conveyed": False,
             "checkpoint_id": "c", "cycle_id": "2026-10-06T12:00:00-07:00", "stage": "RESEARCHER_1", "run_id": "r",
@@ -53,10 +52,10 @@ class AuthorityAndSchemaTests(unittest.TestCase):
             "claims_created_or_updated": [], "hypotheses_created_or_updated": [], "contradiction_refs": [], "source_identity_refs": [],
             "duplicate_source_collapse_refs": [], "pending_verification_refs": [], "minority_finding_refs": [], "unresolved_high_impact_question_refs": []}
         }
-        with self.assertRaises(ValidationError): validator.validate(payload)
+        with self.assertRaises(SchemaValidationError): validate_json_schema(schema, payload)
 
     def test_checkpoint_v3_preserves_interactive_recovery_requirement(self):
-        schema = json.loads((ROOT / "schemas/swarm_stage_checkpoint_v3.schema.json").read_text()); validator = Draft202012Validator(schema)
+        schema = json.loads((ROOT / "schemas/swarm_stage_checkpoint_v3.schema.json").read_text())
         payload = {
             "schema": "intercommunications/swarm-stage-checkpoint/v3", "project_id": "p", "authority_conveyed": False,
             "checkpoint_id": "c", "cycle_id": "2026-10-06T12:00:00-07:00", "stage": "PRIMARY", "run_id": "r",
@@ -66,11 +65,11 @@ class AuthorityAndSchemaTests(unittest.TestCase):
             "claims_created_or_updated": [], "hypotheses_created_or_updated": [], "contradiction_refs": [], "source_identity_refs": [],
             "duplicate_source_collapse_refs": [], "pending_verification_refs": [], "minority_finding_refs": [], "unresolved_high_impact_question_refs": []}
         }
-        with self.assertRaises(ValidationError): validator.validate(payload)
+        with self.assertRaises(SchemaValidationError): validate_json_schema(schema, payload)
 
     def test_new_schemas_are_draft_2020_12_valid(self):
         for name in ("research_epistemic_broadcast.schema.json", "swarm_stage_checkpoint_v3.schema.json"):
-            Draft202012Validator.check_schema(json.loads((ROOT / "schemas" / name).read_text()))
+            validate_schema_contract(json.loads((ROOT / "schemas" / name).read_text()))
 
     def test_reconciliation_cancels_resolved_question_advisory(self):
         q = OpenQuestionRecord("q", "done", 1, 1, 1, 1, status="RESOLVED"); r = reconcile(mdl(open_questions=(q,)))
