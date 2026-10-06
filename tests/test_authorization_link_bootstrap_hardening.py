@@ -10,7 +10,7 @@ def load(path):
 class AuthorizationLinkBootstrapHardeningTests(unittest.TestCase):
     def test_canonical_bootstrap_gate_precedes_authorization(self):
         order = load("BOOTSTRAP_ORDER.json")
-        self.assertEqual(order["schema"], "org-agent-mesh/bootstrap-order/v8")
+        self.assertEqual(order["schema"], "org-agent-mesh/bootstrap-order/v7")
         self.assertTrue(order["actionable_link_delivery_contract"]["required_before_authorization_evaluation"])
         steps = {s["id"]: s for s in order["steps"]}
         link = steps["prepare_and_surface_case_specific_authorization_link"]
@@ -48,6 +48,7 @@ class AuthorizationLinkBootstrapHardeningTests(unittest.TestCase):
             self.assertEqual(link["pre_mutation_state"], "PRE_MUTATION_AUTHORIZATION_REQUIRED")
 
         seeded_order = load("templates/new-project/BOOTSTRAP_ORDER.template.json")
+        self.assertEqual(seeded_order["schema"], "org-agent-mesh/bootstrap-order/v5")
         self.assertIn("case-specific actionable authorization link surfaced when supported", seeded_order["mutation_gate"])
         self.assertIn("raw connector write capability is not authority", seeded_order["mutation_gate"])
 
