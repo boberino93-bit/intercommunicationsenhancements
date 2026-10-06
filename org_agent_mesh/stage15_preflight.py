@@ -22,6 +22,7 @@ PROJECT_ALIASES = {"xrpthesis": "xrp-thesis"}
 STAGE15_CAPACITY_STATES = {"GREEN"}
 DEFAULT_MAX_CAPACITY_AGE_SECONDS = 900
 DEFAULT_MAX_OPERATIONS_AGE_SECONDS = 1800
+DEFAULT_MAX_PERSISTENCE_AGE_SECONDS = 1800
 DEFAULT_MAX_FUTURE_SKEW_SECONDS = 5
 
 
@@ -122,6 +123,45 @@ def normalize_operations_observation(
     }
 
 
+def validate_persistence_health(
+    health: Mapping[str, object],
+    *,
+    expected_project_id: str,
+    now_utc: str,
+    max_age_seconds: int = DEFAULT_MAX_PERSISTENCE_AGE_SECONDS,
+    max_future_skew_seconds: int = DEFAULT_MAX_FUTURE_SKEW_SECONDS,
+) -> dict[str, object]:
+    if not health:
+        raise Stage15PreflightError("PERSISTENCE_HEALTH_MISSING")
+    if health.get("schema") != "org-agent-mesh/persistence-health/v1":
+        raise Stage15PreflightError("PERSISTENCE_HEALTH_SCHEMA_MISMATCH")
+    if health.get("project_id") != expected_project_id:
+        raise Stage15PreflightError("PERSISTENCE_PROJECT_MISMATCH")
+    observed_at = str(health.get("reconciled_at_utc", ""))
+    observed = _parse_utc(observed_at)
+    now = _parse_utc(now_utc)
+    age = (now - observed).total_seconds()
+    if age < -max_future_skew_seconds:
+        raise Stage15PreflightError("PERSISTENCE_HEALTH_FROM_FUTURE")
+    if age > max_age_seconds:
+        raise Stage15PreflightError("PERSISTENCE_HEALTH_STALE")
+    for key in ("route_normalized", "forum_verified", "github_backup_verified", "zero_loss"):
+        if health.get(key) is not True:
+            raise Stage15PreflightError(f"PERSISTENCE_{key.upper()}_REQUIRED")
+    for key in ("single_sink_count", "digest_mismatch_count", "conflict_count"):
+        value = health.get(key)
+        if not isinstance(value, int) or value < 0:
+            raise Stage15PreflightError(f"PERSISTENCE_{key.upper()}_INVALID")
+        if value != 0:
+            raise Stage15PreflightError(f"PERSISTENCE_{key.upper()}_NONZERO")
+    if health.get("authority_conveyed") is not False:
+        raise Stage15PreflightError("PERSISTENCE_HEALTH_CANNOT_CONVEY_AUTHORITY")
+    result = dict(health)
+    result["age_seconds"] = max(0, int(age))
+    result["persistence_admission"] = True
+    return result
+
+
 @dataclass(frozen=True)
 class Stage15ProjectEvidence:
     project_id: str
@@ -130,6 +170,7 @@ class Stage15ProjectEvidence:
     capacity: Mapping[str, object]
     operations: Mapping[str, object]
     kernel_preflight_pass: bool
+    persistence: Mapping[str, object]
 
 
 @dataclass(frozen=True)
@@ -186,6 +227,21 @@ def assemble_stage15_evidence(
             expected_project_id=project_id,
             now_utc=now_utc,
         )
+        try:
+            persistence = validate_persistence_health(
+                item.persistence,
+                expected_project_id=project_id,
+                now_utc=now_utc,
+            )
+        except Stage15PreflightError as exc:
+            persistence = {
+                "project_id": project_id,
+                "persistence_admission": False,
+                "error": str(exc),
+            }
+            blockers.append(f"{project_id}:{exc}")
+        if not operations["mesh_normalization_complete"]:
+            blockers.append(f"{project_id}:MESH_NORMALIZATION_INCOMPLETE")
         if not item.kernel_preflight_pass:
             blockers.append(f"{project_id}:KERNEL_PREFLIGHT_FAILED")
         projects.append({
@@ -194,11 +250,12 @@ def assemble_stage15_evidence(
             "source_revision": item.source_revision,
             "capacity": capacity,
             "operations": operations,
+            "persistence": persistence,
             "kernel_preflight_pass": bool(item.kernel_preflight_pass),
         })
 
     canonical_payload = {
-        "schema": "org-agent-mesh/stage15-evidence/v1",
+        "schema": "org-agent-mesh/stage15-evidence/v2",
         "global_run_id": global_run_id,
         "stage_population": 15,
         "generated_at_utc": now_utc,

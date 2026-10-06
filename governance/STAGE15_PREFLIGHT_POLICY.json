@@ -1,5 +1,5 @@
 {
-  "schema": "org-agent-mesh/stage15-preflight-policy/v1",
+  "schema": "org-agent-mesh/stage15-preflight-policy/v2",
   "status": "ACTIVE_FAIL_CLOSED",
   "scope": "PRE_STAGE15_LAUNCH_SAFETY",
   "runtime": "org_agent_mesh.stage15_preflight",
@@ -33,7 +33,26 @@
     "max_future_skew_seconds": 5,
     "exact_project_accounting_required": true,
     "legacy_aliases": {"xrpthesis": "xrp-thesis"},
-    "legacy_alias_does_not_imply_normalization": true
+    "legacy_alias_does_not_imply_normalization": true,
+    "mesh_normalization_required_for_preflight_ready": true
+  },
+  "persistence": {
+    "required_per_project": true,
+    "schema": "org-agent-mesh/persistence-health/v1",
+    "max_age_seconds": 1800,
+    "max_future_skew_seconds": 5,
+    "route_normalized_required": true,
+    "forum_verified_required": true,
+    "github_backup_verified_required": true,
+    "zero_loss_required": true,
+    "single_sink_count_must_equal": 0,
+    "digest_mismatch_count_must_equal": 0,
+    "conflict_count_must_equal": 0,
+    "authority_conveyed": false,
+    "missing_result": "BLOCK",
+    "stale_result": "BLOCK",
+    "degraded_result": "BLOCK",
+    "unknown_route_result": "BLOCK"
   },
   "kernel_preflight": {
     "required_per_project": true,
@@ -41,7 +60,7 @@
   },
   "readiness_semantics": {
     "contract_ready": "SEVEN_PROJECT_CONTRACT_ALIGNMENT_ONLY",
-    "preflight_ready": "FRESH_CAPACITY_PLUS_OPERATIONS_PLUS_KERNEL_PREFLIGHT",
+    "preflight_ready": "FRESH_CAPACITY_PLUS_OPERATIONS_PLUS_DUAL_PERSISTENCE_HEALTH_PLUS_KERNEL_PREFLIGHT",
     "stage_passed": "POST_RUN_CONVERGENCE_GATE_ONLY",
     "contract_ready_is_launch_authorization": false,
     "preflight_ready_is_launch_authorization": false,

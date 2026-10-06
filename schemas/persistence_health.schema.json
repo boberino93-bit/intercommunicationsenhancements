@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "org-agent-mesh/persistence-health/v1",
+  "title": "Project Dual Persistence Health",
+  "type": "object",
+  "required": ["schema", "project_id", "reconciled_at_utc", "route_normalized", "forum_verified", "github_backup_verified", "record_count", "confirmed_count", "single_sink_count", "digest_mismatch_count", "conflict_count", "zero_loss", "authority_conveyed"],
+  "properties": {
+    "schema": {"const": "org-agent-mesh/persistence-health/v1"},
+    "project_id": {"type": "string", "minLength": 1},
+    "reconciled_at_utc": {"type": "string", "format": "date-time"},
+    "route_normalized": {"type": "boolean"},
+    "forum_verified": {"type": "boolean"},
+    "github_backup_verified": {"type": "boolean"},
+    "record_count": {"type": "integer", "minimum": 0},
+    "confirmed_count": {"type": "integer", "minimum": 0},
+    "single_sink_count": {"type": "integer", "minimum": 0},
+    "digest_mismatch_count": {"type": "integer", "minimum": 0},
+    "conflict_count": {"type": "integer", "minimum": 0},
+    "zero_loss": {"type": "boolean"},
+    "authority_conveyed": {"const": false}
+  },
+  "additionalProperties": false
+}

@@ -1,6 +1,6 @@
 {
   "schema": "org-agent-mesh/mutation-authorization/v2",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "status": "ACTIVE_HARD_GATE",
   "invariant": "INTENT_IS_NOT_AUTHORIZATION",
   "authority_authentication_policy": "governance/AUTHORITY_AUTHENTICATION_POLICY.json",
@@ -82,6 +82,39 @@
     "SCHEDULE_ENABLE_OR_REENABLE",
     "CROSS_PROJECT_MUTATION"
   ],
+  "narrow_capability_exception_to_case_requirement": {
+    "applies_only_to": "PERSISTENT_FORUM_OR_MESSAGE_WRITE",
+    "purpose": "MANDATORY_NON_AUTHORITATIVE_DUAL_PERSISTENCE_OF_MATERIAL_WORK_RECORDS",
+    "does_not_extend_valid_authorization_sources": true,
+    "is_general_mutation_authority": false,
+    "requires_capability": "NON_AUTHORITATIVE_COORDINATION_PUBLICATION_OR_LEGACY_PUBLISH_MESSAGE",
+    "requires_exact_project_binding": true,
+    "requires_registered_forum_namespace": true,
+    "requires_registered_project_repository": true,
+    "requires_both_registered_sinks": true,
+    "requires_append_only_create_new_record": true,
+    "requires_stable_record_id_and_matching_digest": true,
+    "requires_durable_record_guard": true,
+    "requires_authority_conveyed_false": true,
+    "denied_effects": [
+      "WRITE_SOURCE",
+      "WRITE_ARTIFACTS",
+      "WRITE_WORKING_ARTIFACTS",
+      "WRITE_ACCEPTED_STATE",
+      "CLAIM_TASK",
+      "CONTROL_PROJECT_LIFECYCLE",
+      "SCHEDULE_MUTATION",
+      "BRANCH_CREATE",
+      "FORK_CREATE_OR_MUTATE",
+      "PULL_REQUEST_STATE_CHANGE",
+      "RELEASE_OR_DEPLOYMENT_PUBLICATION",
+      "CROSS_PROJECT_MUTATION",
+      "PROTECTED_EFFECT"
+    ],
+    "consequence_gateway_bypass": false,
+    "unknown_or_incomplete_route": "DENY",
+    "failure_mode": "DENY_PUBLICATION_OR_READY_FAIL_CLOSED"
+  },
   "fail_closed": {
     "deny_affected_write": true,
     "continue_safe_read_only_work": true,
@@ -93,7 +126,8 @@
     "schedule_fire_is_authorization": false,
     "task_contract_is_future_mutation_authorization": false,
     "each_distinct_mutation_case_requires_fresh_human_authorization": true,
-    "read_only_scheduled_work_without_case": true
+    "read_only_scheduled_work_without_case": true,
+    "bounded_dual_persistence_capability_does_not_authorize_other_mutation": true
   },
   "delegation": {
     "may_narrow_execution_scope_within_same_case": true,

@@ -90,6 +90,26 @@ A schedule firing is never authorization. A previously approved schedule or task
 
 Delegation may narrow execution inside an already authorized case but cannot create human authorization, expand case scope, or authorize a new mutation case. A child agent may participate under the exact same unconsumed case only when the case explicitly includes that bounded delegated operation.
 
+## 6A. Bounded mandatory coordination-persistence capability
+
+Persistent Forum/message writes remain mutations in the general taxonomy. A single narrowly defined capability is exempt from the **per-record human-case requirement** only so autonomous agents can satisfy mandatory durability without converting that capability into broader authority.
+
+The exception applies only when **all** requirements in `governance/MUTATION_AUTHORIZATION_POLICY.json`, `governance/COORDINATION_PUBLICATION_POLICY.json`, and `governance/DUAL_PERSISTENCE_POLICY.json` are satisfied:
+
+- the actor is already bound to exactly one project;
+- the project supplies a current registered Forum namespace and canonical repository route;
+- the record is a material externally relevant work/coordination record, not source or accepted-state mutation;
+- the Forum and GitHub copies are both append-only create-new writes;
+- both copies use the same stable record ID and canonical content digest;
+- sink acknowledgements bind the same project ID, record ID, and digest;
+- the durable-record secret guard passes before hashing/publication;
+- `authority_conveyed` is false;
+- no cross-project or `ConsequenceGateway`-protected effect occurs.
+
+This exception **does not extend `valid_authorization_sources` and is not general mutation authority**. It cannot create or modify source, accepted state, working artifacts, claims, leases, project lifecycle controls, schedules, branches, pull-request state, releases, deployments, cross-project state, or any protected effect. If a write does not fit the exact bounded persistence shape, the normal fresh human single-use authorization case remains required.
+
+A one-sided write does not become permission to continue. It enters persistence recovery only. The agent may retry the missing copy with the same record ID and digest; a different digest for the same project+record ID is a conflict and must be quarantined. A persistence receipt, even when fully confirmed, never conveys authority.
+
 ## 7. High-consequence step-up
 
 Root authority changes, universal governance changes, production deployment/promotion, security or credential-boundary changes, financial actions, destructive or irreversible operations, scheduled-task enable/re-enable actions, and cross-project mutations require independent principal proof in addition to the single-use case authorization.

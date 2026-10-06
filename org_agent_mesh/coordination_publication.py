@@ -8,7 +8,19 @@ from .project_scope import ProjectScopeError, require_project_id, require_reposi
 
 CAPABILITY = "NON_AUTHORITATIVE_COORDINATION_PUBLICATION"
 LEGACY_CAPABILITY = "PUBLISH_MESSAGE"
-ALLOWED_ROLES = {"RESEARCH", "MANAGER", "RESEARCHER_1", "RESEARCHER_2", "RESEARCHER_3"}
+ALLOWED_ROLES = {
+    "PRIMARY",
+    "MANAGER",
+    "RESEARCH",
+    "RESEARCHER_1",
+    "RESEARCHER_2",
+    "RESEARCHER_3",
+    "RECOVERY",
+    "VALIDATOR",
+    "VALIDATION",
+    "QA",
+    "BUILDER",
+}
 DEFAULT_GITHUB_PREFIX = "agentbus-backup/coordination-messages/"
 
 
@@ -88,15 +100,13 @@ def require_coordination_publication(
     if authority_conveyed:
         raise CoordinationPublicationError("coordination messages cannot convey authority")
 
-    if target_artifactory_namespace is not None:
-        if route.artifactory_namespace is None:
-            raise CoordinationPublicationError("project has no registered Artifactory message namespace")
-        if target_artifactory_namespace != route.artifactory_namespace:
-            raise ProjectScopeError("Artifactory namespace does not match bound project")
+    if route.artifactory_namespace is None:
+        raise CoordinationPublicationError("DUAL_PERSISTENCE_ROUTE_INCOMPLETE:ARTIFACTORY_NAMESPACE_MISSING")
+    if target_artifactory_namespace is None or github_backup_path is None:
+        raise CoordinationPublicationError("DUAL_PERSISTENCE_DESTINATIONS_REQUIRED")
 
-    if github_backup_path is not None:
-        _validated_new_file_path(github_backup_path, route.github_backup_prefix)
+    if target_artifactory_namespace != route.artifactory_namespace:
+        raise ProjectScopeError("Artifactory namespace does not match bound project")
 
-    if target_artifactory_namespace is None and github_backup_path is None:
-        raise CoordinationPublicationError("a registered coordination destination is required")
+    _validated_new_file_path(github_backup_path, route.github_backup_prefix)
     return True

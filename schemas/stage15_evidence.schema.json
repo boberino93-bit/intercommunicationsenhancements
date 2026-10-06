@@ -1,59 +1,32 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "org-agent-mesh/stage15-evidence/v1",
+  "$id": "org-agent-mesh/stage15-evidence/v2",
   "title": "Stage 15 Evidence Envelope",
   "type": "object",
-  "required": [
-    "schema",
-    "global_run_id",
-    "stage_population",
-    "generated_at_utc",
-    "expected_projects",
-    "projects",
-    "contract_ready",
-    "preflight_ready",
-    "stage_passed",
-    "authority_conveyed",
-    "launch_authorized",
-    "blockers",
-    "evidence_digest"
-  ],
+  "required": ["schema", "global_run_id", "stage_population", "generated_at_utc", "expected_projects", "projects", "contract_ready", "preflight_ready", "stage_passed", "authority_conveyed", "launch_authorized", "blockers", "evidence_digest"],
   "properties": {
-    "schema": {"const": "org-agent-mesh/stage15-evidence/v1"},
+    "schema": {"const": "org-agent-mesh/stage15-evidence/v2"},
     "global_run_id": {"type": "string", "minLength": 1},
     "stage_population": {"const": 15},
-    "generated_at_utc": {"type": "string", "minLength": 1},
-    "expected_projects": {
-      "type": "array",
-      "minItems": 7,
-      "maxItems": 7,
-      "uniqueItems": true,
-      "items": {"type": "string", "minLength": 1}
-    },
+    "generated_at_utc": {"type": "string", "format": "date-time"},
+    "expected_projects": {"type": "array", "minItems": 7, "maxItems": 7, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
     "projects": {
       "type": "array",
       "minItems": 7,
       "maxItems": 7,
       "items": {
         "type": "object",
-        "required": ["project_id", "repository_identity", "source_revision", "capacity", "operations", "kernel_preflight_pass"],
+        "required": ["project_id", "repository_identity", "source_revision", "capacity", "operations", "persistence", "kernel_preflight_pass"],
         "properties": {
           "project_id": {"type": "string", "minLength": 1},
           "repository_identity": {"type": "string", "minLength": 1},
           "source_revision": {"type": "string", "minLength": 1},
-          "capacity": {
-            "type": "object",
-            "required": ["project_id", "repository_identity", "measured_at_utc", "overall_state", "capacity_admission"],
-            "properties": {
-              "capacity_admission": {"const": true}
-            }
-          },
-          "operations": {
-            "type": "object",
-            "required": ["project_id", "observed_project_id", "legacy_alias_used", "mesh_normalization_complete", "observed_at_utc"]
-          },
+          "capacity": {"type": "object"},
+          "operations": {"type": "object"},
+          "persistence": {"type": "object"},
           "kernel_preflight_pass": {"type": "boolean"}
-        }
+        },
+        "additionalProperties": false
       }
     },
     "contract_ready": {"type": "boolean"},
