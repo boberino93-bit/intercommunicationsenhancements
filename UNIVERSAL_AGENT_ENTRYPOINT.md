@@ -11,6 +11,9 @@ The universal repository is a routing rendezvous, not automatically the target p
 - detailed unbound routing protocol: `protocols/universal_task_routing.md`
 - fresh-agent orientation: `AGENT_CONTEXT_REFERENCE.md`
 - autonomous continuation: `protocols/autonomous_continuation.md`
+- user control messages: `protocols/user_control_messages.md`
+
+For a non-task-changing human control message, answer the control request immediately and then resume the exact interrupted work automatically without requiring a routine `continue` reprompt, preserving the existing project/task/authorization state subject to normal expiry and safety gates.
 
 ## Unbound rule
 

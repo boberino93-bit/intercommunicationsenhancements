@@ -1,4 +1,5 @@
 from pathlib import Path
+import ast
 import json
 import sys
 import tempfile
@@ -9,6 +10,13 @@ sys.path.insert(0, str(ROOT))
 
 from org_agent_mesh.project_identity import validate_current_project
 from org_agent_mesh.project_scope import ProjectScopeError
+
+
+CANONICAL_BOOTSTRAP_PREFIX = [
+    "bind_host_chat_project_context_before_all_other_bootstrap",
+    "validate_current_human_project_intent",
+    "load_and_validate_project_identity_lock",
+]
 
 
 def write_lock(root, project_id="project-a", repository="repo-a"):
@@ -57,12 +65,24 @@ class RecoveryIdentityTest(unittest.TestCase):
     def test_repository_bootstrap_order_is_identity_first(self):
         order = json.loads((ROOT / "BOOTSTRAP_ORDER.json").read_text(encoding="utf-8"))
         ids = [step["id"] for step in order["steps"]]
-        self.assertEqual(ids[:2], [
-            "validate_current_human_project_intent",
-            "load_and_validate_project_identity_lock",
-        ])
+        self.assertEqual(ids[:3], CANONICAL_BOOTSTRAP_PREFIX)
         continuation_index = ids.index("load_project_handoffs_queues_forums_and_accepted_state")
-        self.assertGreater(continuation_index, 1)
+        self.assertGreater(continuation_index, 2)
+
+    def test_package_verifier_uses_canonical_three_step_bootstrap_prefix(self):
+        verifier_path = ROOT / "tools" / "verify_agent_packages.py"
+        source = verifier_path.read_text(encoding="utf-8")
+        tree = ast.parse(source)
+        expected_prefix = None
+        for node in tree.body:
+            if not isinstance(node, ast.Assign):
+                continue
+            if any(isinstance(target, ast.Name) and target.id == "EXPECTED_PREFIX" for target in node.targets):
+                expected_prefix = ast.literal_eval(node.value)
+                break
+        self.assertEqual(expected_prefix, CANONICAL_BOOTSTRAP_PREFIX)
+        self.assertNotIn("[:2]", source)
+        self.assertGreaterEqual(source.count("[:3]"), 2)
 
 
 if __name__ == "__main__":

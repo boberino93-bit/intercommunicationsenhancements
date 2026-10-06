@@ -89,5 +89,29 @@ class SwarmKernelTest(unittest.TestCase):
     def test_convergence_requires_handoff_checkpoint(self):
         self.assertFalse(convergence_gate(research_accounted=True, manager_dispositions_complete=True, primary_decisions_persisted=True, package_parity_restored=True, unresolved_leases=0, recovery_checkpoint_valid=True, master_handoff_checkpointed=False)["complete"])
 
+    def test_bootstrap_requires_prefilled_clickable_authorization_links(self):
+        overlay = (ROOT / "swarm_kernel" / "AGENT_BOOTSTRAP_OVERLAY.md").read_text(encoding="utf-8")
+        required = (
+            "single clickable prefilled authorization link",
+            "principal-claim template",
+            "case ID",
+            "non-secret nonce or challenge reference",
+            "target project/repository",
+            "branch/ref and expected head",
+            "mutation class",
+            "consequence class",
+            "action digest",
+            "expiry",
+            "bounded action",
+            "explicit exclusions",
+            "human attestation statement",
+            "Bare case text, copy/paste-only authorization text, or generic navigation MUST NOT be the primary authorization path",
+            "verify the canonical externally produced proof before performing the mutation",
+            "secret authentication material MUST NEVER be embedded in the URL",
+        )
+        for phrase in required:
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, overlay)
+
 
 if __name__ == "__main__": unittest.main()

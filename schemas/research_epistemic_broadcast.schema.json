@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "org-agent-mesh/research-epistemic-broadcast/v1",
+  "title": "Non-authoritative research epistemic coordination broadcast",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "message_id", "project_id", "intent", "sender_role", "sender_agent_instance",
+    "discovery", "source_identity_refs", "source_instance_refs", "evidence_tiers",
+    "claims_affected", "significance", "confidence", "authority_conveyed"
+  ],
+  "properties": {
+    "schema": {"const": "org-agent-mesh/research-epistemic-broadcast/v1"},
+    "message_id": {"type": "string", "minLength": 1},
+    "project_id": {"type": "string", "pattern": "^[a-z0-9](?:[a-z0-9._-]{0,126}[a-z0-9])?$"},
+    "intent": {"enum": [
+      "DISCOVERY_BROADCAST", "VERIFICATION_REQUEST", "CONTRADICTION_RAISED",
+      "SOURCE_DUPLICATE_NOTICE", "NEGATIVE_EVIDENCE", "HYPOTHESIS_PROPOSED",
+      "HYPOTHESIS_TEST_RESULT", "RECONCILIATION_UPDATE", "MODEL_REVISION_NOTICE"
+    ]},
+    "sender_role": {"enum": ["RESEARCH", "RESEARCHER_1", "RESEARCHER_2", "RESEARCHER_3", "MANAGER"]},
+    "sender_agent_instance": {"type": "string", "minLength": 1},
+    "discovery": {"type": "string", "minLength": 1},
+    "source_identity_refs": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+    "source_instance_refs": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+    "evidence_tiers": {"type": "array", "items": {"type": "integer", "minimum": 1, "maximum": 6}},
+    "temporal_scope": {"type": ["string", "null"]},
+    "environment": {"type": ["string", "null"]},
+    "version": {"type": ["string", "null"]},
+    "claims_affected": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+    "significance": {"enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"]},
+    "confidence": {"type": "integer", "minimum": 0, "maximum": 100},
+    "conflict": {"type": ["string", "null"]},
+    "request": {"type": ["string", "null"]},
+    "authority_conveyed": {"const": false}
+  }
+}

@@ -83,7 +83,12 @@ def load_control_state():
     if project["project_id"] != identity["project_id"]: raise ValueError("project manifest and identity lock disagree on project_id")
     if project["repository_identity"] != identity["writable_repository"]: raise ValueError("project manifest and identity lock disagree on writable repository")
     steps = [item.get("id") for item in bootstrap.get("steps", [])]
-    if steps[:2] != ["validate_current_human_project_intent", "load_and_validate_project_identity_lock"]: raise ValueError("bootstrap order does not establish project identity first")
+    expected_prefix = [
+        "bind_host_chat_project_context_before_all_other_bootstrap",
+        "validate_current_human_project_intent",
+        "load_and_validate_project_identity_lock",
+    ]
+    if steps[:3] != expected_prefix: raise ValueError("bootstrap order does not establish host project binding and project identity first")
     if dependency_map.get("schema") != "org-agent-mesh/package-dependency-map/v1": raise ValueError("unsupported package dependency map schema")
     return project, identity, dependency_map
 
