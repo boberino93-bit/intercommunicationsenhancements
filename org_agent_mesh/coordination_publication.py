@@ -5,11 +5,18 @@ from pathlib import PurePosixPath
 
 from .project_scope import ProjectScopeError, require_project_id, require_repository_identity
 
-
 CAPABILITY = "NON_AUTHORITATIVE_COORDINATION_PUBLICATION"
 LEGACY_CAPABILITY = "PUBLISH_MESSAGE"
-ALLOWED_ROLES = {"RESEARCH", "MANAGER", "RESEARCHER_1", "RESEARCHER_2", "RESEARCHER_3"}
+ALLOWED_ROLES = {"PRIMARY", "MANAGER", "RESEARCH", "RESEARCHER_1", "RESEARCHER_2", "RESEARCHER_3"}
 DEFAULT_GITHUB_PREFIX = "agentbus-backup/coordination-messages/"
+TOKEN_FREE_AUTHORIZATION_MODE = "PROJECT_BOUND_CAPABILITY_NO_SECURITY_TOKEN"
+GITHUB_CREATE_OPERATION = "CREATE_NEW_FILE"
+PROHIBITED_GITHUB_OPERATIONS = {
+    "UPDATE_FILE", "DELETE_FILE", "MOVE_FILE", "RENAME_FILE", "BRANCH_CREATE",
+    "PULL_REQUEST_CREATE", "PULL_REQUEST_REVIEW", "PULL_REQUEST_APPROVAL",
+    "WORKFLOW_RUN", "WORKFLOW_DISPATCH", "WORKFLOW_FILE_MUTATION", "CHECK_RUN",
+    "RELEASE", "DEPLOYMENT", "ENVIRONMENT_APPROVAL",
+}
 
 
 class CoordinationPublicationError(PermissionError):
@@ -27,6 +34,17 @@ class CoordinationRoute:
         require_project_id(self.project_id)
         require_repository_identity(self.repository)
         _validated_prefix(self.github_backup_prefix)
+
+
+@dataclass(frozen=True)
+class CoordinationPublicationPermit:
+    project_id: str
+    role: str
+    authorization_mode: str
+    token_required: bool
+    authority_conveyed: bool
+    artifactory_allowed: bool
+    github_backup_allowed: bool
 
 
 def _validated_prefix(prefix: str) -> str:
@@ -69,6 +87,7 @@ def require_coordination_publication(
     target_artifactory_namespace: str | None = None,
     github_backup_path: str | None = None,
     operation: str = "CREATE_NEW_MESSAGE",
+    github_operation: str = GITHUB_CREATE_OPERATION,
     authority_conveyed: bool = False,
 ) -> bool:
     project_id = require_project_id(actor_project_id)
@@ -76,7 +95,7 @@ def require_coordination_publication(
     capabilities = frozenset(actor_capabilities or ())
 
     if role not in ALLOWED_ROLES:
-        raise CoordinationPublicationError("role is not eligible for subordinate coordination publication")
+        raise CoordinationPublicationError("role is not eligible for coordination publication")
     if CAPABILITY not in capabilities and LEGACY_CAPABILITY not in capabilities:
         raise CoordinationPublicationError("coordination publication capability is missing")
     if route.project_id != project_id:
@@ -95,8 +114,24 @@ def require_coordination_publication(
             raise ProjectScopeError("Artifactory namespace does not match bound project")
 
     if github_backup_path is not None:
+        github_operation = str(github_operation or "").strip().upper()
+        if github_operation in PROHIBITED_GITHUB_OPERATIONS or github_operation != GITHUB_CREATE_OPERATION:
+            raise CoordinationPublicationError("GitHub coordination lane permits create-new-file backup only")
         _validated_new_file_path(github_backup_path, route.github_backup_prefix)
 
     if target_artifactory_namespace is None and github_backup_path is None:
         raise CoordinationPublicationError("a registered coordination destination is required")
     return True
+
+
+def issue_coordination_publication_permit(**kwargs) -> CoordinationPublicationPermit:
+    require_coordination_publication(**kwargs)
+    return CoordinationPublicationPermit(
+        project_id=require_project_id(kwargs["actor_project_id"]),
+        role=str(kwargs["actor_role"]).strip().upper(),
+        authorization_mode=TOKEN_FREE_AUTHORIZATION_MODE,
+        token_required=False,
+        authority_conveyed=False,
+        artifactory_allowed=kwargs.get("target_artifactory_namespace") is not None,
+        github_backup_allowed=kwargs.get("github_backup_path") is not None,
+    )

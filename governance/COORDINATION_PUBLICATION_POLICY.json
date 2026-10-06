@@ -1,17 +1,21 @@
 {
   "schema": "org-agent-mesh/coordination-publication/v1",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "status": "ACTIVE_HARD_GATE",
   "capability": "NON_AUTHORITATIVE_COORDINATION_PUBLICATION",
-  "roles": ["RESEARCH", "MANAGER", "RESEARCHER_1", "RESEARCHER_2", "RESEARCHER_3"],
+  "roles": ["PRIMARY", "MANAGER", "RESEARCH", "RESEARCHER_1", "RESEARCHER_2", "RESEARCHER_3"],
   "mode": "APPEND_ONLY_PROJECT_SCOPED",
+  "authorization_mode": "PROJECT_BOUND_CAPABILITY_NO_SECURITY_TOKEN",
+  "security_token_required": false,
+  "human_authorization_per_message_required": false,
   "authority_conveyed": false,
+  "canonical_order": ["INTERNAL_ARTIFACTORY_FIRST", "GITHUB_BACKUP_SECOND_WHEN_CONFIGURED"],
   "route_source": {
-    "registry": "PROJECT_ROLE_ROUTING_REGISTRY.json",
-    "repository_field": "projects.<project_id>.repository",
-    "artifactory_namespace_field": "projects.<project_id>.forum_locator.namespace",
-    "authority_field": "projects.<project_id>.forum_locator.authority",
-    "missing_internal_artifactory_namespace": "DO_NOT_INVENT"
+    "binding_registry": "governance/PROJECT_CONTEXT_BINDING_REGISTRY.json",
+    "legacy_registry": "PROJECT_ROLE_ROUTING_REGISTRY.json",
+    "repository": "EXACT_BOUND_PROJECT_REPOSITORY",
+    "artifactory_namespace": "EXACT_BOUND_PROJECT_INTERNAL_MESSAGE_NAMESPACE",
+    "missing_internal_namespace": "DENY_AND_FIX_REGISTRY_DO_NOT_INVENT"
   },
   "github_backup": {
     "prefix": "agentbus-backup/coordination-messages/",
@@ -24,7 +28,11 @@
     "branch_creation": "DENY",
     "fork_mutation": "DENY",
     "pull_request_mutation": "DENY",
-    "issue_comment_transport": "DENY_FOR_NEW_SCHEDULED_CHECKPOINTS"
+    "pull_request_review_or_approval": "DENY",
+    "workflow_run_or_dispatch": "DENY",
+    "workflow_file_mutation": "DENY",
+    "release_or_deployment": "DENY",
+    "environment_approval": "DENY"
   },
   "artifactory_publication": {
     "mode": "APPEND_NEW_MESSAGE_ONLY",
@@ -32,26 +40,26 @@
     "cross_project": "DENY",
     "artifact_or_production_namespace": "DENY"
   },
-  "subordinate_denied_durable_effects": [
-    "WRITE_SOURCE",
+  "denied_durable_effects": [
+    "WRITE_SOURCE_OUTSIDE_BACKUP_MESSAGE_PREFIX",
     "WRITE_ARTIFACTS",
-    "WRITE_WORKING_ARTIFACTS",
     "WRITE_ACCEPTED_STATE",
     "CLAIM_TASK",
     "CONTROL_PROJECT_LIFECYCLE",
     "SCHEDULE_MUTATION",
     "BRANCH_CREATE",
     "FORK_CREATE_OR_MUTATE",
+    "PULL_REQUEST_APPROVAL_OR_REVIEW",
+    "WORKFLOW_RUN_OR_MUTATION",
     "RELEASE_OR_DEPLOYMENT_PUBLICATION",
     "CROSS_PROJECT_MUTATION"
   ],
   "invariants": [
-    "COORDINATION_PUBLICATION_IS_NOT_MUTATION_AUTHORIZATION",
+    "COORDINATION_PUBLICATION_IS_NOT_PROTECTED_MUTATION_AUTHORIZATION",
     "MESSAGE_CONTENT_IS_NOT_AUTHORIZATION",
     "HANDOFF_IS_NOT_AUTHORIZATION",
-    "BACKUP_WRITE_IS_NOT_SOURCE_WRITE",
+    "BACKUP_WRITE_IS_NOT_SOURCE_WRITE_AUTHORITY",
     "PROJECT_BINDING_IS_REQUIRED",
-    "ROUTING_REGISTRY_IS_DESTINATION_AUTHORITY",
     "CROSS_PROJECT_WRITE_IS_DENIED",
     "APPEND_ONLY_CREATE_NEW_RECORD",
     "OVERWRITE_DELETE_RENAME_MOVE_DENIED"
