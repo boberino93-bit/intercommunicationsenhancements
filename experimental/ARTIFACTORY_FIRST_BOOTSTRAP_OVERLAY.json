@@ -1,0 +1,33 @@
+{
+  "schema": "org-agent-mesh/experimental-bootstrap-overlay/v1",
+  "status": "EXPERIMENTAL_NOT_PRODUCTION",
+  "load_order": [
+    "canonical bootstrap and authority controls",
+    "registered project routing",
+    "registered internal message board and latest durable handoff",
+    "heartbeat/lease/fence state",
+    "this experimental overlay"
+  ],
+  "coordination": {
+    "read_first": "REGISTERED_INTERNAL_MESSAGE_BOARD",
+    "write_during_active_run": "REGISTERED_INTERNAL_MESSAGE_BOARD",
+    "github": "CODE_HISTORY_AND_VERIFIED_COMPLETED_BACKUP_RECOVERY_ONLY"
+  },
+  "warm_handoff": {
+    "states": ["WARM_HANDOFF_READY", "WARM_HANDOFF_ACCEPTED", "RECOVERY_REQUIRED"],
+    "context_transfers": true,
+    "authority_transfers": false,
+    "ownership_transfers": false,
+    "successor_requires_canonical_claim_lease_fence": true
+  },
+  "uncertainty": {
+    "consequential_unresolved_question": "HUMAN_DECISION_REQUIRED",
+    "dependent_mutation": "DENY",
+    "unrelated_safe_read_only_work": "ALLOW"
+  },
+  "capacity": {
+    "target_max_fraction": 0.8,
+    "example_20_gb_ceiling_gb": 16,
+    "do_not_assume_capacity_without_authoritative_telemetry": true
+  }
+}
