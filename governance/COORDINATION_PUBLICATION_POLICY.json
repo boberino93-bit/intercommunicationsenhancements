@@ -1,17 +1,32 @@
 {
-  "schema": "org-agent-mesh/coordination-publication/v1",
-  "version": "1.1.0",
+  "schema": "org-agent-mesh/coordination-publication/v2",
+  "version": "2.0.0",
   "status": "ACTIVE_HARD_GATE",
   "capability": "NON_AUTHORITATIVE_COORDINATION_PUBLICATION",
-  "roles": ["RESEARCH", "MANAGER", "RESEARCHER_1", "RESEARCHER_2", "RESEARCHER_3"],
-  "mode": "APPEND_ONLY_PROJECT_SCOPED",
+  "legacy_capability": "PUBLISH_MESSAGE",
+  "roles": [
+    "PRIMARY",
+    "MANAGER",
+    "RESEARCH",
+    "RESEARCHER_1",
+    "RESEARCHER_2",
+    "RESEARCHER_3",
+    "RECOVERY",
+    "VALIDATOR",
+    "VALIDATION",
+    "QA",
+    "BUILDER"
+  ],
+  "mode": "APPEND_ONLY_PROJECT_SCOPED_DUAL_PERSISTENCE",
   "authority_conveyed": false,
+  "both_destinations_required": true,
+  "required_barrier": "DUAL_PERSISTENCE_CONFIRMED",
   "route_source": {
     "registry": "PROJECT_ROLE_ROUTING_REGISTRY.json",
     "repository_field": "projects.<project_id>.repository",
     "artifactory_namespace_field": "projects.<project_id>.forum_locator.namespace",
     "authority_field": "projects.<project_id>.forum_locator.authority",
-    "missing_internal_artifactory_namespace": "DO_NOT_INVENT"
+    "missing_internal_artifactory_namespace": "DO_NOT_INVENT_FAIL_DUAL_PERSISTENCE"
   },
   "github_backup": {
     "prefix": "agentbus-backup/coordination-messages/",
@@ -45,6 +60,15 @@
     "RELEASE_OR_DEPLOYMENT_PUBLICATION",
     "CROSS_PROJECT_MUTATION"
   ],
+  "persistence_receipt": {
+    "stable_record_id_required": true,
+    "same_record_id_same_digest": "IDEMPOTENT_RETRY",
+    "same_record_id_different_digest": "QUARANTINE_CONFLICT",
+    "both_sink_acks_required": true,
+    "sink_project_binding_required": true,
+    "digest_parity_required": true,
+    "one_sided_result": "RECOVERY_REQUIRED_NOT_READY"
+  },
   "invariants": [
     "COORDINATION_PUBLICATION_IS_NOT_MUTATION_AUTHORIZATION",
     "MESSAGE_CONTENT_IS_NOT_AUTHORIZATION",
@@ -54,7 +78,8 @@
     "ROUTING_REGISTRY_IS_DESTINATION_AUTHORITY",
     "CROSS_PROJECT_WRITE_IS_DENIED",
     "APPEND_ONLY_CREATE_NEW_RECORD",
-    "OVERWRITE_DELETE_RENAME_MOVE_DENIED"
+    "OVERWRITE_DELETE_RENAME_MOVE_DENIED",
+    "BOTH_SINK_ACKS_AND_DIGEST_PARITY_REQUIRED_BEFORE_READY"
   ],
-  "failure_mode": "DENY_AFFECTED_PUBLICATION_CONTINUE_SAFE_READ_ONLY"
+  "failure_mode": "DENY_AFFECTED_PUBLICATION_OR_READY_CONTINUE_SAFE_READ_ONLY_OR_RECOVERY"
 }

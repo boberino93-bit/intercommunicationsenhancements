@@ -1,0 +1,153 @@
+{
+  "schema": "org-agent-mesh/dual-persistence-repair-package-manifest/v1",
+  "status": "LOCAL_VALIDATED_AWAITING_FRESH_AUTHORIZATION",
+  "repository": "boberino93-bit/intercommunicationsenhancements",
+  "main_expected": "d74b1057a0730263061b3e936da5d4aaa87b78d0",
+  "backup_ref": "backup/pre-dual-persistence-hardening-20261006",
+  "backup_expected": "d74b1057a0730263061b3e936da5d4aaa87b78d0",
+  "feature_ref": "feature/dual-persistence-hardening-v1-20261006",
+  "feature_head_expected": "a4158ab161b3a2c8ce82cf2cdb6c2fabd3809890",
+  "pull_request": 84,
+  "deterministic_files": [
+    {
+      "path": "UNIVERSAL_AGENT_ENTRYPOINT.md",
+      "sha256": "98f1a63444128252d9d1e75ba5e3b118b6e93de3e3f53fd5ee49f8d89f922622",
+      "bytes": 12225
+    },
+    {
+      "path": "governance/COORDINATION_PUBLICATION_POLICY.json",
+      "sha256": "b9b82d564abeedf7ca88b34051e92fbb2a067e5404298807eac57175752cc917",
+      "bytes": 2889
+    },
+    {
+      "path": "governance/DUAL_PERSISTENCE_HARDENING_TRANSACTION_20261006.json",
+      "sha256": "197f0a6f60032a44503d27922bad70d966f4771bef2f50d752eba1c0f5de4656",
+      "bytes": 2176
+    },
+    {
+      "path": "governance/DUAL_PERSISTENCE_POLICY.json",
+      "sha256": "6c79795bfbe40ce5ec57d7debfe569725501cc9dc9120541a8185efbabbf30c9",
+      "bytes": 2428
+    },
+    {
+      "path": "governance/MUTATION_AUTHORIZATION_POLICY.json",
+      "sha256": "85b8eaf9424f57c97774e7f34f66c78387a88f3a46697a0b8cb1316587479985",
+      "bytes": 5239
+    },
+    {
+      "path": "governance/STAGE15_PREFLIGHT_POLICY.json",
+      "sha256": "ad47a03858cb462be6dbd723932ed344ee1b54d8fb7ec7a253dd7348365e87c9",
+      "bytes": 2718
+    },
+    {
+      "path": "org_agent_mesh/coordination_publication.py",
+      "sha256": "60fbea9ea3c8e43fe3e9a84b1973a82eeb91ec341a9fbeec07ce9acd47672565",
+      "bytes": 4383
+    },
+    {
+      "path": "org_agent_mesh/dual_persistence.py",
+      "sha256": "fcf5f89116fb0c571aa8d045cb21a7860c418b75b50a7056a65e2c62f59e0394",
+      "bytes": 17878
+    },
+    {
+      "path": "org_agent_mesh/checkpoint_persistence.py",
+      "sha256": "58588cd7b31b1572c11b86b6927f837a8efab377858a27582b47a6aabf52adee",
+      "bytes": 2501
+    },
+    {
+      "path": "org_agent_mesh/stage15_preflight.py",
+      "sha256": "d235118c003533cd55d96db4b2235e1da088ad263b26199b8b522d23841bbb9d",
+      "bytes": 10852
+    },
+    {
+      "path": "protocols/completion_integrity.md",
+      "sha256": "c27b4cfab6979f376568a2532276abfda30292965b9efe475291361a883067c9",
+      "bytes": 3812
+    },
+    {
+      "path": "protocols/mutation_authorization.md",
+      "sha256": "c32b4e0fe9a4a6958bb99da027a512091753d9c4f2b101fd41c4c35139e280c1",
+      "bytes": 8507
+    },
+    {
+      "path": "protocols/non_authoritative_coordination_publication.md",
+      "sha256": "cff58e8f849bd058ba5af97dff54fee8060d5db3ed1ad7bcef14ad65acb95ec6",
+      "bytes": 2521
+    },
+    {
+      "path": "schemas/dual_persistence_receipt.schema.json",
+      "sha256": "ed81432ab6bd71215788182ca8e0035c0ce2aee46737a115983338a8b18a9f84",
+      "bytes": 2113
+    },
+    {
+      "path": "schemas/persistence_health.schema.json",
+      "sha256": "6ffd0f4589fbc6550ed77d7d16272d60cacf5c27edac4b26b246d7b83ef506bd",
+      "bytes": 1195
+    },
+    {
+      "path": "schemas/stage15_evidence.schema.json",
+      "sha256": "45062e01771be76dd8d56d9daf9040eb99a218bd0d7c4678c19c521c6c4be978",
+      "bytes": 1929
+    },
+    {
+      "path": "tests/test_checkpoint_persistence.py",
+      "sha256": "4f39a6fa05b6e0140248d2bdf996b7604cb10edfe78e2b179a303fcd16e3fe5a",
+      "bytes": 2693
+    },
+    {
+      "path": "tests/test_coordination_publication.py",
+      "sha256": "3c089050fc9cd63d926ba01a4d2ea65aae2e4c4effb6e8073f4aebdb12bba2b4",
+      "bytes": 4428
+    },
+    {
+      "path": "tests/test_dual_persistence.py",
+      "sha256": "03e1b441327f320f73bd03772e2440e1bae08e65af82680d2c78e843abdc560f",
+      "bytes": 3726
+    },
+    {
+      "path": "tests/test_dual_persistence_adversarial.py",
+      "sha256": "9e8d2ba57c03de512f6d613f9d739c9f1535728980dc00c874e4387d755f2305",
+      "bytes": 11598
+    },
+    {
+      "path": "tests/test_persistence_governance.py",
+      "sha256": "13fc3eeb792e1b5d8e8a8179f2fccebac7767b630e5c3067e3dcb5536b7d07a8",
+      "bytes": 5933
+    },
+    {
+      "path": "tests/test_persistence_schemas.py",
+      "sha256": "3d4bba4efe2bfb376b1b0d9325831f8b25a5e53711f5658b0bc00d3310401c97",
+      "bytes": 1868
+    },
+    {
+      "path": "tests/test_stage15_preflight.py",
+      "sha256": "9cbe53cacdd6042cf0f02db1c3f98540f04e5e048d9abab0c20e1cbc54119a40",
+      "bytes": 10246
+    }
+  ],
+  "dynamic_transaction_artifacts": [
+    "governance/DUAL_PERSISTENCE_REPAIR_TRANSACTION_20261006.json",
+    "governance/DUAL_PERSISTENCE_SECURITY_VALIDATION_REPAIR_20261006.json"
+  ],
+  "local_validation": {
+    "unittest_discovery": "102/102 PASS",
+    "adversarial_matrix": "35/35 PASS",
+    "compileall": "PASS",
+    "json_schema_draft_2020_12": "PASS"
+  },
+  "preservation_proofs": {
+    "UNIVERSAL_AGENT_ENTRYPOINT.md": "production blob reconstructed exactly: b5d53e6f2f95d28cca84f1cdea7815289213426a",
+    "protocols/mutation_authorization.md": "production blob reconstructed exactly: 3130c5fb60ced58e73ed0cde3702a698b47bda41",
+    "protocols/completion_integrity.md": "production blob source reconstructed exactly: 2691678be6b55876f4c9b6858ee51c75b9238797",
+    "org_agent_mesh/coordination_publication.py": "production blob reconstructed exactly: 3eacc847ae0251a1a79d0a0bc594eeedfc751d5e",
+    "org_agent_mesh/stage15_preflight.py": "production blob source reconstructed exactly: 7727e2ec7081c9ad5f9385c4e1bd998b2f02405f",
+    "governance/MUTATION_AUTHORIZATION_POLICY.json": "production blob reconstructed exactly after removing additive persistence exception: 91571ecee2077d9817eb60c4d4f96239ecbe86db"
+  },
+  "activation": {
+    "merge_to_main": false,
+    "schedule_enablement": false,
+    "stage15_launch": false,
+    "scaler_activation": false,
+    "peer_propagation": false
+  }
+}

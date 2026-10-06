@@ -1,68 +1,18 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "org-agent-mesh/stage15-evidence/v1",
-  "title": "Stage 15 Evidence Envelope",
-  "type": "object",
-  "required": [
-    "schema",
-    "global_run_id",
-    "stage_population",
-    "generated_at_utc",
-    "expected_projects",
-    "projects",
-    "contract_ready",
-    "preflight_ready",
-    "stage_passed",
-    "authority_conveyed",
-    "launch_authorized",
-    "blockers",
-    "evidence_digest"
-  ],
-  "properties": {
-    "schema": {"const": "org-agent-mesh/stage15-evidence/v1"},
-    "global_run_id": {"type": "string", "minLength": 1},
-    "stage_population": {"const": 15},
-    "generated_at_utc": {"type": "string", "minLength": 1},
-    "expected_projects": {
-      "type": "array",
-      "minItems": 7,
-      "maxItems": 7,
-      "uniqueItems": true,
-      "items": {"type": "string", "minLength": 1}
-    },
-    "projects": {
-      "type": "array",
-      "minItems": 7,
-      "maxItems": 7,
-      "items": {
-        "type": "object",
-        "required": ["project_id", "repository_identity", "source_revision", "capacity", "operations", "kernel_preflight_pass"],
-        "properties": {
-          "project_id": {"type": "string", "minLength": 1},
-          "repository_identity": {"type": "string", "minLength": 1},
-          "source_revision": {"type": "string", "minLength": 1},
-          "capacity": {
-            "type": "object",
-            "required": ["project_id", "repository_identity", "measured_at_utc", "overall_state", "capacity_admission"],
-            "properties": {
-              "capacity_admission": {"const": true}
-            }
-          },
-          "operations": {
-            "type": "object",
-            "required": ["project_id", "observed_project_id", "legacy_alias_used", "mesh_normalization_complete", "observed_at_utc"]
-          },
-          "kernel_preflight_pass": {"type": "boolean"}
-        }
-      }
-    },
-    "contract_ready": {"type": "boolean"},
-    "preflight_ready": {"type": "boolean"},
-    "stage_passed": {"const": false},
-    "authority_conveyed": {"const": false},
-    "launch_authorized": {"const": false},
-    "blockers": {"type": "array", "items": {"type": "string"}},
-    "evidence_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
-  },
-  "additionalProperties": false
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"org-agent-mesh/stage15-evidence/v2",
+  "title":"Stage 15 Evidence Envelope",
+  "type":"object",
+  "required":["schema","global_run_id","stage_population","generated_at_utc","expected_projects","projects","contract_ready","preflight_ready","stage_passed","authority_conveyed","launch_authorized","blockers","evidence_digest"],
+  "properties":{
+    "schema":{"const":"org-agent-mesh/stage15-evidence/v2"},"global_run_id":{"type":"string","minLength":1},"stage_population":{"const":15},"generated_at_utc":{"type":"string","format":"date-time"},
+    "expected_projects":{"type":"array","minItems":7,"maxItems":7,"uniqueItems":true,"items":{"type":"string","minLength":1}},
+    "projects":{"type":"array","minItems":7,"maxItems":7,"items":{"type":"object","required":["project_id","repository_identity","source_revision","capacity","operations","persistence","kernel_preflight_pass"],"properties":{
+      "project_id":{"type":"string","minLength":1},"repository_identity":{"type":"string","minLength":1},"source_revision":{"type":"string","minLength":1},
+      "capacity":{"type":"object","required":["project_id","repository_identity","measured_at_utc","overall_state","capacity_admission"],"properties":{"project_id":{"type":"string","minLength":1},"repository_identity":{"type":"string","minLength":1},"measured_at_utc":{"type":"string","format":"date-time"},"overall_state":{"type":"string","minLength":1},"capacity_admission":{"const":true}},"additionalProperties":true},
+      "operations":{"type":"object","required":["project_id","observed_project_id","legacy_alias_used","mesh_normalization_complete","observed_at_utc"],"properties":{"project_id":{"type":"string","minLength":1},"observed_project_id":{"type":"string","minLength":1},"legacy_alias_used":{"type":"boolean"},"mesh_normalization_complete":{"const":true},"observed_at_utc":{"type":"string","format":"date-time"}},"additionalProperties":true},
+      "persistence":{"type":"object","required":["schema","project_id","reconciled_at_utc","route_normalized","forum_verified","github_backup_verified","record_count","confirmed_count","single_sink_count","digest_mismatch_count","conflict_count","zero_loss","authority_conveyed"],"properties":{"schema":{"const":"org-agent-mesh/persistence-health/v1"},"project_id":{"type":"string","minLength":1},"reconciled_at_utc":{"type":"string","format":"date-time"},"route_normalized":{"const":true},"forum_verified":{"const":true},"github_backup_verified":{"const":true},"record_count":{"type":"integer","minimum":0},"confirmed_count":{"type":"integer","minimum":0},"single_sink_count":{"const":0},"digest_mismatch_count":{"const":0},"conflict_count":{"const":0},"zero_loss":{"const":true},"authority_conveyed":{"const":false}},"additionalProperties":false},
+      "kernel_preflight_pass":{"const":true}},"additionalProperties":false}},
+    "contract_ready":{"type":"boolean"},"preflight_ready":{"type":"boolean"},"stage_passed":{"const":false},"authority_conveyed":{"const":false},"launch_authorized":{"const":false},"blockers":{"type":"array","items":{"type":"string"}},"evidence_digest":{"type":"string","pattern":"^sha256:[0-9a-f]{64}$"}},
+  "additionalProperties":false
 }

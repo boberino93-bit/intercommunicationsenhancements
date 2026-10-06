@@ -1,0 +1,11 @@
+{
+  "schema":"org-agent-mesh/intercommunications-consolidation-manifest/v1","status":"CANDIDATE_NON_ACTIVATING","authority_conveyed":false,
+  "authorization":{"case_id":"AUTH-INTERCOMM-CONSOLIDATION-CANDIDATE-V1-52A9318269F2","proof_issue":86,"single_use":true},
+  "production_base":"d74b1057a0730263061b3e936da5d4aaa87b78d0","candidate_branch":"feature/intercommunications-consolidation-v1-20261006","rollback_ref":"backup/pre-dual-persistence-hardening-20261006",
+  "sources":{"pr84":"cc46ab0cddefc4c9eddb27267a93fb09dd64e73b","pr82":"21c67c7428a243ae015629003edf154d1f17da19","pr65":"8e6770dd2ab453e3a8eee7a613f403ff937736ec","pr28":"b513b9180cb929651de91a52faa8d8a805357f9c","pr14":"b24a1d3e48974a49a3f53aa53286aa907fe38088"},
+  "dispositions":{"pr84":"REBUILT_CORE_WITH_SCHEMA_AND_DEPENDENCY_REPAIRS","pr82":"REUSED_STAGED_DISABLED_PRIOR_AUTH_ARTIFACTS_OMITTED","pr65":"REUSED_STAGED_NOT_ACTIVE_PERSISTENCE_POLICY_GATED","pr28":"SUPERSEDED_BY_CANONICAL_TIMEOUT_RECOVERY","pr14":"RESEARCH_ANCESTRY_NOT_PROMOTED"},
+  "xrp_routing":{"canonical_project_id":"xrp-thesis","legacy_observation_alias":"xrpthesis","forum":"/XRPTHESIS-AgentBus/messages","github_backup_prefix":"agentbus-backup/coordination-messages/","single_sink_exception":false},
+  "safety":{"consequence_gateway_sole_protected_effect_boundary":true,"generic_primary_self_admission":false,"hybrid_enabled":false,"scaler_active":false,"stage15_launch_authorized":false,"scheduler_enable_authorized":false,"peer_propagation_authorized":false,"main_merge_authorized":false},
+  "validation":{"hosted_ci":"PENDING","exact_head_readback":"PENDING","full_suite":"PENDING","dual_persistence_adversarial":"PENDING","deterministic_packages":"PENDING"},
+  "cleanup":{"issues_or_prs_closed":false,"agentbus_mutated":false,"historical_branch_deletion_claimed":false}
+}

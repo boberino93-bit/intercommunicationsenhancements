@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "org-agent-mesh/priority-frontier/v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "snapshot_id", "registry_revision", "global_run_id", "generated_at", "expires_at", "entries", "input_digest", "authority_conveyed"],
+  "properties": {
+    "schema": {"const": "org-agent-mesh/priority-frontier/v2"},
+    "snapshot_id": {"type": "string", "minLength": 1},
+    "registry_revision": {"type": "string", "minLength": 1},
+    "global_run_id": {"type": "string", "minLength": 1},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "expires_at": {"type": "string", "format": "date-time"},
+    "input_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "authority_conveyed": {"const": false},
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["project_id", "source_revision", "priority_tier", "priority_provenance", "impact", "information_gain", "evidence_gap", "contradiction", "duplicate_risk", "manager_backpressure", "primary_backpressure", "candidate_roles", "candidate_lanes", "digest_hash"],
+        "properties": {
+          "project_id": {"type": "string", "minLength": 1},
+          "source_revision": {"type": "string", "minLength": 1},
+          "priority_tier": {"type": "integer", "minimum": 0, "maximum": 3},
+          "priority_provenance": {"enum": ["DERIVED", "ASSERTED", "HUMAN_SET", "POLICY_SET", "INCOMPLETE"]},
+          "impact": {"type": "number", "minimum": 0, "maximum": 1},
+          "information_gain": {"type": "number", "minimum": 0, "maximum": 1},
+          "evidence_gap": {"type": "number", "minimum": 0, "maximum": 1},
+          "contradiction": {"type": "number", "minimum": 0, "maximum": 1},
+          "duplicate_risk": {"type": "number", "minimum": 0, "maximum": 1},
+          "manager_backpressure": {"type": "number", "minimum": 0, "maximum": 1},
+          "primary_backpressure": {"type": "number", "minimum": 0, "maximum": 1},
+          "candidate_roles": {"type": "array", "items": {"enum": ["research", "manager"]}, "uniqueItems": true},
+          "candidate_lanes": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+          "digest_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "schema": "org-agent-mesh/security-validation-receipt-bundle/v1",
+  "transaction_id": "AUTH-DUAL-PERSISTENCE-REPAIR-V1-6834265ED8FC",
+  "subject_id": "global-swarm-dual-persistence-hardening-v1",
+  "issued_at": "2026-10-05T21:56:07-07:00",
+  "expires_at": "2026-10-05T22:11:07-07:00",
+  "receipts": [
+    {
+      "receipt_id": "SECVAL-DP-REPAIR-A-6834265ED8FC",
+      "path_id": "FORENSIC_REVIEW_A",
+      "subject_id": "global-swarm-dual-persistence-hardening-v1",
+      "transaction_id": "AUTH-DUAL-PERSISTENCE-REPAIR-V1-6834265ED8FC",
+      "verifier_ref": "project-library:file_00000000322081fd8d79d75fe9d2642f@version=1",
+      "review_name": "forensic_architecture_review_generic_capacity_admission.md",
+      "scope": "dual-persistence durability, append-chain scaling, partial-write failure semantics, and readiness gating",
+      "issued_at": "2026-10-05T21:56:07-07:00",
+      "expires_at": "2026-10-05T22:11:07-07:00",
+      "verified": true,
+      "consumed": false,
+      "bound_findings": [
+        "sharded audit intake required to avoid a global hot head",
+        "audit append failure must not create false readiness",
+        "PRIMARY remains non-schedulable and non-self-selectable"
+      ]
+    },
+    {
+      "receipt_id": "SECVAL-DP-REPAIR-B-6834265ED8FC",
+      "path_id": "SILOED_REVIEW_B",
+      "subject_id": "global-swarm-dual-persistence-hardening-v1",
+      "transaction_id": "AUTH-DUAL-PERSISTENCE-REPAIR-V1-6834265ED8FC",
+      "verifier_ref": "project-library:file_00000000ed5081fdb8c09884a37336ad@version=1",
+      "review_name": "independent_siloed_forensic_architecture_review.md",
+      "scope": "partial audit write recovery, durable receipt semantics, authority separation, and reconciliation",
+      "issued_at": "2026-10-05T21:56:07-07:00",
+      "expires_at": "2026-10-05T22:11:07-07:00",
+      "verified": true,
+      "consumed": false,
+      "bound_findings": [
+        "partial audit writes require explicit recovery semantics",
+        "audit evidence is not authorization",
+        "durable admission/audit receipts must be explainable and recoverable"
+      ]
+    }
+  ],
+  "distinct_receipt_ids": true,
+  "distinct_paths": true,
+  "authority_conveyed": false
+}
