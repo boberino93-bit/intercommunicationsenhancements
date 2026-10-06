@@ -1,0 +1,11 @@
+{
+  "schema": "org-agent-mesh/cross-project-change-intent/v1",
+  "change_id": "hybrid-admission-shadow-v2b-20261005",
+  "source_project": "intercommunicationsenhancements",
+  "status": "PENDING_NO_PROPAGATION",
+  "authorization_case": "AUTH-HYBRID-SHADOW-HARDENED-V2B-379F47DE59FC",
+  "source_acceptance_is_target_propagation": false,
+  "peer_mutation_authorized": false,
+  "future_target_adoption_requires_separate_authorization": true,
+  "current_behavior": "READ_ONLY_DISCOVERY_ONLY"
+}
