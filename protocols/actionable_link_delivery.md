@@ -1,6 +1,6 @@
 # Verified Actionable-Link Delivery Protocol
 
-Status: ACTIVE HARDENING CONTROL
+Status: ACTIVE HARD GATE
 Scope: UNIVERSAL / ALL PROJECTS / ALL PERSISTENT ROLES
 
 ## Purpose
@@ -15,7 +15,7 @@ A plausible-looking URL is not evidence that the target exists, is the right tar
 
 ## Default behavior
 
-When a human action is required, the agent SHOULD provide a direct deep link to the exact actionable surface by default rather than forcing the human to manually navigate from a repository root, dashboard, or generic landing page.
+When a human action is required, the agent MUST provide a direct deep link to the exact actionable surface by default rather than forcing the human to manually navigate from a repository root, dashboard, or generic landing page.
 
 When the agent creates, locates, or finishes a useful downloadable artifact for the human, it SHOULD proactively provide the direct verified download link without waiting for the human to ask for it. This applies to generated files, packages, reports, archives, exports, build artifacts, and other user-consumable deliverables when an accessible download surface exists.
 
@@ -94,3 +94,25 @@ A human-facing deliverable/action step is complete only when the agent has eithe
 
 - proactively provided the applicable `VERIFIED_DIRECT` or `VERIFIED_DOWNLOAD` link; or
 - transparently stated why direct verification/download exposure is unavailable and provided the safest bounded fallback.
+
+## Pre-mutation authorization-link gate
+
+For any durable mutation that requires current human authorization, actionable-link delivery is a universal pre-mutation bootstrap requirement, not an optional swarm-only overlay.
+
+The required state before authorization is `PRE_MUTATION_AUTHORIZATION_REQUIRED`.
+
+When a supported prefilled approval surface exists, the agent MUST:
+
+1. generate the current case ID and action-bound challenge/nonce reference;
+2. bind the target scope, mutation class, bounded scope or immutable digest, consequence class, action digest, issue time, expiry time, and expected revision when applicable;
+3. surface the case-specific approval link before waiting for the human response;
+4. prefill only non-secret case metadata;
+5. never embed passwords, bearer tokens, API keys, cookies, private keys, reusable credentials, secret security tokens, or equivalent authentication secrets in the URL;
+6. treat a non-secret nonce/challenge reference as a case-binding reference, not as a bearer credential;
+7. verify the human-produced canonical external proof before any durable write.
+
+If the exact action surface can be safely constructed but authenticated accessibility cannot be verified, the agent MUST disclose that verification is incomplete, classify the link as `UNVERIFIED_DIRECT`, and still surface the safe direct link. Verification uncertainty alone MUST NOT suppress a safe authorization link.
+
+Opening or rendering a link is not authorization. Link generation is not authorization. A human must perform the required external approval action.
+
+Raw connector/tool write capability is not mutation authority.
