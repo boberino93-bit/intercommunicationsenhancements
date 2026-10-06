@@ -1,0 +1,28 @@
+{
+  "schema": "org-agent-mesh/project-context-binding-policy/v1",
+  "version": "1.0.0",
+  "status": "ACTIVE_HARD_GATE",
+  "host_project_context": {
+    "when_available": "REQUIRED_STRONG_EVIDENCE",
+    "binding_mode": "HARD_BIND_BEFORE_TASK_INTERPRETATION",
+    "task_text_may_override": false,
+    "conversation_history_may_override": false,
+    "recent_repository_may_override": false,
+    "handoff_recency_may_override": false,
+    "explicit_structured_project_switch": "FAIL_CLOSED_REBIND_REQUIRED"
+  },
+  "required_before_task_interpretation": [
+    "resolve_host_project_to_registered_project_id",
+    "verify_repository_identity",
+    "load_local_AGENT_BOOTSTRAP",
+    "load_local_AGENT_CONTEXT_REFERENCE",
+    "load_project_identity_lock_when_present",
+    "load_master_handoff_and_authoritative_internal_message_route",
+    "emit_project_context_bound_receipt"
+  ],
+  "project_bound_worker_rule": "A_WORKER_LAUNCHED_IN_A_PROJECT_STAYS_BOUND_TO_THAT_PROJECT_UNLESS_A_DELIBERATE_REBIND_OCCURS",
+  "generic_unbound_role_rule": "ROLELESS_DEMAND_DRIVEN_ADMISSION",
+  "generic_unbound_primary_default": false,
+  "failure_mode": "NO_TASK_EXECUTION_OR_MUTATION_UNTIL_CONTEXT_BOUND",
+  "authority_semantics": "PROJECT_CONTEXT_BINDS_SCOPE_BUT_DOES_NOT_GRANT_PROTECTED_MUTATION_AUTHORITY"
+}

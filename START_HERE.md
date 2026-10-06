@@ -2,54 +2,58 @@
 
 This repository hardens the Organization Agent Mesh for simultaneous unrelated projects.
 
-## Universal launch path
+## First decision: project-bound or unbound
 
-An agent launched **outside any project** must begin at `UNIVERSAL_AGENT_ENTRYPOINT.md`, not by guessing a project from the task topic. The universal layer stays read-only while it resolves exactly one registered project, can consult registered forum/handoff metadata only for exact ownership identifiers, then verifies the target project's local contract and enters that project's normal bootstrap.
+A worker launched **inside a ChatGPT Project is already project-bound for routing purposes**. It MUST run `protocols/project_context_binding.md` and `org_agent_mesh.project_context_binding` before task interpretation. Do not send a project-bound worker through fuzzy/unbound discovery first.
 
-The machine-readable anchor is `GLOBAL_AGENT_ENTRYPOINT.json`; the detailed protocol is `protocols/universal_task_routing.md`.
+A worker launched **outside every project**, or one for which the host project cannot be verified, starts at `UNIVERSAL_AGENT_ENTRYPOINT.md` and remains read-only until exactly one project is resolved.
 
-## Bootstrap order
+## Project-bound bootstrap order
 
-For an already project-bound agent:
+For a worker launched inside a project:
 
-1. Validate current human project intent.
-2. Validate `PROJECT_IDENTITY_LOCK.json`.
-3. Validate the package manifest/project/repository/source identity.
-4. Bind one immutable execution instance and its declared capability set.
-5. Initialize and become `ACTIVE` before any mutation.
-6. Only then load handoffs, queues, forums and accepted state.
-7. Classify the incoming work through `protocols/task_intake_and_delegation.md` before project mutation.
-8. Execute only inside the validated project/task/delegation boundaries.
+1. Resolve the exact host ChatGPT Project through `governance/PROJECT_CONTEXT_BINDING_REGISTRY.json`.
+2. Bind the project ID, registered repository, canonical internal AgentBus/Artifactory message namespace, artifact namespace, and local bootstrap path.
+3. Load the target project's `AGENT_BOOTSTRAP.json`.
+4. Load the target project's `AGENT_CONTEXT_REFERENCE.md` **before interpreting the task**.
+5. Validate the local project identity lock when present.
+6. Load the current master handoff and authoritative internal coordination state.
+7. Enter explicit-role validation or roleless demand-driven admission.
+8. Classify and execute the task only after the project-context READY barrier passes.
+
+Task topic, recent conversation history, recently accessed repositories, stale handoffs, or neighboring project state may not override the verified host project context. A real project switch requires a deliberate rebind/new launch.
+
+## Role rule
+
+A generic human-launched worker does **not** default to PRIMARY. If no role is explicitly and validly assigned, use roleless demand-driven admission. PRIMARY may not be self-selected from generic project context.
+
+## Coordination authority
+
+Internal project AgentBus/Artifactory state is the canonical coordination/message-board surface. GitHub is downstream source/version control and backup. Routine project-bound append-only coordination messages may use the narrow token-free publication lane; workflow runs or workflow changes, approvals/reviews, releases, deployments, destructive operations, branch creation, and cross-project writes remain outside that lane.
+
+XRP follows the same rule: `/XRPTHESIS-AgentBus/messages` is canonical internal coordination; `boberino93-bit/XRPTHESIS` is downstream source/backup.
 
 ## Task entry and routing
 
-Every agent must distinguish the kind of work it has received before acting:
+After project binding and role admission, classify the request through `protocols/task_intake_and_delegation.md`:
 
-- `EXISTING_PROJECT_TASK`: continue only after loading the validated project's accepted state, handoffs, queues and applicable task/delegation scope.
-- `NEW_PROJECT_BOOTSTRAP`: do **not** write the new project's state into this framework project or any unrelated project. Establish a distinct project identity, repository/workspace boundary and project-scoped coordination/recovery state first; then define the problem, source-of-truth hierarchy, workstreams and research-assistance decision.
-- `CROSS_PROJECT_EXCHANGE`: use the explicit approved cross-project exchange contract; ordinary internal messaging is not a bridge.
-- `FRAMEWORK_MAINTENANCE`: changes to this reusable framework remain framework-scoped and must not absorb instance-specific project state.
-- `AMBIGUOUS_PROJECT`: fail closed on mutation until the target project identity is resolved.
+- `EXISTING_PROJECT_TASK`: continue only after loading the validated project's accepted state, handoffs, queues, and applicable task/delegation scope.
+- `NEW_PROJECT_BOOTSTRAP`: establish a distinct project identity and project-local coordination/recovery boundary first; do not write the new project's state into this or another existing project.
+- `CROSS_PROJECT_EXCHANGE`: use the explicit cross-project exchange contract; ordinary internal messaging is not a bridge.
+- `FRAMEWORK_MAINTENANCE`: keep reusable framework changes framework-scoped.
+- `AMBIGUOUS_PROJECT`: fail closed on project work until identity is resolved.
 
-A user instruction naming a target project or explicitly asking for a new project is intent evidence, not permission to bypass identity, capability, isolation or write-boundary checks.
+Project binding establishes scope, not protected mutation authority. Protected effects continue through their existing authorization gates.
 
-## Primary intake responsibility
+## Current invariants
 
-For a new project or materially new workstream, Primary must persist a task intake record before risky implementation. The intake defines the problem and source-of-truth hierarchy first, decomposes actual technical/work domains, records risk and uncertainty, determines whether research assistance is justified, and records the proposed Research/Manager topology. Delegated work must use explicit delegation contracts with scope, sources, tools, write boundaries, evidence requirements, output contract, completion condition and failure condition.
+- Host project context is a hard routing boundary when available.
+- Local context is loaded before task interpretation.
+- Generic workers do not default to PRIMARY.
+- Internal AgentBus/Artifactory is canonical coordination; GitHub is downstream.
+- Cross-project writes are denied by default.
+- Children retain the same project binding unless deliberately relaunched/rebound.
+- Task, lease, artifact, and state mutations remain project-scoped and version/ownership protected.
+- A child never infers expanded task scope from conversation context.
 
-Research findings, hypotheses and implementation authority remain distinct. Adaptive sizing or experimental policy may inform a Primary decision, but never grants spawn or mutation authority by itself.
-
-## Current alpha invariants
-
-- Unbound agents may read routing metadata but cannot mutate any project.
-- A generic human-launched task agent defaults to the target project's `primary` workflow only after one project is resolved; the target project must still authorize and activate that role.
-- Caller-supplied project IDs are untrusted; bound session identity authorizes mutation.
-- Invalid canonical IDs are rejected rather than rewritten into ambiguous aliases.
-- Internal messages require matching projects and bound sender identity.
-- Cross-project exchange uses its own approved capability-gated contract.
-- Children inherit project identity and may only retain or reduce capabilities.
-- Task/lease/artifact/state mutations are project-scoped and version/ownership protected.
-- PRIMARY, MANAGER and RESEARCH packages are dependency-closed, exact-SHA traceable, component-hashed and reproducible.
-- A child never infers expanded task scope from conversation context; scope changes return to Primary for authorization.
-
-Run `python tests/run_all.py` for tests. Build with `python tools/build_agent_packages.py --source-revision <commit> --out dist`, validate with `python tools/verify_agent_packages.py`, independently rebuild to another directory, then compare with `python tools/check_reproducible_packages.py dist <other-dir>`.
+Run `python tests/run_all.py` for the full test suite. Build with `python tools/build_agent_packages.py --source-revision <commit> --out dist`, validate with `python tools/verify_agent_packages.py`, independently rebuild to another directory, then compare with `python tools/check_reproducible_packages.py dist <other-dir>`.

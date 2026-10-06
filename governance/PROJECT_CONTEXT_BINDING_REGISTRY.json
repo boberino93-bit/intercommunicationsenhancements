@@ -1,0 +1,25 @@
+{
+  "schema": "org-agent-mesh/project-context-binding-registry/v1",
+  "version": "1.0.0",
+  "status": "ACTIVE_HARD_GATE",
+  "mode": "FAIL_CLOSED_PROJECT_BOUND",
+  "semantics": {
+    "host_chat_project_when_available": "HARD_BIND_BEFORE_TASK_INTERPRETATION",
+    "task_text_may_rebind_project": false,
+    "conversation_history_may_rebind_project": false,
+    "recent_repository_may_rebind_project": false,
+    "explicit_project_switch_requires_rebind": true,
+    "binding_grants_protected_mutation_authority": false,
+    "internal_coordination_is_canonical": true,
+    "github_is_downstream_source_and_backup": true
+  },
+  "projects": {
+    "intercommunicationsenhancements": {"chat_project":"Intercommunication enhancements","repository":"boberino93-bit/intercommunicationsenhancements","repository_id":1403662737,"forum_authority":"INTERNAL_ARTIFACTORY","forum_namespace":"intercommunicationsenhancements::messages","artifact_namespace":"intercommunicationsenhancements::artifacts","local_contract_path":"AGENT_BOOTSTRAP.json","context_reference_path":"AGENT_CONTEXT_REFERENCE.md"},
+    "duo-open": {"chat_project":"Duo Screen","repository":"boberino93-bit/duo-open","repository_id":1396743140,"forum_authority":"INTERNAL_ARTIFACTORY","forum_namespace":"/DuoOpen-AgentBus/messages","artifact_namespace":"/DuoOpen-AgentBus/artifacts","local_contract_path":"AGENT_BOOTSTRAP.json","context_reference_path":"AGENT_CONTEXT_REFERENCE.md"},
+    "benefitflow": {"chat_project":"Benefitflow","repository":"boberino93-bit/benefitflow","repository_id":1403645790,"forum_authority":"INTERNAL_ARTIFACTORY","forum_namespace":"BenefitFlow-AgentBus/forum/","artifact_namespace":"BenefitFlow-AgentBus/artifactory/","local_contract_path":"AGENT_BOOTSTRAP.json","context_reference_path":"AGENT_CONTEXT_REFERENCE.md"},
+    "fold7-power-lab": {"chat_project":"Samsung power bootstrap","repository":"boberino93-bit/samsungpowerbootstrap","repository_id":1404088763,"forum_authority":"INTERNAL_ARTIFACTORY","forum_namespace":"/Fold7-PowerLab-AgentBus/messages","artifact_namespace":"/Fold7-PowerLab-AgentBus/artifacts","local_contract_path":"AGENT_BOOTSTRAP.json","context_reference_path":"AGENT_CONTEXT_REFERENCE.md"},
+    "warp-propulsion-lab": {"chat_project":"Warp-Propulsion-lab","repository":"boberino93-bit/warp-propulsion-lab","repository_id":1372658198,"forum_authority":"INTERNAL_ARTIFACTORY","forum_namespace":"/Warp-Propulsion-AgentBus/messages","artifact_namespace":"/Warp-Propulsion-AgentBus/artifacts","local_contract_path":"AGENT_BOOTSTRAP.json","context_reference_path":"AGENT_CONTEXT_REFERENCE.md"},
+    "ai-behaviour-control-lab": {"chat_project":"Ai Behavior Control Lab","repository":"boberino93-bit/ai-behaviour-control-lab","repository_id":1375194437,"forum_authority":"INTERNAL_ARTIFACTORY","forum_namespace":"/AI-Behaviour-Control-Lab-AgentBus/messages","artifact_namespace":"/AI-Behaviour-Control-Lab-AgentBus/artifacts","local_contract_path":"AGENT_BOOTSTRAP.json","context_reference_path":"AGENT_CONTEXT_REFERENCE.md"},
+    "xrp-thesis": {"chat_project":"Xrp analysis","repository":"boberino93-bit/XRPTHESIS","repository_id":1405663336,"forum_authority":"INTERNAL_ARTIFACTORY","forum_namespace":"/XRPTHESIS-AgentBus/messages","artifact_namespace":"/XRPTHESIS-AgentBus/artifacts","local_contract_path":"AGENT_BOOTSTRAP.json","context_reference_path":"AGENT_CONTEXT_REFERENCE.md"}
+  }
+}

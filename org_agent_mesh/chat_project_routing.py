@@ -13,12 +13,29 @@ DEFAULT_CHAT_PROJECT_MAPPING = {
     "fold7-power-lab": "Samsung power bootstrap",
     "warp-propulsion-lab": "Warp-Propulsion-lab",
     "ai-behaviour-control-lab": "Ai Behavior Control Lab",
+    "xrp-thesis": "Xrp analysis",
 }
 
 
-class ChatProjectAdapter(Protocol):
-    """Host adapter; implement with a supported ChatGPT Project API or UI automation."""
+class ChatProjectRoutingError(ValueError):
+    pass
 
+
+def _normalize_project_name(value: str) -> str:
+    if not isinstance(value, str) or not value.strip():
+        raise ChatProjectRoutingError("chat project name is required")
+    return " ".join(value.casefold().split())
+
+
+def project_id_for_chat_project(project_name: str, mapping: Mapping[str, str] | None = None) -> str:
+    normalized = _normalize_project_name(project_name)
+    matches = [pid for pid, name in dict(mapping or DEFAULT_CHAT_PROJECT_MAPPING).items() if _normalize_project_name(name) == normalized]
+    if len(matches) != 1:
+        raise ChatProjectRoutingError("chat project context is unknown or ambiguous")
+    return require_project_id(matches[0])
+
+
+class ChatProjectAdapter(Protocol):
     def supports_direct_create(self) -> bool: ...
     def create_conversation(self, *, title: str, project: Optional[str]) -> str: ...
     def move_conversation(self, *, conversation_id: str, project: str) -> None: ...
@@ -37,101 +54,47 @@ class ProjectAssignmentResult:
 
 
 class ChatProjectRouter:
-    """Fail-closed ChatGPT sidebar Project placement with post-action verification."""
-
-    def __init__(
-        self,
-        adapter: ChatProjectAdapter,
-        mapping: Mapping[str, str] | None = None,
-        *,
-        max_move_attempts: int = 3,
-    ):
+    def __init__(self, adapter: ChatProjectAdapter, mapping: Mapping[str, str] | None = None, *, max_move_attempts: int = 3):
         self.adapter = adapter
         self.mapping = dict(mapping or DEFAULT_CHAT_PROJECT_MAPPING)
         if max_move_attempts < 1:
             raise ValueError("max_move_attempts must be >= 1")
         self.max_move_attempts = max_move_attempts
 
-    def assign(
-        self,
-        *,
-        agent_id: str,
-        agent_type: str,
-        project_id: Optional[str],
-        title: str,
-        roaming: bool = False,
-        conversation_id: Optional[str] = None,
-    ) -> ProjectAssignmentResult:
+    def assign(self, *, agent_id: str, agent_type: str, project_id: Optional[str], title: str, roaming: bool = False, conversation_id: Optional[str] = None) -> ProjectAssignmentResult:
         agent_id = require_resource_id(agent_id, field="agent_id")
         agent_type = agent_type.strip().lower()
-
         if roaming or agent_type == "master":
             if project_id is not None:
-                return ProjectAssignmentResult(
-                    "FAIL", agent_id, conversation_id, None, None, "none",
-                    "roaming/master agent must not be project-bound",
-                )
+                return ProjectAssignmentResult("FAIL", agent_id, conversation_id, None, None, "none", "roaming/master agent must not be project-bound")
             if conversation_id is None:
                 conversation_id = self.adapter.create_conversation(title=title, project=None)
             detected = self.adapter.detect_project(conversation_id=conversation_id)
             if detected is not None:
-                return ProjectAssignmentResult(
-                    "FAIL", agent_id, conversation_id, None, detected, "verify",
-                    "Master/global conversation is unexpectedly attached to a project",
-                )
-            return ProjectAssignmentResult(
-                "SKIPPED", agent_id, conversation_id, None, None, "global",
-                "Global roaming agent; no ChatGPT Project assignment",
-            )
-
+                return ProjectAssignmentResult("FAIL", agent_id, conversation_id, None, detected, "verify", "Master/global conversation is unexpectedly attached to a project")
+            return ProjectAssignmentResult("SKIPPED", agent_id, conversation_id, None, None, "global", "Global roaming agent; no ChatGPT Project assignment")
         if project_id is None:
-            return ProjectAssignmentResult(
-                "FAIL", agent_id, conversation_id, None, None, "none",
-                "No configured project_id; conversation left unchanged",
-            )
+            return ProjectAssignmentResult("FAIL", agent_id, conversation_id, None, None, "none", "No configured project_id; conversation left unchanged")
         project_id = require_project_id(project_id)
         expected = self.mapping.get(project_id)
         if expected is None:
-            return ProjectAssignmentResult(
-                "FAIL", agent_id, conversation_id, None, None, "none",
-                "No configured ChatGPT Project mapping; conversation left unchanged",
-            )
-
+            return ProjectAssignmentResult("FAIL", agent_id, conversation_id, None, None, "none", "No configured ChatGPT Project mapping; conversation left unchanged")
         if conversation_id is not None:
             detected = self.adapter.detect_project(conversation_id=conversation_id)
             if detected == expected:
-                return ProjectAssignmentResult(
-                    "OK", agent_id, conversation_id, expected, detected, "already-assigned",
-                    "Conversation already belongs to the expected project",
-                )
-
+                return ProjectAssignmentResult("OK", agent_id, conversation_id, expected, detected, "already-assigned", "Conversation already belongs to the expected project")
         if conversation_id is None and self.adapter.supports_direct_create():
             conversation_id = self.adapter.create_conversation(title=title, project=expected)
             detected = self.adapter.detect_project(conversation_id=conversation_id)
             if detected == expected:
-                return ProjectAssignmentResult(
-                    "OK", agent_id, conversation_id, expected, detected, "direct-create",
-                    "ChatGPT Project assignment verified",
-                )
-            return ProjectAssignmentResult(
-                "FAIL", agent_id, conversation_id, expected, detected, "direct-create",
-                "Direct create returned but project verification failed",
-            )
-
+                return ProjectAssignmentResult("OK", agent_id, conversation_id, expected, detected, "direct-create", "ChatGPT Project assignment verified")
+            return ProjectAssignmentResult("FAIL", agent_id, conversation_id, expected, detected, "direct-create", "Direct create returned but project verification failed")
         if conversation_id is None:
             conversation_id = self.adapter.create_conversation(title=title, project=None)
-
         detected = self.adapter.detect_project(conversation_id=conversation_id)
         for _ in range(self.max_move_attempts):
             if detected == expected:
-                return ProjectAssignmentResult(
-                    "OK", agent_id, conversation_id, expected, detected, "move",
-                    "ChatGPT Project assignment verified",
-                )
+                return ProjectAssignmentResult("OK", agent_id, conversation_id, expected, detected, "move", "ChatGPT Project assignment verified")
             self.adapter.move_conversation(conversation_id=conversation_id, project=expected)
             detected = self.adapter.detect_project(conversation_id=conversation_id)
-
-        return ProjectAssignmentResult(
-            "FAIL", agent_id, conversation_id, expected, detected, "move",
-            "Project placement could not be verified after bounded retries",
-        )
+        return ProjectAssignmentResult("FAIL", agent_id, conversation_id, expected, detected, "move", "Project placement could not be verified after bounded retries")
