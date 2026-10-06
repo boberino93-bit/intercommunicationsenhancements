@@ -31,8 +31,8 @@ def expected_components(role):
         components.add(rel)
     return sorted(components)
 
-EXPECTED_REVISION=checked_out_revision(); EXPECTED_DEPENDENCY_HASH=digest_file(DEPENDENCY_MAP_PATH); EXPECTED_PREFIX=["validate_current_human_project_intent","load_and_validate_project_identity_lock"]
-if [step.get("id") for step in BOOTSTRAP.get("steps",[])][:2] != EXPECTED_PREFIX: errors.append("repository bootstrap order is not identity-first")
+EXPECTED_REVISION=checked_out_revision(); EXPECTED_DEPENDENCY_HASH=digest_file(DEPENDENCY_MAP_PATH); EXPECTED_PREFIX=["bind_host_chat_project_context_before_all_other_bootstrap","validate_current_human_project_intent","load_and_validate_project_identity_lock"]
+if [step.get("id") for step in BOOTSTRAP.get("steps",[])][:3] != EXPECTED_PREFIX: errors.append("repository bootstrap order is not identity-first")
 if DEPENDENCY_MAP.get("schema") != "org-agent-mesh/package-dependency-map/v1": errors.append("unsupported package dependency map schema")
 seen_roles=set(); source_revisions=set(); package_hashes={}
 for path in packages:
@@ -70,7 +70,7 @@ for path in packages:
                 if actual_hash != digest_file(ROOT/rel): raise ValueError(f"packaged component drifts from repository source: {rel}")
             packaged_identity=json.loads(archive.read(manifest["identity_lock_path"]))
             if packaged_identity["mode"]!="FAIL_CLOSED" or packaged_identity["project_id"]!=PROJECT["project_id"] or packaged_identity["writable_repository"]!=PROJECT["repository_identity"] or packaged_identity["coordination_root"]!=IDENTITY["coordination_root"]: raise ValueError("packaged identity lock mismatch")
-            packaged_bootstrap=json.loads(archive.read(manifest["bootstrap_order_path"])); prefix=[step.get("id") for step in packaged_bootstrap.get("steps",[])][:2]
+            packaged_bootstrap=json.loads(archive.read(manifest["bootstrap_order_path"])); prefix=[step.get("id") for step in packaged_bootstrap.get("steps",[])][:3]
             if prefix != EXPECTED_PREFIX: raise ValueError("packaged bootstrap order is not identity-first")
             expected_filename=f"{PROJECT['project_id']}-{role.lower()}-{PROJECT['framework_version']}.zip"
             if path.name != expected_filename: raise ValueError(f"unexpected package filename: {path.name!r} != {expected_filename!r}")
