@@ -44,7 +44,7 @@ class CoordinationAndTelemetryTests(unittest.TestCase):
     def test_broadcast_runtime_matches_schema(self):
         schema = json.loads((ROOT / "schemas/research_epistemic_broadcast.schema.json").read_text())
         broadcast = ResearchBroadcast("m", "p", "DISCOVERY_BROADCAST", "RESEARCH", "agent-1", "finding", ("s",), ("i",), (1, 3), claims_affected=("c",), confidence=80)
-        Draft202012Validator(schema).validate(broadcast.to_payload())
+        validate_json_schema(schema, broadcast.to_payload())
 
     def test_broadcast_never_authority(self):
         with self.assertRaises(AuthorityError): ResearchBroadcast("m", "p", "DISCOVERY_BROADCAST", "RESEARCH", "a", "x", authority_conveyed=True)
