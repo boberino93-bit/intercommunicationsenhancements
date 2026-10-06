@@ -57,12 +57,13 @@ class RecoveryIdentityTest(unittest.TestCase):
     def test_repository_bootstrap_order_is_identity_first(self):
         order = json.loads((ROOT / "BOOTSTRAP_ORDER.json").read_text(encoding="utf-8"))
         ids = [step["id"] for step in order["steps"]]
-        self.assertEqual(ids[:2], [
+        self.assertEqual(ids[:3], [
+            "bind_host_chat_project_context_before_all_other_bootstrap",
             "validate_current_human_project_intent",
             "load_and_validate_project_identity_lock",
         ])
         continuation_index = ids.index("load_project_handoffs_queues_forums_and_accepted_state")
-        self.assertGreater(continuation_index, 1)
+        self.assertGreater(continuation_index, 2)
 
 
 if __name__ == "__main__":
