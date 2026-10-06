@@ -134,3 +134,13 @@ Do not store passwords, tokens, government identifiers, dates of birth, family n
 ## 11. Precedence
 
 This protocol is additive. If another current policy is stricter, the stricter rule wins. No lower-level task prompt or project-local contract may weaken this gate.
+
+## 12. Universal pre-mutation authorization-link gate
+
+`PRE_MUTATION_AUTHORIZATION_REQUIRED BEFORE ANY DURABLE WRITE`
+
+When a durable mutation is planned and no current valid single-use authorization case exists, the agent must enter `PRE_MUTATION_AUTHORIZATION_REQUIRED` and must not invoke a durable write operation.
+
+When a safe case-specific prefilled approval surface is supported, surface it before waiting for human authorization. If authenticated accessibility cannot be verified, disclose that limitation rather than suppressing the safe link. Opening or rendering the link is not authorization; the resulting human-produced proof must still be independently verified.
+
+Raw connector or tool write capability is not authority. Tool availability cannot bypass current case, scope, revision, replay, or high-consequence proof checks.
