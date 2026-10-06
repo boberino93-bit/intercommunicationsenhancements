@@ -98,6 +98,46 @@ class ProjectContextBindingTests(unittest.TestCase):
                     text,
                 )
 
+    def test_machine_bootstrap_makes_project_context_step_zero_and_guards_execution(self):
+        bootstrap = json.loads((ROOT / "BOOTSTRAP_ORDER.json").read_text())
+        self.assertEqual(bootstrap["schema"], "org-agent-mesh/bootstrap-order/v7")
+        contract = bootstrap["project_context_binding_contract"]
+        self.assertTrue(
+            contract["required_before_every_other_bootstrap_step_when_host_context_available"]
+        )
+        self.assertFalse(contract["task_text_may_override_host_context"])
+        self.assertTrue(
+            contract[
+                "ready_barrier_required_before_role_admission_task_interpretation_handoff_execution_or_mutation_evaluation"
+            ]
+        )
+
+        steps = {step["id"]: step for step in bootstrap["steps"]}
+        gate = steps["bind_host_chat_project_context_before_all_other_bootstrap"]
+        self.assertEqual(gate["order"], 0)
+        self.assertEqual(gate["task_text_override"], "DENY")
+        self.assertEqual(
+            gate["unbound_fallback"],
+            "ONLY_IF_HOST_CONTEXT_UNAVAILABLE_OR_UNVERIFIABLE",
+        )
+        self.assertFalse(gate["mutation_allowed"])
+
+        self.assertTrue(
+            steps["classify_task_and_bind_work_context"]["project_context_ready_required"]
+        )
+        self.assertTrue(
+            steps["evaluate_current_mutation_authorization_envelope"][
+                "project_context_ready_required"
+            ]
+        )
+        for step_id in (
+            "bind_global_run_role_instance_and_ready_barrier_if_swarm",
+            "execute_task_with_autonomous_continuation_and_per_mutation_scope_validation",
+            "persist_learning_checkpoint_and_handoff",
+            "checkpoint_master_handoff_after_material_transition_or_before_yield",
+        ):
+            self.assertIn("project_context_ready", steps[step_id]["additional_guards"])
+
 
 if __name__ == "__main__":
     unittest.main()
