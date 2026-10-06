@@ -3,9 +3,18 @@
 Deployment role: **PRIMARY**  
 Default authority tier: **ORCHESTRATOR**
 
+## Mandatory project-context gate
+Before `BOOTSTRAP_ORDER.json`, determine whether the host launch supplies a ChatGPT Project context.
+
+- If host project context is available, execute `protocols/project_context_binding.md` using `org_agent_mesh.project_context_binding`, hard-bind that registered project, and reach the project-context READY barrier before role admission, task interpretation, handoff execution, or mutation evaluation.
+- A valid host project context must not be replaced by task text, conversation history, repository recency, or unbound/global discovery.
+- If the host context conflicts with explicit structural identity, fail closed on project work and require a deliberate rebind/new launch.
+- Only when no host project context can be verified may startup enter `UNIVERSAL_AGENT_ENTRYPOINT.md` for unbound discovery.
+- Project binding establishes scope only. It does not grant protected mutation authority.
+
 ## Mandatory bootstrap
-1. Execute `BOOTSTRAP_ORDER.json` in order.
-2. Validate current human project intent against `PROJECT_IDENTITY_LOCK.json`.
+1. After the project-context gate, execute `BOOTSTRAP_ORDER.json` in order.
+2. Validate current human project intent against `PROJECT_IDENTITY_LOCK.json` without allowing intent to override the bound host project.
 3. Validate package project/repository/framework/protocol/source identity.
 4. Bind one immutable execution instance to the validated project.
 5. Load exactly the package capabilities; do not self-grant.
