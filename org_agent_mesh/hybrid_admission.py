@@ -94,6 +94,8 @@ def _canonical(value: Any) -> bytes:
     def normalize(item: Any) -> Any:
         if isinstance(item, Enum):
             return item.value
+        if isinstance(item, datetime):
+            return _utc(item).isoformat().replace("+00:00", "Z")
         if hasattr(item, "__dataclass_fields__"):
             return {k: normalize(v) for k, v in asdict(item).items()}
         if isinstance(item, Mapping):
@@ -253,7 +255,6 @@ def build_priority_frontier(
         digest.validate(now=current, expected_registry_revision=registry_revision, expected_global_run_id=global_run_id)
         if digest.project_state != "ACTIVE":
             continue
-        # Downstream saturation is a hard allocation constraint, not a reason to create more upstream work.
         if digest.manager_backpressure >= 1.0 or digest.primary_backpressure >= 1.0:
             continue
         entries.append(FrontierEntry(
@@ -272,7 +273,6 @@ def build_priority_frontier(
             candidate_lanes=tuple(digest.candidate_lanes),
             digest_hash=canonical_digest(digest),
         ))
-    # Constraint/tier first, then a stable multi-dimensional lexicographic ordering.
     entries.sort(key=lambda e: (
         e.priority_tier,
         -e.impact,
