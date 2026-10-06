@@ -1,7 +1,7 @@
 # Project Context Binding Protocol
 
 Status: **ACTIVE HARD GATE**  
-Version: **1.0.0**
+Version: **1.1.0**
 
 ## Purpose
 
@@ -27,9 +27,21 @@ The required acknowledgement is:
 
 `PROJECT CONTEXT BOUND: project=<project_id>; chat_project=<host project>; repository=<repository>; forum=<internal namespace>; task_interpretation_allowed=true; mutation_authority=false`
 
+## Child/worker launch envelope
+
+Parents, dispatchers, and scalers that create project-bound workers SHOULD render the canonical machine block with `render_project_launch_context(...)` and include it in the worker instruction:
+
+`ORG_AGENT_MESH_PROJECT_CONTEXT_BINDING`
+
+`<canonical JSON + context_fingerprint>`
+
+`END_ORG_AGENT_MESH_PROJECT_CONTEXT_BINDING`
+
+The child parses that block with `parse_project_launch_context(...)` before task interpretation and revalidates it against the binding registry. A changed repository, forum, project, artifact namespace, or context path invalidates the fingerprint or registry comparison and fails closed. The fingerprint is an integrity checksum, not mutation authorization.
+
 ## Precedence
 
-For a project-bound worker, the verified host project context wins over task-topic similarity, conversation history, recently accessed repositories, stale handoffs, and neighboring project state. Those sources may provide read-only evidence after binding but may not silently rebind the worker.
+For a project-bound worker, the verified host project context or verified launch envelope wins over task-topic similarity, conversation history, recently accessed repositories, stale handoffs, and neighboring project state. Those sources may provide read-only evidence after binding but may not silently rebind the worker.
 
 An explicit structured project switch that conflicts with the host project is not executed in place. Fail closed on project-specific work and perform a deliberate rebind/new launch.
 
@@ -47,4 +59,4 @@ XRP uses `/XRPTHESIS-AgentBus/messages` as the canonical internal message namesp
 
 ## Failure behavior
 
-If host project resolution, repository identity, local bootstrap, context reference, identity lock, handoff, or coordination route is missing or conflicting, do not interpret the project task as executable work and do not mutate. Preserve the blocker and continue only safe diagnostic work.
+If host project resolution, repository identity, launch-envelope integrity, local bootstrap, context reference, identity lock, handoff, or coordination route is missing or conflicting, do not interpret the project task as executable work and do not mutate. Preserve the blocker and continue only safe diagnostic work.

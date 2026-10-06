@@ -5,6 +5,8 @@ import unittest
 from org_agent_mesh.project_context_binding import (
     ProjectContextBindingError,
     bind_host_project_context,
+    parse_project_launch_context,
+    render_project_launch_context,
     require_project_context_ready,
     resolve_host_project_id,
 )
@@ -27,9 +29,17 @@ class ProjectContextBindingTests(unittest.TestCase):
         with self.assertRaises(ProjectContextBindingError):
             bind_host_project_context(REGISTRY, host_project_context="Duo Screen", explicit_project_id="benefitflow")
 
-    def test_conflicting_repository_is_denied(self):
+    def test_launch_context_round_trip(self):
+        binding = bind_host_project_context(REGISTRY, host_project_context="Duo Screen")
+        rendered = render_project_launch_context(binding)
+        parsed = parse_project_launch_context("Start work\n" + rendered + "\nThen continue", REGISTRY)
+        self.assertEqual(parsed, binding)
+
+    def test_tampered_launch_context_is_denied(self):
+        binding = bind_host_project_context(REGISTRY, host_project_context="Duo Screen")
+        rendered = render_project_launch_context(binding).replace("boberino93-bit/duo-open", "boberino93-bit/benefitflow")
         with self.assertRaises(ProjectContextBindingError):
-            bind_host_project_context(REGISTRY, host_project_context="Duo Screen", repository="boberino93-bit/benefitflow")
+            parse_project_launch_context(rendered, REGISTRY)
 
     def test_ready_barrier_requires_local_context(self):
         binding = bind_host_project_context(REGISTRY, host_project_context="Duo Screen")
