@@ -1,0 +1,63 @@
+{
+  "schema": "org-agent-mesh/internal-scheduler-entrypoint/v1",
+  "status": "CANDIDATE",
+  "service": {
+    "runtime": "org_agent_mesh.internal_scheduler.BootstrapInternalScheduler",
+    "protocol": "protocols/bootstrap_internal_scheduler.md",
+    "load_on_bootstrap": true,
+    "resident_when_host_process_persists": true,
+    "stateless_bootstrap_tick_supported": true,
+    "durable_state_required": true
+  },
+  "spawn_semantics": {
+    "internal_clock_may_issue_spawn_ticket": true,
+    "spawn_ticket_is_session_started": false,
+    "host_spawn_adapter_required_for_real_execution": true,
+    "fabricated_session_success": "DENY",
+    "schedule_fire_is_mutation_authority": false,
+    "ticket_conveys_mutation_authority": false
+  },
+  "activation": {
+    "service_loaded_by_bootstrap": true,
+    "individual_schedule_enablement": "EXPLICIT_CURRENT_HUMAN_ACTION",
+    "disabled_to_enabled_autonomous_transition": "DENY",
+    "configuration_updates_preserve_enabled_state": true
+  },
+  "role_boundary": {
+    "primary_creation": "PROHIBITED",
+    "full_swarm_creation": "HUMAN_ONLY",
+    "internally_schedulable_roles": [
+      "research",
+      "manager"
+    ]
+  },
+  "default_policy": {
+    "catch_up": "COALESCE_TO_LATEST",
+    "max_pending_tickets_per_schedule": 1,
+    "provider_admission_runtime": "org_agent_mesh.launch_admission.LaunchAdmissionController",
+    "max_inflight_starts": 1,
+    "min_start_interval_seconds": 30,
+    "base_backoff_seconds": 30,
+    "max_backoff_seconds": 900,
+    "max_attempts": 6,
+    "jitter_percent": 25
+  },
+  "outcome_states": [
+    "READY_FOR_HOST_ADMISSION",
+    "HOST_SPAWN_ADAPTER_REQUIRED",
+    "HOST_ADMITTED",
+    "PROVIDER_ACCEPTED",
+    "BOOTSTRAP_READY",
+    "RETRY_WAIT",
+    "COMPLETED",
+    "TERMINAL_FAILURE"
+  ],
+  "integration_requirements": [
+    "LOAD_AFTER_PROJECT_CONTEXT_AND_GOVERNANCE_GATES",
+    "RESTORE_DURABLE_SCHEDULER_STATE_BEFORE_TICK",
+    "PERSIST_NEW_TICKETS_BEFORE_CLAIMING_OCCURRENCE_EXISTS",
+    "USE_HOST_ADAPTER_FOR_REAL_SESSION_CREATION",
+    "DO_NOT_ADVANCE_PROJECT_TASK_BEFORE_BOOTSTRAP_READY",
+    "PRESERVE_OCCURRENCE_ID_ACROSS_PROVIDER_RETRY"
+  ]
+}
