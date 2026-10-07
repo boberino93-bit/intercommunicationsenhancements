@@ -82,6 +82,30 @@ class SchedulerSynchronizationTests(unittest.TestCase):
         self.assertFalse(grant["mutation_limits"]["disable_task_under_liveness_repair"])
         self.assertTrue(grant["revocation"]["canonical_backend_enabled_false_revokes_for_target"])
 
+    def test_bindings_and_grant_match_independent_frontend_identity_receipt(self):
+        receipt = self.load("governance/SCHEDULER_FRONTEND_IDENTITY_RECEIPT_2026-10-07.json")
+        bindings_doc = self.load("governance/SCHEDULER_FRONTEND_BINDINGS.json")
+        grant = self.load("governance/SCHEDULER_ACTIVATION_GRANT_2026-10-07.json")
+        registry = self.load("governance/INTERNAL_SPAWN_SCHEDULES.json")
+
+        mapped = {
+            b["backend_job_id"]: b["frontend_automation_id"]
+            for b in bindings_doc["bindings"]
+            if b["mode"] == "MIRROR"
+        }
+        self.assertEqual(mapped, receipt["mapped_system_identities"])
+
+        enabled_backend_ids = {job["job_id"] for job in registry["jobs"] if job["enabled"]}
+        expected_targets = {receipt["mapped_system_identities"][job_id] for job_id in enabled_backend_ids}
+        self.assertEqual(set(grant["authorized_target_frontend_automation_ids"]), expected_targets)
+        self.assertEqual(set(receipt["repair_targets_observed_enabled_after_human_repair"]), expected_targets)
+        self.assertEqual(
+            receipt["standby_observed_disabled"],
+            receipt["mapped_system_identities"]["global-capacity-slot-2"],
+        )
+        self.assertTrue(receipt["authority"]["evidence_only"])
+        self.assertFalse(receipt["authority"]["may_enable_or_disable_tasks"])
+
     def test_capacity_lanes_are_one_to_one_mapped_and_plan_limit_aware(self):
         registry = self.load("governance/INTERNAL_SPAWN_SCHEDULES.json")
         bindings = self.load("governance/SCHEDULER_FRONTEND_BINDINGS.json")["bindings"]
