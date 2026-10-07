@@ -80,9 +80,19 @@ The system may measure success rate, first-pass completion, repeated-failure rec
 
 The intended system property is that later agents begin with better validated procedures and fewer repeated mistakes than earlier agents while retaining auditability, reversibility, bounded context, project isolation, and explicit human/project authority.
 
-## Cross-project exchange
+## Cross-project operational intelligence and exchange
 
-Ordinary internal channels never cross projects. Exchange requires an `ACTIVE` source-project session, `CROSS_PROJECT_EXCHANGE`, exact requesting-agent/session agreement, distinct projects, explicit approval, bounded artifact scope/purpose, and valid creation/expiry. The validator is implemented; a durable sanitized export/import bridge remains future production work.
+Ordinary internal channels never cross projects. Base exchange requires an `ACTIVE` source-project session, `CROSS_PROJECT_EXCHANGE`, exact requesting-agent/session agreement, distinct projects, explicit approval, bounded artifact scope/purpose, and valid creation/expiry.
+
+Above that transport gate, `protocols/cross_project_operational_intelligence.md` provides the semantic federation layer. It separates passive knowledge, discovery, expertise/capability/managerial awareness, routing requests and active execution. Cross-project intelligence metadata always carries `authority_conveyed=false` and can never grant peer mutation or local capability inheritance.
+
+`OperationalIntelligenceRegistry` maintains a consumer-project-owned copy-by-value discovery index of sanitized peer themes, expertise, capability references, availability and provenance. Expired entries are not discoverable and unknown fields fail closed. The registry is advisory/read-only for discovery and does not assign work.
+
+Cross-project routing uses explicit correlation and lineage. `validate_routing_lineage()` rejects cycles and repeated project visits. A target project must independently accept or decline the request. Acceptance and later redirect/supersession state are represented by explicit non-authoritative receipts; `ACCEPTED` creates no active-participation claim by itself.
+
+`SanitizedSnapshotBridge` is the durable reference bridge. Source export validates the approved exchange and stores an immutable, digest-bound sanitized snapshot under the source project. Destination import revalidates destination identity/capabilities, expiry and classification, then writes a copy-by-value evidence record only under the destination project. Imported records are explicitly `accepted_state=false` and `authority_conveyed=false`; there is no automatic knowledge/doctrine/assignment promotion path.
+
+This design intentionally avoids a global mutable Project Intelligence Bus. Federation is achieved by bounded, explicit, copy-by-value exchange plus project-local acceptance.
 
 ## Packaging and dependency closure
 
@@ -100,4 +110,4 @@ Doctrine changes that alter packaged agent behavior are subject to this same rel
 
 ## Remaining production layers
 
-The alpha still needs distributed/multi-node durable adapters for the complete registry set, persistent organizational registry/global observability, a full sanitized cross-project bridge, broker-specific durable acknowledgement transport, a concrete durable learning-registry implementation that enforces the promotion lifecycle described above, and host/scheduler integration that can enforce provider admission before model invocation. Those are future layers, not current enforcement claims.
+The alpha still needs distributed/multi-node durable adapters for the complete registry set, persistent organization-wide lifecycle/global observability, broker-specific durable acknowledgement transport, cryptographic cross-host attestation for sanitized snapshot packages when crossing separate trust domains, a concrete durable learning-registry implementation that enforces the promotion lifecycle described above, and host/scheduler integration that can enforce provider admission before model invocation. Those are production/distribution layers, not missing semantics in the completed reference cross-project intelligence federation.
