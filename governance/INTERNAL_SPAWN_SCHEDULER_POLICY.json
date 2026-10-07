@@ -1,6 +1,6 @@
 {
   "schema": "org-agent-mesh/internal-spawn-scheduler-policy/v1",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "status": "ACTIVE_BY_EXPLICIT_HUMAN_REQUEST",
   "service": {
     "enabled": true,
@@ -54,7 +54,14 @@
     "continuation_may_not_cross_project_or_claim_new_work_unit": true,
     "continuation_does_not_grant_mutation_authority": true,
     "hold_pause_stop_override_continuation": true,
-    "resource_exhaustion_requires_best_available_handoff_when_practical": true
+    "resource_exhaustion_requires_best_available_handoff_when_practical": true,
+    "unfinished_safe_work_survives_invocation_boundary": true,
+    "unfinished_work_must_not_be_marked_completed": true,
+    "successor_must_scan_valid_unresolved_continuation_handoffs_before_lower_priority_fresh_work": true,
+    "successor_resume_requires_project_role_claim_fence_and_control_revalidation": true,
+    "higher_priority_p0_p3_work_may_preempt_continuation": true,
+    "live_owner_prevents_duplicate_continuation": true,
+    "handoff_transfers_context_not_authority": true
   },
   "scheduler_state_boundary": {
     "synchronization_authorized_by_human_directive": true,
@@ -99,6 +106,7 @@
     "frontend_account_capacity_full": "CAPACITY_LIMIT_DEFERRED",
     "frontend_mapped_backend_dispatch_suppressed": "FRONTEND_EXECUTION_EXPECTED",
     "premature_blocker_finalization": "CONTINUATION_INTEGRITY_VIOLATION",
+    "unfinished_work_abandoned_at_invocation_boundary": "CONTINUATION_HANDOFF_MISSING",
     "never_call_capacity_limit_deferred_task_failed": true,
     "never_call_missing_adapter_task_failed": true,
     "never_claim_spawn_from_ticket_alone": true
@@ -124,6 +132,9 @@
     "record_safe_fallbacks_considered": true,
     "record_safe_fallbacks_completed": true,
     "record_remaining_safe_work_at_finalization": true,
+    "record_continuation_handoff_required": true,
+    "record_continuation_handoff_ref": true,
+    "record_successor_acceptance_when_resumed": true,
     "record_remaining_human_gate": true
   }
 }
