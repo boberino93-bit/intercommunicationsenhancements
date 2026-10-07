@@ -8,6 +8,7 @@ from org_agent_mesh.internal_scheduler import (
     DispatchResult,
     InternalSchedulerError,
     ScheduleJob,
+    WebhookSpawnAdapter,
     dispatch_ticket,
     due_boundary,
     evaluate_registry,
@@ -93,6 +94,62 @@ class InternalSchedulerTests(unittest.TestCase):
         self.assertEqual(final.status, "SESSION_STARTED_VERIFIED")
         self.assertTrue(final.host_start_receipt.startswith("receipt:"))
 
+    def test_unconfigured_webhook_adapter_reports_unavailable(self):
+        boundary = due_boundary(self.job, self.now)
+        ticket = make_ticket(self.job, boundary, self.now)
+        result = WebhookSpawnAdapter(endpoint=None, token=None).dispatch(ticket)
+        self.assertEqual(result.status, "SPAWN_ADAPTER_UNAVAILABLE")
+        self.assertIsNone(result.host_start_receipt)
+
+    def test_run_once_dispatches_and_records_verified_start(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            registry = root / "registry.json"
+            policy = root / "policy.json"
+            out = root / "out"
+            registry.write_text(json.dumps({
+                "catch_up_policy": "COALESCE_TO_LATEST",
+                "jobs": [
+                    {
+                        "job_id": "bounded",
+                        "enabled": True,
+                        "schedule": {
+                            "type": "HOURLY_MINUTE_OFFSETS",
+                            "minute_offsets": [5],
+                            "grace_minutes": 10,
+                        },
+                        "launch_scope": "GLOBAL_DEMAND_ROUTED_CAPACITY",
+                        "requested_roles": ["research", "manager"],
+                        "max_workers_per_occurrence": 1,
+                        "primary_prohibited": True,
+                    }
+                ],
+            }))
+            policy.write_text(json.dumps({
+                "service": {"enabled": True},
+                "delegated_spawn_authority": {
+                    "primary_allowed": False,
+                    "master_allowed": False,
+                    "max_tickets_per_scheduler_invocation": 1,
+                },
+            }))
+            result = run_once(
+                registry,
+                policy,
+                out,
+                self.now,
+                dispatch=True,
+                adapter=_ReceiptAdapter(),
+            )
+            self.assertEqual(len(result), 1)
+            self.assertEqual(result[0].status, "SESSION_STARTED_VERIFIED")
+            self.assertTrue(result[0].host_start_receipt.startswith("receipt:"))
+            summary = json.loads((out / "run-summary.json").read_text())
+            self.assertTrue(summary["dispatch_requested"])
+            self.assertEqual(summary["verified_start_count"], 1)
+            self.assertEqual(summary["adapter_unavailable_count"], 0)
+            self.assertEqual(summary["adapter_rejected_count"], 0)
+
     def test_policy_disabled_emits_no_tickets_but_writes_summary(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -110,6 +167,9 @@ class InternalSchedulerTests(unittest.TestCase):
             }))
             result = run_once(registry, policy, out, self.now, dispatch=False)
             self.assertEqual(result, [])
+            summary = json.loads((out / "run-summary.json").read_text())
+            self.assertEqual(summary["due_ticket_count"], 0)
+            self.assertEqual(summary["verified_start_count"], 0)
 
 
 if __name__ == "__main__":

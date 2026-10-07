@@ -33,14 +33,46 @@ jobs:
             tests.test_schedule_activation \
             tests.test_scheduler_synchronization
 
-      - name: Evaluate due mapped scheduler lanes
+      - name: Evaluate and dispatch due mapped scheduler lanes
+        env:
+          ORG_AGENT_MESH_SPAWN_ENDPOINT: ${{ secrets.ORG_AGENT_MESH_SPAWN_ENDPOINT }}
+          ORG_AGENT_MESH_SPAWN_TOKEN: ${{ secrets.ORG_AGENT_MESH_SPAWN_TOKEN }}
         run: |
           rm -rf scheduler-out
           python -m org_agent_mesh.internal_scheduler \
             --registry governance/INTERNAL_SPAWN_SCHEDULES.json \
             --policy governance/INTERNAL_SPAWN_SCHEDULER_POLICY.json \
-            --out-dir scheduler-out
+            --out-dir scheduler-out \
+            --dispatch
           cat scheduler-out/run-summary.json
+
+      - name: Validate dispatch evidence semantics
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          summary = json.loads(Path("scheduler-out/run-summary.json").read_text())
+          if summary.get("dispatch_requested") is not True:
+              raise SystemExit("scheduler run did not request dispatch")
+          for result in summary.get("results", []):
+              status = result.get("status")
+              receipt = result.get("host_start_receipt")
+              if status == "SESSION_STARTED_VERIFIED" and not receipt:
+                  raise SystemExit("verified session start is missing host receipt")
+              if status != "SESSION_STARTED_VERIFIED" and receipt:
+                  raise SystemExit("host receipt present without verified session start")
+          print(
+              "dispatch evidence:",
+              {
+                  "due": summary.get("due_ticket_count", 0),
+                  "verified": summary.get("verified_start_count", 0),
+                  "accepted_unverified": summary.get("dispatch_accepted_start_unverified_count", 0),
+                  "adapter_unavailable": summary.get("adapter_unavailable_count", 0),
+                  "adapter_rejected": summary.get("adapter_rejected_count", 0),
+              },
+          )
+          PY
 
       - name: Preserve scheduler occurrence audit
         if: always()
