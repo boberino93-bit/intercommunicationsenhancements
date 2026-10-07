@@ -35,6 +35,7 @@ jobs:
             tests.test_scheduler_policy_coherence \
             tests.test_frontend_execution_receipts \
             tests.test_frontend_receipt_audit \
+            tests.test_scheduler_health \
             tests.test_scheduler_synchronization \
             tests.test_scheduler_ecosystem_rollout
 
@@ -101,6 +102,15 @@ jobs:
               },
           )
           PY
+
+      - name: Enforce mapped frontend sustained health
+        run: |
+          python -m org_agent_mesh.scheduler_health \
+            --registry governance/INTERNAL_SPAWN_SCHEDULES.json \
+            --bindings governance/SCHEDULER_FRONTEND_BINDINGS.json \
+            --receipt-audit scheduler-out/frontend-receipt-audit.json \
+            --policy governance/SCHEDULER_HEALTH_POLICY.json \
+            --out scheduler-out/frontend-health.json
 
       - name: Preserve scheduler occurrence audit
         if: always()
