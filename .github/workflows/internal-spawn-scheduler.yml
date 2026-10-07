@@ -45,7 +45,7 @@ jobs:
             tests.test_scheduler_synchronization \
             tests.test_scheduler_ecosystem_rollout
 
-      - name: Validate scheduler mutation journal integrity
+      - name: Validate scheduler mutation ledger integrity and journal claims
         run: |
           python - <<'PY'
           import json
