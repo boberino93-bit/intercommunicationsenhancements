@@ -1,6 +1,6 @@
 {
   "schema": "org-agent-mesh/internal-spawn-scheduler-policy/v1",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "status": "ACTIVE_BY_EXPLICIT_HUMAN_REQUEST",
   "service": {
     "enabled": true,
@@ -10,6 +10,7 @@
     "repair_guard_runtime": "org_agent_mesh.scheduler_repair_guard",
     "scheduler_health_runtime": "org_agent_mesh.scheduler_health",
     "scheduler_work_gate_runtime": "org_agent_mesh.scheduler_work_gate",
+    "scheduler_occurrence_guard_runtime": "org_agent_mesh.scheduler_occurrence_guard",
     "scheduler_mutation_ledger_runtime": "org_agent_mesh.scheduler_mutation_ledger",
     "scheduler_mutation_journal_runtime": "org_agent_mesh.scheduler_mutation_journal",
     "protocol": "protocols/internal_scheduler_service.md",
@@ -22,11 +23,13 @@
     "frontend_binding_registry": "governance/SCHEDULER_FRONTEND_BINDINGS.json",
     "scheduler_activation_grant": "governance/SCHEDULER_ACTIVATION_GRANT_2026-10-07.json",
     "scheduler_health_policy": "governance/SCHEDULER_HEALTH_POLICY.json",
+    "scheduler_occurrence_claim_policy": "governance/SCHEDULER_OCCURRENCE_CLAIM_POLICY.json",
     "scheduler_mutation_ledger_policy": "governance/SCHEDULER_MUTATION_LEDGER_POLICY.json",
     "scheduler_mutation_journal_policy": "governance/SCHEDULER_MUTATION_JOURNAL_POLICY.json",
     "runtime_evidence_branch": "scheduler-evidence",
     "runtime_mutation_journal_root": "governance/scheduler-mutation-journal-v3",
     "runtime_receipt_directory": "agentbus-backup/coordination-messages",
+    "runtime_occurrence_claim_directory": "agentbus-backup/scheduler-occurrence-claims",
     "canonical_code_and_policy_branch": "main",
     "continuation_integrity_protocol": "protocols/scheduled_continuation_integrity.md",
     "autonomous_continuation_protocol": "protocols/autonomous_continuation.md"
@@ -51,7 +54,9 @@
     "frontend_mapped_backend_disposition": "FRONTEND_EXECUTION_EXPECTED",
     "frontend_mapped_backend_adapter_result": "BACKEND_DISPATCH_SUPPRESSED_FRONTEND_MAPPED",
     "backend_host_dispatch_requires_explicit_execution_surface": true,
-    "duplicate_cross_surface_execution_prohibited": true
+    "duplicate_cross_surface_execution_prohibited": true,
+    "frontend_occurrence_project_work_requires_atomic_occurrence_claim": true,
+    "duplicate_frontend_occurrence_must_noop_before_project_binding": true
   },
   "runtime_evidence_isolation": {
     "canonical_code_and_policy_branch": "main",
@@ -61,9 +66,28 @@
     "scheduler_runtime_writes_to_main_prohibited_after_cutover": true,
     "mutation_journal_reads_and_writes_use_runtime_evidence_branch": true,
     "degraded_github_frontend_receipts_use_runtime_evidence_branch": true,
+    "frontend_occurrence_claims_use_runtime_evidence_branch": true,
     "independent_backend_health_audit_fetches_runtime_evidence_branch_read_only": true,
     "evidence_branch_missing_unavailable_or_invalid_fails_closed": true,
     "main_snapshot_through_journal_sequence_6_is_historical_cutover_evidence_only": true
+  },
+  "frontend_occurrence_ownership": {
+    "policy": "governance/SCHEDULER_OCCURRENCE_CLAIM_POLICY.json",
+    "runtime": "org_agent_mesh.scheduler_occurrence_guard",
+    "claim_scope": "EXACT_BACKEND_OCCURRENCE_ACROSS_FRONTEND_EXECUTION_ATTEMPTS",
+    "deterministic_claim_path_required": true,
+    "claim_storage_branch": "scheduler-evidence",
+    "claim_operation": "CREATE_NEW_FILE_ONLY",
+    "claim_must_bind_execution_receipt_id": true,
+    "claim_readback_required_before_project_work": true,
+    "claim_conveys_no_scheduler_or_project_authority": true,
+    "existing_different_claim_disposition": "DUPLICATE_OCCURRENCE_NOOP",
+    "duplicate_may_not_bind_to_project_work_unit": true,
+    "duplicate_may_not_perform_reversible_or_protected_project_mutation": true,
+    "automatic_claim_stealing_prohibited": true,
+    "automatic_claim_expiry_or_takeover_prohibited": true,
+    "claim_storage_failure_restricts_to_read_only_and_append_only_observability": true,
+    "safety_priority": "PREFER_MISSED_BOUNDED_OCCURRENCE_OVER_DUPLICATE_CONSEQUENTIAL_EXECUTION"
   },
   "continuation_integrity": {
     "required_for_scheduled_workers": true,
@@ -148,6 +172,7 @@
     "frontend_expected_is_not_execution_proof": true,
     "health_evidence_deadline_must_cover_receipt_acceptance_and_persistence_grace": true,
     "health_receipts_are_read_from_runtime_evidence_branch_when_github_fallback_is_used": true,
+    "duplicate_occurrence_execution_evidence_is_not_health_evidence": true,
     "consequential_mutation_requires_HEALTHY_lane": true,
     "RECOVERING_DEGRADED_or_UNQUALIFIED_lane_may_continue_read_only_and_append_only_observability": true,
     "health_gate_is_restrictive_only_and_never_grants_project_authority": true
@@ -182,6 +207,10 @@
     "frontend_identity_missing_or_unavailable": "REPLACEMENT_AUTHORIZATION_REQUIRED",
     "frontend_execution_stale": "STALE_EXECUTION_REPORTED",
     "frontend_mapped_backend_dispatch_suppressed": "FRONTEND_EXECUTION_EXPECTED",
+    "frontend_duplicate_occurrence_evidence": "FRONTEND_DUPLICATE_OCCURRENCE_EVIDENCE",
+    "occurrence_claim_persistence_blocked": "OCCURRENCE_CLAIM_PERSISTENCE_BLOCKED",
+    "occurrence_claim_conflict": "OCCURRENCE_CLAIM_CONFLICT",
+    "duplicate_occurrence_noop": "DUPLICATE_OCCURRENCE_NOOP",
     "scheduler_health_not_qualified_for_consequential_work": "SCHEDULER_HEALTH_GATE_BLOCKED",
     "scheduler_mutation_ledger_invalid": "SCHEDULER_MUTATION_LEDGER_INVALID",
     "scheduler_mutation_journal_invalid": "SCHEDULER_MUTATION_JOURNAL_INVALID",
@@ -199,6 +228,9 @@
     "record_scheduled_for": true,
     "record_observed_at": true,
     "record_occurrence_id": true,
+    "record_occurrence_claim_id": true,
+    "record_occurrence_claim_disposition": true,
+    "record_duplicate_occurrence_detection": true,
     "record_ticket_id": true,
     "record_adapter_result": true,
     "record_start_receipt": true,
