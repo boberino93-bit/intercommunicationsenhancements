@@ -5,12 +5,16 @@ on:
     paths:
       - "org_agent_mesh/internal_scheduler.py"
       - "org_agent_mesh/launch_admission.py"
+      - "org_agent_mesh/scheduler_reconciliation.py"
       - "tests/test_internal_scheduler.py"
       - "tests/test_launch_admission.py"
       - "tests/test_schedule_activation.py"
+      - "tests/test_scheduler_reconciliation.py"
       - "tests/test_scheduler_synchronization.py"
       - "governance/INTERNAL_SPAWN_SCHEDULER_POLICY.json"
       - "governance/INTERNAL_SPAWN_SCHEDULES.json"
+      - "governance/SCHEDULER_FRONTEND_BINDINGS.json"
+      - "governance/SCHEDULER_SYNCHRONIZATION_DIRECTIVE.json"
       - ".github/workflows/internal-spawn-scheduler.yml"
       - ".github/workflows/scheduler-dispatch-regression.yml"
   workflow_dispatch:
@@ -37,4 +41,5 @@ jobs:
             tests.test_internal_scheduler \
             tests.test_launch_admission \
             tests.test_schedule_activation \
+            tests.test_scheduler_reconciliation \
             tests.test_scheduler_synchronization
