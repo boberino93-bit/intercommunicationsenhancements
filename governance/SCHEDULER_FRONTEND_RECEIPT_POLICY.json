@@ -1,12 +1,13 @@
 {
   "schema": "org-agent-mesh/scheduler-frontend-receipt-policy/v1",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "status": "ACTIVE",
   "receipt_schema": "schemas/frontend_execution_receipt.schema.json",
   "message_schema": "schemas/scheduler_frontend_receipt_message.schema.json",
   "validator": "org_agent_mesh.frontend_execution_receipts",
   "backend_auditor": "org_agent_mesh.frontend_receipt_audit",
-  "purpose": "Allow the backend scheduler ledger to verify that a mapped ChatGPT frontend occurrence was actually observed without treating a backend ticket, title match, conversation ID, expected execution, or enabled flag as proof, while keeping runtime evidence off protected canonical main.",
+  "occurrence_claim_policy": "governance/SCHEDULER_OCCURRENCE_CLAIM_POLICY.json",
+  "purpose": "Verify exact mapped ChatGPT frontend executions while detecting duplicate delivery of one deterministic scheduled occurrence and keeping runtime evidence off protected canonical main.",
   "publisher": {
     "mode": "DECLARED_RECONCILER_OR_EXACT_SELF",
     "project_id": "intercommunicationsenhancements",
@@ -58,7 +59,10 @@
     "frontend_expected_status_is_not_frontend_execution_proof": true,
     "enabled_flag_is_not_frontend_execution_proof": true,
     "exact_duplicate_receipt_is_idempotent": true,
-    "conflicting_reuse_of_receipt_id_is_rejected": true
+    "conflicting_reuse_of_receipt_id_is_rejected": true,
+    "one_distinct_execution_receipt_per_occurrence_required": true,
+    "multiple_distinct_receipts_for_same_occurrence_are_rejected_as_duplicate_execution_evidence": true,
+    "duplicate_occurrence_is_excluded_from_health_evidence": true
   },
   "authority": {
     "receipt_conveys_authority": false,
@@ -68,6 +72,12 @@
     "receipt_may_not_change_project_authority": true,
     "backend_ingestion_is_observability_only": true,
     "evidence_branch_write_authority_is_not_main_branch_write_authority": true
+  },
+  "duplicate_execution": {
+    "frontend_work_ownership_gate": "governance/SCHEDULER_OCCURRENCE_CLAIM_POLICY.json",
+    "receipt_audit_disposition": "FRONTEND_DUPLICATE_OCCURRENCE_EVIDENCE",
+    "duplicate_occurrence_must_not_qualify_lane_health": true,
+    "duplicate_occurrence_must_not_be_silently_collapsed_unless_receipt_is_exact_idempotent_duplicate": true
   },
   "cutover": {
     "storage_branch": "scheduler-evidence",
@@ -81,6 +91,7 @@
     "publisher_mismatch": "FRONTEND_EXECUTION_RECEIPT_REJECTED",
     "project_or_repository_mismatch": "FRONTEND_EXECUTION_RECEIPT_REJECTED",
     "occurrence_mismatch": "FRONTEND_EXECUTION_RECEIPT_REJECTED",
+    "duplicate_distinct_occurrence_receipts": "FRONTEND_DUPLICATE_OCCURRENCE_EVIDENCE",
     "timing_mismatch": "FRONTEND_EXECUTION_RECEIPT_REJECTED",
     "authority_claim_present": "FRONTEND_EXECUTION_RECEIPT_REJECTED",
     "evidence_branch_unavailable": "SCHEDULER_EVIDENCE_BRANCH_UNAVAILABLE",
