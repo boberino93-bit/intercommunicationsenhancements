@@ -7,6 +7,7 @@
   "schedule_registry": "governance/INTERNAL_SPAWN_SCHEDULES.json",
   "scheduler_sync_directive": "governance/SCHEDULER_SYNCHRONIZATION_DIRECTIVE.json",
   "frontend_binding_registry": "governance/SCHEDULER_FRONTEND_BINDINGS.json",
+  "frontend_execution_receipt_policy": "governance/SCHEDULER_FRONTEND_RECEIPT_POLICY.json",
   "control_interface": "governance/SCHEDULER_CONTROL_INTERFACE.json",
   "continuation_integrity_protocol": "protocols/scheduled_continuation_integrity.md",
   "runtime": "org_agent_mesh.internal_scheduler",
