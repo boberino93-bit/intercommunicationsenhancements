@@ -23,6 +23,7 @@ class ReconciliationAction(str, Enum):
     DISABLE_AUTHORIZED = "DISABLE_AUTHORIZED"
     ENABLE_AUTHORIZED = "ENABLE_AUTHORIZED"
     ENABLE_AUTHORIZATION_REQUIRED = "ENABLE_AUTHORIZATION_REQUIRED"
+    REPAIR_QUARANTINED = "REPAIR_QUARANTINED"
     REPLACEMENT_AUTHORIZATION_REQUIRED = "REPLACEMENT_AUTHORIZATION_REQUIRED"
     CAPACITY_LIMIT_DEFERRED = "CAPACITY_LIMIT_DEFERRED"
     STALE_EXECUTION_REPORTED = "STALE_EXECUTION_REPORTED"
@@ -41,6 +42,9 @@ class ReconciliationRequest:
     declared_repair_actor: bool = False
     repair_authorization_ref: str | None = None
     repair_scope_contains_task: bool = False
+    repair_guard_passed: bool = False
+    repair_guard_reason: str | None = None
+    repair_quarantine_required: bool = False
 
 
 @dataclass(frozen=True)
@@ -67,7 +71,8 @@ def decide_frontend_reconciliation(request: ReconciliationRequest) -> Reconcilia
     Capacity availability is an admission fact, not activation authority. Missing or dead
     frontend identities are never replaced automatically. Disabled->enabled transitions
     require either a direct current human enablement or bounded liveness repair backed by
-    an active human authorization and an exact in-scope declared mapping.
+    an active human authorization, an exact in-scope declared mapping, and a passed
+    expiry/budget/quarantine repair guard.
     """
     if request.enabled_state_policy not in SUPPORTED_ENABLED_STATE_POLICIES:
         raise ValueError(f"unsupported enabled_state_policy: {request.enabled_state_policy}")
@@ -117,6 +122,14 @@ def decide_frontend_reconciliation(request: ReconciliationRequest) -> Reconcilia
             reason="CAPACITY_UNAVAILABLE_DOES_NOT_GRANT_OR_CONSUME_ACTIVATION_AUTHORITY",
         )
 
+    if desired_enabled and request.repair_quarantine_required:
+        return ReconciliationDecision(
+            action=ReconciliationAction.REPAIR_QUARANTINED,
+            may_mutate_frontend=False,
+            resulting_enabled=request.current_enabled,
+            reason=request.repair_guard_reason or "REPAIR_BUDGET_EXHAUSTED_QUARANTINE_REQUIRED",
+        )
+
     try:
         decision = evaluate_schedule_state_change(
             ScheduleStateChangeRequest(
@@ -128,6 +141,8 @@ def decide_frontend_reconciliation(request: ReconciliationRequest) -> Reconcilia
                 declared_repair_actor=request.declared_repair_actor,
                 repair_authorization_ref=request.repair_authorization_ref,
                 repair_scope_contains_task=request.repair_scope_contains_task,
+                repair_guard_passed=request.repair_guard_passed,
+                repair_guard_reason=request.repair_guard_reason,
             )
         )
     except ScheduleActivationError:
@@ -136,7 +151,7 @@ def decide_frontend_reconciliation(request: ReconciliationRequest) -> Reconcilia
                 action=ReconciliationAction.ENABLE_AUTHORIZATION_REQUIRED,
                 may_mutate_frontend=False,
                 resulting_enabled=request.current_enabled,
-                reason="SCHEDULE_ACTIVATION_GATE_REQUIRES_HUMAN_ENABLEMENT_OR_VALID_SCOPED_REPAIR_GRANT",
+                reason=request.repair_guard_reason or "SCHEDULE_ACTIVATION_GATE_REQUIRES_HUMAN_ENABLEMENT_OR_VALID_SCOPED_REPAIR_GRANT",
             )
         raise
 

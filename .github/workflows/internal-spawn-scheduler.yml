@@ -37,8 +37,26 @@ jobs:
             tests.test_frontend_receipt_audit \
             tests.test_scheduler_health \
             tests.test_scheduler_health_policy \
+            tests.test_scheduler_repair_guard \
+            tests.test_scheduler_work_gate \
+            tests.test_scheduler_mutation_ledger \
+            tests.test_scheduler_hardening_contract \
             tests.test_scheduler_synchronization \
             tests.test_scheduler_ecosystem_rollout
+
+      - name: Validate scheduler mutation ledger integrity
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from org_agent_mesh.scheduler_mutation_ledger import parse_jsonl, validate_ledger
+
+          path = Path("governance/SCHEDULER_MUTATION_LEDGER_V2_2026-10-07.jsonl")
+          result = validate_ledger(parse_jsonl(path.read_text(encoding="utf-8")))
+          print(
+              "scheduler mutation ledger:",
+              {"events": result.event_count, "terminal_hash": result.terminal_hash},
+          )
+          PY
 
       - name: Evaluate and dispatch due mapped scheduler lanes
         env:

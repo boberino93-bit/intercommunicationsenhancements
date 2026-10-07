@@ -1,8 +1,11 @@
 {
   "schema": "org-agent-mesh/scheduler-activation-grant/v1",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "status": "ACTIVE",
-  "authorization_basis": "EXPLICIT_CURRENT_HUMAN_REQUEST_2026-10-07_REPAIR_TEST_IMPLEMENT_PATCH_SWARM_LEVEL",
+  "grant_epoch": 2,
+  "issued_at": "2026-10-07T21:33:00Z",
+  "expires_at": "2026-10-08T21:33:00Z",
+  "authorization_basis": "EXPLICIT_CURRENT_HUMAN_REQUEST_2026-10-07_KEEP_WORKING_HARDEN_SCHEDULER",
   "purpose": "Allow bounded recovery of already-declared mapped swarm scheduler tasks from unexpected frontend disabled drift without granting task creation, replacement, project mutation, or full-swarm authority.",
   "authorized_repair_actors": [
     {
@@ -34,7 +37,23 @@
     "account_capacity_available_required": true,
     "project_hold_pause_stop_must_be_clear": true,
     "frontend_identity_must_be_available": true,
-    "replacement_prohibited": true
+    "replacement_prohibited": true,
+    "repair_guard_must_pass": true
+  },
+  "repair_budget": {
+    "window_minutes": 180,
+    "max_repairs_per_target_in_window": 2,
+    "max_total_repairs_in_window": 5,
+    "count_statuses": [
+      "APPLIED_AND_VERIFIED"
+    ],
+    "on_exhaustion": "QUARANTINE_REPAIR_AND_REQUIRE_HUMAN"
+  },
+  "renewal": {
+    "automatic_extension_allowed": false,
+    "explicit_current_human_authorization_required": true,
+    "new_epoch_required": true,
+    "expired_grant_fails_closed": true
   },
   "prohibited_targets": {
     "mirror_disabled_standby": true,
@@ -55,11 +74,14 @@
     "scheduler_pause_command_revokes_for_affected_jobs": true,
     "canonical_backend_enabled_false_revokes_for_target": true,
     "hold_pause_stop_overrides_grant": true,
-    "grant_status_REVOKED_disables_all_repair": true
+    "grant_status_REVOKED_disables_all_repair": true,
+    "grant_expiry_disables_all_repair": true,
+    "repair_budget_exhaustion_quarantines_automatic_repair": true
   },
   "notes": [
     "This grant does not authorize autonomous creation of a swarm or PRIMARY/MASTER sessions.",
-    "Mapped system task desired enablement is taken from the canonical backend registry while this grant is active.",
-    "A direct frontend toggle without a corresponding canonical pause is treated as execution-state drift for these mapped system tasks; use the scheduler control interface for an intentional durable pause."
+    "Mapped system task desired enablement is taken from the canonical backend registry only while this grant is current and the repair guard passes.",
+    "A direct frontend toggle without a corresponding canonical pause is treated as execution-state drift for these mapped system tasks; use the scheduler control interface for an intentional durable pause.",
+    "Repeated disable/repair flapping is not normal liveness recovery. Budget exhaustion requires quarantine and renewed human authorization."
   ]
 }

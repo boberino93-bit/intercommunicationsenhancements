@@ -14,8 +14,13 @@ class SchedulerSynchronizationTests(unittest.TestCase):
         self.assertEqual(bootstrap["scheduler_sync_directive"], "governance/SCHEDULER_SYNCHRONIZATION_DIRECTIVE.json")
         self.assertEqual(bootstrap["frontend_binding_registry"], "governance/SCHEDULER_FRONTEND_BINDINGS.json")
         self.assertEqual(bootstrap["control_interface"], "governance/SCHEDULER_CONTROL_INTERFACE.json")
+        self.assertEqual(bootstrap["repair_guard_runtime"], "org_agent_mesh.scheduler_repair_guard")
+        self.assertEqual(bootstrap["scheduler_work_gate_runtime"], "org_agent_mesh.scheduler_work_gate")
+        self.assertEqual(bootstrap["scheduler_mutation_ledger_runtime"], "org_agent_mesh.scheduler_mutation_ledger")
         self.assertTrue(bootstrap["invariants"]["declared_mapping_required_for_frontend_backend_sync"])
         self.assertTrue(bootstrap["invariants"]["unmapped_frontend_task_mutation_prohibited"])
+        self.assertTrue(bootstrap["invariants"]["repair_budget_exhaustion_requires_quarantine"])
+        self.assertTrue(bootstrap["invariants"]["nonhealthy_lane_consequential_mutation_prohibited"])
 
     def test_only_declared_bindings_may_auto_repair(self):
         directive = self.load("governance/SCHEDULER_SYNCHRONIZATION_DIRECTIVE.json")
@@ -61,19 +66,24 @@ class SchedulerSynchronizationTests(unittest.TestCase):
         self.assertFalse(boundary["ordinary_capacity_workers_may_mutate_scheduler_state"])
         self.assertTrue(boundary["secondary_liveness_reconciler_is_explicit_exception_to_ordinary_worker_fence"])
         self.assertTrue(boundary["automatic_repair_actor_must_match_declared_reconciler_or_liveness_sentinel"])
+        self.assertTrue(boundary["repair_guard_must_pass_before_delegated_enablement"])
+        self.assertTrue(boundary["repair_budget_exhaustion_requires_quarantine"])
         self.assertFalse(boundary["reconciler_may_create_replacement_frontend_tasks"])
         self.assertFalse(boundary["reconciler_may_delete_frontend_tasks"])
         self.assertTrue(boundary["missing_mapped_task_requires_human_replacement_authorization"])
 
-    def test_activation_grant_is_exactly_scoped_and_non_destructive(self):
+    def test_activation_grant_is_exactly_scoped_time_bounded_and_non_destructive(self):
         grant = self.load("governance/SCHEDULER_ACTIVATION_GRANT_2026-10-07.json")
         self.assertEqual(grant["status"], "ACTIVE")
         self.assertEqual(grant["allowed_transition"], "DISABLED_TO_ENABLED_ONLY")
         self.assertEqual(len(grant["authorized_repair_actors"]), 2)
         self.assertEqual(len(grant["authorized_target_frontend_automation_ids"]), 5)
+        self.assertIn("issued_at", grant)
+        self.assertIn("expires_at", grant)
         self.assertTrue(grant["required_conditions"]["exact_declared_binding_required"])
         self.assertTrue(grant["required_conditions"]["canonical_backend_enabled_required"])
         self.assertTrue(grant["required_conditions"]["account_capacity_available_required"])
+        self.assertTrue(grant["required_conditions"]["repair_guard_must_pass"])
         self.assertTrue(grant["prohibited_targets"]["mirror_disabled_standby"])
         self.assertTrue(grant["prohibited_targets"]["frontend_only_personal"])
         self.assertTrue(grant["prohibited_targets"]["unmapped_tasks"])
@@ -81,6 +91,9 @@ class SchedulerSynchronizationTests(unittest.TestCase):
         self.assertFalse(grant["mutation_limits"]["delete_task"])
         self.assertFalse(grant["mutation_limits"]["disable_task_under_liveness_repair"])
         self.assertTrue(grant["revocation"]["canonical_backend_enabled_false_revokes_for_target"])
+        self.assertTrue(grant["revocation"]["grant_expiry_disables_all_repair"])
+        self.assertTrue(grant["revocation"]["repair_budget_exhaustion_quarantines_automatic_repair"])
+        self.assertFalse(grant["renewal"]["automatic_extension_allowed"])
 
     def test_bindings_and_grant_match_independent_frontend_identity_receipt(self):
         receipt = self.load("governance/SCHEDULER_FRONTEND_IDENTITY_RECEIPT_2026-10-07.json")
@@ -146,6 +159,7 @@ class SchedulerSynchronizationTests(unittest.TestCase):
         self.assertIn("--dispatch", workflow)
         self.assertIn("ORG_AGENT_MESH_SPAWN_ENDPOINT", workflow)
         self.assertIn("ORG_AGENT_MESH_SPAWN_TOKEN", workflow)
+        self.assertIn("Validate scheduler mutation ledger integrity", workflow)
 
         policy = self.load("governance/INTERNAL_SPAWN_SCHEDULER_POLICY.json")
         self.assertTrue(policy["service"]["host_adapter_required_for_real_spawn"])
@@ -205,6 +219,7 @@ class SchedulerSynchronizationTests(unittest.TestCase):
         self.assertFalse(boundary["may_create_or_delete_unmapped_chatgpt_tasks"])
         self.assertFalse(boundary["may_infer_mapping_from_title_similarity"])
         self.assertTrue(boundary["enable_repair_requires_active_scoped_human_authorization"])
+        self.assertTrue(boundary["repair_guard_must_pass_before_delegated_enablement"])
 
     def test_control_interface_has_short_commands(self):
         control = self.load("governance/SCHEDULER_CONTROL_INTERFACE.json")

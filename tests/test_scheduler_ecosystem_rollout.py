@@ -29,7 +29,7 @@ class SchedulerEcosystemRolloutTests(unittest.TestCase):
         self.assertFalse(authority["full_swarm_auto_start_allowed"])
         self.assertTrue(authority["spawn_authority_is_not_mutation_authority"])
 
-    def test_schedule_task_state_is_separate_but_scoped_human_repair_may_restore_mappings(self):
+    def test_schedule_task_state_is_separate_but_guarded_human_repair_may_restore_mappings(self):
         boundary = self.policy["scheduler_state_boundary"]
         self.assertTrue(boundary["synchronization_authorized_by_human_directive"])
         self.assertTrue(boundary["declared_mapping_required"])
@@ -40,12 +40,15 @@ class SchedulerEcosystemRolloutTests(unittest.TestCase):
         )
         self.assertTrue(boundary["enable_repair_requires_active_scoped_human_authorization"])
         self.assertTrue(
-            boundary["disabled_to_enabled_requires_direct_human_request_or_active_scoped_human_repair_grant"]
+            boundary["disabled_to_enabled_requires_direct_human_request_or_current_scoped_budgeted_human_repair_grant"]
         )
+        self.assertTrue(boundary["repair_guard_must_pass_before_delegated_enablement"])
+        self.assertTrue(boundary["repair_grant_must_be_time_bounded"])
+        self.assertTrue(boundary["repair_budget_exhaustion_requires_quarantine"])
         self.assertTrue(boundary["capacity_availability_is_not_activation_authorization"])
         self.assertEqual(
             boundary["capacity_release_action"],
-            "RETRY_IF_ACTIVE_SCOPED_HUMAN_REPAIR_GRANT_ELSE_REPORT_READY_FOR_HUMAN_ENABLEMENT",
+            "RETRY_IF_CURRENT_SCOPED_BUDGETED_HUMAN_REPAIR_GRANT_ELSE_REPORT_READY_FOR_HUMAN_ENABLEMENT",
         )
         self.assertTrue(boundary["may_disable_mapped_chatgpt_task_when_binding_policy_is_MIRROR"])
         self.assertTrue(boundary["must_keep_MIRROR_DISABLED_STANDBY_disabled"])

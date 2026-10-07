@@ -19,7 +19,26 @@ def _occurrence_id(job_id: str, scheduled_for: datetime) -> str:
     return f"{job_id}:{scheduled_for.strftime('%Y%m%dT%H%MZ')}"
 
 
-def _mature_occurrences(job: dict, *, observed_at: datetime, count: int) -> list[datetime]:
+def _health_evidence_deadline_minutes(job: dict, policy: dict) -> int:
+    job_grace = int(job.get("schedule", {}).get("grace_minutes", 0))
+    receipt_window = int(policy.get("receipt_acceptance_window_minutes", 0))
+    persistence_grace = int(policy.get("receipt_persistence_grace_minutes", 0))
+    configured_deadline = int(policy.get("health_evidence_deadline_minutes", 0))
+    minimum_deadline = max(job_grace, receipt_window + persistence_grace)
+    if configured_deadline < minimum_deadline:
+        raise ValueError(
+            "health evidence deadline must cover job grace and receipt acceptance plus persistence grace"
+        )
+    return configured_deadline
+
+
+def _mature_occurrences(
+    job: dict,
+    *,
+    observed_at: datetime,
+    count: int,
+    evidence_deadline_minutes: int,
+) -> list[datetime]:
     schedule = job["schedule"]
     if schedule.get("type") != "HOURLY_MINUTE_OFFSETS":
         raise ValueError("unsupported schedule type for health qualification")
@@ -27,8 +46,7 @@ def _mature_occurrences(job: dict, *, observed_at: datetime, count: int) -> list
     if len(offsets) != 1:
         raise ValueError("health qualification requires exactly one hourly minute offset")
     minute = int(offsets[0])
-    grace = timedelta(minutes=int(schedule.get("grace_minutes", 0)))
-    cutoff = observed_at.astimezone(UTC) - grace
+    cutoff = observed_at.astimezone(UTC) - timedelta(minutes=evidence_deadline_minutes)
     anchor = cutoff.replace(minute=minute, second=0, microsecond=0)
     if anchor > cutoff:
         anchor -= timedelta(hours=1)
@@ -71,7 +89,13 @@ def evaluate_scheduler_health(
             })
             continue
         try:
-            mature = _mature_occurrences(job, observed_at=observed_at, count=required)
+            evidence_deadline = _health_evidence_deadline_minutes(job, policy)
+            mature = _mature_occurrences(
+                job,
+                observed_at=observed_at,
+                count=required,
+                evidence_deadline_minutes=evidence_deadline,
+            )
         except ValueError as exc:
             lanes.append({
                 "job_id": job_id,
@@ -113,6 +137,7 @@ def evaluate_scheduler_health(
             "healthy": healthy,
             "required_consecutive_verified_occurrences": required,
             "verified_consecutive_occurrences": consecutive,
+            "health_evidence_deadline_minutes": evidence_deadline,
             "latest_mature_occurrence_id": expected_ids[0],
             "evaluated_occurrence_ids": expected_ids,
             "missing_occurrence_ids": missing,
@@ -123,6 +148,9 @@ def evaluate_scheduler_health(
         "schema": "org-agent-mesh/scheduler-health-report/v1",
         "observed_at": observed_at.astimezone(UTC).isoformat().replace("+00:00", "Z"),
         "required_consecutive_verified_occurrences": required,
+        "receipt_acceptance_window_minutes": int(policy.get("receipt_acceptance_window_minutes", 0)),
+        "receipt_persistence_grace_minutes": int(policy.get("receipt_persistence_grace_minutes", 0)),
+        "health_evidence_deadline_minutes": int(policy.get("health_evidence_deadline_minutes", 0)),
         "lane_count": len(lanes),
         "healthy_lane_count": len(lanes) - len(unhealthy),
         "unhealthy_lane_count": len(unhealthy),

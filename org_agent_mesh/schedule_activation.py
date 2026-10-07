@@ -29,6 +29,8 @@ class ScheduleStateChangeRequest:
     declared_repair_actor: bool = False
     repair_authorization_ref: str | None = None
     repair_scope_contains_task: bool = False
+    repair_guard_passed: bool = False
+    repair_guard_reason: str | None = None
 
 
 @dataclass(frozen=True)
@@ -42,10 +44,10 @@ def evaluate_schedule_state_change(request: ScheduleStateChangeRequest) -> Sched
     """Enforce human-controlled activation with bounded delegated liveness repair.
 
     A disabled task can be enabled directly by an explicit current human request. A
-    declared SYSTEM/RECOVERY reconciler may also restore an already-declared mapped
-    task only when it carries a durable human repair authorization reference and the
-    target is explicitly inside that authorization's scope. This is repair authority,
-    not general activation or task-creation authority.
+    declared SYSTEM/RECOVERY reconciler may restore an already-declared mapped task
+    only when it carries a durable human repair authorization reference, the target is
+    explicitly in scope, and the separate time/budget/quarantine repair guard passed.
+    This is repair authority, not general activation or task-creation authority.
     """
     if request.requested_enabled == request.current_enabled:
         return ScheduleStateDecision(
@@ -84,6 +86,7 @@ def evaluate_schedule_state_change(request: ScheduleStateChangeRequest) -> Sched
         and request.declared_repair_actor
         and bool(request.repair_authorization_ref)
         and request.repair_scope_contains_task
+        and request.repair_guard_passed
     ):
         return ScheduleStateDecision(
             allowed=True,
@@ -91,9 +94,13 @@ def evaluate_schedule_state_change(request: ScheduleStateChangeRequest) -> Sched
             reason="HUMAN_AUTHORIZED_DECLARED_LIVENESS_REPAIR",
         )
 
+    guard_detail = (
+        f" ({request.repair_guard_reason})" if request.repair_guard_reason else ""
+    )
     raise ScheduleActivationError(
         "Scheduled swarm tasks may only be enabled by an explicit current human request "
-        "or a declared repair actor operating inside an active human repair authorization"
+        "or a declared repair actor operating inside a current scoped human repair authorization "
+        f"that passed the repair guard{guard_detail}"
     )
 
 
@@ -106,6 +113,8 @@ def require_preserve_enabled_state(
     declared_repair_actor: bool = False,
     repair_authorization_ref: str | None = None,
     repair_scope_contains_task: bool = False,
+    repair_guard_passed: bool = False,
+    repair_guard_reason: str | None = None,
 ) -> bool:
     """Use for migrations/alignment so omitted state remains unchanged by construction."""
     if proposed_enabled is None:
@@ -120,6 +129,8 @@ def require_preserve_enabled_state(
             declared_repair_actor=declared_repair_actor,
             repair_authorization_ref=repair_authorization_ref,
             repair_scope_contains_task=repair_scope_contains_task,
+            repair_guard_passed=repair_guard_passed,
+            repair_guard_reason=repair_guard_reason,
         )
     )
     return decision.resulting_enabled

@@ -15,9 +15,6 @@ class SchedulerPolicyCoherenceTests(unittest.TestCase):
         policy = self.load("governance/INTERNAL_SPAWN_SCHEDULER_POLICY.json")
         grant = self.load("governance/SCHEDULER_ACTIVATION_GRANT_2026-10-07.json")
 
-        # General self-activation remains prohibited. The liveness path is not a general
-        # recovery capability: it is an exact-target exception backed by this explicit
-        # current human authorization grant.
         global_activation = entrypoint["scheduled_task_activation_policy"]
         self.assertFalse(global_activation["automatic_reenable"])
         self.assertFalse(global_activation["recovery_may_enable"])
@@ -39,23 +36,33 @@ class SchedulerPolicyCoherenceTests(unittest.TestCase):
         )
         self.assertTrue(boundary["enable_repair_requires_active_scoped_human_authorization"])
         self.assertTrue(
-            boundary["disabled_to_enabled_requires_direct_human_request_or_active_scoped_human_repair_grant"]
+            boundary["disabled_to_enabled_requires_direct_human_request_or_current_scoped_budgeted_human_repair_grant"]
         )
+        self.assertTrue(boundary["repair_grant_must_be_time_bounded"])
+        self.assertTrue(boundary["repair_grant_automatic_extension_prohibited"])
+        self.assertTrue(boundary["repair_guard_must_pass_before_delegated_enablement"])
+        self.assertTrue(boundary["repair_budget_exhaustion_requires_quarantine"])
         self.assertTrue(boundary["capacity_availability_is_not_activation_authorization"])
         self.assertTrue(boundary["capacity_deferred_enablement_may_retry_after_capacity_release_under_active_repair_grant"])
         self.assertEqual(
             boundary["capacity_release_action"],
-            "RETRY_IF_ACTIVE_SCOPED_HUMAN_REPAIR_GRANT_ELSE_REPORT_READY_FOR_HUMAN_ENABLEMENT",
+            "RETRY_IF_CURRENT_SCOPED_BUDGETED_HUMAN_REPAIR_GRANT_ELSE_REPORT_READY_FOR_HUMAN_ENABLEMENT",
         )
 
         self.assertEqual(grant["allowed_transition"], "DISABLED_TO_ENABLED_ONLY")
         self.assertTrue(grant["required_conditions"]["exact_declared_binding_required"])
         self.assertTrue(grant["required_conditions"]["canonical_backend_enabled_required"])
         self.assertTrue(grant["required_conditions"]["account_capacity_available_required"])
+        self.assertTrue(grant["required_conditions"]["repair_guard_must_pass"])
         self.assertTrue(grant["prohibited_targets"]["mirror_disabled_standby"])
         self.assertTrue(grant["prohibited_targets"]["frontend_only_personal"])
         self.assertFalse(grant["mutation_limits"]["create_task"])
         self.assertFalse(grant["mutation_limits"]["replace_task"])
+        self.assertFalse(grant["renewal"]["automatic_extension_allowed"])
+        self.assertEqual(
+            grant["repair_budget"]["on_exhaustion"],
+            "QUARANTINE_REPAIR_AND_REQUIRE_HUMAN",
+        )
 
     def test_capacity_binding_can_retry_only_under_scoped_repair_grant(self):
         bindings = self.load("governance/SCHEDULER_FRONTEND_BINDINGS.json")

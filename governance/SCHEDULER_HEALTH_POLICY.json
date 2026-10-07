@@ -1,9 +1,12 @@
 {
   "schema": "org-agent-mesh/scheduler-health-policy/v1",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "status": "ACTIVE",
-  "purpose": "Fail closed when mapped frontend scheduler occurrences lack execution evidence and require sustained verified cadence before a lane is declared healthy.",
+  "purpose": "Fail closed when mapped frontend scheduler occurrences lack execution evidence, avoid premature failure before valid receipt evidence can arrive, and require sustained verified cadence before a lane is trusted for consequential work.",
   "required_consecutive_verified_occurrences": 3,
+  "receipt_acceptance_window_minutes": 30,
+  "receipt_persistence_grace_minutes": 5,
+  "health_evidence_deadline_minutes": 35,
   "health_states": [
     "HEALTHY",
     "RECOVERING",
@@ -20,13 +23,45 @@
     "latest_mature_occurrence_must_be_verified": true,
     "healthy_requires_consecutive_verified_occurrences": true,
     "standby_disabled_jobs_are_excluded_from_active_health": true,
-    "unknown_or_unsupported_schedule_is_unqualified": true
+    "unknown_or_unsupported_schedule_is_unqualified": true,
+    "health_deadline_must_cover_job_grace": true,
+    "health_deadline_must_cover_receipt_acceptance_plus_persistence_grace": true,
+    "absence_before_health_evidence_deadline_is_not_missing_execution_failure": true
+  },
+  "work_admission": {
+    "reference_runtime": "org_agent_mesh.scheduler_work_gate",
+    "health_gate_is_additional_restriction_not_authority": true,
+    "HEALTHY": [
+      "READ_ONLY",
+      "APPEND_ONLY_OBSERVABILITY",
+      "REVERSIBLE_MUTATION",
+      "PROTECTED_MUTATION"
+    ],
+    "RECOVERING": [
+      "READ_ONLY",
+      "APPEND_ONLY_OBSERVABILITY"
+    ],
+    "DEGRADED_MISSING_EXECUTION_EVIDENCE": [
+      "READ_ONLY",
+      "APPEND_ONLY_OBSERVABILITY"
+    ],
+    "UNQUALIFIED": [
+      "READ_ONLY",
+      "APPEND_ONLY_OBSERVABILITY"
+    ],
+    "unknown_health_state_fails_closed": true,
+    "normal_project_role_mutation_and_consequence_gates_still_required_when_scheduler_health_is_HEALTHY": true
   },
   "common_mode_boundary": {
     "chatgpt_bridge_and_slot1_share_provider_failure_domain": true,
     "secondary_chatgpt_task_is_not_independent_provider_failover": true,
     "independent_backend_clock_may_detect_but_cannot_claim_frontend_repair_without_an_actuation_interface": true,
     "absence_of_out_of_band_actuator_must_be_reported_as_capability_blocked_not_healthy": true
+  },
+  "mutation_ledger": {
+    "policy": "governance/SCHEDULER_MUTATION_LEDGER_POLICY.json",
+    "active_ledger": "governance/SCHEDULER_MUTATION_LEDGER_V2_2026-10-07.jsonl",
+    "tamper_evident_hash_chain_required": true
   },
   "mutation_ledger_required_fields": [
     "observed_at",
