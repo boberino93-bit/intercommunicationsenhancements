@@ -29,13 +29,19 @@ class SchedulerEcosystemRolloutTests(unittest.TestCase):
         self.assertFalse(authority["full_swarm_auto_start_allowed"])
         self.assertTrue(authority["spawn_authority_is_not_mutation_authority"])
 
-    def test_schedule_task_state_remains_separate_human_gate(self):
+    def test_schedule_task_state_is_separate_but_declared_mappings_may_sync(self):
         boundary = self.policy["scheduler_state_boundary"]
-        self.assertFalse(boundary["may_enable_existing_chatgpt_scheduled_tasks"])
-        self.assertFalse(boundary["may_reenable_disabled_chatgpt_scheduled_tasks"])
-        self.assertFalse(boundary["may_disable_existing_chatgpt_scheduled_tasks"])
-        self.assertFalse(boundary["may_reschedule_existing_chatgpt_scheduled_tasks"])
-        self.assertTrue(boundary["disabled_task_remains_human_control_gate"])
+        self.assertTrue(boundary["synchronization_authorized_by_human_directive"])
+        self.assertTrue(boundary["declared_mapping_required"])
+        self.assertTrue(boundary["may_reconcile_mapped_chatgpt_scheduled_tasks"])
+        self.assertTrue(boundary["may_enable_mapped_chatgpt_task_when_binding_policy_is_MIRROR"])
+        self.assertTrue(boundary["may_disable_mapped_chatgpt_task_when_binding_policy_is_MIRROR"])
+        self.assertTrue(boundary["may_reschedule_mapped_chatgpt_task_to_canonical_backend_schedule"])
+        self.assertFalse(boundary["may_modify_unmapped_chatgpt_tasks"])
+        self.assertFalse(boundary["may_create_or_delete_unmapped_chatgpt_tasks"])
+        self.assertFalse(boundary["may_infer_mapping_from_title_similarity"])
+        self.assertTrue(boundary["personal_frontend_tasks_remain_frontend_control"])
+        self.assertTrue(boundary["scheduler_sync_does_not_expand_project_mutation_authority"])
 
     def test_new_project_factory_materializes_scheduler_files(self):
         outputs = {item["output"] for item in self.kit["required_documents"]}
