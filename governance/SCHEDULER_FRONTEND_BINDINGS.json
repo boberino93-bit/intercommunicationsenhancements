@@ -1,6 +1,6 @@
 {
   "schema": "org-agent-mesh/scheduler-frontend-bindings/v1",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "status": "ACTIVE",
   "reconciliation_directive": "governance/SCHEDULER_SYNCHRONIZATION_DIRECTIVE.json",
   "activation_gate": "org_agent_mesh.schedule_activation",
@@ -93,7 +93,7 @@
     {
       "binding_id": "capacity-slot-5-frontend",
       "backend_job_id": "global-capacity-slot-5",
-      "frontend_automation_id": "6ac65689018c8191b598a8395a679a25",
+      "frontend_automation_id": "6ac65689018c8191bf5128a1e6ce6815",
       "frontend_title": "Swarm Capacity Slot 5",
       "mode": "MIRROR",
       "schedule_authority": "BACKEND",
