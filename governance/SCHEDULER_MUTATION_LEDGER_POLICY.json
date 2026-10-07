@@ -1,12 +1,25 @@
 {
   "schema": "org-agent-mesh/scheduler-mutation-ledger-policy/v1",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "status": "SUPERSEDED_FOR_NEW_WRITES",
   "active_journal_policy": "governance/SCHEDULER_MUTATION_JOURNAL_POLICY.json",
   "active_journal_root": "governance/scheduler-mutation-journal-v3",
   "active_journal_validator": "org_agent_mesh.scheduler_mutation_journal",
   "historical_v2_ledger": "governance/SCHEDULER_MUTATION_LEDGER_V2_2026-10-07.jsonl",
   "legacy_v1_ledger": "governance/SCHEDULER_MUTATION_LEDGER_2026-10-07.jsonl",
+  "hash_algorithm": "SHA-256",
+  "requirements": {
+    "append_only": true,
+    "strict_sequence": true,
+    "unique_event_id": true,
+    "previous_event_hash_required": true,
+    "event_hash_required": true,
+    "silent_rewrite_or_reordering_is_invalid": true,
+    "new_writes_use_immutable_create_new_file_only_journal": true,
+    "deterministic_sequence_claim_required_before_new_mutation": true,
+    "claim_readback_required_before_mutation": true,
+    "stranded_claim_blocks_automatic_mutation": true
+  },
   "migration": {
     "historical_ledgers_preserved": true,
     "new_writes_to_v1_or_v2_prohibited": true,
