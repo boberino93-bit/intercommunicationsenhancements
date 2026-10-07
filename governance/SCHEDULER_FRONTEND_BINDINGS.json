@@ -1,6 +1,6 @@
 {
   "schema": "org-agent-mesh/scheduler-frontend-bindings/v1",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "status": "ACTIVE",
   "reconciliation_directive": "governance/SCHEDULER_SYNCHRONIZATION_DIRECTIVE.json",
   "distribution_strategy": "PLAN_LIMIT_AWARE_EVEN_12_MINUTE_STAGGER",
@@ -63,7 +63,7 @@
     {
       "binding_id": "capacity-slot-4-frontend",
       "backend_job_id": "global-capacity-slot-4",
-      "frontend_automation_id": "6ac377927fbc81919028f4ad0d3666e3",
+      "frontend_automation_id": "6ac658dad9a881919e43aba112f23364",
       "frontend_title": "Swarm Capacity Slot 4",
       "mode": "MIRROR",
       "schedule_authority": "BACKEND",
@@ -71,7 +71,8 @@
       "enabled_state_policy": "MIRROR",
       "expected_timezone": "America/Vancouver",
       "expected_minute_offset": 36,
-      "purpose": "Expose one canonical bounded capacity lane as an actual ChatGPT scheduled model invocation."
+      "purpose": "Expose one canonical bounded capacity lane as an actual ChatGPT scheduled model invocation.",
+      "capacity_note": "Rebound 2026-10-07 after the prior frontend task repeatedly accepted immediate-run requests without advancing its execution timestamp and repeatedly toggled disabled; replacement carries the ordinary-worker scheduler-state fence from creation."
     },
     {
       "binding_id": "capacity-slot-5-frontend",
