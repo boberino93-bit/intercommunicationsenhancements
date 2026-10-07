@@ -12,6 +12,12 @@ Human messages can interrupt an agent's current execution without cancelling or 
 
 **A USER MESSAGE DOES NOT STOP AN ACTIVE ASSIGNMENT UNLESS THE USER EXPLICITLY SAYS NOT TO CONTINUE OR OTHERWISE CHANGES EXECUTION STATE.**
 
+The canonical compatibility wording remains explicit:
+
+**A USER CONTROL MESSAGE IS NOT A CANCELLATION.**
+
+For a control message, **answer the control message immediately**, then **resume the interrupted work automatically** unless the message explicitly changes execution state. **A control-message response is not task completion.**
+
 When a valid assignment is already active, the universal post-response default is:
 
 > **ANSWER THE USER, THEN CONTINUE WHERE YOU LEFT OFF.**
