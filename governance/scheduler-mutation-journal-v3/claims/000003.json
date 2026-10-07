@@ -1,0 +1,10 @@
+{
+  "schema": "org-agent-mesh/scheduler-mutation-claim/v1",
+  "sequence": 3,
+  "event_id": "sched-mut-20261007-0003",
+  "actor": "GPT-5.6-Sol",
+  "previous_event_hash": "5d465cf13c507f4157c0abe3cf37fa71ce385356f73e081d3c9ecf4adaff0cca",
+  "claimed_at": "2026-10-07T22:13:20Z",
+  "purpose": "REPAIR_SLOT1_DISABLED_DRIFT_AFTER_PROMPT_ONLY_UPDATE",
+  "claim_hash": "03942e26b9234ca1482d345fe04c1946ad1d47af94753e2b873f60bcf2446a16"
+}
