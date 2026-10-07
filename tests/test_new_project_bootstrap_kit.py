@@ -26,9 +26,12 @@ class NewProjectBootstrapKitTests(unittest.TestCase):
                 "PROJECT_CHARTER.md",
                 "HARDENING_STATUS.md",
                 "NEW_PROJECT_BOOTSTRAP.json",
+                "INTERNAL_SCHEDULER_SERVICE_BINDING.json",
+                "bootstrap/INTERNAL_SCHEDULER_SERVICE.json",
             },
         )
         self.assertIn(".interagent/handoffs", kit["required_directories"])
+        self.assertIn("bootstrap", kit["required_directories"])
         for item in kit["required_documents"]:
             self.assertTrue((ROOT / item["template"]).is_file(), item["template"])
 
@@ -40,15 +43,23 @@ class NewProjectBootstrapKitTests(unittest.TestCase):
             "BOOTSTRAP_ORDER.template.json",
             "MASTER_HANDOFF.template.json",
             "NEW_PROJECT_BOOTSTRAP.template.json",
+            "INTERNAL_SCHEDULER_SERVICE_BINDING.template.json",
+            "INTERNAL_SCHEDULER_SERVICE.template.json",
         ]
         for name in template_names:
             raw = (ROOT / "templates" / "new-project" / name).read_text()
             parsed = json.loads(raw)
             repository = parsed.get("repository")
             if repository is not None:
-                self.assertEqual(repository.get("binding_state"), "UNBOUND")
+                binding_state = repository.get("binding_state")
+                if binding_state is not None:
+                    self.assertEqual(binding_state, "UNBOUND")
                 self.assertIsNone(repository.get("full_name"))
                 self.assertIsNone(repository.get("id"))
+            project = parsed.get("project")
+            if isinstance(project, dict):
+                self.assertIsNone(project.get("repository"))
+                self.assertIsNone(project.get("repository_id"))
             self.assertNotIn('"full_name": "boberino93-bit/', raw)
 
     def test_recursive_pointer_is_unbound_and_canonical(self):
@@ -58,6 +69,7 @@ class NewProjectBootstrapKitTests(unittest.TestCase):
         self.assertEqual(pointer["canonical_kit"]["repository"], "boberino93-bit/intercommunicationsenhancements")
         self.assertTrue(pointer["rules"]["materialize_this_pointer_in_every_seeded_project"])
         self.assertTrue(pointer["rules"]["new_project_must_receive_master_handoff"])
+        self.assertTrue(pointer["rules"]["new_project_must_receive_scheduler_binding"])
         self.assertFalse(pointer["local_reference"]["copy_identity_values"])
 
     def test_global_entrypoint_has_explicit_new_project_branch(self):
