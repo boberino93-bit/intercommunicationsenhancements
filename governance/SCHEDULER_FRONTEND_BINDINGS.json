@@ -1,9 +1,9 @@
 {
   "schema": "org-agent-mesh/scheduler-frontend-bindings/v1",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "status": "ACTIVE",
   "reconciliation_directive": "governance/SCHEDULER_SYNCHRONIZATION_DIRECTIVE.json",
-  "distribution_strategy": "EVEN_10_MINUTE_STAGGER",
+  "distribution_strategy": "PLAN_LIMIT_AWARE_EVEN_12_MINUTE_STAGGER",
   "bindings": [
     {
       "binding_id": "capacity-slot-1-frontend",
@@ -13,10 +13,11 @@
       "mode": "MIRROR",
       "schedule_authority": "BACKEND",
       "execution_state_authority": "FRONTEND",
-      "enabled_state_policy": "MIRROR",
+      "enabled_state_policy": "MIRROR_WHEN_ACCOUNT_CAPACITY_AVAILABLE",
       "expected_timezone": "America/Vancouver",
       "expected_minute_offset": 0,
-      "purpose": "Expose one canonical bounded capacity lane as an actual ChatGPT scheduled model invocation."
+      "purpose": "Expose one canonical bounded capacity lane as an actual ChatGPT scheduled model invocation.",
+      "capacity_note": "Deferred while Morning Income Research occupies the fifth active-task slot; activate automatically when account capacity is released."
     },
     {
       "binding_id": "bounded-capacity-hourly-frontend",
@@ -28,7 +29,7 @@
       "execution_state_authority": "FRONTEND",
       "enabled_state_policy": "MIRROR",
       "expected_timezone": "America/Vancouver",
-      "expected_minute_offset": 10,
+      "expected_minute_offset": 12,
       "purpose": "Expose one canonical bounded capacity lane as an actual ChatGPT scheduled model invocation."
     },
     {
@@ -39,10 +40,11 @@
       "mode": "MIRROR",
       "schedule_authority": "BACKEND",
       "execution_state_authority": "FRONTEND",
-      "enabled_state_policy": "MIRROR",
+      "enabled_state_policy": "MIRROR_DISABLED_STANDBY",
       "expected_timezone": "America/Vancouver",
-      "expected_minute_offset": 20,
-      "purpose": "Expose one canonical bounded capacity lane as an actual ChatGPT scheduled model invocation."
+      "expected_minute_offset": 6,
+      "purpose": "Expose one canonical bounded capacity lane as an actual ChatGPT scheduled model invocation.",
+      "capacity_note": "Warm standby because the account limit is five active Scheduled Tasks and this slot had a prior unexplained scheduler-state disable."
     },
     {
       "binding_id": "capacity-slot-3-frontend",
@@ -54,7 +56,7 @@
       "execution_state_authority": "FRONTEND",
       "enabled_state_policy": "MIRROR",
       "expected_timezone": "America/Vancouver",
-      "expected_minute_offset": 30,
+      "expected_minute_offset": 24,
       "purpose": "Expose one canonical bounded capacity lane as an actual ChatGPT scheduled model invocation."
     },
     {
@@ -67,7 +69,7 @@
       "execution_state_authority": "FRONTEND",
       "enabled_state_policy": "MIRROR",
       "expected_timezone": "America/Vancouver",
-      "expected_minute_offset": 40,
+      "expected_minute_offset": 36,
       "purpose": "Expose one canonical bounded capacity lane as an actual ChatGPT scheduled model invocation."
     },
     {
@@ -80,7 +82,7 @@
       "execution_state_authority": "FRONTEND",
       "enabled_state_policy": "MIRROR",
       "expected_timezone": "America/Vancouver",
-      "expected_minute_offset": 50,
+      "expected_minute_offset": 48,
       "purpose": "Expose one canonical bounded capacity lane as an actual ChatGPT scheduled model invocation."
     },
     {

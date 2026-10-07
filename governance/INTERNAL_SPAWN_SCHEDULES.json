@@ -1,21 +1,30 @@
 {
   "schema": "org-agent-mesh/internal-spawn-schedule-registry/v1",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "timezone": "UTC",
   "catch_up_policy": "COALESCE_TO_LATEST",
   "distribution": {
-    "strategy": "EVEN_10_MINUTE_STAGGER",
-    "capacity_lanes_per_hour": 6,
-    "minimum_lane_spacing_minutes": 10,
-    "grace_minutes": 9,
-    "frontend_execution_mapped": true,
-    "purpose": "Maximize temporal distribution of bounded Research/Manager capacity while preventing overlapping backend due windows for the same logical occurrence."
+    "strategy": "PLAN_LIMIT_AWARE_EVEN_12_MINUTE_STAGGER",
+    "frontend_active_task_limit": 5,
+    "steady_state_capacity_lanes_per_hour": 5,
+    "configured_capacity_jobs": 6,
+    "minimum_active_lane_spacing_minutes": 12,
+    "grace_minutes": 11,
+    "standby_job_id": "global-capacity-slot-2",
+    "standby_reason": "Prior unexplained scheduler-state disable; retain as mapped warm standby while five healthy lanes fill the account limit.",
+    "temporary_frontend_reservation": {
+      "frontend_automation_id": "6ac6329227548191b598a8395a679a25",
+      "title": "Morning Income Research",
+      "release_condition": "ONE_TIME_TASK_COMPLETED",
+      "deferred_capacity_job_id": "global-capacity-slot-1"
+    },
+    "purpose": "Use the maximum five active ChatGPT Scheduled Tasks without crowding, while preserving the already-scheduled one-time income task until completion."
   },
   "jobs": [
     {
       "job_id": "global-capacity-slot-1",
       "enabled": true,
-      "schedule": {"type": "HOURLY_MINUTE_OFFSETS", "minute_offsets": [0], "grace_minutes": 9},
+      "schedule": {"type": "HOURLY_MINUTE_OFFSETS", "minute_offsets": [0], "grace_minutes": 11},
       "launch_scope": "GLOBAL_DEMAND_ROUTED_CAPACITY",
       "requested_roles": ["research", "manager"],
       "role_selection": "DEMAND_DRIVEN_ONE_ROLE_ONLY",
@@ -23,16 +32,16 @@
       "project_selection": "AUTHORIZED_DEMAND_SNAPSHOT_THEN_EXACT_SINGLE_PROJECT_BINDING",
       "execution_surface": "CHATGPT_FRONTEND_MAPPED",
       "frontend_title": "Swarm Capacity Slot 1",
+      "frontend_enabled_state_policy": "MIRROR_WHEN_ACCOUNT_CAPACITY_AVAILABLE",
       "primary_prohibited": true,
       "full_swarm_prohibited": true,
       "occurrence_idempotency_required": true,
-      "host_start_receipt_required": false,
-      "purpose": "Provide the 00-minute bounded worker lane through its explicitly mapped ChatGPT automation."
+      "host_start_receipt_required": false
     },
     {
       "job_id": "global-bounded-capacity-hourly",
       "enabled": true,
-      "schedule": {"type": "HOURLY_MINUTE_OFFSETS", "minute_offsets": [10], "grace_minutes": 9},
+      "schedule": {"type": "HOURLY_MINUTE_OFFSETS", "minute_offsets": [12], "grace_minutes": 11},
       "launch_scope": "GLOBAL_DEMAND_ROUTED_CAPACITY",
       "requested_roles": ["research", "manager"],
       "role_selection": "DEMAND_DRIVEN_ONE_ROLE_ONLY",
@@ -40,33 +49,16 @@
       "project_selection": "AUTHORIZED_DEMAND_SNAPSHOT_THEN_EXACT_SINGLE_PROJECT_BINDING",
       "execution_surface": "CHATGPT_FRONTEND_MAPPED",
       "frontend_title": "Bootstrap Spawn Bridge",
+      "frontend_enabled_state_policy": "MIRROR",
       "primary_prohibited": true,
       "full_swarm_prohibited": true,
       "occurrence_idempotency_required": true,
-      "host_start_receipt_required": false,
-      "purpose": "Provide the 10-minute bounded worker lane through its explicitly mapped ChatGPT automation."
-    },
-    {
-      "job_id": "global-capacity-slot-2",
-      "enabled": true,
-      "schedule": {"type": "HOURLY_MINUTE_OFFSETS", "minute_offsets": [20], "grace_minutes": 9},
-      "launch_scope": "GLOBAL_DEMAND_ROUTED_CAPACITY",
-      "requested_roles": ["research", "manager"],
-      "role_selection": "DEMAND_DRIVEN_ONE_ROLE_ONLY",
-      "max_workers_per_occurrence": 1,
-      "project_selection": "AUTHORIZED_DEMAND_SNAPSHOT_THEN_EXACT_SINGLE_PROJECT_BINDING",
-      "execution_surface": "CHATGPT_FRONTEND_MAPPED",
-      "frontend_title": "Swarm Capacity Slot 2",
-      "primary_prohibited": true,
-      "full_swarm_prohibited": true,
-      "occurrence_idempotency_required": true,
-      "host_start_receipt_required": false,
-      "purpose": "Provide the 20-minute bounded worker lane through its explicitly mapped ChatGPT automation."
+      "host_start_receipt_required": false
     },
     {
       "job_id": "global-capacity-slot-3",
       "enabled": true,
-      "schedule": {"type": "HOURLY_MINUTE_OFFSETS", "minute_offsets": [30], "grace_minutes": 9},
+      "schedule": {"type": "HOURLY_MINUTE_OFFSETS", "minute_offsets": [24], "grace_minutes": 11},
       "launch_scope": "GLOBAL_DEMAND_ROUTED_CAPACITY",
       "requested_roles": ["research", "manager"],
       "role_selection": "DEMAND_DRIVEN_ONE_ROLE_ONLY",
@@ -74,16 +66,16 @@
       "project_selection": "AUTHORIZED_DEMAND_SNAPSHOT_THEN_EXACT_SINGLE_PROJECT_BINDING",
       "execution_surface": "CHATGPT_FRONTEND_MAPPED",
       "frontend_title": "Swarm Capacity Slot 3",
+      "frontend_enabled_state_policy": "MIRROR",
       "primary_prohibited": true,
       "full_swarm_prohibited": true,
       "occurrence_idempotency_required": true,
-      "host_start_receipt_required": false,
-      "purpose": "Provide the 30-minute bounded worker lane through its explicitly mapped ChatGPT automation."
+      "host_start_receipt_required": false
     },
     {
       "job_id": "global-capacity-slot-4",
       "enabled": true,
-      "schedule": {"type": "HOURLY_MINUTE_OFFSETS", "minute_offsets": [40], "grace_minutes": 9},
+      "schedule": {"type": "HOURLY_MINUTE_OFFSETS", "minute_offsets": [36], "grace_minutes": 11},
       "launch_scope": "GLOBAL_DEMAND_ROUTED_CAPACITY",
       "requested_roles": ["research", "manager"],
       "role_selection": "DEMAND_DRIVEN_ONE_ROLE_ONLY",
@@ -91,16 +83,16 @@
       "project_selection": "AUTHORIZED_DEMAND_SNAPSHOT_THEN_EXACT_SINGLE_PROJECT_BINDING",
       "execution_surface": "CHATGPT_FRONTEND_MAPPED",
       "frontend_title": "Swarm Capacity Slot 4",
+      "frontend_enabled_state_policy": "MIRROR",
       "primary_prohibited": true,
       "full_swarm_prohibited": true,
       "occurrence_idempotency_required": true,
-      "host_start_receipt_required": false,
-      "purpose": "Provide the 40-minute bounded worker lane through its explicitly mapped ChatGPT automation."
+      "host_start_receipt_required": false
     },
     {
       "job_id": "global-capacity-slot-5",
       "enabled": true,
-      "schedule": {"type": "HOURLY_MINUTE_OFFSETS", "minute_offsets": [50], "grace_minutes": 9},
+      "schedule": {"type": "HOURLY_MINUTE_OFFSETS", "minute_offsets": [48], "grace_minutes": 11},
       "launch_scope": "GLOBAL_DEMAND_ROUTED_CAPACITY",
       "requested_roles": ["research", "manager"],
       "role_selection": "DEMAND_DRIVEN_ONE_ROLE_ONLY",
@@ -108,11 +100,29 @@
       "project_selection": "AUTHORIZED_DEMAND_SNAPSHOT_THEN_EXACT_SINGLE_PROJECT_BINDING",
       "execution_surface": "CHATGPT_FRONTEND_MAPPED",
       "frontend_title": "Swarm Capacity Slot 5",
+      "frontend_enabled_state_policy": "MIRROR",
+      "primary_prohibited": true,
+      "full_swarm_prohibited": true,
+      "occurrence_idempotency_required": true,
+      "host_start_receipt_required": false
+    },
+    {
+      "job_id": "global-capacity-slot-2",
+      "enabled": false,
+      "schedule": {"type": "HOURLY_MINUTE_OFFSETS", "minute_offsets": [6], "grace_minutes": 5},
+      "launch_scope": "GLOBAL_DEMAND_ROUTED_CAPACITY",
+      "requested_roles": ["research", "manager"],
+      "role_selection": "DEMAND_DRIVEN_ONE_ROLE_ONLY",
+      "max_workers_per_occurrence": 1,
+      "project_selection": "AUTHORIZED_DEMAND_SNAPSHOT_THEN_EXACT_SINGLE_PROJECT_BINDING",
+      "execution_surface": "CHATGPT_FRONTEND_MAPPED",
+      "frontend_title": "Swarm Capacity Slot 2",
+      "frontend_enabled_state_policy": "MIRROR_DISABLED_STANDBY",
       "primary_prohibited": true,
       "full_swarm_prohibited": true,
       "occurrence_idempotency_required": true,
       "host_start_receipt_required": false,
-      "purpose": "Provide the 50-minute bounded worker lane through its explicitly mapped ChatGPT automation."
+      "purpose": "Warm standby retained for failover or future capacity expansion."
     }
   ]
 }

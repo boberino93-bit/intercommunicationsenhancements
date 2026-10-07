@@ -26,19 +26,26 @@ class SchedulerSynchronizationTests(unittest.TestCase):
         self.assertTrue(rec["never_create_or_delete_frontend_task_without_explicit_binding_record"])
         self.assertTrue(rec["never_import_unmapped_personal_frontend_tasks_into_backend"])
 
-    def test_six_capacity_lanes_are_one_to_one_mapped_and_evenly_distributed(self):
+    def test_capacity_lanes_are_one_to_one_mapped_and_plan_limit_aware(self):
         registry = self.load("governance/INTERNAL_SPAWN_SCHEDULES.json")
         bindings = self.load("governance/SCHEDULER_FRONTEND_BINDINGS.json")["bindings"]
         jobs = registry["jobs"]
         mapped = [b for b in bindings if b["mode"] == "MIRROR"]
 
-        self.assertEqual(registry["distribution"]["strategy"], "EVEN_10_MINUTE_STAGGER")
+        self.assertEqual(registry["distribution"]["strategy"], "PLAN_LIMIT_AWARE_EVEN_12_MINUTE_STAGGER")
+        self.assertEqual(registry["distribution"]["frontend_active_task_limit"], 5)
         self.assertEqual(len(jobs), 6)
         self.assertEqual(len(mapped), 6)
+        self.assertEqual(sum(1 for job in jobs if job["enabled"]), 5)
 
-        expected_offsets = [0, 10, 20, 30, 40, 50]
-        observed_offsets = sorted(job["schedule"]["minute_offsets"][0] for job in jobs)
-        self.assertEqual(observed_offsets, expected_offsets)
+        expected_active_offsets = [0, 12, 24, 36, 48]
+        observed_active_offsets = sorted(
+            job["schedule"]["minute_offsets"][0] for job in jobs if job["enabled"]
+        )
+        self.assertEqual(observed_active_offsets, expected_active_offsets)
+        standby = [job for job in jobs if not job["enabled"]]
+        self.assertEqual(len(standby), 1)
+        self.assertEqual(standby[0]["job_id"], "global-capacity-slot-2")
 
         backend_ids = {job["job_id"] for job in jobs}
         mapped_ids = {binding["backend_job_id"] for binding in mapped}
@@ -46,27 +53,43 @@ class SchedulerSynchronizationTests(unittest.TestCase):
         self.assertEqual(len({binding["frontend_automation_id"] for binding in mapped}), 6)
 
         for job in jobs:
-            self.assertTrue(job["enabled"])
-            self.assertEqual(job["schedule"]["grace_minutes"], 9)
+            if job["enabled"]:
+                self.assertEqual(job["schedule"]["grace_minutes"], 11)
             self.assertEqual(job["max_workers_per_occurrence"], 1)
             self.assertEqual(job["execution_surface"], "CHATGPT_FRONTEND_MAPPED")
             self.assertTrue(job["primary_prohibited"])
             self.assertTrue(job["full_swarm_prohibited"])
 
-    def test_backend_clock_spacing_cannot_keep_previous_lane_due(self):
+    def test_backend_clock_spacing_cannot_keep_previous_active_lane_due(self):
         workflow = (ROOT / ".github/workflows/internal-spawn-scheduler.yml").read_text()
-        self.assertIn('cron: "*/10 * * * *"', workflow)
+        self.assertIn('cron: "0,12,24,36,48 * * * *"', workflow)
         self.assertNotIn("--dispatch", workflow)
 
         registry = self.load("governance/INTERNAL_SPAWN_SCHEDULES.json")
-        offsets = sorted(job["schedule"]["minute_offsets"][0] for job in registry["jobs"])
+        offsets = sorted(
+            job["schedule"]["minute_offsets"][0]
+            for job in registry["jobs"]
+            if job["enabled"]
+        )
         grace = registry["distribution"]["grace_minutes"]
         cyclic_gaps = [
             (offsets[(i + 1) % len(offsets)] - offsets[i]) % 60
             for i in range(len(offsets))
         ]
-        self.assertTrue(all(gap == 10 for gap in cyclic_gaps))
+        self.assertTrue(all(gap == 12 for gap in cyclic_gaps))
         self.assertLess(grace, min(cyclic_gaps))
+
+    def test_capacity_defer_and_standby_policies_are_explicit(self):
+        bindings = self.load("governance/SCHEDULER_FRONTEND_BINDINGS.json")["bindings"]
+        by_title = {binding["frontend_title"]: binding for binding in bindings}
+        self.assertEqual(
+            by_title["Swarm Capacity Slot 1"]["enabled_state_policy"],
+            "MIRROR_WHEN_ACCOUNT_CAPACITY_AVAILABLE",
+        )
+        self.assertEqual(
+            by_title["Swarm Capacity Slot 2"]["enabled_state_policy"],
+            "MIRROR_DISABLED_STANDBY",
+        )
 
     def test_personal_frontend_tasks_are_not_auto_mutated(self):
         bindings = self.load("governance/SCHEDULER_FRONTEND_BINDINGS.json")["bindings"]
