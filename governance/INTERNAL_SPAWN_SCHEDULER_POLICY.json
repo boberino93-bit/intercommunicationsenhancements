@@ -1,6 +1,6 @@
 {
   "schema": "org-agent-mesh/internal-spawn-scheduler-policy/v1",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "status": "ACTIVE_BY_EXPLICIT_HUMAN_REQUEST",
   "service": {
     "enabled": true,
@@ -66,6 +66,7 @@
   "scheduler_state_boundary": {
     "synchronization_authorized_by_human_directive": true,
     "declared_mapping_required": true,
+    "may_reconcile_mapped_chatgpt_scheduled_tasks": true,
     "declared_frontend_reconciler_automation_id": "6ac63d38cc688191b9de4213ca40f951",
     "declared_frontend_reconciler_title": "Bootstrap Spawn Bridge",
     "ordinary_capacity_workers_scheduler_state_access": "READ_DETECT_REPORT_ONLY",
