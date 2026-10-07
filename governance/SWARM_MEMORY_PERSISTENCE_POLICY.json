@@ -1,0 +1,79 @@
+{
+  "schema": "org-agent-mesh/swarm-memory-persistence-policy/v1",
+  "policy_id": "IEP-MEM-001",
+  "version": "1.0.0",
+  "status": "ACTIVE",
+  "priority": "P1",
+  "scope": "GLOBAL_ALL_AGENT_TYPES",
+  "title": "External-only swarm memory and persistence",
+  "purpose": "Prevent native ChatGPT memory or any implicit host-memory layer from becoming swarm collective state, cache, log, fallback, or authority.",
+  "canonical_persistence": {
+    "artifactory": {
+      "authority": "CANONICAL",
+      "coordination_root": "/Intercommunication enhancements/AgentBus",
+      "message_board": "/Intercommunication enhancements/AgentBus/messages",
+      "namespace": "intercommunicationsenhancements::messages"
+    },
+    "github": {
+      "authority": "DURABLE_SOURCE_VERSION_CONTROL_AND_BACKUP_NON_CANONICAL_COORDINATION",
+      "repository": "boberino93-bit/intercommunicationsenhancements",
+      "coordination_backup_prefix": "agentbus-backup/coordination-messages/"
+    }
+  },
+  "native_chatgpt_memory": {
+    "swarm_authority": "DENY",
+    "protocol_access": "MUST_NOT_CALL",
+    "recall_ingestion": "DENY",
+    "fallback": "DENY",
+    "cache_source": "DENY",
+    "log_source": "DENY",
+    "collective_state_source": "DENY",
+    "mutation_authority": "DENY"
+  },
+  "local_runtime_state": {
+    "ephemeral_compute": "ALLOW_NON_AUTHORITATIVE_ONLY",
+    "local_files_or_sqlite": "ALLOW_REFERENCE_OR_TRANSIENT_ONLY",
+    "collective_authority": "DENY",
+    "promotion_without_external_persistence": "DENY"
+  },
+  "required_external_record_classes": [
+    "collective_cached_data",
+    "records",
+    "logs",
+    "forensic_findings",
+    "architecture_directives",
+    "synchronization_state",
+    "handoffs",
+    "operational_state",
+    "persistent_swarm_services"
+  ],
+  "conflict_policy": {
+    "external_state_precedence": true,
+    "artifactory_is_canonical": true,
+    "github_may_not_silently_override_artifactory": true,
+    "artifactory_github_mismatch": "STOP_AFFECTED_AUTHORITY_DEPENDENT_BRANCH_AND_SURFACE_CONFLICT",
+    "native_memory_conflict": "IGNORE_FOR_AUTHORITY_AND_REQUIRE_EXTERNAL_READBACK"
+  },
+  "failure_policy": {
+    "canonical_artifactory_unavailable": "FAIL_CLOSED_FOR_AFFECTED_PERSISTENCE_DEPENDENT_BRANCH",
+    "native_memory_fallback": "DENY",
+    "continue_unrelated_safe_work": true
+  },
+  "propagation_claim": {
+    "requires_artifactory_readback": true,
+    "requires_github_revision_or_backup_readback": true,
+    "one_store_does_not_imply_other_store": true
+  },
+  "migration_rule": "Any swarm fact stored only in native ChatGPT memory is non-authoritative until externalized to an approved external store and independently read back.",
+  "implementation": {
+    "protocol": "protocols/external_swarm_memory.md",
+    "runtime_guard": "org_agent_mesh/swarm_memory_policy.py",
+    "test": "tests/test_swarm_memory_policy.py",
+    "startup_context": "AGENT_CONTEXT_REFERENCE.md"
+  },
+  "forensic_basis": {
+    "record": "/Intercommunication enhancements/AgentBus/evaluation/20261007T170000Z__MEMORY_PERSISTENCE_FAULT_FORENSIC_REPORT.md",
+    "example_a_sha256": "739cfb244e9e105b3e43074db62c1e7816a1fa2d9680c58c56a5a3fdc9ed12f5",
+    "classification": "CONFIRMED_FAULT"
+  }
+}

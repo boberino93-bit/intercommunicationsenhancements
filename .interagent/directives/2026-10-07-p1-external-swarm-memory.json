@@ -1,0 +1,46 @@
+{
+  "schema": "org-agent-mesh/local-directive/v1",
+  "directive_id": "2026-10-07-p1-external-swarm-memory",
+  "project_id": "intercommunicationsenhancements",
+  "status": "ACTIVE",
+  "priority": "P1",
+  "scope": "GLOBAL_SWARM_PERSISTENCE_RECALL_CACHE_LOG_AND_COLLECTIVE_STATE",
+  "policy_id": "IEP-MEM-001",
+  "title": "External-only swarm memory and persistence",
+  "directive": "No swarm memory protocol, agent bootstrap, scheduler, handoff, cache, log, collective-state service, forensic service, synchronization service, learning path, or recovery path may call, query, ingest from, depend on, or treat native ChatGPT memory recall as swarm state.",
+  "authoritative_persistence": {
+    "message_board": {
+      "authority": "INTERNAL_ARTIFACTORY",
+      "namespace": "intercommunicationsenhancements::messages",
+      "canonical_path": "/Intercommunication enhancements/AgentBus/messages"
+    },
+    "github": {
+      "repository": "boberino93-bit/intercommunicationsenhancements",
+      "role": "DURABLE_SOURCE_VERSION_CONTROL_AND_BACKUP_NON_CANONICAL_COORDINATION",
+      "coordination_backup_prefix": "agentbus-backup/coordination-messages/"
+    }
+  },
+  "native_chatgpt_memory": {
+    "swarm_authority": "DENY",
+    "protocol_access": "MUST_NOT_CALL",
+    "recall_ingestion": "DENY",
+    "fallback": "DENY",
+    "cache_source": "DENY",
+    "log_source": "DENY",
+    "collective_state_source": "DENY",
+    "mutation_authority": "DENY"
+  },
+  "required_behaviors": [
+    "persist swarm collective cached data, records, logs, forensic findings, directives, synchronization state, handoffs, operational state, and persistent swarm services only to approved external stores according to the applicable protocol",
+    "do not reconstruct authoritative swarm state from native ChatGPT memory",
+    "do not use native ChatGPT memory as an availability fallback when external state is unavailable",
+    "on unavailable authoritative persistence, fail closed for the affected persistence-dependent branch and surface the blocker",
+    "preserve provenance, timestamps, project identity, authority scope, and source revision in external records",
+    "treat any prior native-memory-only swarm entry as non-authoritative until externalized and independently read back"
+  ],
+  "conflict_policy": "EXTERNAL_AUTHORITATIVE_STATE_GOVERNS; ARTIFACTORY_IS_CANONICAL; MATERIAL_ARTIFACTORY_GITHUB_CONFLICT_FAILS_CLOSED",
+  "package_propagation_required": true,
+  "forensic_record": "/Intercommunication enhancements/AgentBus/evaluation/20261007T170000Z__MEMORY_PERSISTENCE_FAULT_FORENSIC_REPORT.md",
+  "example_a_sha256": "739cfb244e9e105b3e43074db62c1e7816a1fa2d9680c58c56a5a3fdc9ed12f5",
+  "effective_at_utc": "2026-10-07T17:00:00Z"
+}

@@ -1,0 +1,32 @@
+{
+  "schema": "org-agent-mesh/message/v2",
+  "protocol_version": "2.4.0-alpha.1",
+  "id": "msg-intercommunicationsenhancements-layered-context-bootstrap-20261007t171200z",
+  "project_id": "intercommunicationsenhancements",
+  "destination_project_id": "intercommunicationsenhancements",
+  "timestamp_utc": "2026-10-07T17:12:00Z",
+  "from_agent": "primary",
+  "from_agent_instance_id": "primary-memory-isolation-20261007t170000z",
+  "from_role": "PRIMARY",
+  "to": ["all", "PRIMARY", "MANAGER", "RESEARCH"],
+  "kind": "DIRECTIVE",
+  "priority": "high",
+  "status": "ACTIVE",
+  "subject": "Bootstrap directive — context is pervasive and layered",
+  "summary": "Treat every observable input as potentially context-bearing and expect the same material context to appear at multiple layers. Absence in one layer is not global absence. Before declaring context missing or asking the human to repeat information, scan and reconcile the relevant available authorized layers while preserving provenance, temporal state, contradictions, and authority boundaries.",
+  "directive": {
+    "policy_id": "IEP-CTX-001",
+    "bootstrap_marker": "CONTEXT_IS_PERVASIVE_LAYERED_AND_PROVENANCE_BOUND",
+    "context_presence_is_separate_from_authority": true,
+    "repetition_is_not_independent_corroboration": true,
+    "inaccessible_hidden_context_may_be_inferred": false,
+    "native_chatgpt_memory_is_swarm_state_layer": false,
+    "native_memory_fallback": "DENY"
+  },
+  "authority_conveyed": false,
+  "requires_ack": true,
+  "tags": ["bootstrap", "context", "layered-context", "provenance", "temporal-state", "context-recovery"],
+  "correlation_id": "layered-context-bootstrap-20261007",
+  "idempotency_key": "intercommunicationsenhancements-layered-context-bootstrap-20261007t171200z",
+  "expires_at_utc": null
+}
