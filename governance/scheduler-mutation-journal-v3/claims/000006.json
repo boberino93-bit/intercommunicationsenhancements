@@ -1,0 +1,10 @@
+{
+  "schema": "org-agent-mesh/scheduler-mutation-claim/v1",
+  "sequence": 6,
+  "event_id": "sched-mut-20261007-0006",
+  "actor": "GPT-5.6-Sol",
+  "previous_event_hash": "ca13266fd33d587a16394270449101f0358407aae487a8554180d6e1d1a522b2",
+  "claimed_at": "2026-10-07T22:15:31Z",
+  "purpose": "REPAIR_BOOTSTRAP_BRIDGE_DISABLED_DRIFT_READBACK",
+  "claim_hash": "3c9da8a0968d44cbe22c1dc3148d9105423a28c2dd15edbcb7305b8ded6badd8"
+}
