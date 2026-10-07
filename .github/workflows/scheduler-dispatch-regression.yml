@@ -25,6 +25,7 @@ on:
       - "tests/test_scheduler_repair_guard.py"
       - "tests/test_scheduler_work_gate.py"
       - "tests/test_scheduler_mutation_ledger.py"
+      - "tests/test_scheduler_hardening_contract.py"
       - "tests/test_scheduler_synchronization.py"
       - "tests/test_scheduler_ecosystem_rollout.py"
       - "schemas/frontend_execution_receipt.schema.json"
@@ -76,5 +77,6 @@ jobs:
             tests.test_scheduler_repair_guard \
             tests.test_scheduler_work_gate \
             tests.test_scheduler_mutation_ledger \
+            tests.test_scheduler_hardening_contract \
             tests.test_scheduler_synchronization \
             tests.test_scheduler_ecosystem_rollout
