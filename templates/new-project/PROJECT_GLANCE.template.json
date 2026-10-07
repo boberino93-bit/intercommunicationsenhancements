@@ -1,0 +1,12 @@
+{
+  "schema":"org-agent-mesh/project-glance/v1",
+  "project_id":"{{PROJECT_ID}}",
+  "repository":"UNBOUND",
+  "observed_at_utc":"{{CREATED_AT_UTC}}",
+  "status":"UNKNOWN",
+  "current_focus":"New project seeded; exact active work must be recovered from project-local durable state.",
+  "blockers":["Repository binding is UNBOUND until explicitly verified."],
+  "next_action":"Complete project-local bootstrap/charter work and refresh this snapshot on the first material transition.",
+  "last_material_change":"Project bootstrap seed created.",
+  "evidence_refs":["AGENT_BOOTSTRAP.json","PROJECT_MANIFEST.json","MASTER_HANDOFF.json"]
+}
