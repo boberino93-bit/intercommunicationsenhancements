@@ -1,6 +1,6 @@
 {
   "schema": "org-agent-mesh/internal-spawn-scheduler-policy/v1",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "status": "ACTIVE_BY_EXPLICIT_HUMAN_REQUEST",
   "service": {
     "enabled": true,
@@ -28,6 +28,16 @@
     "project_binding_required_before_protected_work": true,
     "spawn_authority_is_not_mutation_authority": true,
     "role_or_ticket_is_not_mutation_authority": true
+  },
+  "execution_surface_isolation": {
+    "exactly_one_execution_surface_per_occurrence": true,
+    "allowed_surfaces": ["CHATGPT_FRONTEND_MAPPED", "BACKEND_HOST_ADAPTER"],
+    "frontend_mapped_backend_webhook_dispatch": false,
+    "backend_host_adapter_frontend_execution": false,
+    "frontend_mapped_backend_disposition": "FRONTEND_EXECUTION_EXPECTED",
+    "frontend_mapped_backend_adapter_result": "BACKEND_DISPATCH_SUPPRESSED_FRONTEND_MAPPED",
+    "backend_host_dispatch_requires_explicit_execution_surface": true,
+    "duplicate_cross_surface_execution_prohibited": true
   },
   "continuation_integrity": {
     "required_for_scheduled_workers": true,
@@ -87,6 +97,7 @@
     "scheduler_mapping_conflict": "SCHEDULER_SYNC_CONFLICT",
     "frontend_state_unavailable": "FRONTEND_SCHEDULER_STATE_UNAVAILABLE",
     "frontend_account_capacity_full": "CAPACITY_LIMIT_DEFERRED",
+    "frontend_mapped_backend_dispatch_suppressed": "FRONTEND_EXECUTION_EXPECTED",
     "premature_blocker_finalization": "CONTINUATION_INTEGRITY_VIOLATION",
     "never_call_capacity_limit_deferred_task_failed": true,
     "never_call_missing_adapter_task_failed": true,
@@ -106,6 +117,9 @@
     "record_backend_canonical_state": true,
     "record_sync_disposition": true,
     "record_capacity_deferred_state": true,
+    "record_execution_surface": true,
+    "record_backend_dispatch_attempt_count": true,
+    "record_frontend_mapped_execution_count": true,
     "record_blocked_actions": true,
     "record_safe_fallbacks_considered": true,
     "record_safe_fallbacks_completed": true,
