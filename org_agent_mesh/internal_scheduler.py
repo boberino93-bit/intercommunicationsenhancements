@@ -13,6 +13,7 @@ from urllib import error, request
 
 TICKET_SCHEMA = "org-agent-mesh/scheduled-spawn-ticket/v1"
 ALLOWED_ROLES = frozenset({"research", "manager"})
+ALLOWED_EXECUTION_SURFACES = frozenset({"BACKEND_HOST_ADAPTER", "CHATGPT_FRONTEND_MAPPED"})
 
 
 class InternalSchedulerError(ValueError):
@@ -43,6 +44,7 @@ class ScheduleJob:
     launch_scope: str
     requested_roles: tuple[str, ...]
     max_workers_per_occurrence: int = 1
+    execution_surface: str = "BACKEND_HOST_ADAPTER"
 
     @classmethod
     def from_dict(cls, value: dict) -> "ScheduleJob":
@@ -69,6 +71,9 @@ class ScheduleJob:
             raise InternalSchedulerError("job_id is required")
         if not isinstance(scope, str) or not scope.strip():
             raise InternalSchedulerError("launch_scope is required")
+        execution_surface = value.get("execution_surface", "BACKEND_HOST_ADAPTER")
+        if execution_surface not in ALLOWED_EXECUTION_SURFACES:
+            raise InternalSchedulerError("unsupported execution_surface")
         return cls(
             job_id=job_id.strip(),
             enabled=bool(value.get("enabled")),
@@ -77,6 +82,7 @@ class ScheduleJob:
             launch_scope=scope.strip(),
             requested_roles=roles,
             max_workers_per_occurrence=workers,
+            execution_surface=execution_surface,
         )
 
 
@@ -91,6 +97,7 @@ class SpawnTicket:
     launch_scope: str
     requested_roles: tuple[str, ...]
     max_workers: int
+    execution_surface: str = "BACKEND_HOST_ADAPTER"
     status: str = "SPAWN_TICKET_PENDING"
     adapter_result: str | None = None
     host_start_receipt: str | None = None
@@ -195,6 +202,7 @@ def make_ticket(job: ScheduleJob, scheduled_for: datetime, observed_at: datetime
         launch_scope=job.launch_scope,
         requested_roles=job.requested_roles,
         max_workers=1,
+        execution_surface=job.execution_surface,
     )
 
 
@@ -255,6 +263,8 @@ def run_once(
             "observed_at": _iso(now),
             "due_ticket_count": 0,
             "dispatch_requested": dispatch,
+            "backend_dispatch_attempt_count": 0,
+            "frontend_mapped_execution_count": 0,
             "verified_start_count": 0,
             "dispatch_accepted_start_unverified_count": 0,
             "adapter_unavailable_count": 0,
@@ -272,10 +282,21 @@ def run_once(
     if dispatch and spawn_adapter is None:
         spawn_adapter = WebhookSpawnAdapter()
     emitted: list[SpawnTicket] = []
+    backend_dispatch_attempt_count = 0
+    frontend_mapped_execution_count = 0
     for ticket in tickets:
-        if dispatch:
+        if ticket.execution_surface == "CHATGPT_FRONTEND_MAPPED":
+            final = replace(
+                ticket,
+                status="FRONTEND_EXECUTION_EXPECTED",
+                adapter_result="BACKEND_DISPATCH_SUPPRESSED_FRONTEND_MAPPED",
+                host_start_receipt=None,
+            )
+            frontend_mapped_execution_count += 1
+        elif dispatch:
             if spawn_adapter is None:
                 raise InternalSchedulerError("dispatch requested without spawn adapter")
+            backend_dispatch_attempt_count += 1
             final = dispatch_ticket(ticket, spawn_adapter)
         else:
             final = ticket
@@ -286,6 +307,8 @@ def run_once(
         "observed_at": _iso(now),
         "due_ticket_count": len(emitted),
         "dispatch_requested": dispatch,
+        "backend_dispatch_attempt_count": backend_dispatch_attempt_count,
+        "frontend_mapped_execution_count": frontend_mapped_execution_count,
         "verified_start_count": sum(ticket.status == "SESSION_STARTED_VERIFIED" for ticket in emitted),
         "dispatch_accepted_start_unverified_count": sum(
             ticket.status == "DISPATCH_ACCEPTED_START_UNVERIFIED" for ticket in emitted
