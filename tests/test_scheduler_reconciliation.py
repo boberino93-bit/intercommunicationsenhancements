@@ -25,7 +25,7 @@ class SchedulerReconciliationTests(unittest.TestCase):
         self.assertFalse(decision.may_mutate_frontend)
         self.assertFalse(decision.resulting_enabled)
 
-    def test_declared_repair_actor_with_human_authorization_may_restore_mapped_task(self):
+    def test_declared_repair_actor_with_validated_human_authorization_may_restore_mapped_task(self):
         decision = decide_frontend_reconciliation(
             ReconciliationRequest(
                 task_id="slot-1",
@@ -37,11 +37,52 @@ class SchedulerReconciliationTests(unittest.TestCase):
                 declared_repair_actor=True,
                 repair_authorization_ref="governance/SCHEDULER_ACTIVATION_GRANT_2026-10-07.json",
                 repair_scope_contains_task=True,
+                repair_guard_passed=True,
+                repair_guard_reason="REPAIR_GRANT_CURRENT_SCOPED_AND_WITHIN_BUDGET",
             )
         )
         self.assertEqual(decision.action, ReconciliationAction.ENABLE_AUTHORIZED)
         self.assertTrue(decision.may_mutate_frontend)
         self.assertTrue(decision.resulting_enabled)
+
+    def test_declared_repair_actor_is_denied_if_guard_fails(self):
+        decision = decide_frontend_reconciliation(
+            ReconciliationRequest(
+                task_id="slot-1",
+                current_enabled=False,
+                backend_enabled=True,
+                enabled_state_policy="MIRROR",
+                actor=ActivationActor.RECOVERY,
+                declared_repair_actor=True,
+                repair_authorization_ref="governance/SCHEDULER_ACTIVATION_GRANT_2026-10-07.json",
+                repair_scope_contains_task=True,
+                repair_guard_passed=False,
+                repair_guard_reason="REPAIR_GRANT_EXPIRED",
+            )
+        )
+        self.assertEqual(decision.action, ReconciliationAction.ENABLE_AUTHORIZATION_REQUIRED)
+        self.assertFalse(decision.may_mutate_frontend)
+        self.assertEqual(decision.reason, "REPAIR_GRANT_EXPIRED")
+
+    def test_budget_exhaustion_quarantines_repair(self):
+        decision = decide_frontend_reconciliation(
+            ReconciliationRequest(
+                task_id="slot-1",
+                current_enabled=False,
+                backend_enabled=True,
+                enabled_state_policy="MIRROR",
+                actor=ActivationActor.RECOVERY,
+                declared_repair_actor=True,
+                repair_authorization_ref="governance/SCHEDULER_ACTIVATION_GRANT_2026-10-07.json",
+                repair_scope_contains_task=True,
+                repair_guard_passed=False,
+                repair_guard_reason="REPAIR_TARGET_BUDGET_EXHAUSTED",
+                repair_quarantine_required=True,
+            )
+        )
+        self.assertEqual(decision.action, ReconciliationAction.REPAIR_QUARANTINED)
+        self.assertFalse(decision.may_mutate_frontend)
+        self.assertFalse(decision.resulting_enabled)
 
     def test_repair_actor_without_scope_match_cannot_enable(self):
         decision = decide_frontend_reconciliation(
@@ -54,13 +95,14 @@ class SchedulerReconciliationTests(unittest.TestCase):
                 declared_repair_actor=True,
                 repair_authorization_ref="governance/SCHEDULER_ACTIVATION_GRANT_2026-10-07.json",
                 repair_scope_contains_task=False,
+                repair_guard_passed=True,
             )
         )
         self.assertEqual(decision.action, ReconciliationAction.ENABLE_AUTHORIZATION_REQUIRED)
         self.assertFalse(decision.may_mutate_frontend)
         self.assertFalse(decision.resulting_enabled)
 
-    def test_explicit_current_human_request_may_enable(self):
+    def test_explicit_current_human_request_may_enable_without_delegated_repair_guard(self):
         decision = decide_frontend_reconciliation(
             ReconciliationRequest(
                 task_id="slot-1",
