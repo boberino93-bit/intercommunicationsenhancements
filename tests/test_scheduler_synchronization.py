@@ -22,9 +22,38 @@ class SchedulerSynchronizationTests(unittest.TestCase):
         rec = directive["reconciliation"]
         self.assertEqual(rec["mode"], "DECLARED_MAPPING_ONLY")
         self.assertTrue(rec["automatic_repair_authorized_for_mapped_non_destructive_fields"])
+        self.assertTrue(rec["automatic_repair_actor_must_match_declared_reconciler"])
         self.assertTrue(rec["never_infer_mapping_by_title_similarity"])
-        self.assertTrue(rec["never_create_or_delete_frontend_task_without_explicit_binding_record"])
+        self.assertTrue(rec["never_create_frontend_task_as_automatic_repair"])
+        self.assertTrue(rec["never_delete_frontend_task_as_automatic_repair"])
         self.assertTrue(rec["never_import_unmapped_personal_frontend_tasks_into_backend"])
+
+    def test_only_bootstrap_bridge_may_mutate_mapped_scheduler_state(self):
+        directive = self.load("governance/SCHEDULER_SYNCHRONIZATION_DIRECTIVE.json")
+        authority = directive["reconciler_authority"]
+        self.assertEqual(authority["mode"], "SINGLE_DECLARED_FRONTEND_RECONCILER")
+        self.assertEqual(authority["frontend_automation_id"], "6ac63d38cc688191b9de4213ca40f951")
+        self.assertEqual(authority["frontend_title"], "Bootstrap Spawn Bridge")
+        self.assertFalse(authority["ordinary_capacity_workers_may_mutate_scheduler_state"])
+        self.assertFalse(authority["ordinary_capacity_workers_may_create_frontend_tasks"])
+        self.assertFalse(authority["ordinary_capacity_workers_may_disable_or_enable_frontend_tasks"])
+        self.assertFalse(authority["ordinary_capacity_workers_may_reschedule_or_rename_frontend_tasks"])
+        self.assertEqual(authority["ordinary_capacity_workers_scheduler_role"], "READ_DETECT_REPORT_ONLY")
+        self.assertTrue(authority["reconciler_may_update_only_existing_declared_frontend_automation_ids"])
+        self.assertFalse(authority["reconciler_may_create_replacement_tasks"])
+        self.assertFalse(authority["reconciler_may_delete_tasks"])
+        self.assertTrue(authority["duplicate_title_does_not_establish_identity"])
+        self.assertTrue(authority["conversation_id_does_not_establish_binding"])
+
+        policy = self.load("governance/INTERNAL_SPAWN_SCHEDULER_POLICY.json")
+        boundary = policy["scheduler_state_boundary"]
+        self.assertEqual(boundary["declared_frontend_reconciler_automation_id"], authority["frontend_automation_id"])
+        self.assertEqual(boundary["ordinary_capacity_workers_scheduler_state_access"], "READ_DETECT_REPORT_ONLY")
+        self.assertFalse(boundary["ordinary_capacity_workers_may_mutate_scheduler_state"])
+        self.assertTrue(boundary["automatic_repair_actor_must_match_declared_reconciler"])
+        self.assertFalse(boundary["reconciler_may_create_replacement_frontend_tasks"])
+        self.assertFalse(boundary["reconciler_may_delete_frontend_tasks"])
+        self.assertTrue(boundary["missing_mapped_task_requires_human_replacement_authorization"])
 
     def test_capacity_lanes_are_one_to_one_mapped_and_plan_limit_aware(self):
         registry = self.load("governance/INTERNAL_SPAWN_SCHEDULES.json")
@@ -121,7 +150,6 @@ class SchedulerSynchronizationTests(unittest.TestCase):
         boundary = policy["scheduler_state_boundary"]
         self.assertTrue(boundary["synchronization_authorized_by_human_directive"])
         self.assertTrue(boundary["declared_mapping_required"])
-        self.assertTrue(boundary["may_reconcile_mapped_chatgpt_scheduled_tasks"])
         self.assertFalse(boundary["may_modify_unmapped_chatgpt_tasks"])
         self.assertFalse(boundary["may_create_or_delete_unmapped_chatgpt_tasks"])
         self.assertFalse(boundary["may_infer_mapping_from_title_similarity"])
