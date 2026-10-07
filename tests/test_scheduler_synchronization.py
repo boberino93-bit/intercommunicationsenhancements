@@ -60,7 +60,7 @@ class SchedulerSynchronizationTests(unittest.TestCase):
             self.assertTrue(job["primary_prohibited"])
             self.assertTrue(job["full_swarm_prohibited"])
 
-    def test_backend_clock_spacing_and_dispatch_remain_governed(self):
+    def test_backend_clock_spacing_dispatch_and_execution_surface_remain_governed(self):
         workflow = (ROOT / ".github/workflows/internal-spawn-scheduler.yml").read_text()
         self.assertIn('cron: "0,12,24,36,48 * * * *"', workflow)
         self.assertIn("--dispatch", workflow)
@@ -74,6 +74,13 @@ class SchedulerSynchronizationTests(unittest.TestCase):
         self.assertEqual(delegated["max_workers_per_occurrence"], 1)
         self.assertEqual(delegated["max_tickets_per_scheduler_invocation"], 1)
         self.assertFalse(delegated["full_swarm_auto_start_allowed"])
+
+        surface = policy["execution_surface_isolation"]
+        self.assertTrue(surface["exactly_one_execution_surface_per_occurrence"])
+        self.assertFalse(surface["frontend_mapped_backend_webhook_dispatch"])
+        self.assertFalse(surface["backend_host_adapter_frontend_execution"])
+        self.assertTrue(surface["backend_host_dispatch_requires_explicit_execution_surface"])
+        self.assertTrue(surface["duplicate_cross_surface_execution_prohibited"])
 
         registry = self.load("governance/INTERNAL_SPAWN_SCHEDULES.json")
         offsets = sorted(
