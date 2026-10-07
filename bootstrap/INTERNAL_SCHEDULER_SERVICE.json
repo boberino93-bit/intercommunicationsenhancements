@@ -1,0 +1,26 @@
+{
+  "schema": "org-agent-mesh/bootstrap-service-binding/v1",
+  "service_id": "internal-spawn-scheduler",
+  "status": "ACTIVE_BY_EXPLICIT_HUMAN_REQUEST",
+  "protocol": "protocols/internal_scheduler_service.md",
+  "policy": "governance/INTERNAL_SPAWN_SCHEDULER_POLICY.json",
+  "schedule_registry": "governance/INTERNAL_SPAWN_SCHEDULES.json",
+  "runtime": "org_agent_mesh.internal_scheduler",
+  "host_clock": ".github/workflows/internal-spawn-scheduler.yml",
+  "load_with": [
+    "protocols/scheduled_agent_launch.md",
+    "org_agent_mesh.launch_admission",
+    "org_agent_mesh.schedule_activation"
+  ],
+  "invariants": {
+    "bootstrap_document_is_not_daemon": true,
+    "host_clock_required_for_independent_execution": true,
+    "spawn_ticket_is_not_session_started": true,
+    "host_start_receipt_required": true,
+    "primary_spawn_prohibited": true,
+    "master_spawn_prohibited": true,
+    "full_swarm_auto_start_prohibited": true,
+    "existing_scheduled_task_state_mutation_prohibited": true,
+    "spawn_authority_is_not_mutation_authority": true
+  }
+}
