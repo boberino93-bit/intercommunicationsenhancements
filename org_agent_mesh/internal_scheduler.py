@@ -142,6 +142,8 @@ class WebhookSpawnAdapter:
             with request.urlopen(req, timeout=self.timeout_seconds) as response:
                 body = response.read().decode("utf-8")
                 code = response.getcode()
+        except error.HTTPError as exc:
+            return DispatchResult("SPAWN_ADAPTER_REJECTED", f"HTTP_{exc.code}")
         except (error.URLError, TimeoutError) as exc:
             return DispatchResult("SPAWN_ADAPTER_REJECTED", f"ADAPTER_TRANSPORT_ERROR:{type(exc).__name__}")
         if code < 200 or code >= 300:
@@ -237,20 +239,46 @@ def _write_json(path: Path, value: dict) -> None:
         path.write_text(encoded, encoding="utf-8")
 
 
-def run_once(registry_path: Path, policy_path: Path, out_dir: Path, now: datetime, dispatch: bool) -> list[SpawnTicket]:
+def run_once(
+    registry_path: Path,
+    policy_path: Path,
+    out_dir: Path,
+    now: datetime,
+    dispatch: bool,
+    adapter: SpawnAdapter | None = None,
+) -> list[SpawnTicket]:
     registry = json.loads(registry_path.read_text(encoding="utf-8"))
     policy = json.loads(policy_path.read_text(encoding="utf-8"))
     if policy.get("service", {}).get("enabled") is not True:
+        summary = {
+            "schema": "org-agent-mesh/internal-scheduler-run/v1",
+            "observed_at": _iso(now),
+            "due_ticket_count": 0,
+            "dispatch_requested": dispatch,
+            "verified_start_count": 0,
+            "dispatch_accepted_start_unverified_count": 0,
+            "adapter_unavailable_count": 0,
+            "adapter_rejected_count": 0,
+            "results": [],
+        }
+        _write_json(out_dir / "run-summary.json", summary)
         return []
     delegated = policy.get("delegated_spawn_authority") or {}
     if delegated.get("primary_allowed") is not False or delegated.get("master_allowed") is not False:
         raise InternalSchedulerError("scheduler policy must prohibit PRIMARY and MASTER")
     max_tickets = int(delegated.get("max_tickets_per_scheduler_invocation", 3))
     tickets = evaluate_registry(registry, now, max_tickets=max_tickets)
-    adapter = WebhookSpawnAdapter()
+    spawn_adapter = adapter
+    if dispatch and spawn_adapter is None:
+        spawn_adapter = WebhookSpawnAdapter()
     emitted: list[SpawnTicket] = []
     for ticket in tickets:
-        final = dispatch_ticket(ticket, adapter) if dispatch else ticket
+        if dispatch:
+            if spawn_adapter is None:
+                raise InternalSchedulerError("dispatch requested without spawn adapter")
+            final = dispatch_ticket(ticket, spawn_adapter)
+        else:
+            final = ticket
         emitted.append(final)
         _write_json(out_dir / f"{final.ticket_id}.json", final.as_dict())
     summary = {
@@ -258,6 +286,12 @@ def run_once(registry_path: Path, policy_path: Path, out_dir: Path, now: datetim
         "observed_at": _iso(now),
         "due_ticket_count": len(emitted),
         "dispatch_requested": dispatch,
+        "verified_start_count": sum(ticket.status == "SESSION_STARTED_VERIFIED" for ticket in emitted),
+        "dispatch_accepted_start_unverified_count": sum(
+            ticket.status == "DISPATCH_ACCEPTED_START_UNVERIFIED" for ticket in emitted
+        ),
+        "adapter_unavailable_count": sum(ticket.status == "SPAWN_ADAPTER_UNAVAILABLE" for ticket in emitted),
+        "adapter_rejected_count": sum(ticket.status == "SPAWN_ADAPTER_REJECTED" for ticket in emitted),
         "results": [ticket.as_dict() for ticket in emitted],
     }
     _write_json(out_dir / "run-summary.json", summary)
