@@ -4,6 +4,7 @@ import json
 import unittest
 
 from org_agent_mesh.scheduler_mutation_ledger import parse_jsonl, validate_ledger
+from org_agent_mesh.scheduler_mutation_journal import validate_journal
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -42,16 +43,27 @@ class SchedulerHardeningContractTests(unittest.TestCase):
         bootstrap = self.load("bootstrap/INTERNAL_SCHEDULER_SERVICE.json")
         self.assertEqual(bootstrap["repair_guard_runtime"], "org_agent_mesh.scheduler_repair_guard")
         self.assertEqual(bootstrap["scheduler_work_gate_runtime"], "org_agent_mesh.scheduler_work_gate")
-        self.assertEqual(bootstrap["scheduler_mutation_ledger_runtime"], "org_agent_mesh.scheduler_mutation_ledger")
+        self.assertEqual(bootstrap["scheduler_mutation_journal_runtime"], "org_agent_mesh.scheduler_mutation_journal")
         self.assertTrue(bootstrap["invariants"]["nonhealthy_lane_consequential_mutation_prohibited"])
         self.assertTrue(bootstrap["invariants"]["repair_budget_exhaustion_requires_quarantine"])
-        self.assertTrue(bootstrap["invariants"]["scheduler_mutation_ledger_hash_chain_required"])
+        self.assertTrue(bootstrap["invariants"]["scheduler_mutation_journal_create_if_absent_claim_required"])
+        self.assertTrue(bootstrap["invariants"]["scheduler_mutation_journal_immutable_event_required"])
+        self.assertTrue(bootstrap["invariants"]["scheduler_mutation_journal_incomplete_or_forked_blocks_automatic_mutation"])
 
-    def test_canonical_mutation_ledger_validates_end_to_end(self):
+    def test_historical_v2_ledger_still_validates(self):
         path = ROOT / "governance" / "SCHEDULER_MUTATION_LEDGER_V2_2026-10-07.jsonl"
         result = validate_ledger(parse_jsonl(path.read_text(encoding="utf-8")))
         self.assertTrue(result.valid)
         self.assertGreaterEqual(result.event_count, 2)
+
+    def test_active_v3_journal_validates_end_to_end(self):
+        root = ROOT / "governance" / "scheduler-mutation-journal-v3"
+        claims = [json.loads(path.read_text(encoding="utf-8")) for path in sorted((root / "claims").glob("*.json"))]
+        events = [json.loads(path.read_text(encoding="utf-8")) for path in sorted((root / "events").glob("*.json"))]
+        result = validate_journal(claims=claims, events=events)
+        self.assertTrue(result.valid)
+        self.assertGreaterEqual(result.event_count, 2)
+        self.assertEqual(result.next_sequence, result.event_count + 1)
 
 
 if __name__ == "__main__":

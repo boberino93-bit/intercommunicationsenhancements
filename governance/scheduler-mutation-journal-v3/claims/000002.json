@@ -1,0 +1,10 @@
+{
+  "schema": "org-agent-mesh/scheduler-mutation-claim/v1",
+  "sequence": 2,
+  "event_id": "sched-mut-20261007-0002",
+  "actor": "GPT-5.6-Sol",
+  "previous_event_hash": "4339f7f5f546a18bb45ee93aac3ad38ce6bc8b52673b02877fec4c893af77d1f",
+  "claimed_at": "2026-10-07T21:26:55Z",
+  "purpose": "REPAIR_CANONICAL_ENABLED_SLOT1_FRONTEND_DRIFT",
+  "claim_hash": "51310bd3cd36ac18ae0c3a96e4c0972f6aa30f6f2db714d85e6ee272d04a0caf"
+}

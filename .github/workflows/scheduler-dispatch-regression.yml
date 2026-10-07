@@ -13,6 +13,7 @@ on:
       - "org_agent_mesh/scheduler_repair_guard.py"
       - "org_agent_mesh/scheduler_work_gate.py"
       - "org_agent_mesh/scheduler_mutation_ledger.py"
+      - "org_agent_mesh/scheduler_mutation_journal.py"
       - "tests/test_internal_scheduler.py"
       - "tests/test_launch_admission.py"
       - "tests/test_schedule_activation.py"
@@ -25,6 +26,7 @@ on:
       - "tests/test_scheduler_repair_guard.py"
       - "tests/test_scheduler_work_gate.py"
       - "tests/test_scheduler_mutation_ledger.py"
+      - "tests/test_scheduler_mutation_journal.py"
       - "tests/test_scheduler_hardening_contract.py"
       - "tests/test_scheduler_synchronization.py"
       - "tests/test_scheduler_ecosystem_rollout.py"
@@ -38,7 +40,8 @@ on:
       - "governance/SCHEDULER_HEALTH_POLICY.json"
       - "governance/SCHEDULER_ACTIVATION_GRANT_2026-10-07.json"
       - "governance/SCHEDULER_MUTATION_LEDGER_POLICY.json"
-      - "governance/SCHEDULER_MUTATION_LEDGER_V2_2026-10-07.jsonl"
+      - "governance/SCHEDULER_MUTATION_JOURNAL_POLICY.json"
+      - "governance/scheduler-mutation-journal-v3/**"
       - "governance/SCHEDULER_SYNCHRONIZATION_DIRECTIVE.json"
       - "protocols/internal_scheduler_service.md"
       - "protocols/scheduled_agent_launch_repair_and_receipt_amendment_2026-10-07.md"
@@ -77,6 +80,7 @@ jobs:
             tests.test_scheduler_repair_guard \
             tests.test_scheduler_work_gate \
             tests.test_scheduler_mutation_ledger \
+            tests.test_scheduler_mutation_journal \
             tests.test_scheduler_hardening_contract \
             tests.test_scheduler_synchronization \
             tests.test_scheduler_ecosystem_rollout

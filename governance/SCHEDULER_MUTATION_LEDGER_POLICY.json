@@ -1,40 +1,30 @@
 {
   "schema": "org-agent-mesh/scheduler-mutation-ledger-policy/v1",
-  "version": "1.0.0",
-  "status": "ACTIVE",
-  "active_ledger": "governance/SCHEDULER_MUTATION_LEDGER_V2_2026-10-07.jsonl",
-  "legacy_ledger": "governance/SCHEDULER_MUTATION_LEDGER_2026-10-07.jsonl",
-  "validator": "org_agent_mesh.scheduler_mutation_ledger",
+  "version": "1.1.1",
+  "status": "SUPERSEDED_FOR_NEW_WRITES",
+  "active_journal_policy": "governance/SCHEDULER_MUTATION_JOURNAL_POLICY.json",
+  "active_journal_root": "governance/scheduler-mutation-journal-v3",
+  "active_journal_validator": "org_agent_mesh.scheduler_mutation_journal",
+  "historical_v2_ledger": "governance/SCHEDULER_MUTATION_LEDGER_V2_2026-10-07.jsonl",
+  "legacy_v1_ledger": "governance/SCHEDULER_MUTATION_LEDGER_2026-10-07.jsonl",
   "hash_algorithm": "SHA-256",
-  "genesis_previous_event_hash": "0000000000000000000000000000000000000000000000000000000000000000",
   "requirements": {
     "append_only": true,
     "strict_sequence": true,
     "unique_event_id": true,
     "previous_event_hash_required": true,
     "event_hash_required": true,
-    "hash_covers_full_event_except_event_hash": true,
-    "readback_required_for_applied_scheduler_mutation": true,
-    "planned_and_applied_events_are_distinct": true,
     "silent_rewrite_or_reordering_is_invalid": true,
-    "legacy_ledger_is_preserved_but_not_authoritative_for_new_events": true
+    "new_writes_use_immutable_create_new_file_only_journal": true,
+    "deterministic_sequence_claim_required_before_new_mutation": true,
+    "claim_readback_required_before_mutation": true,
+    "stranded_claim_blocks_automatic_mutation": true
   },
-  "required_event_fields": [
-    "event_id",
-    "observed_at",
-    "actor",
-    "source_surface",
-    "frontend_automation_id",
-    "old_enabled_state",
-    "requested_enabled_state",
-    "resulting_enabled_state",
-    "authorization_ref",
-    "reason",
-    "readback_verified",
-    "status",
-    "sequence",
-    "previous_event_hash",
-    "event_hash"
-  ],
-  "purpose": "Make scheduler-state mutation history tamper-evident so deletion, reordering, conflicting replacement, and silent rewrite can be detected during validation."
+  "migration": {
+    "historical_ledgers_preserved": true,
+    "new_writes_to_v1_or_v2_prohibited": true,
+    "v3_first_two_events_are_semantically_equivalent_to_v2_history": true,
+    "v3_uses_atomic_create_if_absent_sequence_claims": true
+  },
+  "purpose": "Preserve historical mutation-ledger evidence while directing all new scheduler mutation evidence to the immutable multi-writer-safe v3 mutation journal."
 }

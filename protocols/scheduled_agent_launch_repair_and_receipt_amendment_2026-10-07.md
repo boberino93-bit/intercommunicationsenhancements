@@ -37,37 +37,34 @@ The receipt publisher may be either:
 
 For exact-self publication, `publisher_frontend_automation_id` MUST equal the receipt's `frontend_automation_id`, and that identity MUST match the declared binding. A worker may never publish a receipt for another worker.
 
-Receipts use:
-
-- `governance/SCHEDULER_FRONTEND_RECEIPT_POLICY.json`;
-- `schemas/frontend_execution_receipt.schema.json`;
-- `schemas/scheduler_frontend_receipt_message.schema.json`;
-- `org_agent_mesh.frontend_execution_receipts`.
-
-Preferred transport is the registered same-project AgentBus/Artifactory channel. When unavailable and the canonical degraded fallback is permitted, create a new immutable file under `agentbus-backup/coordination-messages/` named with prefix `scheduler-frontend-receipt__`. Never overwrite, update, delete, or reuse a conflicting receipt file.
-
-A receipt conveys no scheduler, project, role, mutation, or continuation authority. It proves only the exact observed frontend occurrence when its identity and timing validate.
-
-If receipt persistence is blocked, report `FRONTEND_RECEIPT_PERSISTENCE_BLOCKED`; do not claim the occurrence is backend-verified.
+Receipts use `governance/SCHEDULER_FRONTEND_RECEIPT_POLICY.json`, the receipt schemas, and `org_agent_mesh.frontend_execution_receipts`. Preferred transport is registered same-project AgentBus/Artifactory; when unavailable and permitted, use immutable create-new-file GitHub coordination fallback. A receipt conveys no scheduler, project, role, mutation, or continuation authority. If receipt persistence is blocked, report `FRONTEND_RECEIPT_PERSISTENCE_BLOCKED` and do not claim the occurrence is backend-verified.
 
 ## Health qualification and evidence deadline
 
 `is_enabled=true`, successful update acknowledgement, accepted immediate-run request, `FRONTEND_EXECUTION_EXPECTED`, or one isolated execution is insufficient to declare sustained scheduler health.
 
-The independent health gate in `governance/SCHEDULER_HEALTH_POLICY.json` is authoritative. The default qualification is three consecutive verified mature occurrences. An occurrence becomes health-mature only after the configured health evidence deadline, which MUST cover both the receipt acceptance window and persistence grace as well as any job-specific scheduler grace. Absence before that deadline is pending evidence, not a missing-execution failure. Absence after that deadline is degraded.
+The independent health gate in `governance/SCHEDULER_HEALTH_POLICY.json` is authoritative. The default qualification is three consecutive verified health-mature occurrences. An occurrence becomes health-mature only after the configured health evidence deadline, which MUST cover receipt acceptance plus persistence grace and any job-specific scheduler grace. Absence before that deadline is pending evidence; absence after it is degraded.
 
 Common-mode ChatGPT provider failure is not automatically recoverable by another ChatGPT Scheduled Task and must remain visibly degraded when no out-of-band actuator exists.
 
 ## Scheduler-health work admission
 
-Scheduler health is an additional restriction and never a source of authority.
+Scheduler health is an additional restriction and never a source of authority. Before reversible or protected project mutation, the exact lane must be `HEALTHY`. `HEALTHY` only permits progression to the normal project, role, claim, consequence, mutation, and validation gates. `RECOVERING`, `DEGRADED_MISSING_EXECUTION_EVIDENCE`, `UNQUALIFIED`, stale, or unknown health permits only useful safe read-only work and append-only observability/checkpoint evidence. The executable reference gate is `org_agent_mesh.scheduler_work_gate`.
 
-Before a scheduled worker performs any reversible or protected project mutation, its exact lane must be `HEALTHY` under the canonical scheduler-health report. `HEALTHY` only permits the worker to proceed to the normal project, role, claim, consequence, mutation, and validation gates; it does not bypass them.
+## Scheduler mutation evidence and multi-writer exclusion
 
-A lane in `RECOVERING`, `DEGRADED_MISSING_EXECUTION_EVIDENCE`, or `UNQUALIFIED` may continue useful safe read-only work and append-only observability/checkpoint evidence, but it MUST NOT perform reversible or protected project mutation. Unknown scheduler-health state fails closed for all work other than the minimum evidence needed to report the ambiguity.
+All new scheduler-state mutation evidence MUST use `governance/SCHEDULER_MUTATION_JOURNAL_POLICY.json` and `org_agent_mesh.scheduler_mutation_journal`. Historical v1/v2 ledger files remain evidence but are not writable authority for new mutations.
 
-The executable reference gate is `org_agent_mesh.scheduler_work_gate`.
+Before any automatic scheduler mutation, an actor MUST:
 
-## Scheduler mutation evidence
+1. validate the complete v3 journal;
+2. derive the exact next sequence and terminal event hash;
+3. atomically acquire the deterministic next sequence by creating `governance/scheduler-mutation-journal-v3/claims/{sequence:06d}.json` with CREATE_NEW_FILE_ONLY semantics;
+4. read back that exact claim and verify its event ID, actor, previous-event hash and claim hash;
+5. create the immutable planned event at the matching deterministic event path;
+6. revalidate the complete journal;
+7. only then perform the separately authorized scheduler mutation.
 
-Every scheduler-state mutation must be represented in the active tamper-evident ledger declared by `governance/SCHEDULER_MUTATION_LEDGER_POLICY.json`. New scheduler mutation records use strict sequence numbers and a SHA-256 previous-event hash chain. Planned mutation and applied/readback-verified mutation are distinct events. Hash-chain discontinuity, duplicate event IDs, silent rewrite, or reordering invalidates the ledger and blocks automated repair until reconciled.
+After provider mutation, live readback must be obtained and a separately claimed immutable applied/readback event must be added through the same sequence protocol.
+
+If the deterministic claim path already exists, the actor lost the race and MUST NOT mutate. A claim without a matching valid event, a sequence fork, hash mismatch, readback mismatch, or inability to create/read back immutable evidence blocks automatic mutation. Claims may not be stolen, overwritten, deleted, or automatically expired. Planned and applied evidence remain distinct. This storage protocol prevents two repair actors from both assuming ownership of one scheduler mutation sequence; it does not grant scheduler mutation authority by itself.

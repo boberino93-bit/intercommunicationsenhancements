@@ -11,7 +11,8 @@
   "frontend_execution_receipt_policy": "governance/SCHEDULER_FRONTEND_RECEIPT_POLICY.json",
   "scheduler_health_policy": "governance/SCHEDULER_HEALTH_POLICY.json",
   "scheduler_mutation_ledger_policy": "governance/SCHEDULER_MUTATION_LEDGER_POLICY.json",
-  "scheduler_mutation_ledger": "governance/SCHEDULER_MUTATION_LEDGER_V2_2026-10-07.jsonl",
+  "scheduler_mutation_journal_policy": "governance/SCHEDULER_MUTATION_JOURNAL_POLICY.json",
+  "scheduler_mutation_journal_root": "governance/scheduler-mutation-journal-v3",
   "scheduler_launch_amendment": "protocols/scheduled_agent_launch_repair_and_receipt_amendment_2026-10-07.md",
   "control_interface": "governance/SCHEDULER_CONTROL_INTERFACE.json",
   "continuation_integrity_protocol": "protocols/scheduled_continuation_integrity.md",
@@ -23,6 +24,7 @@
   "scheduler_health_runtime": "org_agent_mesh.scheduler_health",
   "scheduler_work_gate_runtime": "org_agent_mesh.scheduler_work_gate",
   "scheduler_mutation_ledger_runtime": "org_agent_mesh.scheduler_mutation_ledger",
+  "scheduler_mutation_journal_runtime": "org_agent_mesh.scheduler_mutation_journal",
   "host_clock": ".github/workflows/internal-spawn-scheduler.yml",
   "load_with": [
     "protocols/scheduled_agent_launch.md",
@@ -37,7 +39,8 @@
     "org_agent_mesh.frontend_receipt_audit",
     "org_agent_mesh.scheduler_health",
     "org_agent_mesh.scheduler_work_gate",
-    "org_agent_mesh.scheduler_mutation_ledger"
+    "org_agent_mesh.scheduler_mutation_ledger",
+    "org_agent_mesh.scheduler_mutation_journal"
   ],
   "invariants": {
     "bootstrap_document_is_not_daemon": true,
@@ -65,7 +68,9 @@
     "repair_budget_exhaustion_requires_quarantine": true,
     "capacity_availability_is_not_activation_authority": true,
     "dead_frontend_identity_replacement_requires_explicit_human_authorization": true,
-    "scheduler_mutation_ledger_hash_chain_required": true,
+    "scheduler_mutation_journal_create_if_absent_claim_required": true,
+    "scheduler_mutation_journal_immutable_event_required": true,
+    "scheduler_mutation_journal_incomplete_or_forked_blocks_automatic_mutation": true,
     "scheduler_mutation_readback_required": true,
     "spawn_authority_is_not_mutation_authority": true,
     "scheduler_sync_is_not_project_mutation_authority": true,
