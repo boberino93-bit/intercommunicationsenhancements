@@ -1,0 +1,30 @@
+{
+  "schema": "org-agent-mesh/primary-review-handoff/v1",
+  "project_id": "intercommunicationsenhancements",
+  "origin_project": "benefitflow",
+  "target_project": "intercommunicationsenhancements",
+  "target_role": "PRIMARY",
+  "artifact_type": "DRAFT_PROTOCOL_PROPOSAL",
+  "proposal_path": "proposals/DRAFT_COMPRESSED_INFERENCE_VERIFICATION_PROTOCOL_2026-10-07.md",
+  "status": "CREATED_FOR_LATER_PRIMARY_REVIEW",
+  "requested_action": "REVIEW_VALIDATE_AND_DECIDE_STAGED_GLOBAL_ROLLOUT",
+  "mutation_authorized": false,
+  "requires_primary_review": true,
+  "authority_conveyed": false,
+  "origin_local_trial": {
+    "repository": "boberino93-bit/benefitflow",
+    "human_readable_bootstrap_commit": "36ef717f8147aaed6c321c58efa7e19b80087f1c",
+    "machine_readable_bootstrap_commit": "1a4a4368a78ed0b5157b91fd142ff37f2a5dba97",
+    "deployment_scope": "BENEFITFLOW_LOCAL_TRIAL"
+  },
+  "proposal_commit": "da3defb161f668d93c405e4b44a44ebed4a7dca7",
+  "review_focus": [
+    "PROVISIONAL_INFERENCE_VS_VERIFIED_CONCLUSION",
+    "FALSIFICATION_BEFORE_CONSEQUENTIAL_ACTION",
+    "AUTHORITY_AND_SECURITY_ISOLATION",
+    "FALSE_POSITIVE_AND_CONFIRMATION_BIAS_TESTING",
+    "AUDITABILITY_WITHOUT_PRIVATE_REASONING_DISCLOSURE",
+    "STAGED_REVERSIBLE_GLOBAL_ROLLOUT"
+  ],
+  "deployment_default": "DO_NOT_DEPLOY_GLOBALLY_UNTIL_PRIMARY_APPROVAL"
+}
