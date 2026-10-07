@@ -1,6 +1,6 @@
 {
   "schema": "org-agent-mesh/internal-spawn-scheduler-policy/v1",
-  "version": "1.9.0",
+  "version": "2.0.0",
   "status": "ACTIVE_BY_EXPLICIT_HUMAN_REQUEST",
   "service": {
     "enabled": true,
@@ -11,6 +11,7 @@
     "scheduler_health_runtime": "org_agent_mesh.scheduler_health",
     "scheduler_work_gate_runtime": "org_agent_mesh.scheduler_work_gate",
     "scheduler_mutation_ledger_runtime": "org_agent_mesh.scheduler_mutation_ledger",
+    "scheduler_mutation_journal_runtime": "org_agent_mesh.scheduler_mutation_journal",
     "protocol": "protocols/internal_scheduler_service.md",
     "schedule_registry": "governance/INTERNAL_SPAWN_SCHEDULES.json",
     "ticket_schema": "schemas/scheduled_spawn_ticket.schema.json",
@@ -22,7 +23,11 @@
     "scheduler_activation_grant": "governance/SCHEDULER_ACTIVATION_GRANT_2026-10-07.json",
     "scheduler_health_policy": "governance/SCHEDULER_HEALTH_POLICY.json",
     "scheduler_mutation_ledger_policy": "governance/SCHEDULER_MUTATION_LEDGER_POLICY.json",
-    "scheduler_mutation_ledger": "governance/SCHEDULER_MUTATION_LEDGER_V2_2026-10-07.jsonl",
+    "scheduler_mutation_journal_policy": "governance/SCHEDULER_MUTATION_JOURNAL_POLICY.json",
+    "runtime_evidence_branch": "scheduler-evidence",
+    "runtime_mutation_journal_root": "governance/scheduler-mutation-journal-v3",
+    "runtime_receipt_directory": "agentbus-backup/coordination-messages",
+    "canonical_code_and_policy_branch": "main",
     "continuation_integrity_protocol": "protocols/scheduled_continuation_integrity.md",
     "autonomous_continuation_protocol": "protocols/autonomous_continuation.md"
   },
@@ -47,6 +52,18 @@
     "frontend_mapped_backend_adapter_result": "BACKEND_DISPATCH_SUPPRESSED_FRONTEND_MAPPED",
     "backend_host_dispatch_requires_explicit_execution_surface": true,
     "duplicate_cross_surface_execution_prohibited": true
+  },
+  "runtime_evidence_isolation": {
+    "canonical_code_and_policy_branch": "main",
+    "runtime_evidence_branch": "scheduler-evidence",
+    "runtime_evidence_branch_is_not_policy_authority": true,
+    "runtime_evidence_write_authority_does_not_convey_main_write_authority": true,
+    "scheduler_runtime_writes_to_main_prohibited_after_cutover": true,
+    "mutation_journal_reads_and_writes_use_runtime_evidence_branch": true,
+    "degraded_github_frontend_receipts_use_runtime_evidence_branch": true,
+    "independent_backend_health_audit_fetches_runtime_evidence_branch_read_only": true,
+    "evidence_branch_missing_unavailable_or_invalid_fails_closed": true,
+    "main_snapshot_through_journal_sequence_6_is_historical_cutover_evidence_only": true
   },
   "continuation_integrity": {
     "required_for_scheduled_workers": true,
@@ -86,6 +103,8 @@
     "repair_grant_automatic_extension_prohibited": true,
     "repair_guard_must_pass_before_delegated_enablement": true,
     "repair_budget_exhaustion_requires_quarantine": true,
+    "automatic_repair_requires_valid_runtime_evidence_branch_journal": true,
+    "automatic_repair_may_not_write_runtime_evidence_to_main": true,
     "ordinary_capacity_workers_scheduler_state_access": "READ_DETECT_REPORT_ONLY",
     "ordinary_capacity_workers_may_mutate_scheduler_state": false,
     "secondary_liveness_reconciler_is_explicit_exception_to_ordinary_worker_fence": true,
@@ -128,6 +147,7 @@
     "enabled_state_is_not_health": true,
     "frontend_expected_is_not_execution_proof": true,
     "health_evidence_deadline_must_cover_receipt_acceptance_and_persistence_grace": true,
+    "health_receipts_are_read_from_runtime_evidence_branch_when_github_fallback_is_used": true,
     "consequential_mutation_requires_HEALTHY_lane": true,
     "RECOVERING_DEGRADED_or_UNQUALIFIED_lane_may_continue_read_only_and_append_only_observability": true,
     "health_gate_is_restrictive_only_and_never_grants_project_authority": true
@@ -164,6 +184,9 @@
     "frontend_mapped_backend_dispatch_suppressed": "FRONTEND_EXECUTION_EXPECTED",
     "scheduler_health_not_qualified_for_consequential_work": "SCHEDULER_HEALTH_GATE_BLOCKED",
     "scheduler_mutation_ledger_invalid": "SCHEDULER_MUTATION_LEDGER_INVALID",
+    "scheduler_mutation_journal_invalid": "SCHEDULER_MUTATION_JOURNAL_INVALID",
+    "scheduler_evidence_branch_unavailable": "SCHEDULER_EVIDENCE_BRANCH_UNAVAILABLE",
+    "scheduler_runtime_evidence_wrong_branch": "SCHEDULER_EVIDENCE_WRONG_BRANCH",
     "premature_blocker_finalization": "CONTINUATION_INTEGRITY_VIOLATION",
     "unfinished_work_abandoned_at_invocation_boundary": "CONTINUATION_HANDOFF_MISSING",
     "unauthorized_scheduler_state_mutation_attempt": "SCHEDULER_MUTATION_ACTOR_PROHIBITED",
@@ -197,6 +220,7 @@
     "record_capacity_deferred_state": true,
     "record_scheduler_mutation_actor": true,
     "record_scheduler_mutation_hash_chain": true,
+    "record_scheduler_evidence_branch": true,
     "record_execution_surface": true,
     "record_backend_dispatch_attempt_count": true,
     "record_frontend_mapped_execution_count": true,
