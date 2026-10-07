@@ -1,0 +1,72 @@
+{
+  "schema": "org-agent-mesh/scheduler-occurrence-claim-policy/v1",
+  "version": "1.0.0",
+  "status": "ACTIVE",
+  "runtime": "org_agent_mesh.scheduler_occurrence_guard",
+  "repository": "boberino93-bit/intercommunicationsenhancements",
+  "storage_branch": "scheduler-evidence",
+  "storage_directory": "agentbus-backup/scheduler-occurrence-claims",
+  "purpose": "Prevent duplicate or retried frontend executions for the same deterministic scheduled occurrence from both entering project work.",
+  "claim_identity": {
+    "scope": "EXACT_BACKEND_OCCURRENCE_ACROSS_EXECUTION_ATTEMPTS",
+    "deterministic_path_key": "SHA256_OCCURRENCE_ID",
+    "path_format": "agentbus-backup/scheduler-occurrence-claims/{sha256_occurrence_id}.json",
+    "claim_is_bound_to_execution_receipt_id": true,
+    "claim_is_bound_to_job_binding_and_frontend_identity": true,
+    "claim_is_bound_to_exact_scheduled_for": true,
+    "execution_surface": "CHATGPT_FRONTEND_MAPPED"
+  },
+  "storage_contract": {
+    "operation": "CREATE_NEW_FILE_ONLY",
+    "overwrite_prohibited": true,
+    "delete_prohibited": true,
+    "update_prohibited": true,
+    "force_push_prohibited": true,
+    "create_must_fail_if_path_exists": true,
+    "exact_readback_required_before_project_work": true,
+    "runtime_write_to_main_prohibited": true,
+    "storage_branch_unavailable_fails_closed_for_project_work": true
+  },
+  "execution_order": [
+    "VERIFY_EXACT_SCHEDULED_IDENTITY",
+    "PUBLISH_EXACT_SELF_EXECUTION_RECEIPT",
+    "BUILD_OCCURRENCE_CLAIM_BOUND_TO_RECEIPT",
+    "CREATE_DETERMINISTIC_CLAIM_IF_ABSENT_ON_SCHEDULER_EVIDENCE",
+    "READ_BACK_DETERMINISTIC_CLAIM",
+    "VERIFY_EXACT_CLAIM_ID_AND_HASH",
+    "ONLY_CLAIM_OWNER_MAY_BIND_TO_PROJECT_WORK_UNIT"
+  ],
+  "duplicate_semantics": {
+    "existing_exact_same_claim": "CLAIM_OWNED_BY_THIS_INVOCATION",
+    "existing_different_claim_for_same_occurrence": "DUPLICATE_OCCURRENCE_NOOP",
+    "duplicate_may_publish_its_execution_receipt": true,
+    "duplicate_may_report_duplicate_detection": true,
+    "duplicate_may_not_claim_project_work": true,
+    "duplicate_may_not_perform_reversible_or_protected_project_mutation": true,
+    "duplicate_may_not_steal_or_expire_existing_claim": true,
+    "duplicate_may_not_create_alternate_claim_path": true
+  },
+  "failure_semantics": {
+    "claim_storage_unavailable": "OCCURRENCE_CLAIM_PERSISTENCE_BLOCKED",
+    "claim_create_response_ambiguous": "READ_BACK_DETERMINISTIC_PATH_BEFORE_DECIDING",
+    "claim_readback_mismatch": "OCCURRENCE_CLAIM_CONFLICT",
+    "existing_different_claim": "DUPLICATE_OCCURRENCE_NOOP",
+    "claim_hash_invalid": "OCCURRENCE_CLAIM_INVALID",
+    "claim_identity_invalid": "OCCURRENCE_CLAIM_INVALID",
+    "automatic_fallback_on_claim_failure": "READ_ONLY_AND_APPEND_ONLY_OBSERVABILITY_ONLY"
+  },
+  "authority": {
+    "claim_conveys_scheduler_authority": false,
+    "claim_conveys_project_mutation_authority": false,
+    "claim_conveys_role_authority": false,
+    "claim_only_establishes_single_execution_ownership_of_occurrence_work_unit": true,
+    "normal_project_role_claim_health_consequence_mutation_and_validation_gates_still_required": true
+  },
+  "recovery": {
+    "automatic_claim_stealing_prohibited": true,
+    "automatic_expiry_and_takeover_prohibited": true,
+    "failed_owner_may_leave_occurrence_without_project_work": true,
+    "safety_priority": "PREFER_MISSED_BOUNDED_OCCURRENCE_OVER_DUPLICATE_CONSEQUENTIAL_EXECUTION",
+    "future_takeover_protocol_requires_separate_human_reviewed_design": true
+  }
+}
