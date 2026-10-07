@@ -18,7 +18,11 @@ from org_agent_mesh.internal_scheduler import (
 
 
 class _ReceiptAdapter:
+    def __init__(self):
+        self.calls = 0
+
     def dispatch(self, ticket):
+        self.calls += 1
         return DispatchResult(
             "SESSION_STARTED_VERIFIED",
             "HOST_START_RECEIPT_VERIFIED",
@@ -68,6 +72,20 @@ class InternalSchedulerTests(unittest.TestCase):
         with self.assertRaises(InternalSchedulerError):
             ScheduleJob.from_dict(raw)
 
+    def test_unknown_execution_surface_is_rejected(self):
+        raw = {
+            "job_id": "bad-surface",
+            "enabled": True,
+            "schedule": {"type": "HOURLY_MINUTE_OFFSETS", "minute_offsets": [5], "grace_minutes": 10},
+            "launch_scope": "GLOBAL",
+            "requested_roles": ["research"],
+            "max_workers_per_occurrence": 1,
+            "primary_prohibited": True,
+            "execution_surface": "MAGIC_DUPLICATE_SPAWNER",
+        }
+        with self.assertRaises(InternalSchedulerError):
+            ScheduleJob.from_dict(raw)
+
     def test_registry_coalesces_to_one_current_occurrence(self):
         registry = {
             "catch_up_policy": "COALESCE_TO_LATEST",
@@ -101,7 +119,7 @@ class InternalSchedulerTests(unittest.TestCase):
         self.assertEqual(result.status, "SPAWN_ADAPTER_UNAVAILABLE")
         self.assertIsNone(result.host_start_receipt)
 
-    def test_run_once_dispatches_and_records_verified_start(self):
+    def test_backend_host_surface_dispatches_and_records_verified_start(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             registry = root / "registry.json"
@@ -113,15 +131,12 @@ class InternalSchedulerTests(unittest.TestCase):
                     {
                         "job_id": "bounded",
                         "enabled": True,
-                        "schedule": {
-                            "type": "HOURLY_MINUTE_OFFSETS",
-                            "minute_offsets": [5],
-                            "grace_minutes": 10,
-                        },
+                        "schedule": {"type": "HOURLY_MINUTE_OFFSETS", "minute_offsets": [5], "grace_minutes": 10},
                         "launch_scope": "GLOBAL_DEMAND_ROUTED_CAPACITY",
                         "requested_roles": ["research", "manager"],
                         "max_workers_per_occurrence": 1,
                         "primary_prohibited": True,
+                        "execution_surface": "BACKEND_HOST_ADAPTER",
                     }
                 ],
             }))
@@ -133,22 +148,59 @@ class InternalSchedulerTests(unittest.TestCase):
                     "max_tickets_per_scheduler_invocation": 1,
                 },
             }))
-            result = run_once(
-                registry,
-                policy,
-                out,
-                self.now,
-                dispatch=True,
-                adapter=_ReceiptAdapter(),
-            )
+            adapter = _ReceiptAdapter()
+            result = run_once(registry, policy, out, self.now, dispatch=True, adapter=adapter)
             self.assertEqual(len(result), 1)
+            self.assertEqual(adapter.calls, 1)
             self.assertEqual(result[0].status, "SESSION_STARTED_VERIFIED")
             self.assertTrue(result[0].host_start_receipt.startswith("receipt:"))
             summary = json.loads((out / "run-summary.json").read_text())
             self.assertTrue(summary["dispatch_requested"])
+            self.assertEqual(summary["backend_dispatch_attempt_count"], 1)
+            self.assertEqual(summary["frontend_mapped_execution_count"], 0)
             self.assertEqual(summary["verified_start_count"], 1)
-            self.assertEqual(summary["adapter_unavailable_count"], 0)
-            self.assertEqual(summary["adapter_rejected_count"], 0)
+
+    def test_frontend_mapped_surface_never_calls_backend_spawn_adapter(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            registry = root / "registry.json"
+            policy = root / "policy.json"
+            out = root / "out"
+            registry.write_text(json.dumps({
+                "catch_up_policy": "COALESCE_TO_LATEST",
+                "jobs": [
+                    {
+                        "job_id": "mapped",
+                        "enabled": True,
+                        "schedule": {"type": "HOURLY_MINUTE_OFFSETS", "minute_offsets": [5], "grace_minutes": 10},
+                        "launch_scope": "GLOBAL_DEMAND_ROUTED_CAPACITY",
+                        "requested_roles": ["research", "manager"],
+                        "max_workers_per_occurrence": 1,
+                        "primary_prohibited": True,
+                        "execution_surface": "CHATGPT_FRONTEND_MAPPED",
+                    }
+                ],
+            }))
+            policy.write_text(json.dumps({
+                "service": {"enabled": True},
+                "delegated_spawn_authority": {
+                    "primary_allowed": False,
+                    "master_allowed": False,
+                    "max_tickets_per_scheduler_invocation": 1,
+                },
+            }))
+            adapter = _ReceiptAdapter()
+            result = run_once(registry, policy, out, self.now, dispatch=True, adapter=adapter)
+            self.assertEqual(len(result), 1)
+            self.assertEqual(adapter.calls, 0)
+            self.assertEqual(result[0].status, "FRONTEND_EXECUTION_EXPECTED")
+            self.assertEqual(result[0].adapter_result, "BACKEND_DISPATCH_SUPPRESSED_FRONTEND_MAPPED")
+            self.assertIsNone(result[0].host_start_receipt)
+            summary = json.loads((out / "run-summary.json").read_text())
+            self.assertTrue(summary["dispatch_requested"])
+            self.assertEqual(summary["backend_dispatch_attempt_count"], 0)
+            self.assertEqual(summary["frontend_mapped_execution_count"], 1)
+            self.assertEqual(summary["verified_start_count"], 0)
 
     def test_policy_disabled_emits_no_tickets_but_writes_summary(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -169,6 +221,8 @@ class InternalSchedulerTests(unittest.TestCase):
             self.assertEqual(result, [])
             summary = json.loads((out / "run-summary.json").read_text())
             self.assertEqual(summary["due_ticket_count"], 0)
+            self.assertEqual(summary["backend_dispatch_attempt_count"], 0)
+            self.assertEqual(summary["frontend_mapped_execution_count"], 0)
             self.assertEqual(summary["verified_start_count"], 0)
 
 
