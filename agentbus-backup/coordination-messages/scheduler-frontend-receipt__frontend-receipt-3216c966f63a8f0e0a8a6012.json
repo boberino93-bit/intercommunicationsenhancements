@@ -1,0 +1,24 @@
+{
+  "schema": "org-agent-mesh/scheduler-frontend-receipt-message/v1",
+  "message_type": "SCHEDULER_FRONTEND_EXECUTION_RECEIPT",
+  "project_id": "intercommunicationsenhancements",
+  "repository": "boberino93-bit/intercommunicationsenhancements",
+  "publisher_frontend_automation_id": "6ac65689018c8191bf5128a1e6ce6815",
+  "authority_conveyed": false,
+  "mutation_authority_conveyed": false,
+  "receipt": {
+    "schema": "org-agent-mesh/frontend-execution-receipt/v1",
+    "receipt_id": "frontend-receipt-3216c966f63a8f0e0a8a6012",
+    "occurrence_id": "global-capacity-slot-5:20261007T2248Z",
+    "job_id": "global-capacity-slot-5",
+    "binding_id": "capacity-slot-5-frontend",
+    "frontend_automation_id": "6ac65689018c8191bf5128a1e6ce6815",
+    "scheduled_for": "2026-10-07T22:48:00Z",
+    "observed_run_at": "2026-10-07T22:48:42.833645Z",
+    "observed_at": "2026-10-07T22:48:42.834268Z",
+    "execution_surface": "CHATGPT_FRONTEND_MAPPED",
+    "status": "FRONTEND_EXECUTION_OBSERVED",
+    "authority_conveyed": false,
+    "mutation_authority_conveyed": false
+  }
+}
