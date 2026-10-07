@@ -1,11 +1,11 @@
 {
   "schema":"org-agent-mesh/project-glance-index/v1",
-  "generated_at_utc":"2026-10-07T13:10:00Z",
+  "generated_at_utc":"2026-10-07T13:22:12Z",
   "authority":"READ_ONLY_DERIVED_CACHE",
   "freshness_policy":{"fresh_seconds":1800,"stale_seconds":3600},
-  "summary":{"projects":7,"executing":1,"waiting":0,"blocked":0,"idle_ready":0,"paused":0,"unknown":6,"stale":0},
+  "summary":{"projects":7,"executing":0,"waiting":0,"blocked":0,"idle_ready":1,"paused":0,"unknown":6,"stale":0},
   "projects":[
-    {"project_id":"intercommunicationsenhancements","repository":"boberino93-bit/intercommunicationsenhancements","status":"EXECUTING","current_focus":"Scheduler frontend/backend synchronization and fast multi-project operational glance.","blocker_summary":"none","next_action":"Complete regression/CI validation and confirm scheduler parity.","freshness":"FRESH","source":"PROJECT_GLANCE.json"},
+    {"project_id":"intercommunicationsenhancements","repository":"boberino93-bit/intercommunicationsenhancements","status":"IDLE_READY","current_focus":"Scheduler synchronization and fast multi-project operational glance are deployed and validated.","blocker_summary":"none","next_action":"Use normal scheduler/glance operation; investigate only on drift, stale state, or new governance work.","freshness":"FRESH","source":"PROJECT_GLANCE.json"},
     {"project_id":"duo-open","repository":"boberino93-bit/duo-open","status":"UNKNOWN","current_focus":"Fold7 dual-display and continuity engineering; exact live lane remains AgentBus-derived.","blocker_summary":"Live role state not yet materialized into local glance.","next_action":"Refresh from current AgentBus state on next material Duo transition.","freshness":"FRESH","source":"boberino93-bit/duo-open:PROJECT_GLANCE.json"},
     {"project_id":"benefitflow","repository":"boberino93-bit/benefitflow","status":"UNKNOWN","current_focus":"Alpha v0.4.2 P0 hardening/implementation and durable coordination.","blocker_summary":"Live AgentBus worker state not yet materialized into local glance.","next_action":"Refresh from current BenefitFlow AgentBus state on next material transition.","freshness":"FRESH","source":"boberino93-bit/benefitflow:PROJECT_GLANCE.json"},
     {"project_id":"fold7-power-lab","repository":"boberino93-bit/samsungpowerbootstrap","status":"UNKNOWN","current_focus":"Fold7 display-power/bootstrap research.","blocker_summary":"Risky device mutation blocked pending tested independent rollback; live role state unknown.","next_action":"Refresh live AgentBus state and continue safe reversible research.","freshness":"FRESH","source":"boberino93-bit/samsungpowerbootstrap:PROJECT_GLANCE.json"},
