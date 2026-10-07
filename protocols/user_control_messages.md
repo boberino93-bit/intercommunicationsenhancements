@@ -1,6 +1,6 @@
 # User Control-Message Protocol
 
-Version: 1.0.0
+Version: 1.1.0
 Status: ACTIVE
 Scope: UNIVERSAL / ALL PROJECTS / ALL PERSISTENT ROLES
 
@@ -10,11 +10,23 @@ Human messages can interrupt an agent's current execution without cancelling or 
 
 ## Core invariant
 
-**A USER CONTROL MESSAGE IS NOT A CANCELLATION.**
+**A USER MESSAGE DOES NOT STOP AN ACTIVE ASSIGNMENT UNLESS THE USER EXPLICITLY SAYS NOT TO CONTINUE OR OTHERWISE CHANGES EXECUTION STATE.**
 
-When a valid assignment is already active, a human message that asks for current status, progress, percentage complete, what the agent is doing, why it is doing it, the current blocker, evidence, or an immediate acknowledgement temporarily interrupts output priority only. It does not release the task, abandon the execution lane, discard leases, reset project binding, or require the human to say `continue` afterward.
+When a valid assignment is already active, the universal post-response default is:
 
-The agent must answer the control message immediately and then resume the interrupted work automatically from the exact prior execution state.
+> **ANSWER THE USER, THEN CONTINUE WHERE YOU LEFT OFF.**
+
+The agent must not require a follow-up `continue` message. Silence, thanks, praise, criticism, a question, a screenshot, a reaction, or a request for explanation is not a stop condition.
+
+The formal default is:
+
+`USER_MESSAGE -> RESPOND -> APPLY_ANY_MATERIAL_DIRECTIVE -> RESUME_PRIOR_EXECUTION_CURSOR`
+
+`NO_EXPLICIT_NONCONTINUATION_DIRECTIVE -> CONTINUE_WHERE_YOU_LEFT_OFF`
+
+This applies to ordinary control messages, clarifications, corrections, commentary, status questions, evidence questions, brainstorming, and incidental side discussion. If a message materially corrects the work but does not explicitly stop it, incorporate the correction and resume from the nearest valid cursor under the corrected state.
+
+If no valid active assignment exists, do not invent one. This protocol preserves continuation; it does not manufacture objectives or authority.
 
 ## Control-message examples
 
@@ -30,12 +42,16 @@ Treat messages with these intents as control messages unless they also explicitl
 - `Show me the evidence so far.`
 - `Give me a status update.`
 - `Don't stop; just answer this first.`
+- `That's great.`
+- `Why did that happen?`
+- `Look at this screenshot.`
+- `I think this part is wrong.`
 
 Natural-language wording is not authoritative by itself. Classify by intent.
 
 ## Immediate-response contract
 
-For a status/progress control message, respond before continuing tool or implementation work. Keep the response concise and include the requested subset of:
+For a control message, respond before continuing tool or implementation work. Keep the response focused on what the user asked for and, when useful, include the relevant subset of:
 
 1. current active objective;
 2. approximate percentage complete when requested;
@@ -48,21 +64,23 @@ A percentage is an estimate, not fabricated telemetry. Base it on the remaining 
 
 ## Automatic resume contract
 
-After satisfying the control message:
+After satisfying the user message:
 
 1. preserve the current project binding, role, task identity, execution instance, generation/run identifiers, claims, leases, branch, and durable handoff state unless normal expiry/recovery rules require otherwise;
 2. restore the pre-interruption execution cursor from current chat state and durable project state;
-3. continue the exact previously authorized work without asking for routine confirmation;
-4. do not duplicate work already completed before the interruption;
-5. checkpoint any material new directive contained in the interruption before resuming;
-6. continue until convergence or a true human gate under `protocols/autonomous_continuation.md`.
+3. apply any material correction or directive from the message;
+4. continue the exact previously authorized work, or the nearest still-valid continuation of it, without asking for routine confirmation;
+5. do not duplicate work already completed before the interruption;
+6. checkpoint any material new directive contained in the interruption before resuming when the protocol requires durable state;
+7. continue until convergence or a true human gate under `protocols/autonomous_continuation.md`.
 
-## Messages that DO change execution
+## Explicit non-continuation / execution-changing messages
 
 Do not automatically resume the old objective unchanged when the human explicitly:
 
+- says `do not continue` or equivalent;
 - says `stop`, `cancel`, `abort`, or equivalent;
-- says to pause and wait;
+- says to pause, wait, hold, or end the work;
 - replaces the objective with a materially different task;
 - changes project scope or target project;
 - revokes authority or a previously granted action;
@@ -71,6 +89,8 @@ Do not automatically resume the old objective unchanged when the human explicitl
 
 For a partial change, preserve unaffected work and reclassify only the affected branch.
 
+A non-continuation directive must be explicit in intent. Agents must not infer cancellation from tone, brevity, topic drift, lack of the word `continue`, or the fact that the human asked a question.
+
 ## Compound interruptions
 
 A single human message may contain both a control request and a new durable directive. In that case:
@@ -78,7 +98,7 @@ A single human message may contain both a control request and a new durable dire
 1. answer the control request immediately;
 2. persist or incorporate the new directive at the correct authority surface;
 3. reconcile it with the current active assignment;
-4. resume the prior work with the new directive applied unless the directive explicitly cancels or replaces it.
+4. resume the prior work with the new directive applied unless the directive explicitly cancels, pauses, holds, redirects, replaces it, or says not to continue.
 
 ## Cross-project behavior
 
@@ -104,4 +124,4 @@ Do not ask the human to repeat recoverable context.
 
 ## Completion
 
-A control-message response is not task completion. The agent returns to the interrupted assignment immediately after answering unless an explicit stop/change condition above applies or a true human gate has been reached.
+A response to the user is not task completion. The agent returns to the interrupted assignment immediately after answering unless an explicit non-continuation/change condition above applies or a true human gate has been reached.
