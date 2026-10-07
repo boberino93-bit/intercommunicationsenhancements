@@ -1,0 +1,42 @@
+{
+  "schema":"org-agent-mesh/scheduler-control-interface/v1",
+  "version":"1.0.0",
+  "status":"ACTIVE",
+  "purpose":"Provide a low-prompt natural-language control surface over the internal scheduler and ChatGPT task bridge without merging their authority domains.",
+  "surfaces":{
+    "internal_scheduler":{"authority":"GITHUB_CONTROL_PLANE","schedule_registry":"governance/INTERNAL_SPAWN_SCHEDULES.json","policy":"governance/INTERNAL_SPAWN_SCHEDULER_POLICY.json"},
+    "chatgpt_automations":{"authority":"CHATGPT_AUTOMATIONS","state_source":"AUTOMATIONS_TOOL","separate_from_internal_scheduler":true}
+  },
+  "commands":{
+    "scheduler status":{"action":"READ_BOTH_SURFACES","mutation":false},
+    "scheduler health":{"action":"FORENSIC_HEALTH_BOTH_SURFACES","mutation":false},
+    "scheduler pause internal":{"action":"DISABLE_INTERNAL_JOB_ONLY","requires_explicit_current_human_command":true},
+    "scheduler resume internal":{"action":"ENABLE_INTERNAL_JOB_ONLY","requires_explicit_current_human_command":true},
+    "scheduler pause bridge":{"action":"PAUSE_CHATGPT_BOOTSTRAP_SPAWN_BRIDGE_ONLY","requires_explicit_current_human_command":true},
+    "scheduler resume bridge":{"action":"RESUME_CHATGPT_BOOTSTRAP_SPAWN_BRIDGE_ONLY","requires_explicit_current_human_command":true},
+    "scheduler run bridge":{"action":"RUN_CHATGPT_BOOTSTRAP_SPAWN_BRIDGE_NOW","requires_explicit_current_human_command":true},
+    "scheduler account":{"action":"LIST_CHATGPT_AUTOMATIONS_SUMMARY","mutation":false},
+    "scheduler internal":{"action":"LIST_INTERNAL_JOBS_SUMMARY","mutation":false},
+    "scheduler route <project_id>":{"action":"SET_INTERNAL_PROJECT_FILTER","requires_explicit_current_human_command":true,"must_match_registered_project":true},
+    "scheduler route global":{"action":"CLEAR_INTERNAL_PROJECT_FILTER","requires_explicit_current_human_command":true},
+    "scheduler restore defaults":{"action":"RESTORE_CANONICAL_INTERNAL_SCHEDULER_DEFAULTS_ONLY","requires_explicit_current_human_command":true}
+  },
+  "response_contract":{
+    "default":"COMPACT",
+    "show_running_confirmed":true,
+    "show_enabled_scheduled":true,
+    "show_paused":true,
+    "show_next_due":true,
+    "show_last_result":true,
+    "separate_internal_from_chatgpt_account_tasks":true,
+    "do_not_dump_full_prompts_unless_requested":true
+  },
+  "safety":{
+    "status_command_is_never_mutation":true,
+    "account_task_enablement_remains_human_control_gate":true,
+    "internal_scheduler_may_not_mutate_chatgpt_task_state":true,
+    "chatgpt_bridge_may_not_mutate_internal_policy_without_explicit_human_command":true,
+    "primary_master_full_swarm_prohibitions_unchanged":true,
+    "spawn_authority_is_not_mutation_authority":true
+  }
+}
