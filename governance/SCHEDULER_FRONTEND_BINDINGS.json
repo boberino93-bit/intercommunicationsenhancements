@@ -1,9 +1,10 @@
 {
   "schema": "org-agent-mesh/scheduler-frontend-bindings/v1",
-  "version": "1.3.0",
+  "version": "1.4.1",
   "status": "ACTIVE",
   "reconciliation_directive": "governance/SCHEDULER_SYNCHRONIZATION_DIRECTIVE.json",
   "activation_gate": "org_agent_mesh.schedule_activation",
+  "activation_grant": "governance/SCHEDULER_ACTIVATION_GRANT_2026-10-07.json",
   "identity_health_policy": {
     "probe_by_declared_frontend_automation_id": true,
     "missing_or_unavailable_requires_explicit_human_replacement_authorization": true,
@@ -22,11 +23,13 @@
       "schedule_authority": "BACKEND",
       "execution_state_authority": "FRONTEND",
       "enabled_state_policy": "MIRROR_WHEN_ACCOUNT_CAPACITY_AVAILABLE",
-      "capacity_release_action": "REPORT_READY_FOR_HUMAN_ENABLEMENT",
+      "capacity_release_action": "RETRY_ONLY_UNDER_ACTIVE_SCOPED_HUMAN_REPAIR_GRANT",
+      "liveness_repair_role": "SECONDARY_LIVENESS_SENTINEL",
+      "repair_authorization_ref": "governance/SCHEDULER_ACTIVATION_GRANT_2026-10-07.json",
       "expected_timezone": "America/Vancouver",
       "expected_minute_offset": 0,
-      "purpose": "Expose one canonical bounded capacity lane as an actual ChatGPT scheduled model invocation.",
-      "capacity_note": "Deferred while Morning Income Research occupies the fifth active-task slot. Capacity release makes this lane eligible for human-authorized enablement; it must never auto-enable."
+      "purpose": "Expose one canonical bounded capacity lane as an actual ChatGPT scheduled model invocation and provide one redundant liveness sentinel for the mapped scheduler control plane.",
+      "capacity_note": "Capacity availability alone never grants activation. While the explicit scoped human repair grant is ACTIVE, this exact mapped lane may be restored after capacity release when all repair conditions pass; canonical pause/backend disable still wins."
     },
     {
       "binding_id": "bounded-capacity-hourly-frontend",
@@ -37,9 +40,11 @@
       "schedule_authority": "BACKEND",
       "execution_state_authority": "FRONTEND",
       "enabled_state_policy": "MIRROR",
+      "liveness_repair_role": "PRIMARY_FRONTEND_RECONCILER",
+      "repair_authorization_ref": "governance/SCHEDULER_ACTIVATION_GRANT_2026-10-07.json",
       "expected_timezone": "America/Vancouver",
       "expected_minute_offset": 12,
-      "purpose": "Expose one canonical bounded capacity lane as an actual ChatGPT scheduled model invocation."
+      "purpose": "Expose one canonical bounded capacity lane as an actual ChatGPT scheduled model invocation and primary frontend scheduler reconciler."
     },
     {
       "binding_id": "capacity-slot-2-frontend",
@@ -53,7 +58,7 @@
       "expected_timezone": "America/Vancouver",
       "expected_minute_offset": 6,
       "purpose": "Expose one canonical bounded capacity lane as an actual ChatGPT scheduled model invocation.",
-      "capacity_note": "Warm standby because the account limit is five active Scheduled Tasks and this slot had a prior unexplained scheduler-state disable."
+      "capacity_note": "Warm standby because the account limit is five active Scheduled Tasks. The liveness-repair grant explicitly excludes this standby binding."
     },
     {
       "binding_id": "capacity-slot-3-frontend",
@@ -64,10 +69,11 @@
       "schedule_authority": "BACKEND",
       "execution_state_authority": "FRONTEND",
       "enabled_state_policy": "MIRROR",
+      "repair_authorization_ref": "governance/SCHEDULER_ACTIVATION_GRANT_2026-10-07.json",
       "expected_timezone": "America/Vancouver",
       "expected_minute_offset": 24,
       "purpose": "Expose one canonical bounded capacity lane as an actual ChatGPT scheduled model invocation.",
-      "capacity_note": "Rebound 2026-10-07 after the prior frontend task was rejected by the execution service as no longer available."
+      "capacity_note": "Rebound 2026-10-07 after the prior frontend task was rejected by the execution service as no longer available. This exact replacement identity is an authorized liveness-repair target but is not itself a scheduler mutation actor."
     },
     {
       "binding_id": "capacity-slot-4-frontend",
@@ -78,10 +84,11 @@
       "schedule_authority": "BACKEND",
       "execution_state_authority": "FRONTEND",
       "enabled_state_policy": "MIRROR",
+      "repair_authorization_ref": "governance/SCHEDULER_ACTIVATION_GRANT_2026-10-07.json",
       "expected_timezone": "America/Vancouver",
       "expected_minute_offset": 36,
       "purpose": "Expose one canonical bounded capacity lane as an actual ChatGPT scheduled model invocation.",
-      "capacity_note": "Rebound 2026-10-07 after the prior frontend task repeatedly accepted immediate-run requests without advancing its execution timestamp and repeatedly toggled disabled; replacement carries the ordinary-worker scheduler-state fence from creation."
+      "capacity_note": "Rebound 2026-10-07 after the prior frontend task repeatedly accepted immediate-run requests without advancing its execution timestamp and repeatedly toggled disabled. This exact replacement identity is an authorized liveness-repair target but remains an ordinary scheduler-read-only worker."
     },
     {
       "binding_id": "capacity-slot-5-frontend",
@@ -92,10 +99,11 @@
       "schedule_authority": "BACKEND",
       "execution_state_authority": "FRONTEND",
       "enabled_state_policy": "MIRROR",
+      "repair_authorization_ref": "governance/SCHEDULER_ACTIVATION_GRANT_2026-10-07.json",
       "expected_timezone": "America/Vancouver",
       "expected_minute_offset": 48,
       "purpose": "Expose one canonical bounded capacity lane as an actual ChatGPT scheduled model invocation.",
-      "capacity_note": "Rebound 2026-10-07 after the prior frontend task remained listed as enabled but was rejected by the execution service as no longer available."
+      "capacity_note": "Rebound 2026-10-07 after the prior frontend task remained listed as enabled but was rejected by the execution service as no longer available. This exact replacement identity is an authorized liveness-repair target but remains an ordinary scheduler-read-only worker."
     },
     {
       "binding_id": "morning-income-research",

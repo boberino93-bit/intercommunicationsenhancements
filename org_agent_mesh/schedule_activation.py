@@ -26,6 +26,9 @@ class ScheduleStateChangeRequest:
     requested_enabled: bool
     actor: ActivationActor
     explicit_human_request: bool = False
+    declared_repair_actor: bool = False
+    repair_authorization_ref: str | None = None
+    repair_scope_contains_task: bool = False
 
 
 @dataclass(frozen=True)
@@ -36,10 +39,13 @@ class ScheduleStateDecision:
 
 
 def evaluate_schedule_state_change(request: ScheduleStateChangeRequest) -> ScheduleStateDecision:
-    """Enforce human-only activation while allowing safe preservation/disable operations.
+    """Enforce human-controlled activation with bounded delegated liveness repair.
 
-    This gate is intentionally stricter than runtime lifecycle authority. MASTER/PRIMARY
-    may supervise running work, but they may not turn a disabled recurring swarm task on.
+    A disabled task can be enabled directly by an explicit current human request. A
+    declared SYSTEM/RECOVERY reconciler may also restore an already-declared mapped
+    task only when it carries a durable human repair authorization reference and the
+    target is explicitly inside that authorization's scope. This is repair authority,
+    not general activation or task-creation authority.
     """
     if request.requested_enabled == request.current_enabled:
         return ScheduleStateDecision(
@@ -73,8 +79,21 @@ def evaluate_schedule_state_change(request: ScheduleStateChangeRequest) -> Sched
             reason="EXPLICIT_HUMAN_ENABLEMENT",
         )
 
+    if (
+        request.actor in {ActivationActor.SYSTEM, ActivationActor.RECOVERY}
+        and request.declared_repair_actor
+        and bool(request.repair_authorization_ref)
+        and request.repair_scope_contains_task
+    ):
+        return ScheduleStateDecision(
+            allowed=True,
+            resulting_enabled=True,
+            reason="HUMAN_AUTHORIZED_DECLARED_LIVENESS_REPAIR",
+        )
+
     raise ScheduleActivationError(
-        "Scheduled swarm tasks may only be enabled by an explicit current human request"
+        "Scheduled swarm tasks may only be enabled by an explicit current human request "
+        "or a declared repair actor operating inside an active human repair authorization"
     )
 
 
@@ -84,6 +103,9 @@ def require_preserve_enabled_state(
     proposed_enabled: bool | None,
     actor: ActivationActor,
     explicit_human_request: bool = False,
+    declared_repair_actor: bool = False,
+    repair_authorization_ref: str | None = None,
+    repair_scope_contains_task: bool = False,
 ) -> bool:
     """Use for migrations/alignment so omitted state remains unchanged by construction."""
     if proposed_enabled is None:
@@ -95,6 +117,9 @@ def require_preserve_enabled_state(
             requested_enabled=proposed_enabled,
             actor=actor,
             explicit_human_request=explicit_human_request,
+            declared_repair_actor=declared_repair_actor,
+            repair_authorization_ref=repair_authorization_ref,
+            repair_scope_contains_task=repair_scope_contains_task,
         )
     )
     return decision.resulting_enabled

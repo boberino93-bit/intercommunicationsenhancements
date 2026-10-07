@@ -1,0 +1,65 @@
+{
+  "schema": "org-agent-mesh/scheduler-activation-grant/v1",
+  "version": "1.0.1",
+  "status": "ACTIVE",
+  "authorization_basis": "EXPLICIT_CURRENT_HUMAN_REQUEST_2026-10-07_REPAIR_TEST_IMPLEMENT_PATCH_SWARM_LEVEL",
+  "purpose": "Allow bounded recovery of already-declared mapped swarm scheduler tasks from unexpected frontend disabled drift without granting task creation, replacement, project mutation, or full-swarm authority.",
+  "authorized_repair_actors": [
+    {
+      "frontend_automation_id": "6ac63d38cc688191b9de4213ca40f951",
+      "title": "Bootstrap Spawn Bridge",
+      "role": "PRIMARY_FRONTEND_RECONCILER"
+    },
+    {
+      "frontend_automation_id": "6ac3779cb1008191b636d39bd59553d8",
+      "title": "Swarm Capacity Slot 1",
+      "role": "SECONDARY_LIVENESS_SENTINEL"
+    }
+  ],
+  "authorized_target_frontend_automation_ids": [
+    "6ac3779cb1008191b636d39bd59553d8",
+    "6ac63d38cc688191b9de4213ca40f951",
+    "6ac6571de7d88191a5396d8828a502c2",
+    "6ac658dad9a881919e43aba112f23364",
+    "6ac65689018c8191bf5128a1e6ce6815"
+  ],
+  "allowed_transition": "DISABLED_TO_ENABLED_ONLY",
+  "required_conditions": {
+    "exact_declared_binding_required": true,
+    "canonical_backend_enabled_required": true,
+    "binding_policy_must_be_one_of": [
+      "MIRROR",
+      "MIRROR_WHEN_ACCOUNT_CAPACITY_AVAILABLE"
+    ],
+    "account_capacity_available_required": true,
+    "project_hold_pause_stop_must_be_clear": true,
+    "frontend_identity_must_be_available": true,
+    "replacement_prohibited": true
+  },
+  "prohibited_targets": {
+    "mirror_disabled_standby": true,
+    "frontend_only_personal": true,
+    "unmapped_tasks": true,
+    "missing_or_unavailable_frontend_identities": true
+  },
+  "mutation_limits": {
+    "create_task": false,
+    "delete_task": false,
+    "replace_task": false,
+    "rename_task_under_liveness_repair": false,
+    "reschedule_task_under_liveness_repair": false,
+    "disable_task_under_liveness_repair": false,
+    "project_domain_mutation": false
+  },
+  "revocation": {
+    "scheduler_pause_command_revokes_for_affected_jobs": true,
+    "canonical_backend_enabled_false_revokes_for_target": true,
+    "hold_pause_stop_overrides_grant": true,
+    "grant_status_REVOKED_disables_all_repair": true
+  },
+  "notes": [
+    "This grant does not authorize autonomous creation of a swarm or PRIMARY/MASTER sessions.",
+    "Mapped system task desired enablement is taken from the canonical backend registry while this grant is active.",
+    "A direct frontend toggle without a corresponding canonical pause is treated as execution-state drift for these mapped system tasks; use the scheduler control interface for an intentional durable pause."
+  ]
+}

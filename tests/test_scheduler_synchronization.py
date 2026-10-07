@@ -22,23 +22,31 @@ class SchedulerSynchronizationTests(unittest.TestCase):
         rec = directive["reconciliation"]
         self.assertEqual(rec["mode"], "DECLARED_MAPPING_ONLY")
         self.assertTrue(rec["automatic_repair_authorized_for_mapped_non_destructive_fields"])
-        self.assertTrue(rec["automatic_repair_actor_must_match_declared_reconciler"])
+        self.assertTrue(rec["automatic_repair_actor_must_match_declared_reconciler_or_liveness_sentinel"])
         self.assertTrue(rec["never_infer_mapping_by_title_similarity"])
         self.assertTrue(rec["never_create_frontend_task_as_automatic_repair"])
         self.assertTrue(rec["never_delete_frontend_task_as_automatic_repair"])
         self.assertTrue(rec["never_import_unmapped_personal_frontend_tasks_into_backend"])
 
-    def test_only_bootstrap_bridge_may_mutate_mapped_scheduler_state(self):
+    def test_bootstrap_bridge_plus_one_declared_liveness_sentinel_may_repair(self):
         directive = self.load("governance/SCHEDULER_SYNCHRONIZATION_DIRECTIVE.json")
         authority = directive["reconciler_authority"]
-        self.assertEqual(authority["mode"], "SINGLE_DECLARED_FRONTEND_RECONCILER")
+        self.assertEqual(authority["mode"], "PRIMARY_WITH_DECLARED_LIVENESS_SENTINEL")
         self.assertEqual(authority["frontend_automation_id"], "6ac63d38cc688191b9de4213ca40f951")
         self.assertEqual(authority["frontend_title"], "Bootstrap Spawn Bridge")
+        self.assertEqual(authority["secondary_liveness_reconciler_frontend_automation_id"], "6ac3779cb1008191b636d39bd59553d8")
+        self.assertEqual(authority["secondary_liveness_reconciler_frontend_title"], "Swarm Capacity Slot 1")
+        self.assertEqual(authority["activation_grant"], "governance/SCHEDULER_ACTIVATION_GRANT_2026-10-07.json")
         self.assertFalse(authority["ordinary_capacity_workers_may_mutate_scheduler_state"])
         self.assertFalse(authority["ordinary_capacity_workers_may_create_frontend_tasks"])
         self.assertFalse(authority["ordinary_capacity_workers_may_disable_or_enable_frontend_tasks"])
         self.assertFalse(authority["ordinary_capacity_workers_may_reschedule_or_rename_frontend_tasks"])
         self.assertEqual(authority["ordinary_capacity_workers_scheduler_role"], "READ_DETECT_REPORT_ONLY")
+        self.assertTrue(authority["secondary_liveness_reconciler_is_explicit_exception_to_ordinary_worker_fence"])
+        self.assertTrue(authority["secondary_liveness_reconciler_may_enable_only"])
+        self.assertFalse(authority["secondary_liveness_reconciler_may_disable"])
+        self.assertFalse(authority["secondary_liveness_reconciler_may_reschedule_or_rename"])
+        self.assertFalse(authority["secondary_liveness_reconciler_may_create_or_delete_or_replace"])
         self.assertTrue(authority["reconciler_may_update_only_existing_declared_frontend_automation_ids"])
         self.assertFalse(authority["reconciler_may_create_replacement_tasks"])
         self.assertFalse(authority["reconciler_may_delete_tasks"])
@@ -48,12 +56,55 @@ class SchedulerSynchronizationTests(unittest.TestCase):
         policy = self.load("governance/INTERNAL_SPAWN_SCHEDULER_POLICY.json")
         boundary = policy["scheduler_state_boundary"]
         self.assertEqual(boundary["declared_frontend_reconciler_automation_id"], authority["frontend_automation_id"])
+        self.assertEqual(boundary["secondary_liveness_reconciler_automation_id"], authority["secondary_liveness_reconciler_frontend_automation_id"])
         self.assertEqual(boundary["ordinary_capacity_workers_scheduler_state_access"], "READ_DETECT_REPORT_ONLY")
         self.assertFalse(boundary["ordinary_capacity_workers_may_mutate_scheduler_state"])
-        self.assertTrue(boundary["automatic_repair_actor_must_match_declared_reconciler"])
+        self.assertTrue(boundary["secondary_liveness_reconciler_is_explicit_exception_to_ordinary_worker_fence"])
+        self.assertTrue(boundary["automatic_repair_actor_must_match_declared_reconciler_or_liveness_sentinel"])
         self.assertFalse(boundary["reconciler_may_create_replacement_frontend_tasks"])
         self.assertFalse(boundary["reconciler_may_delete_frontend_tasks"])
         self.assertTrue(boundary["missing_mapped_task_requires_human_replacement_authorization"])
+
+    def test_activation_grant_is_exactly_scoped_and_non_destructive(self):
+        grant = self.load("governance/SCHEDULER_ACTIVATION_GRANT_2026-10-07.json")
+        self.assertEqual(grant["status"], "ACTIVE")
+        self.assertEqual(grant["allowed_transition"], "DISABLED_TO_ENABLED_ONLY")
+        self.assertEqual(len(grant["authorized_repair_actors"]), 2)
+        self.assertEqual(len(grant["authorized_target_frontend_automation_ids"]), 5)
+        self.assertTrue(grant["required_conditions"]["exact_declared_binding_required"])
+        self.assertTrue(grant["required_conditions"]["canonical_backend_enabled_required"])
+        self.assertTrue(grant["required_conditions"]["account_capacity_available_required"])
+        self.assertTrue(grant["prohibited_targets"]["mirror_disabled_standby"])
+        self.assertTrue(grant["prohibited_targets"]["frontend_only_personal"])
+        self.assertTrue(grant["prohibited_targets"]["unmapped_tasks"])
+        self.assertFalse(grant["mutation_limits"]["create_task"])
+        self.assertFalse(grant["mutation_limits"]["delete_task"])
+        self.assertFalse(grant["mutation_limits"]["disable_task_under_liveness_repair"])
+        self.assertTrue(grant["revocation"]["canonical_backend_enabled_false_revokes_for_target"])
+
+    def test_bindings_and_grant_match_independent_frontend_identity_receipt(self):
+        receipt = self.load("governance/SCHEDULER_FRONTEND_IDENTITY_RECEIPT_2026-10-07.json")
+        bindings_doc = self.load("governance/SCHEDULER_FRONTEND_BINDINGS.json")
+        grant = self.load("governance/SCHEDULER_ACTIVATION_GRANT_2026-10-07.json")
+        registry = self.load("governance/INTERNAL_SPAWN_SCHEDULES.json")
+
+        mapped = {
+            b["backend_job_id"]: b["frontend_automation_id"]
+            for b in bindings_doc["bindings"]
+            if b["mode"] == "MIRROR"
+        }
+        self.assertEqual(mapped, receipt["mapped_system_identities"])
+
+        enabled_backend_ids = {job["job_id"] for job in registry["jobs"] if job["enabled"]}
+        expected_targets = {receipt["mapped_system_identities"][job_id] for job_id in enabled_backend_ids}
+        self.assertEqual(set(grant["authorized_target_frontend_automation_ids"]), expected_targets)
+        self.assertEqual(set(receipt["repair_targets_observed_enabled_after_human_repair"]), expected_targets)
+        self.assertEqual(
+            receipt["standby_observed_disabled"],
+            receipt["mapped_system_identities"]["global-capacity-slot-2"],
+        )
+        self.assertTrue(receipt["authority"]["evidence_only"])
+        self.assertFalse(receipt["authority"]["may_enable_or_disable_tasks"])
 
     def test_capacity_lanes_are_one_to_one_mapped_and_plan_limit_aware(self):
         registry = self.load("governance/INTERNAL_SPAWN_SCHEDULES.json")
@@ -153,6 +204,7 @@ class SchedulerSynchronizationTests(unittest.TestCase):
         self.assertFalse(boundary["may_modify_unmapped_chatgpt_tasks"])
         self.assertFalse(boundary["may_create_or_delete_unmapped_chatgpt_tasks"])
         self.assertFalse(boundary["may_infer_mapping_from_title_similarity"])
+        self.assertTrue(boundary["enable_repair_requires_active_scoped_human_authorization"])
 
     def test_control_interface_has_short_commands(self):
         control = self.load("governance/SCHEDULER_CONTROL_INTERFACE.json")
