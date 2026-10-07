@@ -49,7 +49,7 @@
     {
       "binding_id": "capacity-slot-3-frontend",
       "backend_job_id": "global-capacity-slot-3",
-      "frontend_automation_id": "6ac377ad11008191899c464a5856cfd8",
+      "frontend_automation_id": "6ac6571de7d88191a5396d8828a502c2",
       "frontend_title": "Swarm Capacity Slot 3",
       "mode": "MIRROR",
       "schedule_authority": "BACKEND",
@@ -57,7 +57,8 @@
       "enabled_state_policy": "MIRROR",
       "expected_timezone": "America/Vancouver",
       "expected_minute_offset": 24,
-      "purpose": "Expose one canonical bounded capacity lane as an actual ChatGPT scheduled model invocation."
+      "purpose": "Expose one canonical bounded capacity lane as an actual ChatGPT scheduled model invocation.",
+      "capacity_note": "Rebound 2026-10-07 after the prior frontend task was rejected by the execution service as no longer available."
     },
     {
       "binding_id": "capacity-slot-4-frontend",
