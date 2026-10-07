@@ -1,0 +1,27 @@
+{
+  "schema": "org-agent-mesh/internal-spawn-schedule-registry/v1",
+  "version": "1.0.0",
+  "timezone": "UTC",
+  "catch_up_policy": "COALESCE_TO_LATEST",
+  "jobs": [
+    {
+      "job_id": "global-bounded-capacity-hourly",
+      "enabled": true,
+      "schedule": {
+        "type": "HOURLY_MINUTE_OFFSETS",
+        "minute_offsets": [5],
+        "grace_minutes": 10
+      },
+      "launch_scope": "GLOBAL_DEMAND_ROUTED_CAPACITY",
+      "requested_roles": ["research", "manager"],
+      "role_selection": "DEMAND_DRIVEN_ONE_ROLE_ONLY",
+      "max_workers_per_occurrence": 1,
+      "project_selection": "AUTHORIZED_DEMAND_SNAPSHOT_THEN_EXACT_SINGLE_PROJECT_BINDING",
+      "primary_prohibited": true,
+      "full_swarm_prohibited": true,
+      "occurrence_idempotency_required": true,
+      "host_start_receipt_required": true,
+      "purpose": "Provide one independent bounded worker opportunity per hour without mutating existing ChatGPT scheduled-task state."
+    }
+  ]
+}
