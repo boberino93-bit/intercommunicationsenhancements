@@ -115,6 +115,8 @@ def audit_receipt_directory(
     accepted: list[AuditedReceipt] = []
     rejected: list[dict] = []
     seen_receipt_ids: dict[str, str] = {}
+    seen_occurrences: dict[str, tuple[str, str, str]] = {}
+    duplicate_occurrence_ids: set[str] = set()
 
     paths = []
     if receipt_dir.exists():
@@ -167,6 +169,19 @@ def audit_receipt_directory(
                     raise FrontendReceiptAuditError("receipt id reused with conflicting payload")
                 continue
             seen_receipt_ids[receipt.receipt_id] = digest
+
+            prior_occurrence = seen_occurrences.get(receipt.occurrence_id)
+            if prior_occurrence is not None:
+                prior_receipt_id, prior_digest, prior_path = prior_occurrence
+                if prior_receipt_id != receipt.receipt_id or prior_digest != digest:
+                    duplicate_occurrence_ids.add(receipt.occurrence_id)
+                    raise FrontendReceiptAuditError(
+                        "multiple distinct execution receipts observed for one scheduled occurrence; "
+                        f"first={prior_path} first_receipt_id={prior_receipt_id}"
+                    )
+                continue
+            seen_occurrences[receipt.occurrence_id] = (receipt.receipt_id, digest, str(path))
+
             accepted.append(
                 AuditedReceipt(
                     path=str(path),
@@ -187,20 +202,28 @@ def audit_receipt_directory(
 
     latest_by_job: dict[str, dict] = {}
     for item in accepted:
+        if item.occurrence_id in duplicate_occurrence_ids:
+            continue
         previous = latest_by_job.get(item.job_id)
         if previous is None or _parse_time(item.observed_run_at) > _parse_time(previous["observed_run_at"]):
             latest_by_job[item.job_id] = asdict(item)
 
+    accepted_for_health = [item for item in accepted if item.occurrence_id not in duplicate_occurrence_ids]
     return {
         "schema": "org-agent-mesh/frontend-receipt-audit/v1",
         "receipt_directory": str(receipt_dir),
-        "accepted_receipt_count": len(accepted),
+        "accepted_receipt_count": len(accepted_for_health),
+        "raw_accepted_receipt_count": len(accepted),
         "rejected_receipt_count": len(rejected),
-        "self_published_receipt_count": sum(1 for item in accepted if item.publisher_mode == "EXACT_SELF"),
-        "reconciler_published_receipt_count": sum(
-            1 for item in accepted if item.publisher_mode == "DECLARED_RECONCILER"
+        "duplicate_occurrence_count": len(duplicate_occurrence_ids),
+        "duplicate_occurrence_ids": sorted(duplicate_occurrence_ids),
+        "self_published_receipt_count": sum(
+            1 for item in accepted_for_health if item.publisher_mode == "EXACT_SELF"
         ),
-        "accepted_receipts": [asdict(item) for item in accepted],
+        "reconciler_published_receipt_count": sum(
+            1 for item in accepted_for_health if item.publisher_mode == "DECLARED_RECONCILER"
+        ),
+        "accepted_receipts": [asdict(item) for item in accepted_for_health],
         "rejected_receipts": rejected,
         "latest_verified_by_job": latest_by_job,
         "authority_conveyed": False,
