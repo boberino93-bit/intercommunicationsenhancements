@@ -38,6 +38,9 @@ class ReconciliationRequest:
     account_capacity_available: bool = True
     actor: ActivationActor = ActivationActor.SYSTEM
     explicit_human_request: bool = False
+    declared_repair_actor: bool = False
+    repair_authorization_ref: str | None = None
+    repair_scope_contains_task: bool = False
 
 
 @dataclass(frozen=True)
@@ -59,12 +62,12 @@ SUPPORTED_ENABLED_STATE_POLICIES = frozenset(
 
 
 def decide_frontend_reconciliation(request: ReconciliationRequest) -> ReconciliationDecision:
-    """Resolve one mapped frontend task without bypassing the activation gate.
+    """Resolve one mapped frontend task without bypassing activation controls.
 
     Capacity availability is an admission fact, not activation authority. Missing or dead
     frontend identities are never replaced automatically. Disabled->enabled transitions
-    are delegated to schedule_activation so scheduler synchronization cannot silently
-    weaken the global human-only activation invariant.
+    require either a direct current human enablement or bounded liveness repair backed by
+    an active human authorization and an exact in-scope declared mapping.
     """
     if request.enabled_state_policy not in SUPPORTED_ENABLED_STATE_POLICIES:
         raise ValueError(f"unsupported enabled_state_policy: {request.enabled_state_policy}")
@@ -122,6 +125,9 @@ def decide_frontend_reconciliation(request: ReconciliationRequest) -> Reconcilia
                 requested_enabled=desired_enabled,
                 actor=request.actor,
                 explicit_human_request=request.explicit_human_request,
+                declared_repair_actor=request.declared_repair_actor,
+                repair_authorization_ref=request.repair_authorization_ref,
+                repair_scope_contains_task=request.repair_scope_contains_task,
             )
         )
     except ScheduleActivationError:
@@ -130,7 +136,7 @@ def decide_frontend_reconciliation(request: ReconciliationRequest) -> Reconcilia
                 action=ReconciliationAction.ENABLE_AUTHORIZATION_REQUIRED,
                 may_mutate_frontend=False,
                 resulting_enabled=request.current_enabled,
-                reason="GLOBAL_SCHEDULE_ACTIVATION_GATE_REQUIRES_EXPLICIT_CURRENT_HUMAN_ENABLEMENT",
+                reason="SCHEDULE_ACTIVATION_GATE_REQUIRES_HUMAN_ENABLEMENT_OR_VALID_SCOPED_REPAIR_GRANT",
             )
         raise
 
