@@ -1,0 +1,55 @@
+name: Internal Spawn Scheduler
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: internal-spawn-scheduler
+  cancel-in-progress: false
+
+jobs:
+  scheduler:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate scheduler controls
+        run: |
+          python -m unittest \
+            tests.test_internal_scheduler \
+            tests.test_launch_admission \
+            tests.test_schedule_activation
+
+      - name: Evaluate and dispatch due spawn tickets
+        env:
+          ORG_AGENT_MESH_SPAWN_ENDPOINT: ${{ secrets.ORG_AGENT_MESH_SPAWN_ENDPOINT }}
+          ORG_AGENT_MESH_SPAWN_TOKEN: ${{ secrets.ORG_AGENT_MESH_SPAWN_TOKEN }}
+        run: |
+          rm -rf scheduler-out
+          python -m org_agent_mesh.internal_scheduler \
+            --registry governance/INTERNAL_SPAWN_SCHEDULES.json \
+            --policy governance/INTERNAL_SPAWN_SCHEDULER_POLICY.json \
+            --out-dir scheduler-out \
+            --dispatch
+          cat scheduler-out/run-summary.json
+
+      - name: Preserve scheduler occurrence audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: internal-spawn-scheduler-${{ github.run_id }}-${{ github.run_attempt }}
+          path: scheduler-out/
+          if-no-files-found: warn
+          retention-days: 30

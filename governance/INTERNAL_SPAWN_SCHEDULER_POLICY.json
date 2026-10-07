@@ -1,0 +1,69 @@
+{
+  "schema": "org-agent-mesh/internal-spawn-scheduler-policy/v1",
+  "version": "1.0.0",
+  "status": "ACTIVE_BY_EXPLICIT_HUMAN_REQUEST",
+  "service": {
+    "enabled": true,
+    "clock": "INDEPENDENT_HOST_SCHEDULER",
+    "reference_runtime": "org_agent_mesh.internal_scheduler",
+    "protocol": "protocols/internal_scheduler_service.md",
+    "schedule_registry": "governance/INTERNAL_SPAWN_SCHEDULES.json",
+    "ticket_schema": "schemas/scheduled_spawn_ticket.schema.json",
+    "host_adapter_required_for_real_spawn": true,
+    "spawn_ticket_is_session_started": false,
+    "host_start_receipt_required_for_session_started": true
+  },
+  "delegated_spawn_authority": {
+    "authorization_basis": "EXPLICIT_CURRENT_HUMAN_REQUEST_2026-10-07",
+    "allowed_roles": ["research", "manager"],
+    "primary_allowed": false,
+    "master_allowed": false,
+    "full_swarm_auto_start_allowed": false,
+    "max_workers_per_occurrence": 1,
+    "max_tickets_per_scheduler_invocation": 3,
+    "project_binding_required_before_protected_work": true,
+    "spawn_authority_is_not_mutation_authority": true,
+    "role_or_ticket_is_not_mutation_authority": true
+  },
+  "scheduler_state_boundary": {
+    "may_enable_existing_chatgpt_scheduled_tasks": false,
+    "may_reenable_disabled_chatgpt_scheduled_tasks": false,
+    "may_disable_existing_chatgpt_scheduled_tasks": false,
+    "may_reschedule_existing_chatgpt_scheduled_tasks": false,
+    "disabled_task_remains_human_control_gate": true,
+    "scheduler_service_enablement_does_not_change_existing_task_enablement": true
+  },
+  "admission": {
+    "reference": "org_agent_mesh.launch_admission",
+    "provider_admission_required": true,
+    "max_inflight": 1,
+    "minimum_start_spacing_seconds": 30,
+    "retryable_prebootstrap_results": [
+      "TOO_MANY_REQUESTS",
+      "RATE_LIMITED",
+      "TEMPORARY_PROVIDER_UNAVAILABLE",
+      "TIMEOUT_BEFORE_BOOTSTRAP"
+    ],
+    "catch_up_policy": "COALESCE_TO_LATEST",
+    "blind_historical_replay": false
+  },
+  "failure_semantics": {
+    "adapter_missing": "SPAWN_ADAPTER_UNAVAILABLE",
+    "adapter_rejected": "SPAWN_ADAPTER_REJECTED",
+    "adapter_accepted_without_start_receipt": "DISPATCH_ACCEPTED_START_UNVERIFIED",
+    "provider_rejected_before_bootstrap": "LAUNCH_PROVIDER_ADMISSION_FAILED",
+    "ticket_created_without_host_receipt": "SPAWN_TICKET_PENDING",
+    "never_call_missing_adapter_task_failed": true,
+    "never_claim_spawn_from_ticket_alone": true
+  },
+  "observability": {
+    "record_scheduled_for": true,
+    "record_observed_at": true,
+    "record_occurrence_id": true,
+    "record_ticket_id": true,
+    "record_adapter_result": true,
+    "record_start_receipt": true,
+    "record_bootstrap_ready_separately": true,
+    "record_final_outcome_separately": true
+  }
+}
