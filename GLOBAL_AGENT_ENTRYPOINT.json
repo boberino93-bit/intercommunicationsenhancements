@@ -26,6 +26,7 @@
     "coordination_publication_module": "org_agent_mesh.coordination_publication",
     "roleless_agent_admission_protocol": "protocols/roleless_agent_admission.md",
     "roleless_agent_admission_policy": "governance/ROLELESS_AGENT_ADMISSION_POLICY.json",
+    "swarm_synchronization_protocol": "protocols/swarm_synchronization.md",
     "chat_project_router_module": "org_agent_mesh.chat_project_routing",
     "supervision_module": "org_agent_mesh.supervision",
     "schedule_activation_module": "org_agent_mesh.schedule_activation",
@@ -39,6 +40,7 @@
   "coordination_publication_policy": {"allowed_roles": ["RESEARCH", "MANAGER"], "scheduled_research_stage_aliases": ["RESEARCHER_1", "RESEARCHER_2", "RESEARCHER_3"], "mode": "APPEND_ONLY_PROJECT_SCOPED", "route_authority": "PROJECT_ROLE_ROUTING_REGISTRY.json", "github_backup_prefix": "agentbus-backup/coordination-messages/", "human_authorization_per_valid_message_required": false, "authority_conveyed": false, "message_content_is_authorization": false, "backup_write_is_source_write": false, "cross_project_write": "DENY", "all_other_subordinate_durable_mutation": "DENY"},
   "control_message_policy": {"status_progress_or_explanation_request_is_task_completion": false, "respond_before_resuming": true, "preserve_active_assignment": true, "automatic_resume": true, "require_continue_reprompt": false, "percentage_policy": "APPROXIMATE_FROM_KNOWN_REMAINING_PHASES_UNLESS_TELEMETRY_EXISTS", "explicit_stop_cancel_pause_or_redirect_changes_machine_control_state": true},
   "supervisory_policy": {"authority_order": ["USER", "MASTER", "PRIMARY", "SUBORDINATE"], "master": {"roaming": true, "project_id": null, "chat_project": null, "lifecycle_scope": "GLOBAL"}, "primary": {"lifecycle_scope": "OWN_PROJECT_TREE_ONLY"}, "lifecycle_authority_does_not_expand_mutation_authority": true, "bounded_work_unit_control_checks_required": true, "useful_partial_state_preservation_required_when_practical": true},
+  "swarm_synchronization_policy": {"protocol_path":"protocols/swarm_synchronization.md","policy_id":"IEP-SYNC-001","version":"0.1","required_after_project_resolution":true,"required_before_claim_or_retask":true,"required_before_protected_mutation":true,"shared_situation_fields":["mission","priorities","critical_path","ownership","dependencies","contradictions","blockers","decisions","risks","recent_material_changes"],"event_driven_resync":true,"heartbeat_is_sensor_only":true,"ownership_authority":"CLAIMS_LEASES_FENCING","default_primary_task_wip_limit":1,"critical_path_focus_required":true,"does_not_create_authority":true},
   "scheduled_task_activation_policy": {"activation_authority": "EXPLICIT_CURRENT_HUMAN_SINGLE_USE_CASE_PLUS_HIGH_CONSEQUENCE_PROOF", "agents_may_enable": false, "master_may_enable": false, "primary_may_enable": false, "recovery_may_enable": false, "migration_or_alignment_may_enable": false, "automatic_reenable": false, "disabled_is_control_gate": true, "disabled_is_health_failure": false, "configuration_updates_must_preserve_enabled_state": true, "logical_restart_does_not_imply_task_enablement": true},
   "intent_branches": {
     "scheduled_master_task": {"trigger": "VALID_MASTER_SCHEDULED_LAUNCH", "mode": "GLOBAL_ROAMING_MASTER", "protocol_path": "protocols/scheduled_agent_launch.md", "project_id": null, "chat_project": null, "global_discovery_required": true, "project_binding_for_conversation": "DENY", "project_hold_filter_required_before_project_selection": true, "self_enable_or_reenable": "DENY"},
@@ -65,6 +67,7 @@
     "if_project_is_held_checkpoint_partial_state_and_stop_held_project_work_without_treating_it_as_cancellation_or_failure",
     "if_portfolio_or_global_scope_has_other_unheld_work_continue_that_work",
     "run_project_bootstrap_and_communication_awareness",
+    "load_and_apply_canonical_swarm_synchronization_contract_after_exact_project_resolution_and_resynchronize_before_claim_retask_or_protected_mutation",
     "resolve_exact_project_coordination_route_from_PROJECT_ROLE_ROUTING_REGISTRY",
     "load_authoritative_project_forum_master_handoff_and_current_accepted_state",
     "recover_task_context_before_asking_human_to_repeat_known_information",
