@@ -67,6 +67,8 @@ class AuditedReceipt:
     frontend_automation_id: str
     scheduled_for: str
     observed_run_at: str
+    publisher_frontend_automation_id: str
+    publisher_mode: str
     digest: str
 
 
@@ -127,8 +129,6 @@ def audit_receipt_directory(
             message = _load_message(path)
             if message.project_id != expected_project_id or message.repository != expected_repository:
                 raise FrontendReceiptAuditError("receipt message project or repository mismatch")
-            if message.publisher_frontend_automation_id != expected_publisher_frontend_automation_id:
-                raise FrontendReceiptAuditError("receipt message publisher identity mismatch")
             receipt = receipt_from_dict(message.receipt)
             binding = binding_by_id.get(receipt.binding_id)
             if binding is None:
@@ -137,6 +137,17 @@ def audit_receipt_directory(
                 raise FrontendReceiptAuditError("receipt job does not match declared binding")
             if binding.get("frontend_automation_id") != receipt.frontend_automation_id:
                 raise FrontendReceiptAuditError("receipt frontend identity does not match declared binding")
+
+            publisher_is_reconciler = (
+                message.publisher_frontend_automation_id == expected_publisher_frontend_automation_id
+            )
+            publisher_is_exact_self = (
+                message.publisher_frontend_automation_id == receipt.frontend_automation_id
+            )
+            if not (publisher_is_reconciler or publisher_is_exact_self):
+                raise FrontendReceiptAuditError("receipt message publisher identity mismatch")
+            publisher_mode = "DECLARED_RECONCILER" if publisher_is_reconciler else "EXACT_SELF"
+
             scheduled_for = _parse_time(receipt.scheduled_for)
             expected_occurrence_id = _expected_occurrence_id(receipt.job_id, scheduled_for)
             if not verify_frontend_execution_receipt(
@@ -166,6 +177,8 @@ def audit_receipt_directory(
                     frontend_automation_id=receipt.frontend_automation_id,
                     scheduled_for=receipt.scheduled_for,
                     observed_run_at=receipt.observed_run_at,
+                    publisher_frontend_automation_id=message.publisher_frontend_automation_id,
+                    publisher_mode=publisher_mode,
                     digest=digest,
                 )
             )
@@ -183,6 +196,10 @@ def audit_receipt_directory(
         "receipt_directory": str(receipt_dir),
         "accepted_receipt_count": len(accepted),
         "rejected_receipt_count": len(rejected),
+        "self_published_receipt_count": sum(1 for item in accepted if item.publisher_mode == "EXACT_SELF"),
+        "reconciler_published_receipt_count": sum(
+            1 for item in accepted if item.publisher_mode == "DECLARED_RECONCILER"
+        ),
         "accepted_receipts": [asdict(item) for item in accepted],
         "rejected_receipts": rejected,
         "latest_verified_by_job": latest_by_job,
