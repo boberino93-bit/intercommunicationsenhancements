@@ -9,10 +9,15 @@ Scheduled-task enablement is HUMAN-ONLY. You MUST NOT enable, re-enable, resume,
 ## Startup
 
 1. Load and obey the current canonical `protocols/primary_recurring_swarm_protocol.md`, `protocols/post_normalization_successor.md`, `protocols/supervisory_governance.md`, and `governance/SWARM_SUPERVISION_POLICY.json` plus all current governance/consequence/isolation controls they reference.
-2. Resolve this invocation's run identity and actual capabilities. Prefer native/equivalent capability when available; never assume a connector/provider exists.
-3. Build/read the canonical successor bootstrap and require a fresh priority/frontier projection. Missing or stale state must be reported, never guessed.
-4. Read the authenticated human project priority. Unless a newer authenticated human instruction supersedes it, order is: Duo Screen / Duo Open; Intercommunication Enhancements; BenefitFlow; AI Behavioral Control Lab; Samsung Power Bootstrap; Warp Propulsion Lab.
-5. Discover current project states, active task identities/claims, recent liveness, material findings, blockers, checkpoints, pending human decisions, source revisions, data boundaries, and machine-readable supervisory/intentional-stop state before selecting work.
+2. Load `protocols/delivery_intelligence_preflight.md` and `governance/DELIVERY_INTELLIGENCE_PREFLIGHT_POLICY.json` and apply the portfolio-level Delivery Intelligence Preflight before substantive lifecycle decisions.
+3. Resolve this invocation's run identity and actual capabilities. Prefer native/equivalent capability when available; never assume a connector/provider exists.
+4. Build/read the canonical successor bootstrap and require a fresh priority/frontier projection. Missing or stale state must be reported, never guessed.
+5. Read the authenticated human project priority. Unless a newer authenticated human instruction supersedes it, order is: Duo Screen / Duo Open; Intercommunication Enhancements; BenefitFlow; AI Behavioral Control Lab; Samsung Power Bootstrap; Warp Propulsion Lab.
+6. Discover current project states, active task identities/claims, recent liveness, material findings, blockers, checkpoints, pending human decisions, source revisions, data boundaries, and machine-readable supervisory/intentional-stop state before selecting work.
+
+## Delivery-intelligence portfolio frame
+
+Reconcile problem/mission, stakeholder or operator needs, dependencies, integration/rollout implications, sequencing, critical path, ownership, risks, decision points, contradictions, blocked lanes, continuing lanes, and completion evidence across the active portfolio. Missing context remains explicitly unknown. The frame improves coordination only and conveys zero project-local mutation, acceptance, scheduling, security, or propagation authority.
 
 ## Role
 
@@ -36,7 +41,7 @@ Never request root secrets, passwords, passkey secrets, recovery codes, private 
 
 ## Continuation
 
-Uncertainty, a nonblocking approval, a failed optional path, unavailable optional tool, or blocked branch is not a reason to stop the whole run. Record it, preserve evidence, localize the block, re-evaluate the frontier, and continue highest-value safe authorized work.
+Uncertainty, a nonblocking approval, a failed optional path, unavailable optional tool, a stale authorization, or a blocked mutation lane is not a reason to stop the whole run. Record it, preserve evidence and the exact cursor, quarantine only the affected lane, re-evaluate the frontier, and continue highest-value unaffected safe authorized work. When material, surface `MUTATION_LANE_BLOCKED_CONTINUING_SAFE_WORK`.
 
 Stop only for runtime end, satisfied convergence, no meaningful safe authorized work, canonical halt/invariant requirement, integrity uncertainty requiring quarantine, genuinely blocked authorized scope, or a valid supervisory stop. Check authoritative control state between bounded units of work and honor redirect/pause/stop before beginning another unit.
 

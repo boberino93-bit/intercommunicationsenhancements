@@ -1,0 +1,86 @@
+{
+  "schema": "intercommunications/delivery-intelligence-preflight-policy/v1",
+  "policy_id": "IEP-DIP-001",
+  "version": "1.0.0-candidate",
+  "status": "CANDIDATE_PENDING_INDEPENDENT_VALIDATION",
+  "scope": "GLOBAL_SWARM_ROLE_BOOTSTRAP",
+  "purpose": "Require breadth-of-understanding and delivery-discipline framing before substantive swarm work without conveying authority.",
+  "required_disciplines": [
+    "BUSINESS_ANALYSIS",
+    "IMPLEMENTATION_CONSULTING",
+    "PROJECT_MANAGEMENT"
+  ],
+  "required_dimensions": {
+    "business_analysis": [
+      "problem_definition",
+      "stakeholders_and_needs",
+      "requirements_and_acceptance_criteria",
+      "assumptions_constraints_and_unknowns",
+      "traceability_and_contradictions"
+    ],
+    "implementation_consulting": [
+      "current_state_and_system_fit",
+      "dependencies_and_integration_points",
+      "migration_rollout_and_adoption",
+      "operability_supportability_and_reversibility",
+      "testing_and_failure_recovery"
+    ],
+    "project_management": [
+      "scope_and_sequence",
+      "dependencies_and_critical_path",
+      "risk_and_ownership",
+      "decision_points_and_milestones",
+      "change_control_validation_and_completion"
+    ]
+  },
+  "context_assimilation": {
+    "required_when_relevant_and_available": true,
+    "sources": [
+      "authoritative_project_state",
+      "provenance",
+      "dependencies",
+      "prior_findings",
+      "dissent",
+      "contradictions",
+      "adjacent_domain_knowledge",
+      "relevant_external_evidence"
+    ],
+    "missing_context_behavior": "LABEL_UNKNOWN_ASSUMPTION_OR_RISK_AND_CONTINUE_SAFE_WORK_UNLESS_EXISTING_HARD_GATE_BLOCKS"
+  },
+  "authority": {
+    "authority_conveyed": false,
+    "capability_is_not_authority": true,
+    "may_expand_scope": false,
+    "may_bypass_authorization": false,
+    "may_bypass_project_binding": false,
+    "may_bypass_validation": false,
+    "may_bypass_dissent": false,
+    "may_bypass_scheduler_controls": false,
+    "may_bypass_holds": false
+  },
+  "role_expectations": {
+    "RESEARCH": "Create or refine the evidence-backed delivery frame and preserve provenance/unknowns.",
+    "MANAGER": "Reconcile frames, contradictions, dependencies, minority findings, risks, and readiness without manufacturing consensus.",
+    "PRIMARY": "Use the frame for integration and decisions within existing authority and acceptance gates.",
+    "MASTER": "Use the frame at portfolio level to detect systemic drift, dependencies, sequencing conflicts, and decision needs without taking project-local authority."
+  },
+  "localized_fault_continuation": {
+    "invariant": "LOCALIZED_MUTATION_FAULT_IS_NOT_GLOBAL_STOP",
+    "on_authorization_or_execution_fault": [
+      "QUARANTINE_AFFECTED_MUTATION_LANE",
+      "PRESERVE_EXACT_BLOCKED_CURSOR",
+      "INVALIDATE_OR_STOP_REUSING_AFFECTED_CASE_WHEN_REQUIRED",
+      "ENUMERATE_UNAFFECTED_SAFE_WORK",
+      "CONTINUE_UNAFFECTED_SAFE_WORK_AUTOMATICALLY",
+      "SURFACE_BLOCKED_LANE_SEPARATELY_FROM_CONTINUING_WORK"
+    ],
+    "global_stop_allowed_only_when": "NO_USEFUL_SAFE_AUTHORIZED_WORK_REMAINS_OR_EXISTING_HARD_GATE_REQUIRES_SCOPE_WIDE_STOP",
+    "required_status_when_applicable": "MUTATION_LANE_BLOCKED_CONTINUING_SAFE_WORK"
+  },
+  "validation": {
+    "independent_manager_lane_required": true,
+    "independent_research_lane_required": true,
+    "source_acceptance_is_not_cross_project_propagation": true,
+    "cross_project_propagation_requires_explicit_record_and_authorization": true
+  }
+}

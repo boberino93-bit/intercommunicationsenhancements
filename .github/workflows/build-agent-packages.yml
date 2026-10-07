@@ -28,7 +28,9 @@ jobs:
             tests.test_alignment_contracts \
             tests.test_package_sync \
             tests.test_project_role_routing \
-            tests.test_normalization_acceptance
+            tests.test_normalization_acceptance \
+            tests.test_delivery_intelligence_preflight \
+            tests.test_localized_fault_continuation
 
       - name: Build role release set for structural review
         run: python tools/build_agent_packages.py --source-revision "$GITHUB_SHA" --out dist
@@ -52,7 +54,7 @@ jobs:
               'review_lane': 'MANAGER_DETERMINISTIC_STRUCTURAL',
               'head_sha': os.environ['GITHUB_SHA'],
               'result': 'PASS',
-              'checks': ['alignment-contracts', 'package-sync', 'role-routing', 'normalization-acceptance', 'package-closure', 'reproducibility'],
+              'checks': ['alignment-contracts', 'package-sync', 'role-routing', 'normalization-acceptance', 'delivery-intelligence-preflight', 'localized-fault-continuation', 'package-closure', 'reproducibility'],
               'mutation_authority': 'NONE_REVIEW_ONLY'
           }, indent=2) + '\n')
           PY
@@ -86,7 +88,9 @@ jobs:
             tests.test_v2_coordination_candidate \
             tests.test_v2_ecosystem_registry_candidate \
             tests.test_v2_generation_state_candidate \
-            tests.test_normalization_acceptance
+            tests.test_normalization_acceptance \
+            tests.test_delivery_intelligence_preflight \
+            tests.test_localized_fault_continuation
 
       - name: Emit exact-SHA RESEARCH red-team evidence
         run: |
@@ -98,7 +102,7 @@ jobs:
               'review_lane': 'RESEARCH_DETERMINISTIC_ADVERSARIAL',
               'head_sha': os.environ['GITHUB_SHA'],
               'result': 'PASS',
-              'checks': ['control-plane', 'project-isolation', 'delivery-recovery', 'identity-recovery', 'v2-coordination', 'ecosystem-registry', 'generation-state', 'normalization-acceptance'],
+              'checks': ['control-plane', 'project-isolation', 'delivery-recovery', 'identity-recovery', 'v2-coordination', 'ecosystem-registry', 'generation-state', 'normalization-acceptance', 'delivery-intelligence-preflight', 'localized-fault-continuation'],
               'mutation_authority': 'NONE_REVIEW_ONLY'
           }, indent=2) + '\n')
           PY
