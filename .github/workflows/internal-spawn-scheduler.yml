@@ -40,21 +40,25 @@ jobs:
             tests.test_scheduler_repair_guard \
             tests.test_scheduler_work_gate \
             tests.test_scheduler_mutation_ledger \
+            tests.test_scheduler_mutation_journal \
             tests.test_scheduler_hardening_contract \
             tests.test_scheduler_synchronization \
             tests.test_scheduler_ecosystem_rollout
 
-      - name: Validate scheduler mutation ledger integrity
+      - name: Validate scheduler mutation journal integrity
         run: |
           python - <<'PY'
+          import json
           from pathlib import Path
-          from org_agent_mesh.scheduler_mutation_ledger import parse_jsonl, validate_ledger
+          from org_agent_mesh.scheduler_mutation_journal import validate_journal
 
-          path = Path("governance/SCHEDULER_MUTATION_LEDGER_V2_2026-10-07.jsonl")
-          result = validate_ledger(parse_jsonl(path.read_text(encoding="utf-8")))
+          root = Path("governance/scheduler-mutation-journal-v3")
+          claims = [json.loads(path.read_text(encoding="utf-8")) for path in sorted((root / "claims").glob("*.json"))]
+          events = [json.loads(path.read_text(encoding="utf-8")) for path in sorted((root / "events").glob("*.json"))]
+          result = validate_journal(claims=claims, events=events)
           print(
-              "scheduler mutation ledger:",
-              {"events": result.event_count, "terminal_hash": result.terminal_hash},
+              "scheduler mutation journal:",
+              {"events": result.event_count, "terminal_hash": result.terminal_hash, "next_sequence": result.next_sequence},
           )
           PY
 
