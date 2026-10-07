@@ -1,0 +1,41 @@
+{
+  "schema":"org-agent-mesh/scheduler-synchronization-directive/v1",
+  "version":"1.0.0",
+  "status":"ACTIVE_BY_EXPLICIT_HUMAN_DIRECTIVE_2026-10-07",
+  "directive":"Maintain synchronicity between canonical backend scheduler jobs and mapped ChatGPT frontend Scheduled Tasks while preserving separate authority, execution, and audit ledgers.",
+  "surfaces":{
+    "backend":{"canonical_registry":"governance/INTERNAL_SPAWN_SCHEDULES.json","policy":"governance/INTERNAL_SPAWN_SCHEDULER_POLICY.json","clock":".github/workflows/internal-spawn-scheduler.yml"},
+    "frontend":{"provider":"CHATGPT_AUTOMATIONS","state_source":"Automations","mapping_registry":"governance/SCHEDULER_FRONTEND_BINDINGS.json"}
+  },
+  "reconciliation":{
+    "mode":"DECLARED_MAPPING_ONLY",
+    "backend_is_schedule_intent_source_for_mapped_system_jobs":true,
+    "frontend_is_execution_state_source_for_chatgpt_tasks":true,
+    "bidirectional_drift_detection":true,
+    "automatic_repair_authorized_for_mapped_non_destructive_fields":true,
+    "automatic_fields":["title","schedule","timezone","enabled_state_when_mapping_policy_is_MIRROR"],
+    "never_infer_mapping_by_title_similarity":true,
+    "never_create_or_delete_frontend_task_without_explicit_binding_record":true,
+    "never_import_unmapped_personal_frontend_tasks_into_backend":true,
+    "never_delete_unmapped_frontend_tasks":true,
+    "preserve_frontend_task_identity":true,
+    "preserve_backend_job_identity":true,
+    "conflict_action":"FAIL_CLOSED_AFFECTED_BINDING_AND_REPORT_SCHEDULER_SYNC_CONFLICT"
+  },
+  "control":{
+    "human_can_pause_resume_or_reconfigure_mapped_job_from_either_surface":true,
+    "reconciler_must_propagate_authorized_mapped_change":true,
+    "unmapped_personal_tasks_remain_frontend_only":true,
+    "internal_only_jobs_are_allowed":true,
+    "frontend_only_tasks_are_allowed":true,
+    "synchronization_does_not_expand_worker_mutation_authority":true
+  },
+  "safety":{
+    "primary_spawn_prohibited":true,
+    "master_spawn_prohibited":true,
+    "full_swarm_auto_start_prohibited":true,
+    "spawn_authority_is_not_mutation_authority":true,
+    "task_mapping_is_not_project_authority":true,
+    "scheduler_sync_may_not_modify_project_domain_state":true
+  }
+}
