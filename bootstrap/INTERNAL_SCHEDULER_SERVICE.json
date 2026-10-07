@@ -8,22 +8,27 @@
   "scheduler_sync_directive": "governance/SCHEDULER_SYNCHRONIZATION_DIRECTIVE.json",
   "frontend_binding_registry": "governance/SCHEDULER_FRONTEND_BINDINGS.json",
   "frontend_execution_receipt_policy": "governance/SCHEDULER_FRONTEND_RECEIPT_POLICY.json",
+  "scheduler_health_policy": "governance/SCHEDULER_HEALTH_POLICY.json",
+  "scheduler_launch_amendment": "protocols/scheduled_agent_launch_repair_and_receipt_amendment_2026-10-07.md",
   "control_interface": "governance/SCHEDULER_CONTROL_INTERFACE.json",
   "continuation_integrity_protocol": "protocols/scheduled_continuation_integrity.md",
   "runtime": "org_agent_mesh.internal_scheduler",
   "reconciliation_runtime": "org_agent_mesh.scheduler_reconciliation",
   "frontend_execution_receipt_runtime": "org_agent_mesh.frontend_execution_receipts",
   "frontend_receipt_audit_runtime": "org_agent_mesh.frontend_receipt_audit",
+  "scheduler_health_runtime": "org_agent_mesh.scheduler_health",
   "host_clock": ".github/workflows/internal-spawn-scheduler.yml",
   "load_with": [
     "protocols/scheduled_agent_launch.md",
+    "protocols/scheduled_agent_launch_repair_and_receipt_amendment_2026-10-07.md",
     "protocols/autonomous_continuation.md",
     "protocols/scheduled_continuation_integrity.md",
     "org_agent_mesh.launch_admission",
     "org_agent_mesh.schedule_activation",
     "org_agent_mesh.scheduler_reconciliation",
     "org_agent_mesh.frontend_execution_receipts",
-    "org_agent_mesh.frontend_receipt_audit"
+    "org_agent_mesh.frontend_receipt_audit",
+    "org_agent_mesh.scheduler_health"
   ],
   "invariants": {
     "bootstrap_document_is_not_daemon": true,
@@ -31,16 +36,19 @@
     "spawn_ticket_is_not_session_started": true,
     "host_start_receipt_required": true,
     "frontend_execution_receipt_requires_exact_declared_identity": true,
+    "frontend_execution_receipt_may_be_declared_reconciler_or_exact_self": true,
     "frontend_execution_receipt_conveys_no_authority": true,
     "frontend_receipt_backend_ingestion_is_read_only": true,
     "invalid_receipt_shaped_coordination_message_fails_closed": true,
     "ordinary_coordination_messages_are_not_scheduler_receipts": true,
+    "missing_mature_execution_receipt_is_degraded": true,
+    "sustained_health_requires_consecutive_verified_occurrences": true,
     "primary_spawn_prohibited": true,
     "master_spawn_prohibited": true,
     "full_swarm_auto_start_prohibited": true,
     "declared_mapping_required_for_frontend_backend_sync": true,
     "unmapped_frontend_task_mutation_prohibited": true,
-    "disabled_to_enabled_requires_explicit_current_human_authorization": true,
+    "disabled_to_enabled_requires_explicit_current_human_authorization_or_active_scoped_repair_grant": true,
     "capacity_availability_is_not_activation_authority": true,
     "dead_frontend_identity_replacement_requires_explicit_human_authorization": true,
     "spawn_authority_is_not_mutation_authority": true,
@@ -48,6 +56,7 @@
     "scheduled_worker_continuation_integrity_required": true,
     "blocked_mutation_blocks_only_affected_branch": true,
     "blocker_finalization_requires_no_remaining_safe_work": true,
-    "continuation_integrity_does_not_expand_authority_or_scope": true
+    "continuation_integrity_does_not_expand_authority_or_scope": true,
+    "chatgpt_reconciler_and_sentinel_share_provider_failure_domain": true
   }
 }

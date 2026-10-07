@@ -1,0 +1,15 @@
+{
+  "schema": "org-agent-mesh/scheduler-liveness-finding/v1",
+  "observed_at": "2026-10-07T21:13:56Z",
+  "status": "CONFIRMED_DEGRADED",
+  "findings": [
+    "Canonical backend scheduler intent remained enabled for five mapped lanes while frontend Slot 1 was disabled.",
+    "Bootstrap Spawn Bridge remained marked enabled while its last_run_time was stale for multiple expected hourly recurrences.",
+    "Slots 3, 4, and 5 were marked enabled while their last_run_time values were stale relative to canonical hourly schedules.",
+    "Independent GitHub scheduler continued issuing due FRONTEND_EXECUTION_EXPECTED occurrences with verified_start_count=0.",
+    "Frontend receipt audit reported zero accepted receipts and zero rejected receipts, proving absence of evidence was not being converted into degraded health.",
+    "Bootstrap Spawn Bridge and Slot 1 share the same ChatGPT Scheduled Tasks provider and therefore are not independent failure domains."
+  ],
+  "proven_scope": "Control-plane detection and execution-evidence enforcement defect plus frontend provider instability.",
+  "unknown": "The provider-internal cause of task disablement or missed recurring dispatch is not exposed by available scheduler telemetry."
+}

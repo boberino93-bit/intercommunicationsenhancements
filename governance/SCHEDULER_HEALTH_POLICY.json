@@ -1,0 +1,43 @@
+{
+  "schema": "org-agent-mesh/scheduler-health-policy/v1",
+  "version": "1.0.0",
+  "status": "ACTIVE",
+  "purpose": "Fail closed when mapped frontend scheduler occurrences lack execution evidence and require sustained verified cadence before a lane is declared healthy.",
+  "required_consecutive_verified_occurrences": 3,
+  "health_states": [
+    "HEALTHY",
+    "RECOVERING",
+    "DEGRADED_MISSING_EXECUTION_EVIDENCE",
+    "UNQUALIFIED"
+  ],
+  "rules": {
+    "enabled_flag_alone_is_not_health": true,
+    "single_successful_occurrence_is_not_sustained_health": true,
+    "missing_overdue_receipt_is_degraded": true,
+    "zero_receipts_is_not_success": true,
+    "frontend_expected_is_not_execution_verified": true,
+    "only_exact_occurrence_receipts_count": true,
+    "latest_mature_occurrence_must_be_verified": true,
+    "healthy_requires_consecutive_verified_occurrences": true,
+    "standby_disabled_jobs_are_excluded_from_active_health": true,
+    "unknown_or_unsupported_schedule_is_unqualified": true
+  },
+  "common_mode_boundary": {
+    "chatgpt_bridge_and_slot1_share_provider_failure_domain": true,
+    "secondary_chatgpt_task_is_not_independent_provider_failover": true,
+    "independent_backend_clock_may_detect_but_cannot_claim_frontend_repair_without_an_actuation_interface": true,
+    "absence_of_out_of_band_actuator_must_be_reported_as_capability_blocked_not_healthy": true
+  },
+  "mutation_ledger_required_fields": [
+    "observed_at",
+    "actor",
+    "source_surface",
+    "frontend_automation_id",
+    "old_enabled_state",
+    "requested_enabled_state",
+    "resulting_enabled_state",
+    "authorization_ref",
+    "reason",
+    "readback_verified"
+  ]
+}
