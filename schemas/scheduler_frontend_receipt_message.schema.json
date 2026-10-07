@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "org-agent-mesh/scheduler-frontend-receipt-message/v1",
+  "title": "Scheduler frontend receipt coordination message",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "message_type",
+    "project_id",
+    "repository",
+    "publisher_frontend_automation_id",
+    "authority_conveyed",
+    "mutation_authority_conveyed",
+    "receipt"
+  ],
+  "properties": {
+    "schema": {"const": "org-agent-mesh/scheduler-frontend-receipt-message/v1"},
+    "message_type": {"const": "SCHEDULER_FRONTEND_EXECUTION_RECEIPT"},
+    "project_id": {"const": "intercommunicationsenhancements"},
+    "repository": {"const": "boberino93-bit/intercommunicationsenhancements"},
+    "publisher_frontend_automation_id": {"const": "6ac63d38cc688191b9de4213ca40f951"},
+    "authority_conveyed": {"const": false},
+    "mutation_authority_conveyed": {"const": false},
+    "receipt": {"$ref": "frontend_execution_receipt.schema.json"}
+  }
+}

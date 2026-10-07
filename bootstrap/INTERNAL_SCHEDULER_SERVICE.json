@@ -13,6 +13,7 @@
   "runtime": "org_agent_mesh.internal_scheduler",
   "reconciliation_runtime": "org_agent_mesh.scheduler_reconciliation",
   "frontend_execution_receipt_runtime": "org_agent_mesh.frontend_execution_receipts",
+  "frontend_receipt_audit_runtime": "org_agent_mesh.frontend_receipt_audit",
   "host_clock": ".github/workflows/internal-spawn-scheduler.yml",
   "load_with": [
     "protocols/scheduled_agent_launch.md",
@@ -21,7 +22,8 @@
     "org_agent_mesh.launch_admission",
     "org_agent_mesh.schedule_activation",
     "org_agent_mesh.scheduler_reconciliation",
-    "org_agent_mesh.frontend_execution_receipts"
+    "org_agent_mesh.frontend_execution_receipts",
+    "org_agent_mesh.frontend_receipt_audit"
   ],
   "invariants": {
     "bootstrap_document_is_not_daemon": true,
@@ -30,6 +32,9 @@
     "host_start_receipt_required": true,
     "frontend_execution_receipt_requires_exact_declared_identity": true,
     "frontend_execution_receipt_conveys_no_authority": true,
+    "frontend_receipt_backend_ingestion_is_read_only": true,
+    "invalid_receipt_shaped_coordination_message_fails_closed": true,
+    "ordinary_coordination_messages_are_not_scheduler_receipts": true,
     "primary_spawn_prohibited": true,
     "master_spawn_prohibited": true,
     "full_swarm_auto_start_prohibited": true,

@@ -34,6 +34,7 @@ jobs:
             tests.test_scheduler_reconciliation \
             tests.test_scheduler_policy_coherence \
             tests.test_frontend_execution_receipts \
+            tests.test_frontend_receipt_audit \
             tests.test_scheduler_synchronization \
             tests.test_scheduler_ecosystem_rollout
 
@@ -74,6 +75,29 @@ jobs:
                   "accepted_unverified": summary.get("dispatch_accepted_start_unverified_count", 0),
                   "adapter_unavailable": summary.get("adapter_unavailable_count", 0),
                   "adapter_rejected": summary.get("adapter_rejected_count", 0),
+              },
+          )
+          PY
+
+      - name: Audit mapped frontend execution receipts
+        run: |
+          python -m org_agent_mesh.frontend_receipt_audit \
+            --bindings governance/SCHEDULER_FRONTEND_BINDINGS.json \
+            --receipt-dir agentbus-backup/coordination-messages \
+            --out scheduler-out/frontend-receipt-audit.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          audit = json.loads(Path("scheduler-out/frontend-receipt-audit.json").read_text())
+          if audit.get("rejected_receipt_count", 0):
+              raise SystemExit("one or more scheduler frontend receipt messages failed verification")
+          print(
+              "frontend receipt evidence:",
+              {
+                  "accepted": audit.get("accepted_receipt_count", 0),
+                  "rejected": audit.get("rejected_receipt_count", 0),
+                  "verified_jobs": sorted(audit.get("latest_verified_by_job", {})),
               },
           )
           PY
