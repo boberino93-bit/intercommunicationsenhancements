@@ -55,13 +55,13 @@ class SchedulerHealthTests(unittest.TestCase):
         self.assertEqual(report["overall_state"], "DEGRADED")
         self.assertEqual(report["unhealthy_lane_count"], 1)
         self.assertEqual(report["lanes"][0]["state"], "DEGRADED_MISSING_EXECUTION_EVIDENCE")
-        self.assertEqual(report["lanes"][0]["latest_mature_occurrence_id"], "lane-a:20261007T2012Z")
+        self.assertEqual(report["lanes"][0]["latest_mature_occurrence_id"], "lane-a:20261007T2112Z")
 
     def test_one_success_is_recovering_not_healthy(self):
         report = evaluate_scheduler_health(
             registry=self.registry,
             bindings=self.bindings,
-            receipt_audit=self.audit(["lane-a:20261007T2012Z"]),
+            receipt_audit=self.audit(["lane-a:20261007T2112Z"]),
             policy=self.policy,
             observed_at=self.now,
         )
@@ -74,9 +74,9 @@ class SchedulerHealthTests(unittest.TestCase):
             registry=self.registry,
             bindings=self.bindings,
             receipt_audit=self.audit([
+                "lane-a:20261007T2112Z",
                 "lane-a:20261007T2012Z",
                 "lane-a:20261007T1912Z",
-                "lane-a:20261007T1812Z",
             ]),
             policy=self.policy,
             observed_at=self.now,
@@ -89,9 +89,9 @@ class SchedulerHealthTests(unittest.TestCase):
             registry=self.registry,
             bindings=self.bindings,
             receipt_audit=self.audit([
+                "lane-a:20261007T2012Z",
                 "lane-a:20261007T1912Z",
                 "lane-a:20261007T1812Z",
-                "lane-a:20261007T1712Z",
             ]),
             policy=self.policy,
             observed_at=self.now,
@@ -104,9 +104,9 @@ class SchedulerHealthTests(unittest.TestCase):
             registry=self.registry,
             bindings=self.bindings,
             receipt_audit=self.audit([
+                "lane-a:20261007T2112Z",
                 "lane-a:20261007T2012Z",
                 "lane-a:20261007T1912Z",
-                "lane-a:20261007T1812Z",
             ]),
             policy=self.policy,
             observed_at=self.now,
