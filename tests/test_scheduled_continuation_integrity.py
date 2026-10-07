@@ -34,6 +34,7 @@ class ScheduledContinuationIntegrityTests(unittest.TestCase):
         self.assertTrue(integrity["continuation_may_not_cross_project_or_claim_new_work_unit"])
         self.assertTrue(integrity["continuation_does_not_grant_mutation_authority"])
         self.assertTrue(integrity["hold_pause_stop_override_continuation"])
+        self.assertTrue(integrity["handoff_transfers_context_not_authority"])
 
     def test_blocked_capability_preserves_useful_progress_semantics(self):
         policy = self.load("governance/INTERNAL_SPAWN_SCHEDULER_POLICY.json")
@@ -46,19 +47,43 @@ class ScheduledContinuationIntegrityTests(unittest.TestCase):
             "CONTINUATION_INTEGRITY_VIOLATION",
         )
 
-    def test_finalization_observability_records_remaining_safe_work(self):
+    def test_unfinished_work_survives_invocation_boundary(self):
+        policy = self.load("governance/INTERNAL_SPAWN_SCHEDULER_POLICY.json")
+        integrity = policy["continuation_integrity"]
+        self.assertTrue(integrity["unfinished_safe_work_survives_invocation_boundary"])
+        self.assertTrue(integrity["unfinished_work_must_not_be_marked_completed"])
+        self.assertTrue(
+            integrity[
+                "successor_must_scan_valid_unresolved_continuation_handoffs_before_lower_priority_fresh_work"
+            ]
+        )
+        self.assertTrue(integrity["successor_resume_requires_project_role_claim_fence_and_control_revalidation"])
+        self.assertTrue(integrity["higher_priority_p0_p3_work_may_preempt_continuation"])
+        self.assertTrue(integrity["live_owner_prevents_duplicate_continuation"])
+        self.assertEqual(
+            policy["failure_semantics"]["unfinished_work_abandoned_at_invocation_boundary"],
+            "CONTINUATION_HANDOFF_MISSING",
+        )
+
+    def test_finalization_observability_records_remaining_safe_work_and_handoff(self):
         policy = self.load("governance/INTERNAL_SPAWN_SCHEDULER_POLICY.json")
         obs = policy["observability"]
         self.assertTrue(obs["record_blocked_actions"])
         self.assertTrue(obs["record_safe_fallbacks_considered"])
         self.assertTrue(obs["record_safe_fallbacks_completed"])
         self.assertTrue(obs["record_remaining_safe_work_at_finalization"])
+        self.assertTrue(obs["record_continuation_handoff_required"])
+        self.assertTrue(obs["record_continuation_handoff_ref"])
+        self.assertTrue(obs["record_successor_acceptance_when_resumed"])
         self.assertTrue(obs["record_remaining_human_gate"])
 
-    def test_protocol_explicitly_prohibits_premature_halt(self):
+    def test_protocol_explicitly_prohibits_premature_halt_and_abandonment(self):
         text = (ROOT / "protocols/scheduled_continuation_integrity.md").read_text()
         self.assertIn("A local blocker blocks the affected action or branch only.", text)
         self.assertIn("A blocker-based terminal outcome requires `remaining_safe_work = false`.", text)
+        self.assertIn("Inter-occurrence continuation", text)
+        self.assertIn("MUST inspect unresolved valid continuation handoffs", text)
+        self.assertIn("must not be falsely recorded as completed", text)
         self.assertIn("Continuation integrity never authorizes", text)
         self.assertIn("does **not** grant mutation authority", text)
 
