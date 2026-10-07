@@ -5,7 +5,7 @@ protocol_version: 1.0.0
 status: ACTIVE_CANONICAL
 source_proposal: IE-2026-10-07-PSPA-01
 activated_date: 2026-10-07
-authorization_case: AUTH-05CD5C8D
+authorization_case: AUTH-849F53E8
 clarification_required: false
 ---
 
