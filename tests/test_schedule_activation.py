@@ -56,7 +56,7 @@ class ScheduleActivationTests(unittest.TestCase):
                 )
             )
 
-    def test_declared_recovery_may_restore_exact_in_scope_task(self):
+    def test_declared_recovery_may_restore_exact_in_scope_task_after_guard_passes(self):
         decision = evaluate_schedule_state_change(
             ScheduleStateChangeRequest(
                 task_id="swarm-researcher-1",
@@ -66,11 +66,29 @@ class ScheduleActivationTests(unittest.TestCase):
                 declared_repair_actor=True,
                 repair_authorization_ref="governance/SCHEDULER_ACTIVATION_GRANT_2026-10-07.json",
                 repair_scope_contains_task=True,
+                repair_guard_passed=True,
+                repair_guard_reason="REPAIR_GRANT_CURRENT_SCOPED_AND_WITHIN_BUDGET",
             )
         )
         self.assertTrue(decision.allowed)
         self.assertTrue(decision.resulting_enabled)
         self.assertEqual(decision.reason, "HUMAN_AUTHORIZED_DECLARED_LIVENESS_REPAIR")
+
+    def test_declared_recovery_is_denied_when_guard_did_not_pass(self):
+        with self.assertRaises(ScheduleActivationError):
+            evaluate_schedule_state_change(
+                ScheduleStateChangeRequest(
+                    task_id="swarm-researcher-1",
+                    current_enabled=False,
+                    requested_enabled=True,
+                    actor=ActivationActor.RECOVERY,
+                    declared_repair_actor=True,
+                    repair_authorization_ref="governance/SCHEDULER_ACTIVATION_GRANT_2026-10-07.json",
+                    repair_scope_contains_task=True,
+                    repair_guard_passed=False,
+                    repair_guard_reason="REPAIR_GRANT_EXPIRED",
+                )
+            )
 
     def test_repair_grant_cannot_enable_out_of_scope_task(self):
         with self.assertRaises(ScheduleActivationError):
@@ -83,6 +101,7 @@ class ScheduleActivationTests(unittest.TestCase):
                     declared_repair_actor=True,
                     repair_authorization_ref="governance/SCHEDULER_ACTIVATION_GRANT_2026-10-07.json",
                     repair_scope_contains_task=False,
+                    repair_guard_passed=True,
                 )
             )
 
