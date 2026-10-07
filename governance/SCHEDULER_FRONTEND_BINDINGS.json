@@ -49,7 +49,7 @@
     {
       "binding_id": "capacity-slot-3-frontend",
       "backend_job_id": "global-capacity-slot-3",
-      "frontend_automation_id": "6ac377ad11008191899d39bd59553d8",
+      "frontend_automation_id": "6ac377ad11008191899c464a5856cfd8",
       "frontend_title": "Swarm Capacity Slot 3",
       "mode": "MIRROR",
       "schedule_authority": "BACKEND",
