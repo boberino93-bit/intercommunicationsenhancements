@@ -1,0 +1,19 @@
+{
+  "schema": "org-agent-mesh/scheduler-mutation-event/v3",
+  "sequence": 5,
+  "event_id": "sched-mut-20261007-0005",
+  "observed_at": "2026-10-07T22:14:57Z",
+  "actor": "GPT-5.6-Sol",
+  "source_surface": "CHATGPT_CURRENT_CONVERSATION",
+  "frontend_automation_id": "6ac63d38cc688191b9de4213ca40f951",
+  "old_enabled_state": false,
+  "requested_enabled_state": true,
+  "resulting_enabled_state": null,
+  "authorization_ref": "EXPLICIT_USER_REQUEST_2026-10-07_KEEP_WORKING_HARDEN_SCHEDULER",
+  "reason": "REPAIR_BOOTSTRAP_BRIDGE_DISABLED_DRIFT",
+  "readback_verified": false,
+  "status": "PLANNED",
+  "previous_event_hash": "ec3a532c3617d5e287c84b021037dae7fc96660766d75bd31200ba4825b768bb",
+  "claim_hash": "c7b9bcd58d9a07669876293a68569788b67cd53739933176b8923ddd1a88e8e6",
+  "event_hash": "ca13266fd33d587a16394270449101f0358407aae487a8554180d6e1d1a522b2"
+}
