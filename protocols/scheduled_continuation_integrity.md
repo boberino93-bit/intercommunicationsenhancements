@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This protocol prevents a scheduled worker from ending a bounded assignment merely because one action, tool path, persistence path, or protected mutation is blocked when useful safe in-scope work remains.
+This protocol prevents a scheduled worker from ending a bounded assignment merely because one action, tool path, persistence path, protected mutation, or invocation boundary is encountered while useful safe in-scope work remains.
 
 It does **not** grant mutation authority, bypass HOLD/PAUSE/STOP, permit PRIMARY or MASTER creation, expand project scope, create a second work unit, or weaken any human authorization requirement.
 
@@ -14,14 +14,46 @@ Before a scheduled worker finalizes with `HUMAN_DECISION_REQUIRED`, `CAPABILITY_
 
 If safe work remains, the worker MUST continue that safe work until one of these conditions is true:
 
-1. the bounded work unit reaches a natural completion or useful checkpoint;
+1. the bounded work unit reaches natural completion or a useful invocation-boundary checkpoint;
 2. all remaining work genuinely depends on a non-delegable human decision or authorization;
 3. authoritative HOLD/PAUSE/STOP/STOP_TREE state requires stopping;
 4. a required external capability is unavailable and no safe fallback or preparatory work remains;
 5. continuing would cross project, role, claim, lease, fence, confidentiality, safety, or mutation-authority boundaries; or
-6. execution resources are exhausted after preserving the best available handoff/checkpoint.
+6. execution resources are exhausted after preserving the best available resumable handoff/checkpoint.
 
-Routine uncertainty, a blocked write, a missing optional tool, unavailable preferred transport, an unanswered non-critical question, or inability to perform one protected side effect is not by itself a valid reason to terminate the entire bounded work unit.
+Routine uncertainty, a blocked write, a missing optional tool, unavailable preferred transport, an unanswered non-critical question, inability to perform one protected side effect, or the end of a single scheduler invocation is not by itself a valid reason to abandon the bounded work unit.
+
+## Inter-occurrence continuation
+
+Execution-resource or invocation limits may end one worker invocation without ending the underlying bounded work unit.
+
+When useful safe work remains at an invocation boundary, the worker SHOULD publish the best permitted `WARM_HANDOFF_READY` or equivalent resumable checkpoint containing at least:
+
+- project and role;
+- bounded work-unit identity;
+- claim/lease/fence state and expiry when applicable;
+- exact completed work and evidence/provenance;
+- unresolved work;
+- blocked branches and authorization/capability requirements;
+- `remaining_safe_work = true`;
+- exact next safe action;
+- revalidation requirements;
+- supersession/stop conditions.
+
+A later compatible scheduled worker MUST inspect unresolved valid continuation handoffs before selecting lower-priority fresh work. It SHOULD accept and resume the unfinished bounded work unit when all of the following hold:
+
+1. the project remains active and admissible;
+2. the handoff is current, valid, and not superseded;
+3. role compatibility is satisfied;
+4. required claim/lease/fence ownership can be validly acquired or continued under normal rules;
+5. no higher-priority P0-P3 item legitimately preempts the continuation;
+6. no HOLD/PAUSE/STOP, safety, confidentiality, project-isolation, or authorization boundary prohibits continuation.
+
+Acceptance MUST be recorded as `WARM_HANDOFF_ACCEPTED` or equivalent before protected/exclusive continuation work when canonical handoff rules require it.
+
+A scheduler occurrence must not create duplicate continuation work. If another live worker already owns the valid claim/lease for the work unit, the new occurrence must not compete for it and should route to other admissible work.
+
+A continuation handoff transfers context and evidence only. It never transfers mutation authority, human authorization, identity authentication, or stale claims/leases/fences.
 
 ## Authorization-blocked mutation
 
@@ -65,6 +97,8 @@ Before ending a scheduled worker invocation, record or internally establish the 
 - `safe_fallbacks_considered`;
 - `safe_fallbacks_completed`;
 - `remaining_safe_work`;
+- `continuation_handoff_required`;
+- `continuation_handoff_ref` when available;
 - `remaining_human_gate`;
 - `remaining_external_capability_gate`;
 - `control_state`;
@@ -72,7 +106,7 @@ Before ending a scheduled worker invocation, record or internally establish the 
 
 A blocker-based terminal outcome requires `remaining_safe_work = false`.
 
-If `remaining_safe_work = true`, finalization is premature unless an authoritative control state, safety boundary, lease/fence conflict, or resource exhaustion requires immediate stop.
+If `remaining_safe_work = true`, finalization of the invocation is permitted only when an authoritative control state, safety boundary, lease/fence conflict, or resource/invocation exhaustion requires stop, and the best permitted resumable checkpoint/handoff has been preserved when practical. In that case the bounded work unit remains incomplete and eligible for successor recovery; it must not be falsely recorded as completed.
 
 ## Scope preservation
 
@@ -92,5 +126,7 @@ The goal is completion of safe work already in scope, not expansion of scope.
 ## Required startup relationship
 
 Every scheduled Researcher or Manager/Reviewer worker must load this protocol together with `protocols/autonomous_continuation.md` and `protocols/scheduled_agent_launch.md` before work selection or finalization decisions.
+
+Before selecting fresh work, a scheduled worker must inspect valid unresolved continuation handoffs that are visible through canonical state and give resumable higher-priority unfinished work appropriate preference under the rules above.
 
 The scheduled-task prompt, bootstrap service, and scheduler policy should all point to the same continuation-integrity contract so a future prompt rewrite cannot silently remove the requirement.
