@@ -1,0 +1,40 @@
+name: Scheduler dispatch regression
+
+on:
+  pull_request:
+    paths:
+      - "org_agent_mesh/internal_scheduler.py"
+      - "org_agent_mesh/launch_admission.py"
+      - "tests/test_internal_scheduler.py"
+      - "tests/test_launch_admission.py"
+      - "tests/test_schedule_activation.py"
+      - "tests/test_scheduler_synchronization.py"
+      - "governance/INTERNAL_SPAWN_SCHEDULER_POLICY.json"
+      - "governance/INTERNAL_SPAWN_SCHEDULES.json"
+      - ".github/workflows/internal-spawn-scheduler.yml"
+      - ".github/workflows/scheduler-dispatch-regression.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  scheduler-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run scheduler and admission regression suite
+        run: |
+          python -m unittest -v \
+            tests.test_internal_scheduler \
+            tests.test_launch_admission \
+            tests.test_schedule_activation \
+            tests.test_scheduler_synchronization
