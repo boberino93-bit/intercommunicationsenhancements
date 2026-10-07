@@ -1,8 +1,16 @@
 {
   "schema": "org-agent-mesh/scheduler-frontend-bindings/v1",
-  "version": "1.2.2",
+  "version": "1.3.0",
   "status": "ACTIVE",
   "reconciliation_directive": "governance/SCHEDULER_SYNCHRONIZATION_DIRECTIVE.json",
+  "activation_gate": "org_agent_mesh.schedule_activation",
+  "identity_health_policy": {
+    "probe_by_declared_frontend_automation_id": true,
+    "missing_or_unavailable_requires_explicit_human_replacement_authorization": true,
+    "stale_execution_is_report_only": true,
+    "title_similarity_does_not_establish_identity": true,
+    "replacement_must_preserve_enabled_state_unless_activation_is_separately_authorized": true
+  },
   "distribution_strategy": "PLAN_LIMIT_AWARE_EVEN_12_MINUTE_STAGGER",
   "bindings": [
     {
@@ -14,10 +22,11 @@
       "schedule_authority": "BACKEND",
       "execution_state_authority": "FRONTEND",
       "enabled_state_policy": "MIRROR_WHEN_ACCOUNT_CAPACITY_AVAILABLE",
+      "capacity_release_action": "REPORT_READY_FOR_HUMAN_ENABLEMENT",
       "expected_timezone": "America/Vancouver",
       "expected_minute_offset": 0,
       "purpose": "Expose one canonical bounded capacity lane as an actual ChatGPT scheduled model invocation.",
-      "capacity_note": "Deferred while Morning Income Research occupies the fifth active-task slot; activate automatically when account capacity is released."
+      "capacity_note": "Deferred while Morning Income Research occupies the fifth active-task slot. Capacity release makes this lane eligible for human-authorized enablement; it must never auto-enable."
     },
     {
       "binding_id": "bounded-capacity-hourly-frontend",
