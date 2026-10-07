@@ -22,6 +22,7 @@ on:
       - "governance/SCHEDULER_FRONTEND_BINDINGS.json"
       - "governance/SCHEDULER_FRONTEND_RECEIPT_POLICY.json"
       - "governance/SCHEDULER_SYNCHRONIZATION_DIRECTIVE.json"
+      - "protocols/internal_scheduler_service.md"
       - ".github/workflows/internal-spawn-scheduler.yml"
       - ".github/workflows/scheduler-dispatch-regression.yml"
   workflow_dispatch:
