@@ -36,6 +36,7 @@ jobs:
             tests.test_frontend_execution_receipts \
             tests.test_frontend_receipt_audit \
             tests.test_scheduler_health \
+            tests.test_scheduler_health_policy \
             tests.test_scheduler_synchronization \
             tests.test_scheduler_ecosystem_rollout
 
