@@ -1,18 +1,29 @@
 {
   "schema": "org-agent-mesh/scheduler-synchronization-directive/v1",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "status": "ACTIVE_BY_EXPLICIT_HUMAN_DIRECTIVE_2026-10-07",
-  "directive": "Maintain synchronicity between canonical backend scheduler jobs and mapped ChatGPT frontend Scheduled Tasks while preserving separate authority, execution, audit, and account-capacity ledgers, with time-bounded budgeted liveness repair for unexpected frontend disable drift.",
+  "directive": "Maintain synchronicity between canonical backend scheduler jobs and mapped ChatGPT frontend Scheduled Tasks while preserving separate authority, execution, audit, account-capacity, and runtime-evidence ledgers, with time-bounded budgeted liveness repair for unexpected frontend disable drift.",
   "surfaces": {
     "backend": {
       "canonical_registry": "governance/INTERNAL_SPAWN_SCHEDULES.json",
       "policy": "governance/INTERNAL_SPAWN_SCHEDULER_POLICY.json",
-      "clock": ".github/workflows/internal-spawn-scheduler.yml"
+      "clock": ".github/workflows/internal-spawn-scheduler.yml",
+      "canonical_branch": "main"
     },
     "frontend": {
       "provider": "CHATGPT_AUTOMATIONS",
       "state_source": "Automations",
       "mapping_registry": "governance/SCHEDULER_FRONTEND_BINDINGS.json"
+    },
+    "runtime_evidence": {
+      "repository": "boberino93-bit/intercommunicationsenhancements",
+      "branch": "scheduler-evidence",
+      "mutation_journal_policy": "governance/SCHEDULER_MUTATION_JOURNAL_POLICY.json",
+      "mutation_journal_root": "governance/scheduler-mutation-journal-v3",
+      "frontend_receipt_policy": "governance/SCHEDULER_FRONTEND_RECEIPT_POLICY.json",
+      "frontend_receipt_directory": "agentbus-backup/coordination-messages",
+      "is_policy_authority": false,
+      "write_authority_does_not_convey_main_write_authority": true
     }
   },
   "reconciler_authority": {
@@ -24,7 +35,8 @@
     "activation_grant": "governance/SCHEDULER_ACTIVATION_GRANT_2026-10-07.json",
     "repair_guard": "org_agent_mesh.scheduler_repair_guard",
     "mutation_ledger_policy": "governance/SCHEDULER_MUTATION_LEDGER_POLICY.json",
-    "mutation_ledger": "governance/SCHEDULER_MUTATION_LEDGER_V2_2026-10-07.jsonl",
+    "mutation_journal_policy": "governance/SCHEDULER_MUTATION_JOURNAL_POLICY.json",
+    "runtime_evidence_branch": "scheduler-evidence",
     "ordinary_capacity_workers_may_mutate_scheduler_state": false,
     "ordinary_capacity_workers_may_create_frontend_tasks": false,
     "ordinary_capacity_workers_may_disable_or_enable_frontend_tasks": false,
@@ -46,14 +58,11 @@
     "mode": "DECLARED_MAPPING_ONLY",
     "backend_is_schedule_intent_source_for_mapped_system_jobs": true,
     "frontend_is_execution_state_source_for_chatgpt_tasks": true,
+    "runtime_evidence_branch_is_evidence_source_not_policy_source": true,
     "bidirectional_drift_detection": true,
     "automatic_repair_authorized_for_mapped_non_destructive_fields": true,
     "automatic_repair_actor_must_match_declared_reconciler_or_liveness_sentinel": true,
-    "automatic_fields": [
-      "title",
-      "schedule",
-      "timezone"
-    ],
+    "automatic_fields": ["title", "schedule", "timezone"],
     "enabled_state_transition_gate": "org_agent_mesh.schedule_activation",
     "repair_guard": "org_agent_mesh.scheduler_repair_guard",
     "disabled_to_enabled_requires_direct_human_enablement_or_active_scoped_human_repair_grant": true,
@@ -61,14 +70,11 @@
     "repair_guard_must_pass_before_delegated_enablement": true,
     "repair_grant_automatic_extension_prohibited": true,
     "repair_budget_exhaustion_disposition": "REPAIR_QUARANTINED_REQUIRE_HUMAN_RENEWAL_OR_OTHER_AUTHORIZED_RECOVERY",
+    "automatic_scheduler_mutation_requires_valid_journal_from_scheduler_evidence_branch": true,
+    "automatic_scheduler_mutation_runtime_evidence_write_to_main_prohibited": true,
     "capacity_availability_is_not_activation_authorization": true,
     "mirror_policy_may_auto_enable_only_under_active_scoped_human_repair_grant": true,
-    "supported_enabled_state_policies": [
-      "MIRROR",
-      "MIRROR_WHEN_ACCOUNT_CAPACITY_AVAILABLE",
-      "MIRROR_DISABLED_STANDBY",
-      "FRONTEND_ONLY"
-    ],
+    "supported_enabled_state_policies": ["MIRROR", "MIRROR_WHEN_ACCOUNT_CAPACITY_AVAILABLE", "MIRROR_DISABLED_STANDBY", "FRONTEND_ONLY"],
     "account_capacity_limit_is_a_first_class_constraint": true,
     "capacity_limit_deferred_enablement": "RETRY_ONLY_IF_CURRENT_SCOPED_BUDGETED_HUMAN_REPAIR_GRANT_AND_CAPACITY_RELEASED",
     "capacity_release_alone_does_not_enable_task": true,
@@ -85,7 +91,7 @@
     "stale_execution_disposition": "REPORT_STALE_EXECUTION_WITHOUT_IDENTITY_REPLACEMENT",
     "replacement_requires_explicit_current_human_authorization": true,
     "replacement_must_preserve_enabled_state_unless_activation_is_separately_authorized": true,
-    "scheduler_mutation_requires_hash_chained_ledger_event_and_readback": true,
+    "scheduler_mutation_requires_immutable_claim_event_journal_and_readback": true,
     "conflict_action": "FAIL_CLOSED_AFFECTED_BINDING_AND_REPORT_SCHEDULER_SYNC_CONFLICT"
   },
   "control": {
@@ -96,7 +102,8 @@
     "unmapped_personal_tasks_remain_frontend_only": true,
     "internal_only_jobs_are_allowed": true,
     "frontend_only_tasks_are_allowed": true,
-    "synchronization_does_not_expand_worker_project_mutation_authority": true
+    "synchronization_does_not_expand_worker_project_mutation_authority": true,
+    "runtime_evidence_write_authority_does_not_expand_repository_main_authority": true
   },
   "safety": {
     "primary_spawn_prohibited": true,
@@ -107,6 +114,8 @@
     "scheduler_sync_may_not_modify_project_domain_state": true,
     "scheduler_reconciliation_authority_is_not_inherited_by_unspecified_scheduled_workers": true,
     "expired_or_budget_exhausted_repair_grant_fails_closed": true,
-    "invalid_mutation_ledger_blocks_automatic_repair": true
+    "invalid_mutation_ledger_blocks_automatic_repair": true,
+    "invalid_unavailable_or_forked_evidence_branch_blocks_automatic_repair": true,
+    "runtime_scheduler_evidence_may_not_be_used_to_mutate_canonical_policy": true
   }
 }
