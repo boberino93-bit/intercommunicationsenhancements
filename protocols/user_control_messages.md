@@ -10,6 +10,8 @@ Human messages can interrupt an agent's current execution without cancelling or 
 
 ## Core invariant
 
+**A USER CONTROL MESSAGE IS NOT A CANCELLATION.**
+
 **A USER MESSAGE DOES NOT STOP AN ACTIVE ASSIGNMENT UNLESS THE USER EXPLICITLY SAYS NOT TO CONTINUE OR OTHERWISE CHANGES EXECUTION STATE.**
 
 When a valid assignment is already active, the universal post-response default is:
@@ -50,6 +52,8 @@ Treat messages with these intents as control messages unless they also explicitl
 Natural-language wording is not authoritative by itself. Classify by intent.
 
 ## Immediate-response contract
+
+For a control message, **answer the control message immediately**, then continue the active assignment unless the user explicitly changes execution state.
 
 For a control message, respond before continuing tool or implementation work. Keep the response focused on what the user asked for and, when useful, include the relevant subset of:
 
