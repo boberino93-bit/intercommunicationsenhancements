@@ -1,6 +1,6 @@
 {
   "schema": "org-agent-mesh/scheduler-frontend-bindings/v1",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "status": "ACTIVE",
   "reconciliation_directive": "governance/SCHEDULER_SYNCHRONIZATION_DIRECTIVE.json",
   "distribution_strategy": "PLAN_LIMIT_AWARE_EVEN_12_MINUTE_STAGGER",
@@ -49,7 +49,7 @@
     {
       "binding_id": "capacity-slot-3-frontend",
       "backend_job_id": "global-capacity-slot-3",
-      "frontend_automation_id": "6ac377ad110081918c674023c0998ef7",
+      "frontend_automation_id": "6ac377ad11008191899d39bd59553d8",
       "frontend_title": "Swarm Capacity Slot 3",
       "mode": "MIRROR",
       "schedule_authority": "BACKEND",
@@ -75,7 +75,7 @@
     {
       "binding_id": "capacity-slot-5-frontend",
       "backend_job_id": "global-capacity-slot-5",
-      "frontend_automation_id": "6ac3778b38948191bfd96afebcdda1c7",
+      "frontend_automation_id": "6ac65689018c8191bf5128a1e6ce6815",
       "frontend_title": "Swarm Capacity Slot 5",
       "mode": "MIRROR",
       "schedule_authority": "BACKEND",
@@ -83,7 +83,8 @@
       "enabled_state_policy": "MIRROR",
       "expected_timezone": "America/Vancouver",
       "expected_minute_offset": 48,
-      "purpose": "Expose one canonical bounded capacity lane as an actual ChatGPT scheduled model invocation."
+      "purpose": "Expose one canonical bounded capacity lane as an actual ChatGPT scheduled model invocation.",
+      "capacity_note": "Rebound 2026-10-07 after the prior frontend task remained listed as enabled but was rejected by the execution service as no longer available."
     },
     {
       "binding_id": "morning-income-research",
