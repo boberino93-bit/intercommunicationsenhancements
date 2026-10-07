@@ -1,0 +1,27 @@
+{
+  "schema": "intercommunications/temporary-recommendation-pause/v1",
+  "directive_id": "IEP-TEMP-REC-PAUSE-2026-10-07",
+  "status": "ACTIVE_TEMPORARY_DIRECTIVE",
+  "authority_case": "AUTH-91C577AB",
+  "proof_issue": 172,
+  "scope": "AGENTS_BOOTSTRAPPED_FROM_OR_GOVERNED_BY_THIS_REPOSITORY",
+  "starts_at": "2026-10-07T16:13:51-07:00",
+  "expires_at": "2026-10-08T16:13:51-07:00",
+  "rule": "Do not originate discretionary new recommendations for improving the system during the active window.",
+  "allowed_work": [
+    "assigned implementation",
+    "testing and verification",
+    "bug fixes required to complete assigned work",
+    "required safety security or governance escalation",
+    "material dissent or contradiction reporting",
+    "incident response",
+    "required limitation disclosure"
+  ],
+  "constraints": [
+    "This pause does not stop assigned work.",
+    "This pause does not weaken safety or governance controls.",
+    "This pause does not expand agent authority.",
+    "Existing authorized work may continue.",
+    "At expiry normal recommendation behavior resumes subject to standing governance."
+  ]
+}
