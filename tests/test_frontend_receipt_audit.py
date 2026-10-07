@@ -12,6 +12,7 @@ UTC = timezone.utc
 PROJECT_ID = "intercommunicationsenhancements"
 REPOSITORY = "boberino93-bit/intercommunicationsenhancements"
 PUBLISHER_ID = "6ac63d38cc688191b9de4213ca40f951"
+WORKER_ID = "worker-3"
 
 
 class FrontendReceiptAuditTests(unittest.TestCase):
@@ -22,7 +23,12 @@ class FrontendReceiptAuditTests(unittest.TestCase):
                     "binding_id": "bounded-capacity-hourly-frontend",
                     "backend_job_id": "global-bounded-capacity-hourly",
                     "frontend_automation_id": PUBLISHER_ID,
-                }
+                },
+                {
+                    "binding_id": "capacity-slot-3-frontend",
+                    "backend_job_id": "global-capacity-slot-3",
+                    "frontend_automation_id": WORKER_ID,
+                },
             ]
         }
         self.scheduled = datetime(2026, 10, 7, 14, 12, tzinfo=UTC)
@@ -70,11 +76,35 @@ class FrontendReceiptAuditTests(unittest.TestCase):
             audit = self.audit(tmp)
         self.assertEqual(audit["accepted_receipt_count"], 1)
         self.assertEqual(audit["rejected_receipt_count"], 0)
+        self.assertEqual(audit["reconciler_published_receipt_count"], 1)
+        self.assertEqual(audit["self_published_receipt_count"], 0)
         self.assertEqual(
             audit["latest_verified_by_job"]["global-bounded-capacity-hourly"]["occurrence_id"],
             self.receipt.occurrence_id,
         )
         self.assertFalse(audit["authority_conveyed"])
+
+    def test_exact_self_published_worker_receipt_is_accepted(self):
+        receipt = make_frontend_execution_receipt(
+            occurrence_id="global-capacity-slot-3:20261007T1424Z",
+            job_id="global-capacity-slot-3",
+            binding_id="capacity-slot-3-frontend",
+            frontend_automation_id=WORKER_ID,
+            scheduled_for=datetime(2026, 10, 7, 14, 24, tzinfo=UTC),
+            observed_run_at=datetime(2026, 10, 7, 14, 24, 30, tzinfo=UTC),
+            observed_at=datetime(2026, 10, 7, 14, 25, tzinfo=UTC),
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            self.write(
+                tmp,
+                "scheduler-frontend-receipt__self.json",
+                self.message(receipt=receipt, publisher_frontend_automation_id=WORKER_ID),
+            )
+            audit = self.audit(tmp)
+        self.assertEqual(audit["accepted_receipt_count"], 1)
+        self.assertEqual(audit["rejected_receipt_count"], 0)
+        self.assertEqual(audit["self_published_receipt_count"], 1)
+        self.assertEqual(audit["reconciler_published_receipt_count"], 0)
 
     def test_wrong_publisher_is_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:
