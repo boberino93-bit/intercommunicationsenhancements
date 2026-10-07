@@ -1,6 +1,6 @@
 {
   "schema": "org-agent-mesh/internal-spawn-scheduler-policy/v1",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "status": "ACTIVE_BY_EXPLICIT_HUMAN_REQUEST",
   "service": {
     "enabled": true,
@@ -22,7 +22,7 @@
     "master_allowed": false,
     "full_swarm_auto_start_allowed": false,
     "max_workers_per_occurrence": 1,
-    "max_tickets_per_scheduler_invocation": 3,
+    "max_tickets_per_scheduler_invocation": 1,
     "project_binding_required_before_protected_work": true,
     "spawn_authority_is_not_mutation_authority": true,
     "role_or_ticket_is_not_mutation_authority": true
@@ -32,7 +32,11 @@
     "declared_mapping_required": true,
     "may_reconcile_mapped_chatgpt_scheduled_tasks": true,
     "may_enable_mapped_chatgpt_task_when_binding_policy_is_MIRROR": true,
+    "may_enable_mapped_chatgpt_task_when_binding_policy_is_MIRROR_WHEN_ACCOUNT_CAPACITY_AVAILABLE": true,
     "may_disable_mapped_chatgpt_task_when_binding_policy_is_MIRROR": true,
+    "must_keep_MIRROR_DISABLED_STANDBY_disabled": true,
+    "account_capacity_rejection_is_CAPACITY_LIMIT_DEFERRED": true,
+    "capacity_deferred_enablement_may_retry_after_capacity_release": true,
     "may_reschedule_mapped_chatgpt_task_to_canonical_backend_schedule": true,
     "may_rename_mapped_chatgpt_task_to_declared_frontend_title": true,
     "may_modify_unmapped_chatgpt_tasks": false,
@@ -63,6 +67,8 @@
     "ticket_created_without_host_receipt": "SPAWN_TICKET_PENDING",
     "scheduler_mapping_conflict": "SCHEDULER_SYNC_CONFLICT",
     "frontend_state_unavailable": "FRONTEND_SCHEDULER_STATE_UNAVAILABLE",
+    "frontend_account_capacity_full": "CAPACITY_LIMIT_DEFERRED",
+    "never_call_capacity_limit_deferred_task_failed": true,
     "never_call_missing_adapter_task_failed": true,
     "never_claim_spawn_from_ticket_alone": true
   },
@@ -78,6 +84,7 @@
     "record_frontend_binding_id": true,
     "record_frontend_observed_state": true,
     "record_backend_canonical_state": true,
-    "record_sync_disposition": true
+    "record_sync_disposition": true,
+    "record_capacity_deferred_state": true
   }
 }
