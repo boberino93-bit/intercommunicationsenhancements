@@ -103,98 +103,37 @@ Therefore:
 
 The purpose of this rule is to prevent a newly opened or concurrently active conversation from being seconds or minutes behind a material fact that another conversation already learned.
 
-#### Material context promotion
+A material project update MUST be promoted into durable project state through the canonical AgentBus/state-delta path when an authorized persistence path is available. Material updates include user decisions, material objective or scope changes, review outcomes, canonical artifact/revision changes, blockers, failures/recovery state, authoritative implementation or validation results, handoffs/ownership changes, contradictions, and any fact whose omission would cause materially stale action.
 
-A material project update MUST be promoted into durable project state through the canonical AgentBus/state-delta path when an authorized persistence path is available. Material updates include, where applicable:
+Do NOT persist conversational filler, duplicated paraphrases, liveness chatter, secrets, credentials, unnecessary personal information, or unauthorized content. Durable promotion MUST preserve provenance, project scope, source event time where known, recording time, revision/generation, supersession, and evidence pointers.
 
-- user decisions, approvals, rejections, corrections, redirects, and cancellations;
-- material objective or scope changes;
-- review outcomes and consensus milestones;
-- canonical artifact/revision changes;
-- blockers, unblocks, failures, and recovery state;
-- authoritative implementation or validation results;
-- handoffs and ownership changes;
-- material contradictions or newly resolved contradictions;
-- any fact whose omission would cause another authorized agent to give a materially stale answer or take materially stale action.
+Each active or recurring agent SHOULD maintain a compact `CONTEXT_WATERMARK` including strongest available project/swarm state version, last material event, decision version, message offset, protocol version, and last sync time.
 
-Do NOT persist ordinary conversational filler, duplicated paraphrases, routine liveness chatter, secrets, credentials, unnecessary personal information, or content whose persistence/disclosure is not authorized.
+At startup, resume, handoff acceptance, and before a continuity-sensitive answer or protected action, retrieve material state newer than the watermark plus invalidation-critical history.
 
-Durable context promotion MUST preserve provenance, project scope, source event time where known, recording time, applicable revision/generation, supersession relationship, and evidence/reference pointers. A summary is not allowed to impersonate the original evidence object.
+When freshness matters, prefer current state capsules, material durable deltas, decisions/supersessions/handoffs/blockers, canonical AgentBus messages, current repository/artifact revision, then host cross-conversation memory and current conversation as supplementary evidence.
 
-#### Context watermark
+When an agent persists a material context delta, verify durable write/readback where supported. If persistence/freshness cannot be verified, mark `CONTINUITY_DEGRADED`; safe conversational work may continue but actions depending on missing state fail closed.
 
-Each active or recurring agent SHOULD maintain a compact `CONTEXT_WATERMARK` containing the strongest available equivalents of:
+If the user must repeat a material fact already in canonical durable state, classify `CONTEXT_SYNC_MISS`, retrieve/reconcile the canonical record, advance the watermark, avoid making the user reconstruct retrievable state, and record low-noise telemetry where authorized.
 
-```text
-LAST_PROJECT_STATE_VERSION_SEEN
-LAST_SWARM_STATE_VERSION_SEEN
-LAST_MATERIAL_CONTEXT_EVENT_SEEN
-LAST_DECISION_VERSION_SEEN
-LAST_MESSAGE_OFFSET_SEEN
-LAST_PROTOCOL_VERSION_SEEN
-LAST_SYNC_TIME
-```
-
-At startup, resume, handoff acceptance, and before a continuity-sensitive answer or protected action, the agent MUST retrieve material state newer than the watermark plus any invalidation-critical history.
-
-A continuity-sensitive interaction includes any request whose correctness depends on very recent project history, including requests equivalent to:
-
-- "do you already know?";
-- "I just told another agent/chat";
-- "continue from where we left off";
-- "what is the latest state?";
-- "did the reviewers approve it?";
-- or any action whose authority, target, revision, blocker, approval, or implementation plan may have changed since the last synchronization.
-
-#### Synchronization order
-
-When freshness matters, use approximately this order, subject to project-specific authority and availability:
-
-1. current Project State Capsule / Swarm State Capsule;
-2. material durable context/state deltas newer than the watermark;
-3. current decisions, supersessions, review outcomes, handoffs, and blockers;
-4. relevant recent canonical AgentBus messages;
-5. current repository/artifact revision where applicable;
-6. host-provided cross-conversation memory or recent-chat context as supplementary evidence;
-7. current conversation.
-
-The newest conversational statement may be operationally important, but it does not erase or silently supersede stronger canonical state without the appropriate governed transition.
-
-#### Read-after-write and continuity degradation
-
-When an agent persists a material context delta, it MUST verify the durable write/readback where the substrate supports verification. It MUST NOT claim that project-wide continuity has been updated merely because it intended to write or generated a record.
-
-If material state cannot be persisted or freshness cannot be verified:
-
-`CONTEXT_PERSISTENCE_UNVERIFIED -> CONTINUITY_DEGRADED`
-
-The agent may continue safe conversational work, but MUST NOT claim complete cross-session awareness and MUST fail closed for any action whose correctness depends on the missing state.
-
-#### Synchronization miss
-
-If the user has to repeat a material project fact that already exists in canonical durable state, classify the event as a `CONTEXT_SYNC_MISS` rather than treating repetition as the normal retrieval mechanism.
-
-On a `CONTEXT_SYNC_MISS`, the agent SHOULD:
-
-1. retrieve the canonical record;
-2. reconcile its local context;
-3. advance its watermark;
-4. avoid asking the user to reconstruct information already retrievable;
-5. record the miss as continuity-quality telemetry when an authorized low-noise telemetry path exists.
-
-A synchronization miss does not make the user's repeated statement less authoritative. It is evidence that the retrieval/freshness path needs improvement.
-
-#### Noise control
-
-This mechanism MUST NOT turn the durable message board into a transcript or heartbeat log. Persist transitions, not chatter. Prefer compact state deltas, superseding capsules, and pointers to evidence over full conversational duplication.
-
-The target invariant is:
+Persist transitions, not chatter. Target invariant:
 
 `MATERIAL_STATE_CHANGE -> DURABLE_PROMOTION -> VERIFIED_READBACK -> CURSOR_ADVANCE -> NEXT_AGENT_FRESH`
 
-and:
+### 10D. Mission and priority synchronization overlay
 
-`USER_AS_MEMORY = ARCHITECTURAL_FAILURE_MODE`
+Every normal, scheduled, resumed, recovered, and cold-start swarm agent MUST also load `protocols/swarm_synchronization.md`.
+
+Before substantive work, the agent MUST synchronize to the current project mission, priority stack, authoritative decision state, relevant task/checkpoint state, dependencies, contradictions, and applicable ownership/claim/lease/fencing state. It must select the highest-value work it is authorized and capable of advancing, maintain bounded focus, and publish material deltas that could change another agent's decisions.
+
+Agents MUST re-synchronize on material mission, priority, dependency, ownership, authorization, contradiction, incident, handoff, resume, or canonical-revision changes. A stale checkpoint or fresh chat is not sufficient state.
+
+The synchronization overlay is coordination only. It cannot create authority, ownership, scheduler authority, release authority, or deployment authority. Heartbeat remains observational. Claims/leases/fencing remain ownership authority. Existing authority-authentication, single-use mutation authorization, project work control, supervisory control, containment, and project isolation remain stronger gates.
+
+When material state drift, ownership drift, or authority drift is detected before protected mutation, the affected mutation MUST stop, useful work must be checkpointed, authoritative state must be reloaded and reconciled, and all applicable claim/lease/fencing/authorization state must be revalidated before proceeding.
+
+The swarm SHOULD optimize for critical-path mission progress rather than raw activity. P0 integrity/safety/security/authority and P1 critical-path work take precedence over lower-value work subject to valid authority, dependencies, capabilities, holds, containment, and ownership. Accidental duplicate work should be collapsed; intentional independent validation/red-team work must state its purpose.
 
 ## 11. Re-entry to full normalization
 
@@ -202,4 +141,4 @@ Invoke full normalization only when a defined material trigger occurs, including
 
 ## 12. Smoke-test criterion
 
-The recurring protocol passes its smoke test when an authorized fresh agent can reconstruct objective, project, role, authority, current revision, health, ownership, dependencies, and next action from durable state; replay material context newer than its watermark; correctly recover a material update made in another conversation without requiring the user to repeat it; safely suspend/resume across a dependency; reject stale/foreign mutation; honor redirect/pause/stop/stop-tree control; preserve useful partial state; reject blind scheduled respawn after intentional stop; and complete a bounded canary without hidden conversational memory.
+The recurring protocol passes its smoke test when an authorized fresh agent can reconstruct objective, project, role, authority, current revision, health, ownership, dependencies, priorities, contradictions, and next action from durable state; replay material context newer than its watermark; recover a material update made in another conversation without requiring repetition; detect stale/duplicate/priority-drift work; safely suspend/resume across a dependency; reject stale/foreign mutation; honor redirect/pause/stop/stop-tree control; preserve useful partial state; reject blind scheduled respawn after intentional stop; and complete a bounded canary without hidden conversational memory.
