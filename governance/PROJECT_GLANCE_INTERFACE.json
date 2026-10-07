@@ -1,0 +1,56 @@
+{
+  "schema":"org-agent-mesh/project-glance-interface/v1",
+  "version":"1.0.0",
+  "status":"ACTIVE_BY_EXPLICIT_HUMAN_DIRECTIVE_2026-10-07",
+  "purpose":"Provide a one-read, stale-aware operational glance across all registered projects without replacing project-local canonical coordination state.",
+  "registry":"LIVE_OPERATIONS_REGISTRY.json",
+  "cache":"PROJECT_GLANCE_INDEX.json",
+  "local_snapshot_filename":"PROJECT_GLANCE.json",
+  "semantics":{
+    "authority":"READ_ONLY_DERIVED_CACHE",
+    "project_local_state_remains_canonical":true,
+    "central_cache_is_not_mutation_authority":true,
+    "unknown_is_not_idle":true,
+    "stale_is_not_current":true,
+    "never_infer_status_from_repository_activity_alone":true
+  },
+  "required_project_fields":[
+    "project_id",
+    "repository",
+    "observed_at_utc",
+    "status",
+    "current_focus",
+    "blockers",
+    "next_action",
+    "last_material_change",
+    "evidence_refs"
+  ],
+  "status_values":["EXECUTING","WAITING","BLOCKED","IDLE_READY","PAUSED","STALE","UNKNOWN"],
+  "freshness":{
+    "fresh_seconds":1800,
+    "stale_seconds":3600,
+    "beyond_stale_action":"REPORT_STALE_AND_REFRESH_ON_DEMAND"
+  },
+  "commands":{
+    "project status":{"action":"READ_PROJECT_GLANCE_INDEX","mutation":false},
+    "projects status":{"action":"READ_PROJECT_GLANCE_INDEX","mutation":false},
+    "project status <project_id>":{"action":"READ_ONE_PROJECT_GLANCE_AND_REFRESH_IF_STALE","mutation":false},
+    "projects refresh":{"action":"REFRESH_SANITIZED_GLANCE_CACHE_FROM_REGISTERED_PROJECTS","requires_explicit_current_human_command":true},
+    "what is going on":{"action":"READ_PROJECT_GLANCE_INDEX","mutation":false},
+    "what is going on with the projects":{"action":"READ_PROJECT_GLANCE_INDEX","mutation":false}
+  },
+  "response_contract":{
+    "one_line_summary_first":true,
+    "default_fields":["project_id","status","current_focus","blocker_summary","next_action","freshness"],
+    "show_evidence_refs_only_on_request_or_conflict":true,
+    "deep_audit_only_when_stale_conflicting_or_requested":true,
+    "do_not_requery_all_projects_when_cache_is_fresh":true
+  },
+  "update_contract":{
+    "local_snapshot_update_on_material_transition":true,
+    "heartbeat_only_updates_prohibited":true,
+    "aggregator_may_copy_sanitized_summary_only":true,
+    "aggregator_may_not_change_project_domain_state":true,
+    "cross_project_authority_not_conveyed":true
+  }
+}
