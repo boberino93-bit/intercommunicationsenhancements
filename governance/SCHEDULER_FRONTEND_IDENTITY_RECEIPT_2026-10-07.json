@@ -1,0 +1,29 @@
+{
+  "schema": "org-agent-mesh/scheduler-frontend-identity-receipt/v1",
+  "version": "1.0.0",
+  "status": "OBSERVED",
+  "observed_at": "2026-10-07T19:15:00Z",
+  "source": "CHATGPT_AUTOMATIONS_READBACK",
+  "purpose": "Independent readback record of the exact frontend automation identities used to validate the 2026-10-07 scheduler liveness repair. This receipt is evidence only and conveys no mutation authority.",
+  "mapped_system_identities": {
+    "global-capacity-slot-1": "6ac3779cb1008191b636d39bd59553d8",
+    "global-bounded-capacity-hourly": "6ac63d38cc688191b9de4213ca40f951",
+    "global-capacity-slot-2": "6ac377a642e48191899c464a5856cfd8",
+    "global-capacity-slot-3": "6ac6571de7d88191a5396d8828a502c2",
+    "global-capacity-slot-4": "6ac658dad9a881919e43aba112f23364",
+    "global-capacity-slot-5": "6ac65689018c8191bf5128a1e6ce6815"
+  },
+  "repair_targets_observed_enabled_after_human_repair": [
+    "6ac3779cb1008191b636d39bd59553d8",
+    "6ac63d38cc688191b9de4213ca40f951",
+    "6ac6571de7d88191a5396d8828a502c2",
+    "6ac658dad9a881919e43aba112f23364",
+    "6ac65689018c8191bf5128a1e6ce6815"
+  ],
+  "standby_observed_disabled": "6ac377a642e48191899c464a5856cfd8",
+  "authority": {
+    "evidence_only": true,
+    "may_enable_or_disable_tasks": false,
+    "may_create_replace_or_rebind_tasks": false
+  }
+}
