@@ -17,6 +17,9 @@ from .frontend_execution_receipts import (
 MESSAGE_SCHEMA = "org-agent-mesh/scheduler-frontend-receipt-message/v1"
 MESSAGE_TYPE = "SCHEDULER_FRONTEND_EXECUTION_RECEIPT"
 DEFAULT_RECEIPT_PREFIX = "scheduler-frontend-receipt__"
+DEFAULT_PROJECT_ID = "intercommunicationsenhancements"
+DEFAULT_REPOSITORY = "boberino93-bit/intercommunicationsenhancements"
+DEFAULT_PUBLISHER_ID = "6ac63d38cc688191b9de4213ca40f951"
 
 
 class FrontendReceiptAuditError(ValueError):
@@ -197,9 +200,9 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Audit append-only mapped frontend execution receipts")
     parser.add_argument("--bindings", default="governance/SCHEDULER_FRONTEND_BINDINGS.json")
     parser.add_argument("--receipt-dir", default="agentbus-backup/coordination-messages")
-    parser.add_argument("--project-id", default="intercommunications-enhancements")
-    parser.add_argument("--repository", default="boberino93-bit/intercommunicationsenhancements")
-    parser.add_argument("--publisher-id", default="6ac63d38cc688191b9de4213ca40f951")
+    parser.add_argument("--project-id", default=DEFAULT_PROJECT_ID)
+    parser.add_argument("--repository", default=DEFAULT_REPOSITORY)
+    parser.add_argument("--publisher-id", default=DEFAULT_PUBLISHER_ID)
     parser.add_argument("--out", default="scheduler-out/frontend-receipt-audit.json")
     args = parser.parse_args(argv)
 
