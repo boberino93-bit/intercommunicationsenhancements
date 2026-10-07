@@ -49,6 +49,14 @@ All identity inputs are evidence, not authority by themselves. Neither project n
 
 16. Only after the acknowledgements may role-specific startup continue.
 
+## Bootstrap service discovery
+
+After identity and project routing are resolved, check for registered bootstrap control-plane services that are explicitly bound by the canonical repository. For this project, load `bootstrap/INTERNAL_SCHEDULER_SERVICE.json` when present and validate every referenced protocol, policy, registry, runtime, and host-clock path before relying on it.
+
+The internal scheduler service is infrastructure, not an agent role and not mutation authority. Its checked-in binding may authorize bounded scheduled spawn-ticket creation only to the extent explicitly delegated by `governance/INTERNAL_SPAWN_SCHEDULER_POLICY.json`. A spawn ticket is never proof that a session exists. Require the host start receipt defined by `protocols/internal_scheduler_service.md` before treating a scheduled launch as started.
+
+Do not let scheduler-service discovery alter existing ChatGPT Scheduled Task enablement. Existing disabled tasks remain human control gates. PRIMARY, MASTER, or full-swarm creation remains prohibited unless a later explicit human authorization changes those service-policy boundaries.
+
 ## Answering communication-visibility questions
 
 When the human asks whether the agent sees the communications happening around it, do not answer from intuition. Re-run the communication-awareness assessment and state:
