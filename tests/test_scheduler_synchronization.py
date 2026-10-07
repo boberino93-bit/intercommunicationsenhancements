@@ -52,12 +52,32 @@ class SchedulerSynchronizationTests(unittest.TestCase):
         self.assertFalse(boundary["may_create_or_delete_unmapped_chatgpt_tasks"])
         self.assertFalse(boundary["may_infer_mapping_from_title_similarity"])
 
-    def test_control_interface_has_short_commands(self):
+    def test_control_interface_has_short_commands_and_project_glance(self):
         control = self.load("governance/SCHEDULER_CONTROL_INTERFACE.json")
         commands = control["commands"]
-        for command in ["scheduler status", "scheduler health", "scheduler reconcile", "scheduler pause", "scheduler resume", "scheduler run"]:
+        for command in [
+            "scheduler status",
+            "scheduler health",
+            "scheduler reconcile",
+            "scheduler pause",
+            "scheduler resume",
+            "scheduler run",
+            "project status",
+            "project status <project_id>",
+            "projects refresh",
+        ]:
             self.assertIn(command, commands)
         self.assertTrue(control["safety"]["unmapped_personal_tasks_cannot_be_changed_by_scheduler_commands"])
+        self.assertTrue(control["safety"]["project_glance_is_not_project_authority"])
+        self.assertEqual(control["surfaces"]["project_glance"]["cache"], "PROJECT_GLANCE_INDEX.json")
+
+    def test_project_glance_interface_is_stale_aware_and_cache_first(self):
+        glance = self.load("governance/PROJECT_GLANCE_INTERFACE.json")
+        self.assertEqual(glance["semantics"]["authority"], "READ_ONLY_DERIVED_CACHE")
+        self.assertTrue(glance["semantics"]["unknown_is_not_idle"])
+        self.assertTrue(glance["semantics"]["stale_is_not_current"])
+        self.assertTrue(glance["response_contract"]["do_not_requery_all_projects_when_cache_is_fresh"])
+        self.assertTrue(glance["response_contract"]["deep_audit_only_when_stale_conflicting_or_requested"])
 
 
 if __name__ == "__main__":
