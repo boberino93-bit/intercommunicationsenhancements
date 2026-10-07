@@ -10,6 +10,8 @@ Human messages can interrupt an agent's current execution without cancelling or 
 
 ## Core invariant
 
+**A USER CONTROL MESSAGE IS NOT A CANCELLATION.**
+
 **A USER MESSAGE DOES NOT STOP AN ACTIVE ASSIGNMENT UNLESS THE USER EXPLICITLY SAYS NOT TO CONTINUE OR OTHERWISE CHANGES EXECUTION STATE.**
 
 When a valid assignment is already active, the universal post-response default is:
