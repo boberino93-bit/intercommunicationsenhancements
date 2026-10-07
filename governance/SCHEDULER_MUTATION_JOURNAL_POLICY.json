@@ -1,7 +1,9 @@
 {
   "schema": "org-agent-mesh/scheduler-mutation-journal-policy/v1",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "status": "ACTIVE",
+  "repository": "boberino93-bit/intercommunicationsenhancements",
+  "storage_branch": "scheduler-evidence",
   "root": "governance/scheduler-mutation-journal-v3",
   "claim_directory": "governance/scheduler-mutation-journal-v3/claims",
   "event_directory": "governance/scheduler-mutation-journal-v3/events",
@@ -9,20 +11,25 @@
   "claim_path_format": "claims/{sequence:06d}.json",
   "event_path_format": "events/{sequence:06d}.json",
   "storage_contract": {
+    "canonical_policy_source_branch": "main",
+    "runtime_evidence_storage_branch": "scheduler-evidence",
+    "runtime_writes_to_main_prohibited_after_cutover": true,
     "claim_operation": "CREATE_NEW_FILE_ONLY",
     "event_operation": "CREATE_NEW_FILE_ONLY",
     "overwrite_prohibited": true,
     "delete_prohibited": true,
     "update_prohibited": true,
+    "force_push_prohibited": true,
     "claim_creation_must_fail_if_path_exists": true,
-    "actor_must_read_back_own_claim_before_scheduler_mutation": true,
+    "actor_must_read_back_own_claim_from_storage_branch_before_scheduler_mutation": true,
     "claim_must_bind_exact_next_sequence": true,
     "claim_must_bind_previous_terminal_event_hash": true,
     "event_must_bind_claim_hash": true,
     "one_claim_and_one_event_required_per_sequence": true,
     "missing_event_for_existing_claim_blocks_automatic_mutation": true,
     "sequence_fork_blocks_automatic_mutation": true,
-    "stale_claim_may_not_be_stolen_or_overwritten_automatically": true
+    "stale_claim_may_not_be_stolen_or_overwritten_automatically": true,
+    "main_branch_snapshot_is_not_runtime_write_authority_after_cutover": true
   },
   "hashing": {
     "algorithm": "SHA-256",
@@ -32,30 +39,44 @@
     "event_chain_uses_previous_event_hash": true
   },
   "mutation_protocol": [
-    "VALIDATE_COMPLETE_JOURNAL",
+    "READ_CANONICAL_POLICY_FROM_MAIN",
+    "FETCH_EXACT_SCHEDULER_EVIDENCE_BRANCH",
+    "VALIDATE_COMPLETE_JOURNAL_ON_STORAGE_BRANCH",
     "DERIVE_EXACT_NEXT_SEQUENCE_AND_TERMINAL_HASH",
-    "CREATE_DETERMINISTIC_CLAIM_PATH_IF_ABSENT",
-    "READ_BACK_AND_VERIFY_OWN_CLAIM",
-    "CREATE_IMMUTABLE_PLANNED_EVENT_BOUND_TO_CLAIM",
-    "REVALIDATE_JOURNAL",
+    "CREATE_DETERMINISTIC_CLAIM_PATH_IF_ABSENT_ON_STORAGE_BRANCH",
+    "READ_BACK_AND_VERIFY_OWN_CLAIM_FROM_STORAGE_BRANCH",
+    "CREATE_IMMUTABLE_PLANNED_EVENT_BOUND_TO_CLAIM_ON_STORAGE_BRANCH",
+    "REVALIDATE_JOURNAL_ON_STORAGE_BRANCH",
     "PERFORM_ONLY_THE_AUTHORIZED_SCHEDULER_MUTATION",
     "VERIFY_PROVIDER_READBACK",
-    "ACQUIRE_NEXT_SEQUENCE_FOR_APPLIED_EVENT",
-    "CREATE_IMMUTABLE_APPLIED_EVENT",
-    "REVALIDATE_JOURNAL"
+    "ACQUIRE_NEXT_SEQUENCE_FOR_APPLIED_EVENT_ON_STORAGE_BRANCH",
+    "CREATE_IMMUTABLE_APPLIED_EVENT_ON_STORAGE_BRANCH",
+    "REVALIDATE_JOURNAL_ON_STORAGE_BRANCH"
   ],
   "failure_semantics": {
+    "storage_branch_missing_or_unavailable": "SCHEDULER_EVIDENCE_BRANCH_UNAVAILABLE",
     "claim_path_already_exists": "SCHEDULER_MUTATION_SEQUENCE_ALREADY_CLAIMED",
     "claim_readback_mismatch": "SCHEDULER_MUTATION_CLAIM_CONFLICT",
     "claim_without_event": "SCHEDULER_MUTATION_JOURNAL_INCOMPLETE",
     "multiple_claims_or_events_for_sequence": "SCHEDULER_MUTATION_JOURNAL_FORKED",
     "hash_or_sequence_invalid": "SCHEDULER_MUTATION_JOURNAL_INVALID",
+    "attempted_runtime_write_to_main_after_cutover": "SCHEDULER_EVIDENCE_WRONG_BRANCH",
     "automatic_action_on_any_journal_failure": "FAIL_CLOSED_NO_SCHEDULER_MUTATION"
   },
-  "migration": {
-    "v2_ledger_preserved_as_historical_evidence": true,
-    "v3_migration_contains_equivalent_first_two_events": true,
-    "new_mutations_must_use_v3_journal": true
+  "cutover": {
+    "cutover_branch": "scheduler-evidence",
+    "cutover_through_sequence": 6,
+    "cutover_terminal_event_hash": "fe719093f320feec38352fb49de18d3b9ebc7bed9c6e6bfa52b9f2b0b93cded6",
+    "cutover_main_commit": "c21386601432ca7bca8b11a85f41341461887918",
+    "storage_branch_created_from_cutover_main_commit": true,
+    "sequences_1_through_6_exist_on_both_branches_as_cutover_snapshot": true,
+    "sequences_7_and_later_must_exist_only_on_scheduler_evidence_runtime_path": true,
+    "main_copy_through_sequence_6_is_historical_snapshot_not_live_journal": true
   },
-  "purpose": "Prevent multi-writer scheduler repair races by using create-if-absent deterministic sequence claims plus immutable hash-bound events rather than concurrent rewriting of one shared ledger file."
+  "migration": {
+    "v1_and_v2_ledgers_preserved_as_historical_evidence": true,
+    "v3_first_six_events_are_cutover_baseline": true,
+    "new_mutations_must_use_v3_journal_on_scheduler_evidence": true
+  },
+  "purpose": "Prevent multi-writer scheduler repair races while separating mutable runtime evidence from protected canonical main, so main can require PR-only changes without granting scheduler automation a broad bypass."
 }

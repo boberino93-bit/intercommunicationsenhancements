@@ -28,6 +28,7 @@ on:
       - "tests/test_scheduler_mutation_ledger.py"
       - "tests/test_scheduler_mutation_journal.py"
       - "tests/test_scheduler_hardening_contract.py"
+      - "tests/test_scheduler_evidence_branch.py"
       - "tests/test_scheduler_synchronization.py"
       - "tests/test_scheduler_ecosystem_rollout.py"
       - "schemas/frontend_execution_receipt.schema.json"
@@ -43,6 +44,7 @@ on:
       - "governance/SCHEDULER_MUTATION_JOURNAL_POLICY.json"
       - "governance/scheduler-mutation-journal-v3/**"
       - "governance/SCHEDULER_SYNCHRONIZATION_DIRECTIVE.json"
+      - "docs/GITHUB_MAIN_RULESET_REQUIRED.md"
       - "protocols/internal_scheduler_service.md"
       - "protocols/scheduled_agent_launch_repair_and_receipt_amendment_2026-10-07.md"
       - ".github/workflows/internal-spawn-scheduler.yml"
@@ -82,5 +84,6 @@ jobs:
             tests.test_scheduler_mutation_ledger \
             tests.test_scheduler_mutation_journal \
             tests.test_scheduler_hardening_contract \
+            tests.test_scheduler_evidence_branch \
             tests.test_scheduler_synchronization \
             tests.test_scheduler_ecosystem_rollout

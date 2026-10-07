@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Checkout
+      - name: Checkout canonical main
         uses: actions/checkout@v4
 
       - name: Set up Python
@@ -42,17 +42,31 @@ jobs:
             tests.test_scheduler_mutation_ledger \
             tests.test_scheduler_mutation_journal \
             tests.test_scheduler_hardening_contract \
+            tests.test_scheduler_evidence_branch \
             tests.test_scheduler_synchronization \
             tests.test_scheduler_ecosystem_rollout
 
-      - name: Validate scheduler mutation ledger integrity and journal claims
+      - name: Fetch immutable runtime scheduler evidence
+        run: |
+          rm -rf scheduler-evidence-snapshot
+          mkdir -p scheduler-evidence-snapshot
+          git fetch origin scheduler-evidence --depth=1
+          git archive FETCH_HEAD \
+            governance/scheduler-mutation-journal-v3 \
+            agentbus-backup/coordination-messages \
+            | tar -x -C scheduler-evidence-snapshot
+          test -d scheduler-evidence-snapshot/governance/scheduler-mutation-journal-v3/claims
+          test -d scheduler-evidence-snapshot/governance/scheduler-mutation-journal-v3/events
+          test -d scheduler-evidence-snapshot/agentbus-backup/coordination-messages
+
+      - name: Validate scheduler mutation ledger integrity via evidence-branch journal
         run: |
           python - <<'PY'
           import json
           from pathlib import Path
           from org_agent_mesh.scheduler_mutation_journal import validate_journal
 
-          root = Path("governance/scheduler-mutation-journal-v3")
+          root = Path("scheduler-evidence-snapshot/governance/scheduler-mutation-journal-v3")
           claims = [json.loads(path.read_text(encoding="utf-8")) for path in sorted((root / "claims").glob("*.json"))]
           events = [json.loads(path.read_text(encoding="utf-8")) for path in sorted((root / "events").glob("*.json"))]
           result = validate_journal(claims=claims, events=events)
@@ -103,11 +117,11 @@ jobs:
           )
           PY
 
-      - name: Audit mapped frontend execution receipts
+      - name: Audit mapped frontend execution receipts from evidence branch
         run: |
           python -m org_agent_mesh.frontend_receipt_audit \
             --bindings governance/SCHEDULER_FRONTEND_BINDINGS.json \
-            --receipt-dir agentbus-backup/coordination-messages \
+            --receipt-dir scheduler-evidence-snapshot/agentbus-backup/coordination-messages \
             --out scheduler-out/frontend-receipt-audit.json
           python - <<'PY'
           import json
