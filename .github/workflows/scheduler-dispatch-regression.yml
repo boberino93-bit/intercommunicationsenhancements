@@ -7,15 +7,18 @@ on:
       - "org_agent_mesh/launch_admission.py"
       - "org_agent_mesh/scheduler_reconciliation.py"
       - "org_agent_mesh/frontend_execution_receipts.py"
+      - "org_agent_mesh/frontend_receipt_audit.py"
       - "tests/test_internal_scheduler.py"
       - "tests/test_launch_admission.py"
       - "tests/test_schedule_activation.py"
       - "tests/test_scheduler_reconciliation.py"
       - "tests/test_scheduler_policy_coherence.py"
       - "tests/test_frontend_execution_receipts.py"
+      - "tests/test_frontend_receipt_audit.py"
       - "tests/test_scheduler_synchronization.py"
       - "tests/test_scheduler_ecosystem_rollout.py"
       - "schemas/frontend_execution_receipt.schema.json"
+      - "schemas/scheduler_frontend_receipt_message.schema.json"
       - "bootstrap/INTERNAL_SCHEDULER_SERVICE.json"
       - "governance/INTERNAL_SPAWN_SCHEDULER_POLICY.json"
       - "governance/INTERNAL_SPAWN_SCHEDULES.json"
@@ -52,5 +55,6 @@ jobs:
             tests.test_scheduler_reconciliation \
             tests.test_scheduler_policy_coherence \
             tests.test_frontend_execution_receipts \
+            tests.test_frontend_receipt_audit \
             tests.test_scheduler_synchronization \
             tests.test_scheduler_ecosystem_rollout
