@@ -1,10 +1,10 @@
 {
   "schema": "org-agent-mesh/new-project-bootstrap-pointer/v1",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "source_project": {"project_id": "{{PROJECT_ID}}", "repository": null, "repository_binding_state": "UNBOUND"},
   "trigger": "EXPLICIT_HUMAN_REQUEST_TO_CREATE_OR_BOOTSTRAP_A_NEW_PROJECT",
-  "canonical_kit": {"repository": "boberino93-bit/intercommunicationsenhancements", "path": "NEW_PROJECT_BOOTSTRAP.json", "protocol": "protocols/new_project_bootstrap.md", "handoff_protocol": "protocols/agent_state_handoff.md", "templates_root": "templates/new-project"},
-  "local_reference": {"bootstrap_contract": "AGENT_BOOTSTRAP.json", "master_handoff": "MASTER_HANDOFF.json", "use_as_architecture_example_only": true, "copy_identity_values": false},
-  "seed_defaults": {"repository_binding": "UNBOUND", "github_required_to_start": false, "forum_authority": "INTERNAL_ARTIFACTORY", "repository_view": "NONE"},
-  "rules": {"do_not_mutate_source_project_for_new_project_work": true, "do_not_inherit_source_repository": true, "do_not_inherit_source_forum_or_artifact_namespace": true, "new_project_must_receive_its_own_identity_lock": true, "new_project_must_receive_master_handoff": true, "materialize_this_pointer_in_every_seeded_project": true, "bind_and_register_github_later_only_after_repository_verification": true}
+  "canonical_kit": {"repository": "boberino93-bit/intercommunicationsenhancements", "path": "NEW_PROJECT_BOOTSTRAP.json", "protocol": "protocols/new_project_bootstrap.md", "handoff_protocol": "protocols/agent_state_handoff.md", "templates_root": "templates/new-project", "scheduler_project_binding_registry": "governance/INTERNAL_SPAWN_PROJECT_BINDINGS.json"},
+  "local_reference": {"bootstrap_contract": "AGENT_BOOTSTRAP.json", "master_handoff": "MASTER_HANDOFF.json", "scheduler_binding": "INTERNAL_SCHEDULER_SERVICE_BINDING.json", "scheduler_service": "bootstrap/INTERNAL_SCHEDULER_SERVICE.json", "use_as_architecture_example_only": true, "copy_identity_values": false},
+  "seed_defaults": {"repository_binding": "UNBOUND", "github_required_to_start": false, "forum_authority": "INTERNAL_ARTIFACTORY", "repository_view": "NONE", "scheduler_activation": "PENDING_REPOSITORY_BINDING"},
+  "rules": {"do_not_mutate_source_project_for_new_project_work": true, "do_not_inherit_source_repository": true, "do_not_inherit_source_forum_or_artifact_namespace": true, "new_project_must_receive_its_own_identity_lock": true, "new_project_must_receive_master_handoff": true, "new_project_must_receive_scheduler_binding": true, "new_project_scheduler_may_not_spawn_primary_or_master": true, "new_project_scheduler_may_not_auto_start_full_swarm": true, "scheduler_spawn_authority_is_not_mutation_authority": true, "materialize_this_pointer_in_every_seeded_project": true, "bind_and_register_github_later_only_after_repository_verification": true}
 }
