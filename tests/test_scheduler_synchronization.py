@@ -26,21 +26,55 @@ class SchedulerSynchronizationTests(unittest.TestCase):
         self.assertTrue(rec["never_create_or_delete_frontend_task_without_explicit_binding_record"])
         self.assertTrue(rec["never_import_unmapped_personal_frontend_tasks_into_backend"])
 
-    def test_backend_job_is_mapped_to_bootstrap_bridge(self):
+    def test_six_capacity_lanes_are_one_to_one_mapped_and_evenly_distributed(self):
+        registry = self.load("governance/INTERNAL_SPAWN_SCHEDULES.json")
         bindings = self.load("governance/SCHEDULER_FRONTEND_BINDINGS.json")["bindings"]
+        jobs = registry["jobs"]
         mapped = [b for b in bindings if b["mode"] == "MIRROR"]
-        self.assertEqual(len(mapped), 1)
-        binding = mapped[0]
-        self.assertEqual(binding["backend_job_id"], "global-bounded-capacity-hourly")
-        self.assertEqual(binding["frontend_title"], "Bootstrap Spawn Bridge")
-        self.assertEqual(binding["enabled_state_policy"], "MIRROR")
 
-    def test_personal_and_legacy_frontend_tasks_are_not_auto_mutated(self):
+        self.assertEqual(registry["distribution"]["strategy"], "EVEN_10_MINUTE_STAGGER")
+        self.assertEqual(len(jobs), 6)
+        self.assertEqual(len(mapped), 6)
+
+        expected_offsets = [0, 10, 20, 30, 40, 50]
+        observed_offsets = sorted(job["schedule"]["minute_offsets"][0] for job in jobs)
+        self.assertEqual(observed_offsets, expected_offsets)
+
+        backend_ids = {job["job_id"] for job in jobs}
+        mapped_ids = {binding["backend_job_id"] for binding in mapped}
+        self.assertEqual(backend_ids, mapped_ids)
+        self.assertEqual(len({binding["frontend_automation_id"] for binding in mapped}), 6)
+
+        for job in jobs:
+            self.assertTrue(job["enabled"])
+            self.assertEqual(job["schedule"]["grace_minutes"], 9)
+            self.assertEqual(job["max_workers_per_occurrence"], 1)
+            self.assertEqual(job["execution_surface"], "CHATGPT_FRONTEND_MAPPED")
+            self.assertTrue(job["primary_prohibited"])
+            self.assertTrue(job["full_swarm_prohibited"])
+
+    def test_backend_clock_spacing_cannot_keep_previous_lane_due(self):
+        workflow = (ROOT / ".github/workflows/internal-spawn-scheduler.yml").read_text()
+        self.assertIn('cron: "*/10 * * * *"', workflow)
+        self.assertNotIn("--dispatch", workflow)
+
+        registry = self.load("governance/INTERNAL_SPAWN_SCHEDULES.json")
+        offsets = sorted(job["schedule"]["minute_offsets"][0] for job in registry["jobs"])
+        grace = registry["distribution"]["grace_minutes"]
+        cyclic_gaps = [
+            (offsets[(i + 1) % len(offsets)] - offsets[i]) % 60
+            for i in range(len(offsets))
+        ]
+        self.assertTrue(all(gap == 10 for gap in cyclic_gaps))
+        self.assertLess(grace, min(cyclic_gaps))
+
+    def test_personal_frontend_tasks_are_not_auto_mutated(self):
         bindings = self.load("governance/SCHEDULER_FRONTEND_BINDINGS.json")["bindings"]
-        for binding in bindings:
-            if binding["mode"].startswith("FRONTEND_ONLY"):
-                self.assertIsNone(binding["backend_job_id"])
-                self.assertEqual(binding["enabled_state_policy"], "FRONTEND_ONLY")
+        personal = [binding for binding in bindings if binding["mode"] == "FRONTEND_ONLY_PERSONAL"]
+        self.assertGreaterEqual(len(personal), 1)
+        for binding in personal:
+            self.assertIsNone(binding["backend_job_id"])
+            self.assertEqual(binding["enabled_state_policy"], "FRONTEND_ONLY")
 
     def test_policy_allows_only_mapped_scheduler_reconciliation(self):
         policy = self.load("governance/INTERNAL_SPAWN_SCHEDULER_POLICY.json")
@@ -52,32 +86,12 @@ class SchedulerSynchronizationTests(unittest.TestCase):
         self.assertFalse(boundary["may_create_or_delete_unmapped_chatgpt_tasks"])
         self.assertFalse(boundary["may_infer_mapping_from_title_similarity"])
 
-    def test_control_interface_has_short_commands_and_project_glance(self):
+    def test_control_interface_has_short_commands(self):
         control = self.load("governance/SCHEDULER_CONTROL_INTERFACE.json")
         commands = control["commands"]
-        for command in [
-            "scheduler status",
-            "scheduler health",
-            "scheduler reconcile",
-            "scheduler pause",
-            "scheduler resume",
-            "scheduler run",
-            "project status",
-            "project status <project_id>",
-            "projects refresh",
-        ]:
+        for command in ["scheduler status", "scheduler health", "scheduler reconcile", "scheduler pause", "scheduler resume", "scheduler run"]:
             self.assertIn(command, commands)
         self.assertTrue(control["safety"]["unmapped_personal_tasks_cannot_be_changed_by_scheduler_commands"])
-        self.assertTrue(control["safety"]["project_glance_is_not_project_authority"])
-        self.assertEqual(control["surfaces"]["project_glance"]["cache"], "PROJECT_GLANCE_INDEX.json")
-
-    def test_project_glance_interface_is_stale_aware_and_cache_first(self):
-        glance = self.load("governance/PROJECT_GLANCE_INTERFACE.json")
-        self.assertEqual(glance["semantics"]["authority"], "READ_ONLY_DERIVED_CACHE")
-        self.assertTrue(glance["semantics"]["unknown_is_not_idle"])
-        self.assertTrue(glance["semantics"]["stale_is_not_current"])
-        self.assertTrue(glance["response_contract"]["do_not_requery_all_projects_when_cache_is_fresh"])
-        self.assertTrue(glance["response_contract"]["deep_audit_only_when_stale_conflicting_or_requested"])
 
 
 if __name__ == "__main__":

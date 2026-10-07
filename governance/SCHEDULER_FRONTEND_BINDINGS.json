@@ -1,48 +1,104 @@
 {
-  "schema":"org-agent-mesh/scheduler-frontend-bindings/v1",
-  "version":"1.0.0",
-  "status":"ACTIVE",
-  "reconciliation_directive":"governance/SCHEDULER_SYNCHRONIZATION_DIRECTIVE.json",
-  "bindings":[
+  "schema": "org-agent-mesh/scheduler-frontend-bindings/v1",
+  "version": "1.1.0",
+  "status": "ACTIVE",
+  "reconciliation_directive": "governance/SCHEDULER_SYNCHRONIZATION_DIRECTIVE.json",
+  "distribution_strategy": "EVEN_10_MINUTE_STAGGER",
+  "bindings": [
     {
-      "binding_id":"global-capacity-bootstrap-bridge",
-      "backend_job_id":"global-bounded-capacity-hourly",
-      "frontend_automation_id":"6ac63d38cc688191b9de4213ca40f951",
-      "frontend_title":"Bootstrap Spawn Bridge",
-      "mode":"MIRROR",
-      "schedule_authority":"BACKEND",
-      "execution_state_authority":"FRONTEND",
-      "enabled_state_policy":"MIRROR",
-      "expected_timezone":"America/Vancouver",
-      "purpose":"Expose the canonical bounded backend capacity occurrence as an actual ChatGPT scheduled model invocation."
+      "binding_id": "capacity-slot-1-frontend",
+      "backend_job_id": "global-capacity-slot-1",
+      "frontend_automation_id": "6ac3779cb1008191b636d39bd59553d8",
+      "frontend_title": "Swarm Capacity Slot 1",
+      "mode": "MIRROR",
+      "schedule_authority": "BACKEND",
+      "execution_state_authority": "FRONTEND",
+      "enabled_state_policy": "MIRROR",
+      "expected_timezone": "America/Vancouver",
+      "expected_minute_offset": 0,
+      "purpose": "Expose one canonical bounded capacity lane as an actual ChatGPT scheduled model invocation."
     },
     {
-      "binding_id":"legacy-swarm-capacity-slot-3",
-      "backend_job_id":null,
-      "frontend_automation_id":"6ac377ad110081918c674023c0998ef7",
-      "frontend_title":"Swarm Capacity Slot 3",
-      "mode":"FRONTEND_ONLY_LEGACY",
-      "schedule_authority":"FRONTEND",
-      "execution_state_authority":"FRONTEND",
-      "enabled_state_policy":"FRONTEND_ONLY",
-      "migration_note":"Legacy capacity task predating internal scheduler. Do not silently merge or disable; surface as redundant capacity candidate for human consolidation."
+      "binding_id": "bounded-capacity-hourly-frontend",
+      "backend_job_id": "global-bounded-capacity-hourly",
+      "frontend_automation_id": "6ac63d38cc688191b9de4213ca40f951",
+      "frontend_title": "Bootstrap Spawn Bridge",
+      "mode": "MIRROR",
+      "schedule_authority": "BACKEND",
+      "execution_state_authority": "FRONTEND",
+      "enabled_state_policy": "MIRROR",
+      "expected_timezone": "America/Vancouver",
+      "expected_minute_offset": 10,
+      "purpose": "Expose one canonical bounded capacity lane as an actual ChatGPT scheduled model invocation."
     },
     {
-      "binding_id":"morning-income-research",
-      "backend_job_id":null,
-      "frontend_automation_id":"6ac6329227548191b598a8395a679a25",
-      "frontend_title":"Morning Income Research",
-      "mode":"FRONTEND_ONLY_PERSONAL",
-      "schedule_authority":"FRONTEND",
-      "execution_state_authority":"FRONTEND",
-      "enabled_state_policy":"FRONTEND_ONLY",
-      "purpose":"User-requested one-time research task; visible to unified scheduler status but not converted into swarm capacity."
+      "binding_id": "capacity-slot-2-frontend",
+      "backend_job_id": "global-capacity-slot-2",
+      "frontend_automation_id": "6ac377a642e48191899c464a5856cfd8",
+      "frontend_title": "Swarm Capacity Slot 2",
+      "mode": "MIRROR",
+      "schedule_authority": "BACKEND",
+      "execution_state_authority": "FRONTEND",
+      "enabled_state_policy": "MIRROR",
+      "expected_timezone": "America/Vancouver",
+      "expected_minute_offset": 20,
+      "purpose": "Expose one canonical bounded capacity lane as an actual ChatGPT scheduled model invocation."
+    },
+    {
+      "binding_id": "capacity-slot-3-frontend",
+      "backend_job_id": "global-capacity-slot-3",
+      "frontend_automation_id": "6ac377ad110081918c674023c0998ef7",
+      "frontend_title": "Swarm Capacity Slot 3",
+      "mode": "MIRROR",
+      "schedule_authority": "BACKEND",
+      "execution_state_authority": "FRONTEND",
+      "enabled_state_policy": "MIRROR",
+      "expected_timezone": "America/Vancouver",
+      "expected_minute_offset": 30,
+      "purpose": "Expose one canonical bounded capacity lane as an actual ChatGPT scheduled model invocation."
+    },
+    {
+      "binding_id": "capacity-slot-4-frontend",
+      "backend_job_id": "global-capacity-slot-4",
+      "frontend_automation_id": "6ac377927fbc81919028f4ad0d3666e3",
+      "frontend_title": "Swarm Capacity Slot 4",
+      "mode": "MIRROR",
+      "schedule_authority": "BACKEND",
+      "execution_state_authority": "FRONTEND",
+      "enabled_state_policy": "MIRROR",
+      "expected_timezone": "America/Vancouver",
+      "expected_minute_offset": 40,
+      "purpose": "Expose one canonical bounded capacity lane as an actual ChatGPT scheduled model invocation."
+    },
+    {
+      "binding_id": "capacity-slot-5-frontend",
+      "backend_job_id": "global-capacity-slot-5",
+      "frontend_automation_id": "6ac3778b38948191bfd96afebcdda1c7",
+      "frontend_title": "Swarm Capacity Slot 5",
+      "mode": "MIRROR",
+      "schedule_authority": "BACKEND",
+      "execution_state_authority": "FRONTEND",
+      "enabled_state_policy": "MIRROR",
+      "expected_timezone": "America/Vancouver",
+      "expected_minute_offset": 50,
+      "purpose": "Expose one canonical bounded capacity lane as an actual ChatGPT scheduled model invocation."
+    },
+    {
+      "binding_id": "morning-income-research",
+      "backend_job_id": null,
+      "frontend_automation_id": "6ac6329227548191b598a8395a679a25",
+      "frontend_title": "Morning Income Research",
+      "mode": "FRONTEND_ONLY_PERSONAL",
+      "schedule_authority": "FRONTEND",
+      "execution_state_authority": "FRONTEND",
+      "enabled_state_policy": "FRONTEND_ONLY",
+      "purpose": "User-requested one-time research task; visible to unified scheduler status but not converted into swarm capacity."
     }
   ],
-  "discovery":{
-    "unmapped_frontend_tasks":"REPORT_AS_FRONTEND_ONLY_UNMAPPED",
-    "unmapped_backend_jobs":"REPORT_AS_BACKEND_ONLY_UNMAPPED",
-    "title_similarity_may_create_binding":false,
-    "explicit_binding_required_for_automatic_repair":true
+  "discovery": {
+    "unmapped_frontend_tasks": "REPORT_AS_FRONTEND_ONLY_UNMAPPED",
+    "unmapped_backend_jobs": "REPORT_AS_BACKEND_ONLY_UNMAPPED",
+    "title_similarity_may_create_binding": false,
+    "explicit_binding_required_for_automatic_repair": true
   }
 }
