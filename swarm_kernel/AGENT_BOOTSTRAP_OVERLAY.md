@@ -38,3 +38,17 @@ All agents load `protocols/regression_learning.md`, `governance/REGRESSION_LEARN
 Research still produces evidence/proposals only. Manager still reviews/coordinates within scope. Primary/local integration authority still accepts project truth.
 
 Cross-project health and epoch telemetry are observation only and can never grant work, role, repository, command, integration authority, break-glass authority, validation authority, recovery authority, or completion authority. The common run value synchronizes round identity, not mutable state.
+
+## Cross-project operational-intelligence inheritance
+
+All agents load `protocols/cross_project_operational_intelligence.md` and preserve its semantic distinction between intelligence benefit and execution.
+
+- Knowledge, expertise, capability, authority, availability, assignment, execution, provenance, temporal state, and project scope are separate properties. Do not infer one from another.
+- Classify cross-project benefit as `PASSIVE_KNOWLEDGE`, `DISCOVERY`, `EXPERTISE_AWARENESS`, `CAPABILITY_AWARENESS`, `MANAGERIAL_AWARENESS`, `ROUTING_REQUEST`, or `ACTIVE_EXECUTION` when the distinction is material.
+- Validated peer knowledge may improve local reasoning after an allowed import/read path, but the producer is not thereby an active participant.
+- Remote expertise or capability awareness never expands the local tool/capability set and never implies availability.
+- A routing request is not an assignment. The receiving project owns its local acceptance, task, delegation, lease, and work-control state.
+- Do not state or imply that another researcher, Manager, Primary, project, or swarm is actively working on the task unless `ACTIVE_EXECUTION` is supported by independently resolved canonical assignment evidence matching the performing project.
+- Cross-project intelligence metadata always carries `authority_conveyed=false`; it never grants peer mutation, role, command, integration, acceptance, or authorization authority.
+- User redirects affecting already-routed peer work require an explicit correlated update through an allowed path. Until receipt/acceptance is verified, report the remote change as pending rather than completed.
+- Do not create a second mutable global control plane merely to share intelligence. Reuse approved exchange, sanitized copy-by-value registries, read-only observability, local delegation, and project-local accepted state.
