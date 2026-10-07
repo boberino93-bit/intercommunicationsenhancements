@@ -13,6 +13,8 @@ ROLES = {"PRIMARY": "ORCHESTRATOR", "MANAGER": "REVIEWER", "RESEARCH": "SPECIALI
 IDENTITY_LOCK = "PROJECT_IDENTITY_LOCK.json"
 BOOTSTRAP_ORDER = "BOOTSTRAP_ORDER.json"
 DEPENDENCY_MAP = "packaging/agent_package_dependencies.json"
+SWARM_MEMORY_POLICY = "governance/SWARM_MEMORY_PERSISTENCE_POLICY.json"
+AGENT_CONTEXT_REFERENCE = "AGENT_CONTEXT_REFERENCE.md"
 
 
 def sha256(path):
@@ -73,13 +75,66 @@ def _validate_bootstrap_safety_mode(bootstrap):
             raise ValueError(f"unsafe routing 1.5 bootstrap continuation setting: {key}")
 
 
+def _validate_swarm_memory_policy(policy):
+    if policy.get("schema") != "org-agent-mesh/swarm-memory-persistence-policy/v1":
+        raise ValueError("unsupported swarm memory persistence policy schema")
+    if policy.get("policy_id") != "IEP-MEM-001":
+        raise ValueError("unexpected swarm memory persistence policy id")
+    if policy.get("status") != "ACTIVE" or policy.get("priority") != "P1":
+        raise ValueError("swarm memory persistence policy must be ACTIVE P1")
+
+    native = policy.get("native_chatgpt_memory")
+    if not isinstance(native, dict):
+        raise ValueError("swarm memory persistence policy missing native_chatgpt_memory controls")
+    expected_native = {
+        "swarm_authority": "DENY",
+        "protocol_access": "MUST_NOT_CALL",
+        "recall_ingestion": "DENY",
+        "fallback": "DENY",
+        "cache_source": "DENY",
+        "log_source": "DENY",
+        "collective_state_source": "DENY",
+        "mutation_authority": "DENY",
+    }
+    for key, value in expected_native.items():
+        if native.get(key) != value:
+            raise ValueError(f"unsafe native ChatGPT memory policy setting: {key}")
+
+    persistence = policy.get("canonical_persistence")
+    if not isinstance(persistence, dict):
+        raise ValueError("swarm memory persistence policy missing canonical_persistence")
+    artifactory = persistence.get("artifactory", {})
+    github = persistence.get("github", {})
+    if artifactory.get("message_board") != "/Intercommunication enhancements/AgentBus/messages":
+        raise ValueError("swarm memory policy canonical Artifactory board mismatch")
+    if github.get("repository") != "boberino93-bit/intercommunicationsenhancements":
+        raise ValueError("swarm memory policy GitHub repository mismatch")
+
+    failure = policy.get("failure_policy", {})
+    if failure.get("native_memory_fallback") != "DENY":
+        raise ValueError("swarm memory policy must deny native-memory fallback")
+    if failure.get("canonical_artifactory_unavailable") != "FAIL_CLOSED_FOR_AFFECTED_PERSISTENCE_DEPENDENT_BRANCH":
+        raise ValueError("swarm memory policy must fail closed when canonical state is unavailable")
+
+    context = (ROOT / AGENT_CONTEXT_REFERENCE).read_text(encoding="utf-8")
+    for marker in (
+        "P1 external-only swarm memory",
+        "MUST_NOT_CALL_NATIVE_CHATGPT_MEMORY",
+        "DO_NOT_FALL_BACK_TO_NATIVE_MEMORY",
+    ):
+        if marker not in context:
+            raise ValueError(f"fresh-agent context missing swarm memory P1 marker: {marker}")
+
+
 def load_control_state():
     project = json.loads((ROOT / "PROJECT_MANIFEST.json").read_text(encoding="utf-8"))
     identity = json.loads((ROOT / IDENTITY_LOCK).read_text(encoding="utf-8"))
     bootstrap = json.loads((ROOT / BOOTSTRAP_ORDER).read_text(encoding="utf-8"))
     dependency_map = json.loads((ROOT / DEPENDENCY_MAP).read_text(encoding="utf-8"))
+    memory_policy = json.loads((ROOT / SWARM_MEMORY_POLICY).read_text(encoding="utf-8"))
     if identity.get("mode") != "FAIL_CLOSED": raise ValueError("identity control must be FAIL_CLOSED")
     _validate_bootstrap_safety_mode(bootstrap)
+    _validate_swarm_memory_policy(memory_policy)
     if project["project_id"] != identity["project_id"]: raise ValueError("project manifest and identity lock disagree on project_id")
     if project["repository_identity"] != identity["writable_repository"]: raise ValueError("project manifest and identity lock disagree on writable repository")
     steps = [item.get("id") for item in bootstrap.get("steps", [])]

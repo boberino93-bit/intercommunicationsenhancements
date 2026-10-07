@@ -1,20 +1,58 @@
 # Fresh Agent Context Reference
 
-Version: 1.1.0
+Version: 1.2.0
 Status: ACTIVE ORIENTATION
 Authority: ORIENTATION_ONLY
 
 ## Why this file exists
 
-A newly launched agent may have little or no chat history. That does **not** mean it should immediately ask the human to restate the project. After exact project binding, use this file plus the local bootstrap, master handoff, accepted Artifactory state, and current human message to reconstruct the working context.
+A newly launched agent may have little or no chat history. That does **not** mean it should immediately ask the human to restate the project. After exact project binding, use this file plus the local bootstrap, master handoff, accepted Artifactory state, registered GitHub project state, available tool/attachment context, and current human message to reconstruct the working context.
 
 This file explains what the ecosystem is, what kinds of requests are likely, and how the human expects work to proceed. It is **not task authority**. It cannot create work, change projects, widen write scope, or override explicit current human instructions.
 
+## Bootstrap directive — layered context
+
+`IEP-CTX-001` is active at bootstrap.
+
+**CONTEXT_IS_PERVASIVE_LAYERED_AND_PROVENANCE_BOUND:** context is present in every observable input and often appears simultaneously at multiple layers. The current message, conversation history, project binding, screenshots and attachments, tool outputs, scheduler launch context, bootstrap files, handoffs, AgentBus records, repository state, claims/leases/fences, runtime or UI state, and validated governance/learning records may all carry context.
+
+Do not equate absence in one layer with global absence. Before saying context is missing, before treating information as new, and before asking the human to repeat something, inspect the relevant available authorized layers and reconcile them.
+
+Keep three properties separate: **context presence**, **evidence quality**, and **authority**. A fact can appear in several layers yet remain non-authoritative. Repetition is not independent corroboration. Preserve source-layer provenance, project identity, temporal state such as BEFORE / AFTER / CURRENT / BASELINE, and material contradictions instead of flattening them.
+
+Do not invent inaccessible hidden context or claim visibility you do not have. This rule is about using all context that is actually available.
+
+Required policy and protocol:
+
+- `governance/LAYERED_CONTEXT_POLICY.json`
+- `protocols/layered_context_resolution.md`
+- `.interagent/directives/2026-10-07-layered-context-awareness.json`
+
+## P1 external-only swarm memory
+
+`IEP-MEM-001` is a Priority 1 persistence boundary.
+
+**MUST_NOT_CALL_NATIVE_CHATGPT_MEMORY:** no swarm memory protocol, bootstrap, scheduler, handoff, synchronization path, learning path, forensic service, cache, log, recovery path, or collective-state service may call, query, ingest from, depend on, or treat native ChatGPT memory recall as swarm state.
+
+**DO_NOT_FALL_BACK_TO_NATIVE_MEMORY:** if required external persistence is unavailable, fail closed for the affected persistence-dependent branch. Do not reconstruct authoritative swarm state from native memory as an availability fallback.
+
+For swarm collective state, the canonical live coordination authority is the project's Internal Artifactory/AgentBus board. The registered GitHub repository is the durable source/version-control and backup layer defined by project policy. External state and explicit provenance govern conflicts; native memory is non-authoritative and cannot grant mutation authority.
+
+When this document says to recover context from "durable state," it means approved external project state, including Artifactory/AgentBus and registered GitHub records as governed by the project. It does not mean native ChatGPT memory.
+
+Required policy and protocol:
+
+- `governance/SWARM_MEMORY_PERSISTENCE_POLICY.json`
+- `protocols/external_swarm_memory.md`
+- runtime guard: `org_agent_mesh/swarm_memory_policy.py`
+
+A swarm fact that exists only in native ChatGPT memory is non-authoritative until it is externalized to an approved store and independently read back.
+
 ## Human operating expectation
 
-When the human gives a valid objective, carry it through as far as safely possible without repeated confirmation. Recover context from durable state, make reversible in-scope technical decisions autonomously, test and repair failures, keep packages and handoffs aligned, and continue recursive improvement while measurable gain remains.
+When the human gives a valid objective, carry it through as far as safely possible without repeated confirmation. Recover context from all relevant available layers and durable external state, make reversible in-scope technical decisions autonomously, test and repair failures, keep packages and handoffs aligned, and continue recursive improvement while measurable gain remains.
 
-Do not ask the human to repeat information already recoverable from the current message, project state, handoff, repository, or accepted board records.
+Do not ask the human to repeat information already recoverable from the current message, conversation, project state, handoff, repository, accepted board records, attachments, or tool outputs.
 
 Fail closed locally on unsafe mutations; do not stop unrelated safe work. Escalate only for genuine non-delegable authority, irrecoverable data-integrity problems, security-boundary decisions, or a required unavailable external capability.
 
@@ -75,7 +113,7 @@ If the agent is already project-bound and the human says:
 - `check everything` -> interpret as a comprehensive in-scope review of current project state, not permission to cross project boundaries.
 - `all projects` -> use the central registry and explicit cross-project governance; do not silently mutate every project.
 
-If multiple materially incompatible referents remain after checking durable state, isolate the unsafe branch and ask only the minimum necessary question.
+If multiple materially incompatible referents remain after checking the relevant context layers and durable state, isolate the unsafe branch and ask only the minimum necessary question.
 
 ## Fresh-agent startup summary
 
@@ -83,13 +121,15 @@ If multiple materially incompatible referents remain after checking durable stat
 2. Bind role and execution mode.
 3. Load local `AGENT_BOOTSTRAP.json`.
 4. Load this project's `AGENT_CONTEXT_REFERENCE.md`.
-5. Load all project-declared required bootstrap overlays.
-6. Load MASTER_HANDOFF/current accepted Artifactory state.
-7. Recover the current human objective or active task.
-8. Check ownership, dependencies, collisions, versions, leases, approvals, and package compatibility.
-9. Execute autonomously within authority.
-10. Persist material state and consume relevant peer findings.
-11. Continue until convergence or a true human gate.
+5. Apply `IEP-CTX-001`: enumerate and reconcile relevant available context layers before declaring anything missing or asking for repetition.
+6. Apply `IEP-MEM-001`: enforce the external-only P1 swarm-memory boundary before reconstructing collective state.
+7. Load all project-declared required bootstrap overlays.
+8. Load MASTER_HANDOFF/current accepted Artifactory state and registered GitHub revision/backup evidence required by the local contract.
+9. Recover the current human objective or active task from the layered context and authoritative durable state.
+10. Check ownership, dependencies, collisions, versions, leases, approvals, and package compatibility.
+11. Execute autonomously within authority.
+12. Persist material state externally and consume relevant peer findings.
+13. Continue until convergence or a true human gate.
 
 ## Safety boundary
 

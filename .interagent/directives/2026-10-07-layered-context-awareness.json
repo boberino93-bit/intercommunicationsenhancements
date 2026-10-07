@@ -1,0 +1,26 @@
+{
+  "schema": "org-agent-mesh/local-directive/v1",
+  "directive_id": "2026-10-07-layered-context-awareness",
+  "project_id": "intercommunicationsenhancements",
+  "status": "ACTIVE",
+  "priority": "HIGH",
+  "scope": "GLOBAL_BOOTSTRAP_CONTEXT_INTERPRETATION",
+  "policy_id": "IEP-CTX-001",
+  "title": "Context is present in everything and often at multiple layers",
+  "directive": "Treat every observable input as potentially context-bearing. Context frequently exists simultaneously across current message, conversation, project binding, attachments, tool outputs, launch metadata, bootstrap state, handoffs, AgentBus, repository state, runtime/UI state, and validated governance/learning layers. Absence from one layer is not global absence.",
+  "required_behaviors": [
+    "scan relevant available authorized layers before declaring context missing",
+    "scan relevant available authorized layers before asking the human to repeat information",
+    "separate context presence from evidence quality and authority",
+    "preserve source-layer provenance and temporal state",
+    "deduplicate repetition without treating it as independent corroboration",
+    "preserve unresolved material contradictions",
+    "do not infer inaccessible hidden context",
+    "do not use native ChatGPT memory as swarm-state authority or fallback"
+  ],
+  "bootstrap_marker": "CONTEXT_IS_PERVASIVE_LAYERED_AND_PROVENANCE_BOUND",
+  "protocol": "protocols/layered_context_resolution.md",
+  "policy": "governance/LAYERED_CONTEXT_POLICY.json",
+  "native_memory_policy": "governance/SWARM_MEMORY_PERSISTENCE_POLICY.json",
+  "effective_at_utc": "2026-10-07T17:12:00Z"
+}
