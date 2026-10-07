@@ -12,6 +12,7 @@ class NewProjectBootstrapKitTests(unittest.TestCase):
         self.assertFalse(kit["seed_state"]["github_required_to_start"])
         self.assertIsNone(kit["seed_state"]["repository_view"]["path"])
         self.assertTrue(kit["recursion"]["every_seeded_project_materializes_local_factory_pointer"])
+        self.assertTrue(kit["recursion"]["every_seeded_project_materializes_project_glance"])
         outputs = {item["output"] for item in kit["required_documents"]}
         self.assertEqual(
             outputs,
@@ -28,6 +29,7 @@ class NewProjectBootstrapKitTests(unittest.TestCase):
                 "NEW_PROJECT_BOOTSTRAP.json",
                 "INTERNAL_SCHEDULER_SERVICE_BINDING.json",
                 "bootstrap/INTERNAL_SCHEDULER_SERVICE.json",
+                "PROJECT_GLANCE.json",
             },
         )
         self.assertIn(".interagent/handoffs", kit["required_directories"])
@@ -45,17 +47,21 @@ class NewProjectBootstrapKitTests(unittest.TestCase):
             "NEW_PROJECT_BOOTSTRAP.template.json",
             "INTERNAL_SCHEDULER_SERVICE_BINDING.template.json",
             "INTERNAL_SCHEDULER_SERVICE.template.json",
+            "PROJECT_GLANCE.template.json",
         ]
         for name in template_names:
             raw = (ROOT / "templates" / "new-project" / name).read_text()
             parsed = json.loads(raw)
             repository = parsed.get("repository")
-            if repository is not None:
+            if isinstance(repository, dict):
                 binding_state = repository.get("binding_state")
                 if binding_state is not None:
                     self.assertEqual(binding_state, "UNBOUND")
                 self.assertIsNone(repository.get("full_name"))
                 self.assertIsNone(repository.get("id"))
+            elif name == "PROJECT_GLANCE.template.json":
+                self.assertEqual(repository, "UNBOUND")
+                self.assertEqual(parsed["status"], "UNKNOWN")
             project = parsed.get("project")
             if isinstance(project, dict):
                 self.assertIsNone(project.get("repository"))
@@ -70,6 +76,8 @@ class NewProjectBootstrapKitTests(unittest.TestCase):
         self.assertTrue(pointer["rules"]["materialize_this_pointer_in_every_seeded_project"])
         self.assertTrue(pointer["rules"]["new_project_must_receive_master_handoff"])
         self.assertTrue(pointer["rules"]["new_project_must_receive_scheduler_binding"])
+        self.assertTrue(pointer["rules"]["new_project_must_receive_project_glance"])
+        self.assertTrue(pointer["rules"]["project_glance_is_not_mutation_authority"])
         self.assertFalse(pointer["local_reference"]["copy_identity_values"])
 
     def test_global_entrypoint_has_explicit_new_project_branch(self):
