@@ -1,0 +1,61 @@
+{
+  "schema": "org-agent-mesh/scheduler-mutation-journal-policy/v1",
+  "version": "1.0.0",
+  "status": "ACTIVE",
+  "root": "governance/scheduler-mutation-journal-v3",
+  "claim_directory": "governance/scheduler-mutation-journal-v3/claims",
+  "event_directory": "governance/scheduler-mutation-journal-v3/events",
+  "validator": "org_agent_mesh.scheduler_mutation_journal",
+  "claim_path_format": "claims/{sequence:06d}.json",
+  "event_path_format": "events/{sequence:06d}.json",
+  "storage_contract": {
+    "claim_operation": "CREATE_NEW_FILE_ONLY",
+    "event_operation": "CREATE_NEW_FILE_ONLY",
+    "overwrite_prohibited": true,
+    "delete_prohibited": true,
+    "update_prohibited": true,
+    "claim_creation_must_fail_if_path_exists": true,
+    "actor_must_read_back_own_claim_before_scheduler_mutation": true,
+    "claim_must_bind_exact_next_sequence": true,
+    "claim_must_bind_previous_terminal_event_hash": true,
+    "event_must_bind_claim_hash": true,
+    "one_claim_and_one_event_required_per_sequence": true,
+    "missing_event_for_existing_claim_blocks_automatic_mutation": true,
+    "sequence_fork_blocks_automatic_mutation": true,
+    "stale_claim_may_not_be_stolen_or_overwritten_automatically": true
+  },
+  "hashing": {
+    "algorithm": "SHA-256",
+    "genesis_previous_event_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "claim_hash_covers_all_claim_fields_except_claim_hash": true,
+    "event_hash_covers_all_event_fields_except_event_hash": true,
+    "event_chain_uses_previous_event_hash": true
+  },
+  "mutation_protocol": [
+    "VALIDATE_COMPLETE_JOURNAL",
+    "DERIVE_EXACT_NEXT_SEQUENCE_AND_TERMINAL_HASH",
+    "CREATE_DETERMINISTIC_CLAIM_PATH_IF_ABSENT",
+    "READ_BACK_AND_VERIFY_OWN_CLAIM",
+    "CREATE_IMMUTABLE_PLANNED_EVENT_BOUND_TO_CLAIM",
+    "REVALIDATE_JOURNAL",
+    "PERFORM_ONLY_THE_AUTHORIZED_SCHEDULER_MUTATION",
+    "VERIFY_PROVIDER_READBACK",
+    "ACQUIRE_NEXT_SEQUENCE_FOR_APPLIED_EVENT",
+    "CREATE_IMMUTABLE_APPLIED_EVENT",
+    "REVALIDATE_JOURNAL"
+  ],
+  "failure_semantics": {
+    "claim_path_already_exists": "SCHEDULER_MUTATION_SEQUENCE_ALREADY_CLAIMED",
+    "claim_readback_mismatch": "SCHEDULER_MUTATION_CLAIM_CONFLICT",
+    "claim_without_event": "SCHEDULER_MUTATION_JOURNAL_INCOMPLETE",
+    "multiple_claims_or_events_for_sequence": "SCHEDULER_MUTATION_JOURNAL_FORKED",
+    "hash_or_sequence_invalid": "SCHEDULER_MUTATION_JOURNAL_INVALID",
+    "automatic_action_on_any_journal_failure": "FAIL_CLOSED_NO_SCHEDULER_MUTATION"
+  },
+  "migration": {
+    "v2_ledger_preserved_as_historical_evidence": true,
+    "v3_migration_contains_equivalent_first_two_events": true,
+    "new_mutations_must_use_v3_journal": true
+  },
+  "purpose": "Prevent multi-writer scheduler repair races by using create-if-absent deterministic sequence claims plus immutable hash-bound events rather than concurrent rewriting of one shared ledger file."
+}
