@@ -23,6 +23,7 @@
   "frontend_receipt_audit_runtime": "org_agent_mesh.frontend_receipt_audit",
   "scheduler_health_runtime": "org_agent_mesh.scheduler_health",
   "scheduler_work_gate_runtime": "org_agent_mesh.scheduler_work_gate",
+  "scheduler_mutation_ledger_runtime": "org_agent_mesh.scheduler_mutation_ledger",
   "scheduler_mutation_journal_runtime": "org_agent_mesh.scheduler_mutation_journal",
   "host_clock": ".github/workflows/internal-spawn-scheduler.yml",
   "load_with": [
@@ -38,6 +39,7 @@
     "org_agent_mesh.frontend_receipt_audit",
     "org_agent_mesh.scheduler_health",
     "org_agent_mesh.scheduler_work_gate",
+    "org_agent_mesh.scheduler_mutation_ledger",
     "org_agent_mesh.scheduler_mutation_journal"
   ],
   "invariants": {
