@@ -60,10 +60,20 @@ class SchedulerSynchronizationTests(unittest.TestCase):
             self.assertTrue(job["primary_prohibited"])
             self.assertTrue(job["full_swarm_prohibited"])
 
-    def test_backend_clock_spacing_cannot_keep_previous_active_lane_due(self):
+    def test_backend_clock_spacing_and_dispatch_remain_governed(self):
         workflow = (ROOT / ".github/workflows/internal-spawn-scheduler.yml").read_text()
         self.assertIn('cron: "0,12,24,36,48 * * * *"', workflow)
-        self.assertNotIn("--dispatch", workflow)
+        self.assertIn("--dispatch", workflow)
+        self.assertIn("ORG_AGENT_MESH_SPAWN_ENDPOINT", workflow)
+        self.assertIn("ORG_AGENT_MESH_SPAWN_TOKEN", workflow)
+
+        policy = self.load("governance/INTERNAL_SPAWN_SCHEDULER_POLICY.json")
+        self.assertTrue(policy["service"]["host_adapter_required_for_real_spawn"])
+        self.assertTrue(policy["service"]["host_start_receipt_required_for_session_started"])
+        delegated = policy["delegated_spawn_authority"]
+        self.assertEqual(delegated["max_workers_per_occurrence"], 1)
+        self.assertEqual(delegated["max_tickets_per_scheduler_invocation"], 1)
+        self.assertFalse(delegated["full_swarm_auto_start_allowed"])
 
         registry = self.load("governance/INTERNAL_SPAWN_SCHEDULES.json")
         offsets = sorted(
