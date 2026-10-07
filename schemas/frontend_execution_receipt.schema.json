@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "org-agent-mesh/frontend-execution-receipt/v1",
+  "title": "Frontend execution receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "receipt_id",
+    "occurrence_id",
+    "job_id",
+    "binding_id",
+    "frontend_automation_id",
+    "scheduled_for",
+    "observed_run_at",
+    "observed_at",
+    "execution_surface",
+    "status",
+    "authority_conveyed",
+    "mutation_authority_conveyed"
+  ],
+  "properties": {
+    "schema": {"const": "org-agent-mesh/frontend-execution-receipt/v1"},
+    "receipt_id": {"type": "string", "minLength": 1},
+    "occurrence_id": {"type": "string", "minLength": 1},
+    "job_id": {"type": "string", "minLength": 1},
+    "binding_id": {"type": "string", "minLength": 1},
+    "frontend_automation_id": {"type": "string", "minLength": 1},
+    "scheduled_for": {"type": "string", "format": "date-time"},
+    "observed_run_at": {"type": "string", "format": "date-time"},
+    "observed_at": {"type": "string", "format": "date-time"},
+    "execution_surface": {"const": "CHATGPT_FRONTEND_MAPPED"},
+    "status": {"const": "FRONTEND_EXECUTION_OBSERVED"},
+    "authority_conveyed": {"const": false},
+    "mutation_authority_conveyed": {"const": false}
+  }
+}
