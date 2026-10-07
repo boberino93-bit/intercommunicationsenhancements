@@ -32,13 +32,24 @@ class FiveStageScheduleTests(unittest.TestCase):
 
     def test_project_scoped_coordination_transport_replaces_issue_comment_writes(self):
         transport = self.schedule["checkpoint_transport"]
-        self.assertEqual(transport["transport"], "PROJECT_ARTIFACTORY_MESSAGE_FORUM_PLUS_GITHUB_BACKUP")
+        self.assertEqual(
+            transport["transport"],
+            "PROJECT_ARTIFACTORY_FIRST_WITH_VERIFIED_GITHUB_DEGRADED_FALLBACK",
+        )
         self.assertEqual(transport["github_backup_prefix"], "agentbus-backup/coordination-messages/")
         self.assertEqual(transport["legacy_issue_25_transport"], "HISTORICAL_READ_ONLY")
         self.assertFalse(transport["authority_conveyed"])
-        self.assertTrue(transport["artifactory_required_when_registered"])
+        self.assertTrue(transport["artifactory_required_when_registered_and_runtime_available"])
+        self.assertEqual(
+            transport["registered_artifactory_runtime_unavailable_fallback"],
+            "VERIFIED_SAME_PROJECT_GITHUB_BACKUP",
+        )
+        self.assertEqual(transport["runtime_unavailable_marker"], "ARTIFACTORY_RUNTIME_UNAVAILABLE")
         self.assertTrue(transport["github_backup_required"])
+        self.assertTrue(transport["github_backup_readback_required"])
+        self.assertTrue(transport["degraded_github_checkpoint_is_valid_current_cycle_downstream_input"])
         self.assertFalse(transport["cross_project_fallback_allowed"])
+        self.assertFalse(transport["cross_cycle_implicit_fallback_allowed"])
 
     def test_partial_handoffs_are_explicitly_consumable(self):
         self.assertEqual(
@@ -50,6 +61,9 @@ class FiveStageScheduleTests(unittest.TestCase):
                 "downstream_does_not_require_upstream_completion_if_valid_current_project_current_cycle_progress_exists"
             ]
         )
+        self.assertTrue(
+            self.schedule["runtime_rules"]["registered_internal_surface_runtime_outage_uses_verified_github_fallback"]
+        )
 
     def test_each_prompt_loads_v2_transport_and_forbids_new_issue25_writes(self):
         for name in ["researcher_1.md", "researcher_2.md", "researcher_3.md", "manager.md", "primary.md"]:
@@ -57,8 +71,10 @@ class FiveStageScheduleTests(unittest.TestCase):
             self.assertIn("checkpoint_envelope_v2.schema.json", text, name)
             self.assertIn("COORDINATION_PUBLICATION_POLICY.json", text, name)
             self.assertIn("agentbus-backup/coordination-messages/", text, name)
+            self.assertIn("ARTIFACTORY_RUNTIME_UNAVAILABLE", text, name)
             self.assertIn("issue #25", text.lower(), name)
             self.assertIn("historical read-only", text.lower(), name)
+            self.assertIn("create-new-file", text.lower(), name)
 
     def test_manager_prompt_denies_general_durable_mutation(self):
         text = (ROOT / "research_swarm" / "prompts" / "manager.md").read_text()

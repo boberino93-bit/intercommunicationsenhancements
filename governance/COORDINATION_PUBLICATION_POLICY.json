@@ -1,6 +1,6 @@
 {
   "schema": "org-agent-mesh/coordination-publication/v1",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "status": "ACTIVE_HARD_GATE",
   "capability": "NON_AUTHORITATIVE_COORDINATION_PUBLICATION",
   "roles": ["PRIMARY", "MANAGER", "RESEARCH", "RESEARCHER_1", "RESEARCHER_2", "RESEARCHER_3"],
@@ -9,13 +9,29 @@
   "security_token_required": false,
   "human_authorization_per_message_required": false,
   "authority_conveyed": false,
-  "canonical_order": ["INTERNAL_ARTIFACTORY_FIRST", "GITHUB_BACKUP_SECOND_WHEN_CONFIGURED"],
+  "canonical_order": ["INTERNAL_ARTIFACTORY_FIRST_WHEN_RUNTIME_AVAILABLE", "GITHUB_BACKUP_SECOND_OR_DEGRADED_FALLBACK"],
   "route_source": {
     "binding_registry": "governance/PROJECT_CONTEXT_BINDING_REGISTRY.json",
     "legacy_registry": "PROJECT_ROLE_ROUTING_REGISTRY.json",
     "repository": "EXACT_BOUND_PROJECT_REPOSITORY",
     "artifactory_namespace": "EXACT_BOUND_PROJECT_INTERNAL_MESSAGE_NAMESPACE",
     "missing_internal_namespace": "DENY_AND_FIX_REGISTRY_DO_NOT_INVENT"
+  },
+  "runtime_transport_fallback": {
+    "condition": "REGISTERED_INTERNAL_NAMESPACE_RESOLVED_BUT_RUNTIME_CONNECTOR_OR_SURFACE_UNAVAILABLE",
+    "mode": "VERIFIED_GITHUB_BACKUP_DEGRADED",
+    "marker": "ARTIFACTORY_RUNTIME_UNAVAILABLE",
+    "missing_or_conflicting_registry_route_is_not_runtime_unavailability": true,
+    "github_backup_must_be_writable": true,
+    "github_backup_must_be_readable_after_write": true,
+    "same_project_only": true,
+    "current_cycle_only_for_scheduled_pipeline": true,
+    "degraded_checkpoint_is_valid_downstream_input": true,
+    "degraded_checkpoint_may_use_normal_stage_progress_or_ready_state": true,
+    "authority_conveyed": false,
+    "cross_project_fallback": "DENY",
+    "stale_cycle_fallback": "DENY",
+    "if_github_backup_also_unavailable": "CHECKPOINT_IO_BLOCKED_CONTINUE_SAFE_READ_ONLY_ONLY"
   },
   "github_backup": {
     "prefix": "agentbus-backup/coordination-messages/",
@@ -62,7 +78,9 @@
     "PROJECT_BINDING_IS_REQUIRED",
     "CROSS_PROJECT_WRITE_IS_DENIED",
     "APPEND_ONLY_CREATE_NEW_RECORD",
-    "OVERWRITE_DELETE_RENAME_MOVE_DENIED"
+    "OVERWRITE_DELETE_RENAME_MOVE_DENIED",
+    "RUNTIME_SURFACE_OUTAGE_DOES_NOT_EQUAL_MISSING_REGISTRY_ROUTE",
+    "VERIFIED_SAME_PROJECT_GITHUB_BACKUP_MAY_FENCE_A_RUNTIME_SURFACE_OUTAGE"
   ],
   "failure_mode": "DENY_AFFECTED_PUBLICATION_CONTINUE_SAFE_READ_ONLY"
 }
