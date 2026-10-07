@@ -10,7 +10,7 @@ from org_agent_mesh.scheduler_reconciliation import (
 
 
 class SchedulerReconciliationTests(unittest.TestCase):
-    def test_capacity_release_does_not_auto_enable(self):
+    def test_capacity_release_does_not_auto_enable_without_repair_authorization(self):
         decision = decide_frontend_reconciliation(
             ReconciliationRequest(
                 task_id="slot-1",
@@ -19,6 +19,41 @@ class SchedulerReconciliationTests(unittest.TestCase):
                 enabled_state_policy="MIRROR_WHEN_ACCOUNT_CAPACITY_AVAILABLE",
                 account_capacity_available=True,
                 actor=ActivationActor.SYSTEM,
+            )
+        )
+        self.assertEqual(decision.action, ReconciliationAction.ENABLE_AUTHORIZATION_REQUIRED)
+        self.assertFalse(decision.may_mutate_frontend)
+        self.assertFalse(decision.resulting_enabled)
+
+    def test_declared_repair_actor_with_human_authorization_may_restore_mapped_task(self):
+        decision = decide_frontend_reconciliation(
+            ReconciliationRequest(
+                task_id="slot-1",
+                current_enabled=False,
+                backend_enabled=True,
+                enabled_state_policy="MIRROR_WHEN_ACCOUNT_CAPACITY_AVAILABLE",
+                account_capacity_available=True,
+                actor=ActivationActor.RECOVERY,
+                declared_repair_actor=True,
+                repair_authorization_ref="governance/SCHEDULER_ACTIVATION_GRANT_2026-10-07.json",
+                repair_scope_contains_task=True,
+            )
+        )
+        self.assertEqual(decision.action, ReconciliationAction.ENABLE_AUTHORIZED)
+        self.assertTrue(decision.may_mutate_frontend)
+        self.assertTrue(decision.resulting_enabled)
+
+    def test_repair_actor_without_scope_match_cannot_enable(self):
+        decision = decide_frontend_reconciliation(
+            ReconciliationRequest(
+                task_id="unmapped-or-paused",
+                current_enabled=False,
+                backend_enabled=True,
+                enabled_state_policy="MIRROR",
+                actor=ActivationActor.RECOVERY,
+                declared_repair_actor=True,
+                repair_authorization_ref="governance/SCHEDULER_ACTIVATION_GRANT_2026-10-07.json",
+                repair_scope_contains_task=False,
             )
         )
         self.assertEqual(decision.action, ReconciliationAction.ENABLE_AUTHORIZATION_REQUIRED)
