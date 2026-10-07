@@ -160,6 +160,44 @@ class SwarmMemoryPolicyTests(unittest.TestCase):
         self.assertIn("_validate_swarm_memory_policy", build_tool)
         self.assertIn("SWARM_MEMORY_PERSISTENCE_POLICY.json", build_tool)
 
+    def test_no_unapproved_runtime_native_memory_identifiers(self):
+        forbidden = (
+            "chatgpt_memory",
+            "saved_memory",
+            "saved_memories",
+            "memory_recall",
+            "native_memory",
+        )
+        allowed_runtime = {"swarm_memory_policy.py"}
+        violations = []
+        for path in sorted((ROOT / "org_agent_mesh").glob("*.py")):
+            if path.name in allowed_runtime:
+                continue
+            text = path.read_text(encoding="utf-8").lower()
+            for token in forbidden:
+                if token in text:
+                    violations.append(f"{path.relative_to(ROOT)}:{token}")
+        self.assertEqual(violations, [], "unexpected native-memory runtime references: " + ", ".join(violations))
+
+    def test_no_unapproved_protocol_native_memory_fallback_language(self):
+        forbidden = (
+            "chatgpt_memory",
+            "saved_memory",
+            "saved_memories",
+            "memory_recall",
+            "native_memory",
+        )
+        allowed_protocols = {"external_swarm_memory.md", "layered_context_resolution.md"}
+        violations = []
+        for path in sorted((ROOT / "protocols").glob("*.md")):
+            if path.name in allowed_protocols:
+                continue
+            text = path.read_text(encoding="utf-8").lower()
+            for token in forbidden:
+                if token in text:
+                    violations.append(f"{path.relative_to(ROOT)}:{token}")
+        self.assertEqual(violations, [], "unexpected native-memory protocol references: " + ", ".join(violations))
+
 
 if __name__ == "__main__":
     unittest.main()
