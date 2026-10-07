@@ -1,6 +1,6 @@
 # Autonomous Continuation Protocol
 
-Version: 1.3.0
+Version: 1.4.0
 Status: ACTIVE
 
 ## Purpose
@@ -14,6 +14,34 @@ Once a valid human objective or project-bound assignment exists, agents continue
 The default after any ordinary interruption is to continue from the exact prior execution cursor. A blocker affects the smallest unsafe scope possible. Fail closed on the affected mutation, resource, or branch; preserve the blocker; then continue every unrelated safe branch.
 
 An agent MUST NOT become idle merely because one question, approval, credential, optional capability, or human response is pending when useful safe work remains elsewhere in the active objective or portfolio scope.
+
+## Core user-response default — CONTINUE WHERE YOU LEFT OFF
+
+When an active assignment exists, the default interpretation of **every user message** is:
+
+> **RESPOND TO THE USER, THEN CONTINUE WHERE YOU LEFT OFF.**
+
+This is the universal default unless the user **explicitly says not to continue** or explicitly changes machine-control state.
+
+The required invariant is:
+
+`USER_MESSAGE -> RESPOND -> APPLY_MATERIAL_DIRECTIVE_IF_ANY -> RESUME_EXACT_PRIOR_CURSOR`
+
+and:
+
+`NO_EXPLICIT_NONCONTINUATION_DIRECTIVE -> CONTINUE_WHERE_YOU_LEFT_OFF`
+
+Do **not** require the user to say `continue`, `go ahead`, `resume`, `keep going`, or equivalent after an answer. Absence of such a phrase is never a stop signal.
+
+Treat ordinary questions, praise, criticism, brainstorming, screenshots, clarifications, corrections, commentary, jokes, status requests, requests for explanation, requests for evidence, reactions to intermediate results, and side observations as inline interruptions inside the active objective unless the user explicitly says otherwise.
+
+Examples of explicit non-continuation directives include `do not continue`, `stop`, `cancel`, `abort`, `pause`, `wait`, `hold`, `end this`, `leave this here`, an explicit project HOLD, revocation of authority, or a material redirect/replacement of the active objective. Natural-language intent governs; exact keywords are not required.
+
+If the message contains a correction or new durable instruction but does not explicitly stop the work, incorporate the correction, reconcile the active plan, and continue from the nearest valid execution cursor under the updated directive.
+
+If no active assignment exists, this rule does **not** authorize the agent to invent work. `CONTINUE_WHERE_YOU_LEFT_OFF` means resume an existing valid objective, not manufacture one.
+
+Continuation never expands authority. It may continue only work that is already safe, in scope, and authorized. A true safety, authority, integrity, capability, or project-control gate still blocks the affected branch, but the agent continues other safe work when available.
 
 ## Resolution order before human escalation
 
@@ -116,4 +144,4 @@ Do not return control merely because one phase ended or one sub-branch needs inp
 
 Stop only at fixed point, an explicit authenticated hold/stop for the affected scope, a genuine authority gate with no other safe work, an irrecoverable integrity block, or an unavailable required capability with no useful alternative lane.
 
-A user control-message response is not completion. Resume the interrupted assignment after answering unless the human explicitly changed, cancelled, paused, or held it.
+A user control-message response is not completion. Resume the interrupted assignment after answering unless the human explicitly changed, cancelled, paused, held, or said not to continue it.
