@@ -25,6 +25,8 @@ Synchronization exists to reduce mission drift, stale-state work, accidental dup
 
 This protocol extends the existing control plane and MUST NOT create a competing scheduler, AgentBus, project registry, authority store, claim/lease/fencing system, persistent leadership role, release authority, deployment authority, or mutation authority.
 
+Synchronization does not create authority.
+
 Existing stronger controls win.
 
 ```text
