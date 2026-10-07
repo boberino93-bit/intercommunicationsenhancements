@@ -45,7 +45,7 @@ class ScheduleActivationTests(unittest.TestCase):
                 )
             )
 
-    def test_recovery_may_not_enable(self):
+    def test_recovery_may_not_enable_without_repair_grant(self):
         with self.assertRaises(ScheduleActivationError):
             evaluate_schedule_state_change(
                 ScheduleStateChangeRequest(
@@ -53,6 +53,36 @@ class ScheduleActivationTests(unittest.TestCase):
                     current_enabled=False,
                     requested_enabled=True,
                     actor=ActivationActor.RECOVERY,
+                )
+            )
+
+    def test_declared_recovery_may_restore_exact_in_scope_task(self):
+        decision = evaluate_schedule_state_change(
+            ScheduleStateChangeRequest(
+                task_id="swarm-researcher-1",
+                current_enabled=False,
+                requested_enabled=True,
+                actor=ActivationActor.RECOVERY,
+                declared_repair_actor=True,
+                repair_authorization_ref="governance/SCHEDULER_ACTIVATION_GRANT_2026-10-07.json",
+                repair_scope_contains_task=True,
+            )
+        )
+        self.assertTrue(decision.allowed)
+        self.assertTrue(decision.resulting_enabled)
+        self.assertEqual(decision.reason, "HUMAN_AUTHORIZED_DECLARED_LIVENESS_REPAIR")
+
+    def test_repair_grant_cannot_enable_out_of_scope_task(self):
+        with self.assertRaises(ScheduleActivationError):
+            evaluate_schedule_state_change(
+                ScheduleStateChangeRequest(
+                    task_id="unmapped-personal-task",
+                    current_enabled=False,
+                    requested_enabled=True,
+                    actor=ActivationActor.SYSTEM,
+                    declared_repair_actor=True,
+                    repair_authorization_ref="governance/SCHEDULER_ACTIVATION_GRANT_2026-10-07.json",
+                    repair_scope_contains_task=False,
                 )
             )
 
