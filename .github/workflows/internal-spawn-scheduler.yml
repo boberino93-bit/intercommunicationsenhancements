@@ -59,7 +59,7 @@ jobs:
           test -d scheduler-evidence-snapshot/governance/scheduler-mutation-journal-v3/events
           test -d scheduler-evidence-snapshot/agentbus-backup/coordination-messages
 
-      - name: Validate scheduler mutation journal integrity from evidence branch
+      - name: Validate scheduler mutation ledger integrity via evidence-branch journal
         run: |
           python - <<'PY'
           import json
