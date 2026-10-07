@@ -1,6 +1,6 @@
 {
   "schema": "org-agent-mesh/scheduler-synchronization-directive/v1",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "status": "ACTIVE_BY_EXPLICIT_HUMAN_DIRECTIVE_2026-10-07",
   "directive": "Maintain synchronicity between canonical backend scheduler jobs and mapped ChatGPT frontend Scheduled Tasks while preserving separate authority, execution, audit, and account-capacity ledgers.",
   "surfaces": {
@@ -15,12 +15,29 @@
       "mapping_registry": "governance/SCHEDULER_FRONTEND_BINDINGS.json"
     }
   },
+  "reconciler_authority": {
+    "mode": "SINGLE_DECLARED_FRONTEND_RECONCILER",
+    "frontend_automation_id": "6ac63d38cc688191b9de4213ca40f951",
+    "frontend_title": "Bootstrap Spawn Bridge",
+    "ordinary_capacity_workers_may_mutate_scheduler_state": false,
+    "ordinary_capacity_workers_may_create_frontend_tasks": false,
+    "ordinary_capacity_workers_may_disable_or_enable_frontend_tasks": false,
+    "ordinary_capacity_workers_may_reschedule_or_rename_frontend_tasks": false,
+    "ordinary_capacity_workers_scheduler_role": "READ_DETECT_REPORT_ONLY",
+    "reconciler_may_update_only_existing_declared_frontend_automation_ids": true,
+    "reconciler_may_create_replacement_tasks": false,
+    "reconciler_may_delete_tasks": false,
+    "missing_declared_frontend_task_action": "SCHEDULER_SYNC_CONFLICT_REQUIRE_EXPLICIT_HUMAN_REPLACEMENT_AUTHORIZATION",
+    "duplicate_title_does_not_establish_identity": true,
+    "conversation_id_does_not_establish_binding": true
+  },
   "reconciliation": {
     "mode": "DECLARED_MAPPING_ONLY",
     "backend_is_schedule_intent_source_for_mapped_system_jobs": true,
     "frontend_is_execution_state_source_for_chatgpt_tasks": true,
     "bidirectional_drift_detection": true,
     "automatic_repair_authorized_for_mapped_non_destructive_fields": true,
+    "automatic_repair_actor_must_match_declared_reconciler": true,
     "automatic_fields": [
       "title",
       "schedule",
@@ -38,7 +55,8 @@
     "capacity_limit_deferred_is_not_conflict": true,
     "standby_binding_remains_disabled_until_canonical_state_changes": true,
     "never_infer_mapping_by_title_similarity": true,
-    "never_create_or_delete_frontend_task_without_explicit_binding_record": true,
+    "never_create_frontend_task_as_automatic_repair": true,
+    "never_delete_frontend_task_as_automatic_repair": true,
     "never_import_unmapped_personal_frontend_tasks_into_backend": true,
     "never_delete_unmapped_frontend_tasks": true,
     "preserve_frontend_task_identity": true,
@@ -47,7 +65,7 @@
   },
   "control": {
     "human_can_pause_resume_or_reconfigure_mapped_job_from_either_surface": true,
-    "reconciler_must_propagate_authorized_mapped_change": true,
+    "declared_reconciler_must_propagate_authorized_mapped_change": true,
     "unmapped_personal_tasks_remain_frontend_only": true,
     "internal_only_jobs_are_allowed": true,
     "frontend_only_tasks_are_allowed": true,
@@ -59,6 +77,7 @@
     "full_swarm_auto_start_prohibited": true,
     "spawn_authority_is_not_mutation_authority": true,
     "task_mapping_is_not_project_authority": true,
-    "scheduler_sync_may_not_modify_project_domain_state": true
+    "scheduler_sync_may_not_modify_project_domain_state": true,
+    "scheduler_reconciliation_authority_is_not_inherited_by_scheduled_workers": true
   }
 }
