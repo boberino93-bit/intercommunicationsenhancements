@@ -31,6 +31,7 @@ jobs:
             tests.test_internal_scheduler \
             tests.test_launch_admission \
             tests.test_schedule_activation \
+            tests.test_scheduler_reconciliation \
             tests.test_scheduler_synchronization
 
       - name: Evaluate and dispatch due mapped scheduler lanes
