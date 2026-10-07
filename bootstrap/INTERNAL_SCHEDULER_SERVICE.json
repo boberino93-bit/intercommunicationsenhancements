@@ -5,6 +5,9 @@
   "protocol": "protocols/internal_scheduler_service.md",
   "policy": "governance/INTERNAL_SPAWN_SCHEDULER_POLICY.json",
   "schedule_registry": "governance/INTERNAL_SPAWN_SCHEDULES.json",
+  "scheduler_sync_directive": "governance/SCHEDULER_SYNCHRONIZATION_DIRECTIVE.json",
+  "frontend_binding_registry": "governance/SCHEDULER_FRONTEND_BINDINGS.json",
+  "control_interface": "governance/SCHEDULER_CONTROL_INTERFACE.json",
   "runtime": "org_agent_mesh.internal_scheduler",
   "host_clock": ".github/workflows/internal-spawn-scheduler.yml",
   "load_with": [
@@ -20,7 +23,9 @@
     "primary_spawn_prohibited": true,
     "master_spawn_prohibited": true,
     "full_swarm_auto_start_prohibited": true,
-    "existing_scheduled_task_state_mutation_prohibited": true,
-    "spawn_authority_is_not_mutation_authority": true
+    "declared_mapping_required_for_frontend_backend_sync": true,
+    "unmapped_frontend_task_mutation_prohibited": true,
+    "spawn_authority_is_not_mutation_authority": true,
+    "scheduler_sync_is_not_project_mutation_authority": true
   }
 }
