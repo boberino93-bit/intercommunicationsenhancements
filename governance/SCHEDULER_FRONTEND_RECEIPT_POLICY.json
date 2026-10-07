@@ -1,0 +1,44 @@
+{
+  "schema": "org-agent-mesh/scheduler-frontend-receipt-policy/v1",
+  "version": "1.0.0",
+  "status": "ACTIVE",
+  "receipt_schema": "schemas/frontend_execution_receipt.schema.json",
+  "validator": "org_agent_mesh.frontend_execution_receipts",
+  "purpose": "Allow the backend scheduler ledger to verify that a mapped ChatGPT frontend occurrence was actually observed without treating a backend ticket, title match, conversation ID, or expected execution as proof.",
+  "publisher": {
+    "mode": "DECLARED_FRONTEND_RECONCILER_ONLY",
+    "frontend_automation_id": "6ac63d38cc688191b9de4213ca40f951",
+    "frontend_title": "Bootstrap Spawn Bridge",
+    "ordinary_capacity_workers_may_publish_execution_receipts": false,
+    "publisher_may_only_report_observed_frontend_state": true,
+    "publisher_may_not_infer_execution_from_expected_schedule": true
+  },
+  "verification": {
+    "exact_occurrence_id_required": true,
+    "exact_backend_job_id_required": true,
+    "exact_binding_id_required": true,
+    "exact_frontend_automation_id_required": true,
+    "scheduled_for_must_match_occurrence": true,
+    "observed_run_at_must_not_predate_schedule": true,
+    "observed_run_at_must_not_be_later_than_observed_at": true,
+    "default_maximum_start_delay_minutes": 30,
+    "title_similarity_is_not_proof": true,
+    "conversation_id_is_not_proof": true,
+    "backend_spawn_ticket_is_not_frontend_execution_proof": true,
+    "frontend_expected_status_is_not_frontend_execution_proof": true
+  },
+  "authority": {
+    "receipt_conveys_authority": false,
+    "receipt_conveys_mutation_authority": false,
+    "receipt_may_not_enable_or_disable_tasks": true,
+    "receipt_may_not_rebind_dead_identity": true,
+    "receipt_may_not_change_project_authority": true
+  },
+  "failure_semantics": {
+    "missing_receipt": "FRONTEND_EXECUTION_UNVERIFIED",
+    "identity_mismatch": "FRONTEND_EXECUTION_RECEIPT_REJECTED",
+    "occurrence_mismatch": "FRONTEND_EXECUTION_RECEIPT_REJECTED",
+    "timing_mismatch": "FRONTEND_EXECUTION_RECEIPT_REJECTED",
+    "authority_claim_present": "FRONTEND_EXECUTION_RECEIPT_REJECTED"
+  }
+}
