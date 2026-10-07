@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Project Intelligence Envelope",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema": {"const": "org-agent-mesh/project-intelligence-envelope/v1"},
+    "message_id": {"type": "string", "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?$"},
+    "benefit_class": {"enum": ["PASSIVE_KNOWLEDGE", "DISCOVERY", "EXPERTISE_AWARENESS", "CAPABILITY_AWARENESS", "MANAGERIAL_AWARENESS", "ROUTING_REQUEST", "ACTIVE_EXECUTION"]},
+    "source_project_id": {"type": "string", "pattern": "^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$"},
+    "consumer_project_id": {"type": "string", "pattern": "^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$"},
+    "created_at_utc": {"type": "string", "format": "date-time"},
+    "expires_at_utc": {"type": "string", "format": "date-time"},
+    "correlation_id": {"type": "string", "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?$"},
+    "subject": {"type": "string", "minLength": 1},
+    "scope": {"type": "string", "minLength": 1},
+    "artifact_refs": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "provenance_refs": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "validation_state": {"enum": ["RAW", "CANDIDATE", "VALIDATED", "SUPERSEDED", "NOT_APPLICABLE"]},
+    "availability_state": {"enum": ["AVAILABLE", "ACTIVE", "BUSY", "BLOCKED", "WAITING", "COMPLETED", "OFFLINE", "UNKNOWN", "NOT_APPLICABLE"]},
+    "capability_refs": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "request_ref": {"type": ["string", "null"]},
+    "assignment_ref": {"type": ["string", "null"]},
+    "authority_conveyed": {"const": false}
+  },
+  "required": ["schema", "message_id", "benefit_class", "source_project_id", "consumer_project_id", "created_at_utc", "expires_at_utc", "correlation_id", "subject", "scope", "artifact_refs", "provenance_refs", "validation_state", "availability_state", "capability_refs", "request_ref", "assignment_ref", "authority_conveyed"]
+}
