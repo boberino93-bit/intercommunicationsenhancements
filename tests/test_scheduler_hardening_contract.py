@@ -44,11 +44,13 @@ class SchedulerHardeningContractTests(unittest.TestCase):
         self.assertEqual(bootstrap["repair_guard_runtime"], "org_agent_mesh.scheduler_repair_guard")
         self.assertEqual(bootstrap["scheduler_work_gate_runtime"], "org_agent_mesh.scheduler_work_gate")
         self.assertEqual(bootstrap["scheduler_mutation_journal_runtime"], "org_agent_mesh.scheduler_mutation_journal")
+        self.assertEqual(bootstrap["runtime_evidence_branch"], "scheduler-evidence")
         self.assertTrue(bootstrap["invariants"]["nonhealthy_lane_consequential_mutation_prohibited"])
         self.assertTrue(bootstrap["invariants"]["repair_budget_exhaustion_requires_quarantine"])
         self.assertTrue(bootstrap["invariants"]["scheduler_mutation_journal_create_if_absent_claim_required"])
         self.assertTrue(bootstrap["invariants"]["scheduler_mutation_journal_immutable_event_required"])
         self.assertTrue(bootstrap["invariants"]["scheduler_mutation_journal_incomplete_or_forked_blocks_automatic_mutation"])
+        self.assertTrue(bootstrap["invariants"]["runtime_scheduler_evidence_writes_to_main_prohibited"])
 
     def test_historical_v2_ledger_still_validates(self):
         path = ROOT / "governance" / "SCHEDULER_MUTATION_LEDGER_V2_2026-10-07.jsonl"
@@ -56,14 +58,17 @@ class SchedulerHardeningContractTests(unittest.TestCase):
         self.assertTrue(result.valid)
         self.assertGreaterEqual(result.event_count, 2)
 
-    def test_active_v3_journal_validates_end_to_end(self):
+    def test_main_v3_snapshot_is_valid_exact_cutover_baseline(self):
+        policy = self.load("governance/SCHEDULER_MUTATION_JOURNAL_POLICY.json")
         root = ROOT / "governance" / "scheduler-mutation-journal-v3"
         claims = [json.loads(path.read_text(encoding="utf-8")) for path in sorted((root / "claims").glob("*.json"))]
         events = [json.loads(path.read_text(encoding="utf-8")) for path in sorted((root / "events").glob("*.json"))]
         result = validate_journal(claims=claims, events=events)
         self.assertTrue(result.valid)
-        self.assertGreaterEqual(result.event_count, 2)
-        self.assertEqual(result.next_sequence, result.event_count + 1)
+        self.assertEqual(result.event_count, policy["cutover"]["cutover_through_sequence"])
+        self.assertEqual(result.terminal_hash, policy["cutover"]["cutover_terminal_event_hash"])
+        self.assertEqual(policy["storage_branch"], "scheduler-evidence")
+        self.assertTrue(policy["cutover"]["main_copy_through_sequence_6_is_historical_snapshot_not_live_journal"])
 
 
 if __name__ == "__main__":
