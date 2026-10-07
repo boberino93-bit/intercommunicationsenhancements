@@ -1,0 +1,33 @@
+{
+  "schema": "org-agent-mesh/internal-spawn-project-bindings/v1",
+  "version": "1.0.0",
+  "status": "ACTIVE_BY_EXPLICIT_HUMAN_ROLLOUT_2026-10-07",
+  "canonical_service": {
+    "repository": "boberino93-bit/intercommunicationsenhancements",
+    "service_binding": "bootstrap/INTERNAL_SCHEDULER_SERVICE.json",
+    "policy": "governance/INTERNAL_SPAWN_SCHEDULER_POLICY.json",
+    "protocol": "protocols/internal_scheduler_service.md",
+    "local_binding_filename": "INTERNAL_SCHEDULER_SERVICE_BINDING.json"
+  },
+  "global_invariants": {
+    "allowed_worker_roles": ["research", "manager"],
+    "primary_spawn_prohibited": true,
+    "master_spawn_prohibited": true,
+    "full_swarm_auto_start_prohibited": true,
+    "spawn_authority_is_not_mutation_authority": true,
+    "spawn_ticket_is_not_session_started": true,
+    "host_start_receipt_required": true,
+    "existing_scheduled_task_state_mutation_prohibited": true,
+    "project_hold_stop_and_fencing_required": true,
+    "project_local_binding_must_match_central_registry": true
+  },
+  "projects": {
+    "intercommunicationsenhancements": {"repository":"boberino93-bit/intercommunicationsenhancements","repository_id":1403662737,"binding_path":"INTERNAL_SCHEDULER_SERVICE_BINDING.json"},
+    "duo-open": {"repository":"boberino93-bit/duo-open","repository_id":1396743140,"binding_path":"INTERNAL_SCHEDULER_SERVICE_BINDING.json"},
+    "benefitflow": {"repository":"boberino93-bit/benefitflow","repository_id":1403645790,"binding_path":"INTERNAL_SCHEDULER_SERVICE_BINDING.json"},
+    "fold7-power-lab": {"repository":"boberino93-bit/samsungpowerbootstrap","repository_id":1404088763,"binding_path":"INTERNAL_SCHEDULER_SERVICE_BINDING.json"},
+    "warp-propulsion-lab": {"repository":"boberino93-bit/warp-propulsion-lab","repository_id":1372658198,"binding_path":"INTERNAL_SCHEDULER_SERVICE_BINDING.json","legacy_local_bootstrap_compatible":true},
+    "ai-behaviour-control-lab": {"repository":"boberino93-bit/ai-behaviour-control-lab","repository_id":1375194437,"binding_path":"INTERNAL_SCHEDULER_SERVICE_BINDING.json"},
+    "xrp-thesis": {"repository":"boberino93-bit/XRPTHESIS","repository_id":1405663336,"binding_path":"INTERNAL_SCHEDULER_SERVICE_BINDING.json"}
+  }
+}
