@@ -8,10 +8,13 @@
   "scheduler_sync_directive": "governance/SCHEDULER_SYNCHRONIZATION_DIRECTIVE.json",
   "frontend_binding_registry": "governance/SCHEDULER_FRONTEND_BINDINGS.json",
   "control_interface": "governance/SCHEDULER_CONTROL_INTERFACE.json",
+  "continuation_integrity_protocol": "protocols/scheduled_continuation_integrity.md",
   "runtime": "org_agent_mesh.internal_scheduler",
   "host_clock": ".github/workflows/internal-spawn-scheduler.yml",
   "load_with": [
     "protocols/scheduled_agent_launch.md",
+    "protocols/autonomous_continuation.md",
+    "protocols/scheduled_continuation_integrity.md",
     "org_agent_mesh.launch_admission",
     "org_agent_mesh.schedule_activation"
   ],
@@ -26,6 +29,10 @@
     "declared_mapping_required_for_frontend_backend_sync": true,
     "unmapped_frontend_task_mutation_prohibited": true,
     "spawn_authority_is_not_mutation_authority": true,
-    "scheduler_sync_is_not_project_mutation_authority": true
+    "scheduler_sync_is_not_project_mutation_authority": true,
+    "scheduled_worker_continuation_integrity_required": true,
+    "blocked_mutation_blocks_only_affected_branch": true,
+    "blocker_finalization_requires_no_remaining_safe_work": true,
+    "continuation_integrity_does_not_expand_authority_or_scope": true
   }
 }
