@@ -1,6 +1,6 @@
 {
   "schema": "org-agent-mesh/internal-spawn-scheduler-policy/v1",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "status": "ACTIVE_BY_EXPLICIT_HUMAN_REQUEST",
   "service": {
     "enabled": true,
@@ -13,7 +13,9 @@
     "spawn_ticket_is_session_started": false,
     "host_start_receipt_required_for_session_started": true,
     "scheduler_sync_directive": "governance/SCHEDULER_SYNCHRONIZATION_DIRECTIVE.json",
-    "frontend_binding_registry": "governance/SCHEDULER_FRONTEND_BINDINGS.json"
+    "frontend_binding_registry": "governance/SCHEDULER_FRONTEND_BINDINGS.json",
+    "continuation_integrity_protocol": "protocols/scheduled_continuation_integrity.md",
+    "autonomous_continuation_protocol": "protocols/autonomous_continuation.md"
   },
   "delegated_spawn_authority": {
     "authorization_basis": "EXPLICIT_CURRENT_HUMAN_REQUEST_2026-10-07",
@@ -26,6 +28,23 @@
     "project_binding_required_before_protected_work": true,
     "spawn_authority_is_not_mutation_authority": true,
     "role_or_ticket_is_not_mutation_authority": true
+  },
+  "continuation_integrity": {
+    "required_for_scheduled_workers": true,
+    "blocked_action_blocks_only_affected_branch": true,
+    "must_exhaust_useful_safe_in_scope_work_before_blocker_finalization": true,
+    "authorization_blocked_mutation_must_not_end_read_only_safe_work": true,
+    "prepare_non_mutating_execution_artifact_when_useful": true,
+    "safe_reversible_assumptions_may_continue_when_authority_and_scope_unchanged": true,
+    "remaining_safe_work_must_be_false_for_blocker_terminal_outcome": true,
+    "work_advanced_may_coexist_with_secondary_blocker": true,
+    "human_decision_required_only_when_no_useful_safe_work_remains": true,
+    "capability_blocked_only_after_permitted_fallbacks_and_safe_work_exhausted": true,
+    "checkpoint_io_blocked_does_not_erase_completed_useful_work": true,
+    "continuation_may_not_cross_project_or_claim_new_work_unit": true,
+    "continuation_does_not_grant_mutation_authority": true,
+    "hold_pause_stop_override_continuation": true,
+    "resource_exhaustion_requires_best_available_handoff_when_practical": true
   },
   "scheduler_state_boundary": {
     "synchronization_authorized_by_human_directive": true,
@@ -68,6 +87,7 @@
     "scheduler_mapping_conflict": "SCHEDULER_SYNC_CONFLICT",
     "frontend_state_unavailable": "FRONTEND_SCHEDULER_STATE_UNAVAILABLE",
     "frontend_account_capacity_full": "CAPACITY_LIMIT_DEFERRED",
+    "premature_blocker_finalization": "CONTINUATION_INTEGRITY_VIOLATION",
     "never_call_capacity_limit_deferred_task_failed": true,
     "never_call_missing_adapter_task_failed": true,
     "never_claim_spawn_from_ticket_alone": true
@@ -85,6 +105,11 @@
     "record_frontend_observed_state": true,
     "record_backend_canonical_state": true,
     "record_sync_disposition": true,
-    "record_capacity_deferred_state": true
+    "record_capacity_deferred_state": true,
+    "record_blocked_actions": true,
+    "record_safe_fallbacks_considered": true,
+    "record_safe_fallbacks_completed": true,
+    "record_remaining_safe_work_at_finalization": true,
+    "record_remaining_human_gate": true
   }
 }
