@@ -4,40 +4,68 @@
   "origin_project": "intercommunicationsenhancements",
   "target_project": "intercommunicationsenhancements",
   "target_role": "PRIMARY",
-  "artifact_type": "DRAFT_PROTOCOL_PROPOSAL",
+  "artifact_type": "PROTOCOL_IMPLEMENTATION_COMPLETION",
   "proposal_path": "proposals/DRAFT_CROSS_PROJECT_OPERATIONAL_INTELLIGENCE_EXECUTION_INTERCOMMUNICATION_DIRECTIVE_2026-10-07.md",
-  "status": "PRIMARY_REVIEW_COMPLETED_STAGE_1_APPROVED",
+  "status": "PRIMARY_IMPLEMENTATION_COMPLETE_REFERENCE_SCOPE",
   "requested_action": "FORENSIC_REVIEW_VALIDATE_IMPLEMENT_AND_DECIDE_GLOBAL_BOOTSTRAP_INTEGRATION",
-  "primary_decision": "APPROVE_SEMANTIC_CONTROL_PLANE_DEFER_NEW_GLOBAL_TRANSPORT",
+  "primary_decision": "COMPLETE_FEDERATED_REFERENCE_MODEL_WITHOUT_MUTABLE_GLOBAL_CONTROL_PLANE",
   "primary_review_path": "reconciliation/CROSS_PROJECT_OPERATIONAL_INTELLIGENCE_PRIMARY_REVIEW_20261007.md",
+  "completion_path": "reconciliation/CROSS_PROJECT_OPERATIONAL_INTELLIGENCE_COMPLETION_20261007.md",
   "canonical_protocol_path": "protocols/cross_project_operational_intelligence.md",
-  "schema_path": "schemas/project_intelligence_envelope.schema.json",
-  "runtime_path": "org_agent_mesh/operational_intelligence.py",
-  "test_path": "tests/test_operational_intelligence.py",
+  "semantic_schema_path": "schemas/project_intelligence_envelope.schema.json",
+  "registry_schema_path": "schemas/operational_intelligence_registry_entry.schema.json",
+  "acceptance_schema_path": "schemas/cross_project_acceptance_receipt.schema.json",
+  "snapshot_schema_path": "schemas/sanitized_intelligence_snapshot.schema.json",
+  "semantic_runtime_path": "org_agent_mesh/operational_intelligence.py",
+  "federation_runtime_path": "org_agent_mesh/operational_intelligence_federation.py",
+  "semantic_test_path": "tests/test_operational_intelligence.py",
+  "federation_test_path": "tests/test_operational_intelligence_federation.py",
   "bootstrap_integration_path": "swarm_kernel/AGENT_BOOTSTRAP_OVERLAY.md",
+  "architecture_path": "ARCHITECTURE.md",
+  "hardening_status_path": "HARDENING_STATUS.md",
   "mutation_authorized": false,
   "requires_primary_review": false,
   "authority_conveyed": false,
   "user_commit_authorization": {
-    "authorized_action": "COMMIT_PROPOSAL_AND_PRIMARY_REVIEW_IMPLEMENTATION_TO_PROJECT",
-    "authorization_scope": "INTERCOMMUNICATIONS_PROJECT_ARTIFACTS_AND_STAGE_1_IMPLEMENTATION",
+    "authorized_action": "CONTINUE_PRIMARY_IMPLEMENTATION_TO_COMPLETION_WITHIN_INTERCOMMUNICATION_ENHANCEMENTS_PROJECT",
+    "authorization_scope": "REFERENCE_ARCHITECTURE_RUNTIME_SCHEMAS_TESTS_PROTOCOL_BOOTSTRAP_AND_COMPLETION_RECORDS",
     "global_swarm_peer_mutation_authorized": false
   },
-  "implemented_stage_1": [
+  "implemented": [
     "CANONICAL_BENEFIT_CLASSES",
     "PROJECT_INTELLIGENCE_ENVELOPE",
     "TRUTHFUL_PARTICIPATION_SEMANTICS",
     "ACTIVE_EXECUTION_ASSIGNMENT_EVIDENCE_GATE",
+    "PROJECT_LOCAL_SANITIZED_DISCOVERY_INDEX",
+    "EXPLICIT_EXPERTISE_CAPABILITY_AVAILABILITY_FRESHNESS",
+    "ROUTING_CORRELATION_AND_CYCLE_DETECTION",
+    "TARGET_PROJECT_ACCEPTANCE_DECLINE_RECEIPTS",
+    "UPDATE_PENDING_ACCEPTED_REJECTED_SUPERSESSION_STATES",
+    "IMMUTABLE_SANITIZED_SNAPSHOT_EXPORT_IMPORT_BRIDGE",
+    "COPY_BY_VALUE_DESTINATION_IMPORT_WITH_ACCEPTED_STATE_FALSE",
     "BOOTSTRAP_OVERLAY_INHERITANCE",
-    "REGRESSION_TESTS",
-    "EXISTING_EXCHANGE_OBSERVABILITY_LEARNING_DELEGATION_COMPOSITION"
+    "ADVERSARIAL_REGRESSION_TESTS",
+    "ARCHITECTURE_AND_HARDENING_RECONCILIATION"
   ],
-  "explicitly_deferred": [
-    "NEW_GLOBAL_MUTABLE_PROJECT_INTELLIGENCE_BUS",
+  "executed_ci_evidence": {
+    "workflow_run_id": 37630451885,
+    "validated_commit": "002acfc541df9c22d39b86d7e57caf25527c0e68",
+    "result": "SUCCESS",
+    "scope": "FULL_TEST_DISCOVERY_PLUS_EXACT_SHA_PACKAGE_BUILD_VERIFICATION_INDEPENDENT_REBUILD_AND_REPRODUCIBILITY"
+  },
+  "intentional_non_goals": [
+    "MUTABLE_GLOBAL_SHARED_CONTEXT",
     "IMPLICIT_CROSS_PROJECT_ASSIGNMENT",
-    "AUTOMATIC_GLOBAL_USER_OVERRIDE_MUTATION",
+    "PEER_SOURCE_WRITES_THROUGH_INTELLIGENCE_METADATA",
     "REMOTE_CAPABILITY_INHERITANCE",
-    "DURABLE_SANITIZED_EXPORT_IMPORT_BRIDGE"
+    "AUTOMATIC_GLOBAL_USER_COMMAND_MUTATION_WITHOUT_TARGET_LOCAL_ACCEPTANCE",
+    "DEFAULT_TRUST_OF_ALL_PEER_ACTIVITY"
   ],
-  "deployment_default": "STAGE_1_SEMANTIC_CONTRACT_ACTIVE_IN_CANONICAL_SWARM_BOOTSTRAP_OVERLAY;_PEER_MUTATION_AND_NEW_GLOBAL_TRANSPORT_REMAIN_DENIED"
+  "future_production_layers": [
+    "MULTI_NODE_DURABLE_ADAPTERS",
+    "BROKER_SPECIFIC_DURABLE_ACK_TRANSPORT",
+    "CRYPTOGRAPHIC_CROSS_HOST_ATTESTATION",
+    "HOST_SPECIFIC_DISTRIBUTED_INTEGRATION"
+  ],
+  "deployment_default": "REFERENCE_FEDERATION_ACTIVE_IN_CANONICAL_PROTOCOL_AND_BOOTSTRAP;_CROSS_PROJECT_AUTHORITY_AND_PEER_MUTATION_REMAIN_DENIED"
 }
