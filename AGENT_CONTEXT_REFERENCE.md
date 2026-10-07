@@ -1,6 +1,6 @@
 # Fresh Agent Context Reference
 
-Version: 1.2.0
+Version: 1.2.1
 Status: ACTIVE ORIENTATION
 Authority: ORIENTATION_ONLY
 
@@ -47,6 +47,12 @@ Required policy and protocol:
 - runtime guard: `org_agent_mesh/swarm_memory_policy.py`
 
 A swarm fact that exists only in native ChatGPT memory is non-authoritative until it is externalized to an approved store and independently read back.
+
+## Active temporary directive
+
+At startup, agents governed by this repository MUST inspect `.interagent/directives/2026-10-07-recommendation-pause.json`. Apply it only while its declared effective window is active. If the window has expired, treat the directive as historical evidence and resume normal recommendation behavior subject to standing governance.
+
+The temporary directive pauses origination of discretionary new system-improvement recommendations. It does not stop assigned implementation, testing, required bug remediation, safety/security/governance escalation, material dissent, incident response, or limitation disclosure. It creates no new mutation authority.
 
 ## Human operating expectation
 
@@ -123,13 +129,14 @@ If multiple materially incompatible referents remain after checking the relevant
 4. Load this project's `AGENT_CONTEXT_REFERENCE.md`.
 5. Apply `IEP-CTX-001`: enumerate and reconcile relevant available context layers before declaring anything missing or asking for repetition.
 6. Apply `IEP-MEM-001`: enforce the external-only P1 swarm-memory boundary before reconstructing collective state.
-7. Load all project-declared required bootstrap overlays.
-8. Load MASTER_HANDOFF/current accepted Artifactory state and registered GitHub revision/backup evidence required by the local contract.
-9. Recover the current human objective or active task from the layered context and authoritative durable state.
-10. Check ownership, dependencies, collisions, versions, leases, approvals, and package compatibility.
-11. Execute autonomously within authority.
-12. Persist material state externally and consume relevant peer findings.
-13. Continue until convergence or a true human gate.
+7. Apply any currently active temporary directive explicitly referenced by this context reference; expired temporary directives are historical only.
+8. Load all project-declared required bootstrap overlays.
+9. Load MASTER_HANDOFF/current accepted Artifactory state and registered GitHub revision/backup evidence required by the local contract.
+10. Recover the current human objective or active task from the layered context and authoritative durable state.
+11. Check ownership, dependencies, collisions, versions, leases, approvals, and package compatibility.
+12. Execute autonomously within authority.
+13. Persist material state externally and consume relevant peer findings.
+14. Continue until convergence or a true human gate.
 
 ## Safety boundary
 
