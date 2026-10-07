@@ -1,6 +1,6 @@
 {
   "schema": "org-agent-mesh/scheduler-synchronization-directive/v1",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "status": "ACTIVE_BY_EXPLICIT_HUMAN_DIRECTIVE_2026-10-07",
   "directive": "Maintain synchronicity between canonical backend scheduler jobs and mapped ChatGPT frontend Scheduled Tasks while preserving separate authority, execution, audit, and account-capacity ledgers.",
   "surfaces": {
@@ -41,9 +41,12 @@
     "automatic_fields": [
       "title",
       "schedule",
-      "timezone",
-      "enabled_state_when_binding_policy_authorizes_it"
+      "timezone"
     ],
+    "enabled_state_transition_gate": "org_agent_mesh.schedule_activation",
+    "disabled_to_enabled_requires_explicit_current_human_authorization": true,
+    "capacity_availability_is_not_activation_authorization": true,
+    "mirror_policy_may_not_auto_enable": true,
     "supported_enabled_state_policies": [
       "MIRROR",
       "MIRROR_WHEN_ACCOUNT_CAPACITY_AVAILABLE",
@@ -51,7 +54,8 @@
       "FRONTEND_ONLY"
     ],
     "account_capacity_limit_is_a_first_class_constraint": true,
-    "capacity_limit_deferred_enablement": "RETRY_NEXT_RECONCILIATION_AFTER_CAPACITY_RELEASE",
+    "capacity_limit_deferred_enablement": "REPORT_READY_FOR_HUMAN_ENABLEMENT_AFTER_CAPACITY_RELEASE",
+    "capacity_release_does_not_enable_task": true,
     "capacity_limit_deferred_is_not_conflict": true,
     "standby_binding_remains_disabled_until_canonical_state_changes": true,
     "never_infer_mapping_by_title_similarity": true,
@@ -61,6 +65,10 @@
     "never_delete_unmapped_frontend_tasks": true,
     "preserve_frontend_task_identity": true,
     "preserve_backend_job_identity": true,
+    "missing_or_unavailable_identity_disposition": "REPLACEMENT_AUTHORIZATION_REQUIRED",
+    "stale_execution_disposition": "REPORT_STALE_EXECUTION_WITHOUT_IDENTITY_REPLACEMENT",
+    "replacement_requires_explicit_current_human_authorization": true,
+    "replacement_must_preserve_enabled_state_unless_activation_is_separately_authorized": true,
     "conflict_action": "FAIL_CLOSED_AFFECTED_BINDING_AND_REPORT_SCHEDULER_SYNC_CONFLICT"
   },
   "control": {

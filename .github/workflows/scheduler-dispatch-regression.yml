@@ -5,12 +5,24 @@ on:
     paths:
       - "org_agent_mesh/internal_scheduler.py"
       - "org_agent_mesh/launch_admission.py"
+      - "org_agent_mesh/scheduler_reconciliation.py"
+      - "org_agent_mesh/frontend_execution_receipts.py"
       - "tests/test_internal_scheduler.py"
       - "tests/test_launch_admission.py"
       - "tests/test_schedule_activation.py"
+      - "tests/test_scheduler_reconciliation.py"
+      - "tests/test_scheduler_policy_coherence.py"
+      - "tests/test_frontend_execution_receipts.py"
       - "tests/test_scheduler_synchronization.py"
+      - "tests/test_scheduler_ecosystem_rollout.py"
+      - "schemas/frontend_execution_receipt.schema.json"
+      - "bootstrap/INTERNAL_SCHEDULER_SERVICE.json"
       - "governance/INTERNAL_SPAWN_SCHEDULER_POLICY.json"
       - "governance/INTERNAL_SPAWN_SCHEDULES.json"
+      - "governance/SCHEDULER_FRONTEND_BINDINGS.json"
+      - "governance/SCHEDULER_FRONTEND_RECEIPT_POLICY.json"
+      - "governance/SCHEDULER_SYNCHRONIZATION_DIRECTIVE.json"
+      - "protocols/internal_scheduler_service.md"
       - ".github/workflows/internal-spawn-scheduler.yml"
       - ".github/workflows/scheduler-dispatch-regression.yml"
   workflow_dispatch:
@@ -37,4 +49,8 @@ jobs:
             tests.test_internal_scheduler \
             tests.test_launch_admission \
             tests.test_schedule_activation \
-            tests.test_scheduler_synchronization
+            tests.test_scheduler_reconciliation \
+            tests.test_scheduler_policy_coherence \
+            tests.test_frontend_execution_receipts \
+            tests.test_scheduler_synchronization \
+            tests.test_scheduler_ecosystem_rollout

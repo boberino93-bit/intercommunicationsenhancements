@@ -34,7 +34,13 @@ class SchedulerEcosystemRolloutTests(unittest.TestCase):
         self.assertTrue(boundary["synchronization_authorized_by_human_directive"])
         self.assertTrue(boundary["declared_mapping_required"])
         self.assertTrue(boundary["may_reconcile_mapped_chatgpt_scheduled_tasks"])
-        self.assertTrue(boundary["may_enable_mapped_chatgpt_task_when_binding_policy_is_MIRROR"])
+        self.assertFalse(boundary["may_enable_mapped_chatgpt_task_when_binding_policy_is_MIRROR"])
+        self.assertFalse(
+            boundary["may_enable_mapped_chatgpt_task_when_binding_policy_is_MIRROR_WHEN_ACCOUNT_CAPACITY_AVAILABLE"]
+        )
+        self.assertTrue(boundary["disabled_to_enabled_requires_explicit_current_human_authorization"])
+        self.assertTrue(boundary["capacity_availability_is_not_activation_authorization"])
+        self.assertEqual(boundary["capacity_release_action"], "REPORT_READY_FOR_HUMAN_ENABLEMENT")
         self.assertTrue(boundary["may_disable_mapped_chatgpt_task_when_binding_policy_is_MIRROR"])
         self.assertTrue(boundary["may_reschedule_mapped_chatgpt_task_to_canonical_backend_schedule"])
         self.assertFalse(boundary["may_modify_unmapped_chatgpt_tasks"])
