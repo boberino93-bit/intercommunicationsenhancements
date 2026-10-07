@@ -17,6 +17,7 @@ on:
       - "tests/test_frontend_execution_receipts.py"
       - "tests/test_frontend_receipt_audit.py"
       - "tests/test_scheduler_health.py"
+      - "tests/test_scheduler_health_policy.py"
       - "tests/test_scheduler_synchronization.py"
       - "tests/test_scheduler_ecosystem_rollout.py"
       - "schemas/frontend_execution_receipt.schema.json"
@@ -60,5 +61,6 @@ jobs:
             tests.test_frontend_execution_receipts \
             tests.test_frontend_receipt_audit \
             tests.test_scheduler_health \
+            tests.test_scheduler_health_policy \
             tests.test_scheduler_synchronization \
             tests.test_scheduler_ecosystem_rollout
