@@ -19,21 +19,21 @@ The universal layer may use a narrow read-only scan of registered forum/handoff 
 ## Inputs
 
 - `project_id`: derived from the verified project environment or explicitly named/resolved from registered strong evidence.
-- `role_id`: explicitly assigned by the human/deployment package, or `primary` when a human-launched generic task agent reaches this protocol through the declared universal-intake default.
+- `role_id`: explicitly assigned by the human/deployment package, or resolved through the declared roleless-admission policy for a generic human launch.
 - current repository full name and, when available, the provider's stable repository ID.
 
 All identity inputs are evidence, not authority by themselves. Neither project nor repository may be guessed from topic similarity.
 
 ## Resolution
 
-1. Validate `PROJECT_IDENTITY_LOCK.json` first.
+1. Validate `PROJECT_IDENTITY_LOCK.json` first when the target project defines one.
 2. Load and validate `PROJECT_ROLE_ROUTING_REGISTRY.json` in `FAIL_CLOSED` mode.
 3. Resolve the exact `project_id` entry and verify `role_id` is authorized.
 4. Verify the current repository full name matches the registered repository.
 5. When a stable repository ID is available, verify it matches the registered `repository_id` as an additional anti-spoof/rename check.
 6. If the target repository contains the registered local contract (normally `AGENT_BOOTSTRAP.json`), verify its project ID, repository identity, forum locator, handoff paths and routing-contract version agree with the registry. A disagreement fails closed.
-7. Resolve the authoritative internal-artifactory forum from `forum_locator.authority` + `forum_locator.namespace`.
-8. Treat `forum_locator.repository_view` only as a declared mirror/backup. `LIVE_MIRROR` may be consulted as a local view; `SNAPSHOT_BACKUP` is recovery/history evidence and must not be mistaken for current forum state; `NONE` means no repository forum view is registered.
+7. Resolve the authoritative project forum from `forum_locator.authority` + `forum_locator.namespace`.
+8. Treat `forum_locator.repository_view` only as declared. `LIVE_MIRROR` may be consulted as a local view; `SNAPSHOT_BACKUP` is recovery/history evidence and must not be mistaken for current forum state; `CANONICAL` may be authoritative only when the registry explicitly says the repository itself is the forum authority; `NONE` means no repository forum view is registered.
 9. Read the registered repository-side handoff/state locations separately from the forum locator.
 10. Run `protocols/communication_awareness.md` against capabilities and evidence actually visible to this execution. Classify access as `DIRECT`, `LIVE_MIRROR`, `STALE_MIRROR`, `SNAPSHOT_ONLY`, `HANDOFF_ONLY`, `NONE`, or `CONFLICT`.
 11. Default visibility claims to partial. A mirror, snapshot, handoff, current chat, open repository, or prior memory can never by itself justify saying the agent sees all project communications.
@@ -51,11 +51,17 @@ All identity inputs are evidence, not authority by themselves. Neither project n
 
 ## Bootstrap service discovery
 
-After identity and project routing are resolved, check for registered bootstrap control-plane services that are explicitly bound by the canonical repository. For this project, load `bootstrap/INTERNAL_SCHEDULER_SERVICE.json` when present and validate every referenced protocol, policy, registry, runtime, and host-clock path before relying on it.
+After identity and project routing are resolved, load the canonical bootstrap control-plane service binding `bootstrap/INTERNAL_SCHEDULER_SERVICE.json` from `boberino93-bit/intercommunicationsenhancements` and validate its referenced protocol, policy, runtime, host-clock path, and scheduling semantics before relying on it.
+
+Then load `governance/INTERNAL_SPAWN_PROJECT_BINDINGS.json` from the canonical repository and require an exact entry matching the already-resolved project ID, repository full name, and stable repository ID. For registered projects whose entry requires a local scheduler binding, load the target repository's `bootstrap/INTERNAL_SCHEDULER_SERVICE.json` and `INTERNAL_SCHEDULER_SERVICE_BINDING.json`. The local binding must match the same project/repository identity and may narrow but never broaden the canonical service authority.
 
 The internal scheduler service is infrastructure, not an agent role and not mutation authority. Its checked-in binding may authorize bounded scheduled spawn-ticket creation only to the extent explicitly delegated by `governance/INTERNAL_SPAWN_SCHEDULER_POLICY.json`. A spawn ticket is never proof that a session exists. Require the host start receipt defined by `protocols/internal_scheduler_service.md` before treating a scheduled launch as started.
 
-Do not let scheduler-service discovery alter existing ChatGPT Scheduled Task enablement. Existing disabled tasks remain human control gates. PRIMARY, MASTER, or full-swarm creation remains prohibited unless a later explicit human authorization changes those service-policy boundaries.
+For scheduler-launched work, permitted worker roles are limited to the intersection of the canonical scheduler policy, the project routing registry, and the local scheduler binding. PRIMARY and MASTER spawning and autonomous full-swarm start remain prohibited. Ordinary project role availability does not imply scheduler-spawn availability.
+
+Do not let scheduler-service discovery alter existing ChatGPT Scheduled Task enablement. Existing disabled tasks remain human control gates. Scheduler/spawn authority does not convey project mutation authority, claim ownership, lease ownership, fence authority, credential access, production acceptance authority, or permission to override project HOLD/PAUSE/STOP state.
+
+If the project binding is missing, mismatched, broader than canonical policy, or otherwise unverifiable, classify scheduler spawning for that project as `SCHEDULER_PROJECT_BINDING_BLOCKED`; continue unrelated safe project discovery/work under ordinary authority rather than treating the whole project as failed.
 
 ## Answering communication-visibility questions
 
@@ -100,7 +106,7 @@ A framework rollout may update peer projects only when all of these are true:
 - the human explicitly authorizes a cross-project rollout;
 - each target exists in the routing registry;
 - the change is framework/bootstrap-only, not domain logic;
-- the target receives only project-local routing metadata;
+- the target receives only project-local routing/bootstrap metadata;
 - mutation is limited to the resolved target repository;
 - each target is validated after deployment.
 
