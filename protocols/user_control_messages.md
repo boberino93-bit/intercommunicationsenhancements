@@ -53,6 +53,8 @@ Natural-language wording is not authoritative by itself. Classify by intent.
 
 ## Immediate-response contract
 
+For a control message, **answer the control message immediately**, then continue the active assignment unless the user explicitly changes execution state.
+
 For a control message, respond before continuing tool or implementation work. Keep the response focused on what the user asked for and, when useful, include the relevant subset of:
 
 1. current active objective;
