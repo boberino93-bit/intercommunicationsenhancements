@@ -24,8 +24,10 @@ REQUIRED_COMPONENT_PATTERNS = {
     "templates/new-project/*.json",
     "governance/AUTHENTICATION_FACTOR_POLICY.json",
     "protocols/authentication_factor_gateway.md",
+    "protocols/sip_sms_transport.md",
     "org_agent_mesh/authentication_gateway.py",
     "org_agent_mesh/authentication_package_contract.py",
+    "org_agent_mesh/sms_transports.py",
     "schemas/authentication_attestation.schema.json",
 }
 
@@ -82,6 +84,30 @@ def validate_factor_policy(policy: Mapping[str, Any]) -> None:
     if sms.get("high_consequence_independent_factor") is not False:
         raise ValueError("SMS must not be a high-consequence independent factor")
 
+    sip = sms.get("sip_transport", {})
+    expected_sip = {
+        "protocol": "RFC3428_MESSAGE",
+        "provider_sms_interworking_required": True,
+        "gateway_host_allowlist_required": True,
+        "tls_required_default": True,
+        "destination_resolution": "PROTECTED_REFERENCE_RUNTIME_ONLY",
+        "credentials_source": "EXTERNAL_SECRET_RESOLVER_ONLY",
+        "content_type": "text/plain; charset=utf-8",
+        "response_202_semantics": "GATEWAY_ACCEPTED_NOT_FINAL_DELIVERY",
+        "idempotency_key_required": True,
+        "failover_only_on_retryable_error": True,
+        "raw_phone_number_in_configuration": "DENY",
+        "otp_or_destination_logging": "DENY",
+    }
+    for key, value in expected_sip.items():
+        if sip.get(key) != value:
+            raise ValueError(f"unsafe SIP SMS transport setting: {key}")
+    if set(sip.get("accepted_success_responses", [])) != {200, 202}:
+        raise ValueError("SIP SMS success response set drifted")
+    transports = set(sms.get("transports", []))
+    if "SIP_MESSAGE_SMS_ADAPTER_WHEN_PROVIDER_EXPLICITLY_SUPPORTS_SMS_INTERWORKING" not in transports:
+        raise ValueError("SIP SMS adapter transport missing")
+
     strong = set(policy.get("strong_independent_methods", []))
     if strong != {"REGISTERED_GITHUB_EXTERNAL_CHALLENGE", "MICROSOFT_ENTRA_AUTHENTICATOR"}:
         raise ValueError("strong independent factor set drifted")
@@ -98,6 +124,7 @@ def validate_factor_policy(policy: Mapping[str, Any]) -> None:
         "totp_seed_in_repository_or_package",
         "sms_destination_in_repository_or_package",
         "sms_pepper_in_repository_or_package",
+        "sip_credentials_in_repository_or_package",
         "microsoft_client_secret_in_repository_or_package",
         "attestation_signing_key_in_repository_or_package",
     }

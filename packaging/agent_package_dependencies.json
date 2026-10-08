@@ -8,9 +8,18 @@
   },
   "purpose": "Deterministic dependency closure for deployable agent role packages, including continuity, project-factory, mutation-authorization, authentication-factor hardening, roleless-admission, regression-learning, canonical self-audit, and staged 100-agent scaling dependencies.",
   "role_components": {
-    "MANAGER": ["roles/MANAGER.md", "bootstrap/MANAGER.md"],
-    "PRIMARY": ["roles/PRIMARY.md", "bootstrap/PRIMARY.md"],
-    "RESEARCH": ["roles/RESEARCH.md", "bootstrap/RESEARCH.md"]
+    "MANAGER": [
+      "roles/MANAGER.md",
+      "bootstrap/MANAGER.md"
+    ],
+    "PRIMARY": [
+      "roles/PRIMARY.md",
+      "bootstrap/PRIMARY.md"
+    ],
+    "RESEARCH": [
+      "roles/RESEARCH.md",
+      "bootstrap/RESEARCH.md"
+    ]
   },
   "schema": "org-agent-mesh/package-dependency-map/v1",
   "shared_patterns": [
@@ -57,6 +66,8 @@
     "protocols/authentication_factor_gateway.md",
     "org_agent_mesh/authentication_gateway.py",
     "org_agent_mesh/authentication_package_contract.py",
-    "schemas/authentication_attestation.schema.json"
+    "schemas/authentication_attestation.schema.json",
+    "protocols/sip_sms_transport.md",
+    "org_agent_mesh/sms_transports.py"
   ]
 }

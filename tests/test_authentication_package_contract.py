@@ -25,8 +25,10 @@ class AuthenticationPackageContractTests(unittest.TestCase):
                 "templates/new-project/*.json",
                 "governance/AUTHENTICATION_FACTOR_POLICY.json",
                 "protocols/authentication_factor_gateway.md",
+                "protocols/sip_sms_transport.md",
                 "org_agent_mesh/authentication_gateway.py",
                 "org_agent_mesh/authentication_package_contract.py",
+                "org_agent_mesh/sms_transports.py",
                 "schemas/authentication_attestation.schema.json",
             ]
         }
@@ -92,6 +94,54 @@ class AuthenticationPackageContractTests(unittest.TestCase):
         source = (ROOT / "tools/build_agent_packages.py").read_text()
         self.assertIn("validate_factor_policy(factor_policy)", source)
         self.assertIn("validate_package_dependency_patterns(dependency_map)", source)
+
+    def test_sip_tls_cannot_be_disabled_in_policy(self):
+        p = copy.deepcopy(self.policy)
+        p["factors"]["fallback"]["sip_transport"]["tls_required_default"] = False
+        with self.assertRaisesRegex(ValueError, "tls_required_default"):
+            validate_factor_policy(p)
+
+    def test_sip_gateway_allowlist_required(self):
+        p = copy.deepcopy(self.policy)
+        p["factors"]["fallback"]["sip_transport"]["gateway_host_allowlist_required"] = False
+        with self.assertRaisesRegex(ValueError, "gateway_host_allowlist_required"):
+            validate_factor_policy(p)
+
+    def test_sip_interworking_must_be_explicit(self):
+        p = copy.deepcopy(self.policy)
+        p["factors"]["fallback"]["sip_transport"]["provider_sms_interworking_required"] = False
+        with self.assertRaisesRegex(ValueError, "provider_sms_interworking_required"):
+            validate_factor_policy(p)
+
+    def test_sip_credentials_must_stay_external(self):
+        p = copy.deepcopy(self.policy)
+        p["factors"]["fallback"]["sip_transport"]["credentials_source"] = "INLINE"
+        with self.assertRaisesRegex(ValueError, "credentials_source"):
+            validate_factor_policy(p)
+
+    def test_raw_phone_config_denied(self):
+        p = copy.deepcopy(self.policy)
+        p["factors"]["fallback"]["sip_transport"]["raw_phone_number_in_configuration"] = "ALLOW"
+        with self.assertRaisesRegex(ValueError, "raw_phone_number"):
+            validate_factor_policy(p)
+
+    def test_only_200_202_success(self):
+        p = copy.deepcopy(self.policy)
+        p["factors"]["fallback"]["sip_transport"]["accepted_success_responses"] = [200, 202, 302]
+        with self.assertRaisesRegex(ValueError, "success response"):
+            validate_factor_policy(p)
+
+    def test_transport_runtime_explicitly_packaged(self):
+        d = copy.deepcopy(self.dependency_map)
+        d["shared_patterns"].remove("org_agent_mesh/sms_transports.py")
+        with self.assertRaisesRegex(ValueError, "omits auth-bearing components"):
+            validate_package_dependency_patterns(d)
+
+    def test_transport_protocol_explicitly_packaged(self):
+        d = copy.deepcopy(self.dependency_map)
+        d["shared_patterns"].remove("protocols/sip_sms_transport.md")
+        with self.assertRaisesRegex(ValueError, "omits auth-bearing components"):
+            validate_package_dependency_patterns(d)
 
 
 if __name__ == "__main__":

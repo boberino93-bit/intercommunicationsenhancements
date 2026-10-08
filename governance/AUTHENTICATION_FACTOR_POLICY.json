@@ -1,6 +1,6 @@
 {
   "schema": "org-agent-mesh/authentication-factor-policy/v2",
-  "version": "2.0.0-experimental",
+  "version": "2.1.0-experimental",
   "status": "EXPERIMENTAL_HARD_GATE",
   "presence": "MANDATORY_IN_EVERY_BOOTSTRAP_PACKAGE",
   "enforcement_point": "BEFORE_PROTECTED_MUTATION_AUTHORIZATION",
@@ -10,7 +10,9 @@
   "factors": {
     "baseline": {
       "method": "TOTP_RFC6238",
-      "required_for": ["PROTECTED_MUTATION"],
+      "required_for": [
+        "PROTECTED_MUTATION"
+      ],
       "algorithm": "HMAC-SHA1",
       "digits": 6,
       "period_seconds": 30,
@@ -52,7 +54,25 @@
       "code_digest": "HMAC_SHA256_WITH_EXTERNAL_PEPPER",
       "destination_source": "PROTECTED_REFERENCE_ONLY",
       "rate_limit_required_in_deployment": true,
-      "high_consequence_independent_factor": false
+      "high_consequence_independent_factor": false,
+      "sip_transport": {
+        "protocol": "RFC3428_MESSAGE",
+        "provider_sms_interworking_required": true,
+        "gateway_host_allowlist_required": true,
+        "tls_required_default": true,
+        "destination_resolution": "PROTECTED_REFERENCE_RUNTIME_ONLY",
+        "credentials_source": "EXTERNAL_SECRET_RESOLVER_ONLY",
+        "content_type": "text/plain; charset=utf-8",
+        "accepted_success_responses": [
+          200,
+          202
+        ],
+        "response_202_semantics": "GATEWAY_ACCEPTED_NOT_FINAL_DELIVERY",
+        "idempotency_key_required": true,
+        "failover_only_on_retryable_error": true,
+        "raw_phone_number_in_configuration": "DENY",
+        "otp_or_destination_logging": "DENY"
+      }
     }
   },
   "high_consequence_classes": [
@@ -77,7 +97,8 @@
     "sms_destination_in_repository_or_package": "DENY",
     "sms_pepper_in_repository_or_package": "DENY",
     "microsoft_client_secret_in_repository_or_package": "DENY",
-    "attestation_signing_key_in_repository_or_package": "DENY"
+    "attestation_signing_key_in_repository_or_package": "DENY",
+    "sip_credentials_in_repository_or_package": "DENY"
   },
   "fail_closed": true
 }
