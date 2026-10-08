@@ -1,0 +1,83 @@
+{
+  "schema": "org-agent-mesh/authentication-factor-policy/v2",
+  "version": "2.0.0-experimental",
+  "status": "EXPERIMENTAL_HARD_GATE",
+  "presence": "MANDATORY_IN_EVERY_BOOTSTRAP_PACKAGE",
+  "enforcement_point": "BEFORE_PROTECTED_MUTATION_AUTHORIZATION",
+  "read_only_boot_without_human_challenge": true,
+  "runtime": "org_agent_mesh.authentication_gateway",
+  "attestation_schema": "schemas/authentication_attestation.schema.json",
+  "factors": {
+    "baseline": {
+      "method": "TOTP_RFC6238",
+      "required_for": ["PROTECTED_MUTATION"],
+      "algorithm": "HMAC-SHA1",
+      "digits": 6,
+      "period_seconds": 30,
+      "window": 1,
+      "secret_source": "EXTERNAL_SECRET_RESOLVER_ONLY",
+      "inline_secret": "DENY",
+      "persist_or_log_secret": "DENY",
+      "case_bound_attestation": true,
+      "action_digest_binding": true,
+      "replay_protection": "MATCHED_COUNTER_SINGLE_USE"
+    },
+    "secondary": {
+      "method": "REGISTERED_GITHUB_EXTERNAL_CHALLENGE",
+      "purpose": "EXISTING_PROCESS_SEPARATED_HIGH_CONSEQUENCE_PROOF"
+    },
+    "tertiary": {
+      "method": "MICROSOFT_ENTRA_AUTHENTICATOR",
+      "integration": "OIDC_OAUTH2_CONDITIONAL_ACCESS_AUTH_CONTEXT",
+      "tenant_source": "RUNTIME_PRINCIPAL_OR_TENANT_CONFIGURATION",
+      "authentication_context_source": "TENANT_CONFIGURATION_NOT_HARDCODED",
+      "jwt_signature_issuer_audience_expiry_validation": "REQUIRED_BEFORE_NORMALIZATION",
+      "principal_binding": true,
+      "nonce_binding": true,
+      "fresh_authentication_required": true,
+      "token_replay_protection": true
+    },
+    "fallback": {
+      "method": "SMS_OTP",
+      "assurance": "RESTRICTED_FALLBACK",
+      "transports": [
+        "AUTHENTICATED_SMS_PROVIDER_API",
+        "SIP_MESSAGE_SMS_ADAPTER_WHEN_PROVIDER_EXPLICITLY_SUPPORTS_SMS_INTERWORKING"
+      ],
+      "digits": 8,
+      "ttl_seconds": 300,
+      "max_attempts": 3,
+      "single_use": true,
+      "store_plaintext_code": false,
+      "code_digest": "HMAC_SHA256_WITH_EXTERNAL_PEPPER",
+      "destination_source": "PROTECTED_REFERENCE_ONLY",
+      "rate_limit_required_in_deployment": true,
+      "high_consequence_independent_factor": false
+    }
+  },
+  "high_consequence_classes": [
+    "ROOT_AUTHORITY_CHANGE",
+    "UNIVERSAL_GOVERNANCE_CHANGE",
+    "PRODUCTION_PROMOTION_OR_DEPLOYMENT",
+    "SECURITY_OR_CREDENTIAL_BOUNDARY_CHANGE",
+    "FINANCIAL_EFFECT",
+    "DESTRUCTIVE_OR_IRREVERSIBLE_OPERATION",
+    "SCHEDULE_ENABLE_OR_REENABLE",
+    "CROSS_PROJECT_MUTATION"
+  ],
+  "standard_protected_mutation_rule": "TOTP_RFC6238",
+  "high_consequence_rule": "TOTP_RFC6238 AND (REGISTERED_GITHUB_EXTERNAL_CHALLENGE OR MICROSOFT_ENTRA_AUTHENTICATOR)",
+  "strong_independent_methods": [
+    "REGISTERED_GITHUB_EXTERNAL_CHALLENGE",
+    "MICROSOFT_ENTRA_AUTHENTICATOR"
+  ],
+  "sms_rule": "RESTRICTED_FALLBACK_NEVER_SOLE_HIGH_CONSEQUENCE_STEP_UP",
+  "secrets": {
+    "totp_seed_in_repository_or_package": "DENY",
+    "sms_destination_in_repository_or_package": "DENY",
+    "sms_pepper_in_repository_or_package": "DENY",
+    "microsoft_client_secret_in_repository_or_package": "DENY",
+    "attestation_signing_key_in_repository_or_package": "DENY"
+  },
+  "fail_closed": true
+}

@@ -6,14 +6,24 @@ import hashlib
 import json
 import re
 import subprocess
+import sys
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from org_agent_mesh.authentication_package_contract import (  # noqa: E402
+    validate_factor_policy,
+    validate_package_dependency_patterns,
+)
+
 ROLES = {"PRIMARY": "ORCHESTRATOR", "MANAGER": "REVIEWER", "RESEARCH": "SPECIALIST"}
 IDENTITY_LOCK = "PROJECT_IDENTITY_LOCK.json"
 BOOTSTRAP_ORDER = "BOOTSTRAP_ORDER.json"
 DEPENDENCY_MAP = "packaging/agent_package_dependencies.json"
 SWARM_MEMORY_POLICY = "governance/SWARM_MEMORY_PERSISTENCE_POLICY.json"
+AUTHENTICATION_FACTOR_POLICY = "governance/AUTHENTICATION_FACTOR_POLICY.json"
 AGENT_CONTEXT_REFERENCE = "AGENT_CONTEXT_REFERENCE.md"
 
 
@@ -132,9 +142,12 @@ def load_control_state():
     bootstrap = json.loads((ROOT / BOOTSTRAP_ORDER).read_text(encoding="utf-8"))
     dependency_map = json.loads((ROOT / DEPENDENCY_MAP).read_text(encoding="utf-8"))
     memory_policy = json.loads((ROOT / SWARM_MEMORY_POLICY).read_text(encoding="utf-8"))
+    factor_policy = json.loads((ROOT / AUTHENTICATION_FACTOR_POLICY).read_text(encoding="utf-8"))
     if identity.get("mode") != "FAIL_CLOSED": raise ValueError("identity control must be FAIL_CLOSED")
     _validate_bootstrap_safety_mode(bootstrap)
     _validate_swarm_memory_policy(memory_policy)
+    validate_factor_policy(factor_policy)
+    validate_package_dependency_patterns(dependency_map)
     if project["project_id"] != identity["project_id"]: raise ValueError("project manifest and identity lock disagree on project_id")
     if project["repository_identity"] != identity["writable_repository"]: raise ValueError("project manifest and identity lock disagree on writable repository")
     steps = [item.get("id") for item in bootstrap.get("steps", [])]

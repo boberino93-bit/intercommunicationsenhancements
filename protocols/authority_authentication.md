@@ -97,3 +97,19 @@ The agent SHOULD continue safe read-only work and preserve useful prepared state
 ## 9. Swarm inheritance
 
 PRIMARY, MANAGER, RESEARCH, MASTER, recovery agents, scheduled agents, child agents, validators, builders, and newly seeded projects are all subject to this protocol. No role, consensus, learning result, or local project rule may weaken it.
+
+## 10. Mandatory bootstrap factor chain — experimental branch extension
+
+The bootstrap-loaded policy `governance/AUTHORITY_AUTHENTICATION_POLICY.json` points to `governance/AUTHENTICATION_FACTOR_POLICY.json`, `protocols/authentication_factor_gateway.md`, `org_agent_mesh.authentication_gateway`, and `schemas/authentication_attestation.schema.json`. Deployable packages MUST contain all of them and the package builder MUST fail if the factor contract is absent or weakened.
+
+Safe/read-only bootstrap remains non-interactive. Immediately before any protected mutation authorization is accepted, the factor gateway requires a fresh RFC-6238 TOTP attestation bound to the registered principal, current authorization case, challenge, and exact action digest. TOTP seeds are runtime-only credential material and MUST NOT be embedded in bootstrap packages.
+
+For high-consequence operations the authentication expression is:
+
+`TOTP_RFC6238 AND (REGISTERED_GITHUB_EXTERNAL_CHALLENGE OR MICROSOFT_ENTRA_AUTHENTICATOR)`
+
+Microsoft Authenticator is a tertiary strong provider through Microsoft Entra OIDC/OAuth plus a tenant-configured Conditional Access authentication context. Tenant-specific authentication-context identifiers and Microsoft client secrets are runtime configuration and MUST NOT be hard-coded into portable packages.
+
+SMS OTP is a restricted fallback through an authenticated SMS provider or a SIP MESSAGE-to-SMS adapter only when the provider explicitly supports that interworking. SMS MUST NOT replace the independent strong factor for high-consequence operations.
+
+A factor success is authentication evidence only. It does not grant mutation authority and does not weaken the single-use human authorization case requirement.

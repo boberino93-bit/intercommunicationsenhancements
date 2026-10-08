@@ -6,7 +6,7 @@
     "source_hash_mismatch": "FAIL",
     "unknown_shared_runtime_file": "INCLUDE_BY_PATTERN"
   },
-  "purpose": "Deterministic dependency closure for deployable agent role packages, including continuity, project-factory, mutation-authorization, roleless-admission, regression-learning, canonical self-audit, and staged 100-agent scaling dependencies.",
+  "purpose": "Deterministic dependency closure for deployable agent role packages, including continuity, project-factory, mutation-authorization, authentication-factor hardening, roleless-admission, regression-learning, canonical self-audit, and staged 100-agent scaling dependencies.",
   "role_components": {
     "MANAGER": ["roles/MANAGER.md", "bootstrap/MANAGER.md"],
     "PRIMARY": ["roles/PRIMARY.md", "bootstrap/PRIMARY.md"],
@@ -52,6 +52,11 @@
     "templates/new-project/*.json",
     "templates/new-project/*.md",
     "packaging/agent_package_dependencies.json",
-    "reliability/SUCCESSOR_CONTROL_REGISTRIES.json"
+    "reliability/SUCCESSOR_CONTROL_REGISTRIES.json",
+    "governance/AUTHENTICATION_FACTOR_POLICY.json",
+    "protocols/authentication_factor_gateway.md",
+    "org_agent_mesh/authentication_gateway.py",
+    "org_agent_mesh/authentication_package_contract.py",
+    "schemas/authentication_attestation.schema.json"
   ]
 }

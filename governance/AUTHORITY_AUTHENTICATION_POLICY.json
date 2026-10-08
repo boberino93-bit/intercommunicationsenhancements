@@ -1,6 +1,6 @@
 {
   "schema": "org-agent-mesh/authority-authentication/v1",
-  "version": "1.0.0",
+  "version": "1.1.0-experimental",
   "status": "ACTIVE_HARD_GATE",
   "invariants": [
     "CLAIMED_IDENTITY_IS_NOT_AUTHENTICATED_IDENTITY",
@@ -103,6 +103,18 @@
     "preferred_future_upgrade": "PASSKEY_OR_OTHER_CRYPTOGRAPHIC_USER_PRESENCE_FACTOR",
     "missing_required_proof_result": "DENY_HIGH_CONSEQUENCE_MUTATION_CONTINUE_SAFE_READ_ONLY"
   },
+  "factor_chain": {
+    "policy": "governance/AUTHENTICATION_FACTOR_POLICY.json",
+    "protocol": "protocols/authentication_factor_gateway.md",
+    "runtime": "org_agent_mesh.authentication_gateway",
+    "attestation_schema": "schemas/authentication_attestation.schema.json",
+    "required_before_every_protected_mutation": true,
+    "totp_baseline_mandatory": true,
+    "high_consequence_expression": "TOTP_RFC6238 AND (REGISTERED_GITHUB_EXTERNAL_CHALLENGE OR MICROSOFT_ENTRA_AUTHENTICATOR)",
+    "sms_assurance": "RESTRICTED_FALLBACK",
+    "read_only_boot_without_interactive_factor": true,
+    "secret_material_in_bootstrap_package": "DENY"
+  },
   "scheduled_and_recursive_agents": {
     "schedule_fire_is_authorization": false,
     "parent_authorization_carries_to_new_case": false,
@@ -118,6 +130,8 @@
     "replayed_case": "DENY_MUTATION",
     "scope_mismatch": "DENY_MUTATION",
     "missing_high_consequence_proof": "DENY_MUTATION",
+    "missing_mandatory_totp": "DENY_MUTATION",
+    "authentication_factor_binding_mismatch": "DENY_MUTATION",
     "continue_safe_read_only_work": true
   }
 }

@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://intercommunicationsenhancements.invalid/schemas/authentication_attestation.schema.json",
+  "title": "Case-bound authentication factor attestation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "challenge_id",
+    "case_id",
+    "principal_id",
+    "action_digest",
+    "method",
+    "assurance",
+    "verified_at",
+    "expires_at",
+    "verifier_id",
+    "evidence_digest",
+    "signature"
+  ],
+  "properties": {
+    "challenge_id": {"type": "string", "minLength": 8},
+    "case_id": {"type": "string", "minLength": 6},
+    "principal_id": {"type": "string", "minLength": 1},
+    "action_digest": {"type": "string", "minLength": 1},
+    "method": {
+      "enum": [
+        "TOTP_RFC6238",
+        "MICROSOFT_ENTRA_AUTHENTICATOR",
+        "SMS_OTP",
+        "REGISTERED_GITHUB_EXTERNAL_CHALLENGE"
+      ]
+    },
+    "assurance": {
+      "enum": [
+        "POSSESSION_OTP",
+        "STRONG_OUT_OF_BAND",
+        "PHISHING_RESISTANT",
+        "RESTRICTED_FALLBACK",
+        "PROCESS_SEPARATED_EXTERNAL_ATTESTATION"
+      ]
+    },
+    "verified_at": {"type": "string", "format": "date-time"},
+    "expires_at": {"type": "string", "format": "date-time"},
+    "verifier_id": {"type": "string", "minLength": 1},
+    "evidence_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "signature": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}
