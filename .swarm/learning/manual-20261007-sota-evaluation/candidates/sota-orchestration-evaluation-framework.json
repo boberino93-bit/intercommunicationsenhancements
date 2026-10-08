@@ -1,0 +1,159 @@
+{
+  "schema": "org-agent-mesh/learning-candidate/v1",
+  "project_id": "intercommunicationsenhancements",
+  "global_run_id": null,
+  "origin": {
+    "agent_id": "interactive-chat-agent",
+    "agent_instance_id": "interactive-chat-20261007-sota-threshold",
+    "task_id": "chat-sota-threshold-20261007",
+    "created_local_date": "2026-10-07",
+    "timezone": "America/Vancouver",
+    "source_type": "HUMAN_AGENT_ARCHITECTURE_REVIEW"
+  },
+  "state": "CANDIDATE",
+  "authority": "NONE",
+  "claim": "Intercommunication Enhancements may become state of the art in agent orchestration if controlled evaluation demonstrates reproducible architecture-specific gains in reliability, recovery, provenance, authority integrity, long-horizon task success and cost-adjusted performance over strong same-model baselines.",
+  "candidate_lessons": [
+    "Kernel quality should be validated before large swarm scale because scaling can amplify coordination errors as well as useful work.",
+    "Hallucination tolerance should be measured as fault containment and evidence-promotion control rather than as an expectation of zero hallucinations.",
+    "Fresh-agent continuity should depend on durable state reconstruction and provenance rather than inaccessible conversational memory.",
+    "Authority boundaries should be enforced outside model-generated language.",
+    "Cumulative swarm intelligence requires evidence-gated learning promotion.",
+    "State-of-the-art is an empirical measurement claim, not an architectural self-description."
+  ],
+  "required_evaluation_dimensions": [
+    "same_model_advantage",
+    "long_horizon_state_integrity",
+    "fault_containment",
+    "epistemic_provenance",
+    "recovery_without_restart",
+    "bounded_authority",
+    "adaptive_scheduling_and_scaling",
+    "model_independence",
+    "token_tool_cost_and_latency_controls",
+    "ablation_causality",
+    "benchmark_contamination_resistance",
+    "independent_reproduction"
+  ],
+  "proposed_benchmark": {
+    "name": "Kernel Stress Benchmark",
+    "nominal_work_units": 300,
+    "disturbances": [
+      {"step": 47, "type": "CONTRADICT_EARLIER_ASSUMPTION"},
+      {"step": 83, "type": "TERMINATE_COORDINATING_AGENT"},
+      {"step": 117, "type": "INJECT_KNOWN_FALSE_SUBAGENT_CONCLUSION"},
+      {"step": 146, "type": "AUTHORITATIVE_USER_CONSTRAINT_CHANGE"},
+      {"step": 191, "type": "TRUNCATE_CONVERSATIONAL_CONTEXT_PRESERVE_DURABLE_STATE"},
+      {"step": 230, "type": "AUTHORITATIVE_DOCUMENT_CONTRADICTS_SWARM_CONSENSUS"},
+      {"step": 270, "type": "FRESH_AGENT_ASSUMES_COORDINATION_FROM_DURABLE_STATE"}
+    ],
+    "metrics": [
+      "final_task_success",
+      "partial_task_success",
+      "first_pass_success",
+      "requirement_retention",
+      "authority_adherence",
+      "contamination_propagation_distance",
+      "false_claim_survival_rate",
+      "recovery_accuracy",
+      "recovery_cost",
+      "provenance_completeness",
+      "handoff_defects",
+      "blocked_unauthorized_mutation_attempts",
+      "stale_write_or_lease_conflicts",
+      "redundant_work_rate",
+      "unnecessary_agent_spawning",
+      "token_consumption",
+      "tool_call_consumption",
+      "wall_clock_latency",
+      "monetary_cost",
+      "human_corrections_required",
+      "irrelevant_context_loaded",
+      "repeated_run_convergence"
+    ]
+  },
+  "baseline_classes": [
+    "single_frontier_agent",
+    "conventional_supervisor_worker",
+    "independent_parallel_agents_with_synthesis",
+    "full_intercommunication_kernel",
+    "ablated_intercommunication_kernel"
+  ],
+  "ablation_targets": [
+    "forensic_reconciliation",
+    "authoritative_state_hierarchy",
+    "bootstrap_context_recovery",
+    "contamination_quarantine",
+    "typed_provenance",
+    "bounded_mutation_authority",
+    "lease_ownership_fencing",
+    "learning_promotion_gates",
+    "communication_awareness",
+    "adaptive_spawn_controls",
+    "durable_state_capsules_and_handoffs"
+  ],
+  "falsification_conditions": [
+    "gain_disappears_after_resource_budget_matching",
+    "gain_occurs_only_on_one_model_or_one_benchmark",
+    "complexity_increases_without_cost_adjusted_reliability_gain",
+    "ablations_do_not_reduce_performance",
+    "swarm_scale_amplifies_contamination_or_authority_violations_faster_than_success",
+    "fresh_agent_recovery_depends_on_hidden_chat_state",
+    "benchmark_gain_is_explainable_by_contamination_or_overfitting"
+  ],
+  "external_evidence": [
+    {
+      "source": "Anthropic - How we built our multi-agent research system",
+      "url": "https://www.anthropic.com/engineering/multi-agent-research-system",
+      "verified_date": "2026-10-07",
+      "relevance": "Reports 90.2% internal multi-agent research improvement over a single-agent configuration and large token-budget effects; supports resource-normalized evaluation."
+    },
+    {
+      "source": "OSWorld2.0",
+      "url": "https://arxiv.org/abs/2606.29537",
+      "verified_date": "2026-10-07",
+      "relevance": "Long-horizon 108-workflow benchmark with average 318 tool calls in a reported configuration and 20.6% best primary binary completion; failure modes overlap with state-recovery and constraint-retention targets."
+    },
+    {
+      "source": "OpenAI - Why SWE-bench Verified no longer measures frontier coding capabilities",
+      "url": "https://openai.com/index/why-we-no-longer-evaluate-swe-bench-verified/",
+      "verified_date": "2026-10-07",
+      "relevance": "Demonstrates benchmark contamination/evaluator-quality risk and supports held-out, uncontaminated, independently reproduced evaluation."
+    }
+  ],
+  "evidence_refs": [
+    {
+      "repository": "boberino93-bit/intercommunicationsenhancements",
+      "branch": "experimental/global-swarm-hardening-v2-artifactory-first-20261006",
+      "path": "research/SOTA_ORCHESTRATION_EVALUATION_FRAMEWORK_20261007.md",
+      "commit_sha": "5db616530baa9a5ef727c6f02481e40d14503073"
+    },
+    {
+      "path": "protocols/swarm_learning.md",
+      "purpose": "promotion and authority rules"
+    }
+  ],
+  "confidence": {
+    "level": "MEDIUM",
+    "meaning": "The evaluation logic and external motivation are strong enough to justify a research program, but no controlled project benchmark has yet established a SOTA result."
+  },
+  "scope": "agent orchestration, intercommunication, long-horizon reliability, swarm hardening and evaluation methodology",
+  "known_exclusions": [
+    "This record does not claim the project is currently state of the art.",
+    "Illustrative percentages in the research artifact are not experimental results.",
+    "This record does not authorize swarm launch, production promotion, schedule activation or cross-project mutation."
+  ],
+  "validation": {
+    "state": "PENDING",
+    "required_methods": [
+      "controlled_same_model_baseline_comparison",
+      "multi_seed_long_horizon_trials",
+      "fault_injection",
+      "ablation_study",
+      "independent_review",
+      "external_reproduction_before_strongest_SOTA_claim"
+    ],
+    "reviewer": null,
+    "promoter": null
+  }
+}
