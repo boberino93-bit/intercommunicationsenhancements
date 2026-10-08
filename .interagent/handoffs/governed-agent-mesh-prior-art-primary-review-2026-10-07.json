@@ -1,0 +1,83 @@
+{
+  "schema": "org-agent-mesh/primary-review-handoff/v1",
+  "project_id": "intercommunicationsenhancements",
+  "origin_project": "intercommunicationsenhancements",
+  "target_project": "intercommunicationsenhancements",
+  "target_role": "PRIMARY",
+  "artifact_type": "FORENSIC_PRIOR_ART_FINDING",
+  "finding_id": "GOVERNED-AGENT-MESH-PRIOR-ART-2026-10-07",
+  "title": "Governed Agent Mesh prior-art and novelty-falsification investigation",
+  "status": "SUPPORTED_AWAITING_PRIMARY_REVIEW",
+  "finding_strength": "STRONG_COMPONENT_PRIOR_ART__COMBINATION_NOVELTY_UNRESOLVED",
+  "requested_action": "CONSUME_AND_VALIDATE; DO_NOT PROMOTE TO DOCTRINE OR EXTERNAL NOVELTY CLAIM WITHOUT REVIEW",
+  "summary": "A broad claim that the system or its major agentic primitives are unprecedented is not supported. Specialist routing, multi-agent orchestration, shared context, memory/reflection, HITL approval, policy enforcement, zero-trust/workload identity, provenance, durable execution, agent messaging, cross-domain authorization and policy-governed autonomous agents all have substantial prior art. Several pre-October-2026 patent families materially overlap governance, delegation, agent/persona binding, policy gates, federated policy tokens, audit and non-self-authorizing orchestration. No single public reference was found that clearly implements the complete current conjunction of project-bound authorization, fresh execution identity, authority/capability separation, strict-subset child capability, active-session mutation gating, stale-instance rejection, explicit authority_conveyed=false cross-project exchange, immutable sanitized copy-by-value knowledge transfer, context presence/evidence/authority separation, external-only staged swarm learning, doctrine-first bootstrap, pre-model provider admission and exact-revision role packaging. This is an absence-of-found-match result, not proof of novelty or patentability.",
+  "mechanisms": [
+    "project identity as authorization namespace",
+    "fresh per-agent execution-instance identity",
+    "authority tier separated from capability set",
+    "child capability equal-or-strict-subset with self-escalation denied",
+    "mutation authority requires current ACTIVE bound session",
+    "message/task/artifact/lease/audit ownership tied to current project and execution identity",
+    "stale execution instances cannot inherit authority from historical state",
+    "cross-project information exchange explicitly conveys no execution authority",
+    "target project independently validates and accepts imported evidence",
+    "sanitized immutable copy-by-value cross-project intelligence exchange",
+    "context presence, evidence quality and authority tracked separately",
+    "external-only collective memory",
+    "OBSERVED -> CANDIDATE -> VALIDATED -> DOCTRINE learning lifecycle with role-separated promotion",
+    "doctrine-first and scoped-validated-knowledge bootstrap",
+    "provider admission control before model invocation",
+    "exact-revision reproducible role packaging"
+  ],
+  "forensic_interpretation": "The strongest defensible differentiation hypothesis is governance composition and boundary semantics, not delegation or swarm intelligence itself. Component-level novelty is largely falsified. Combination-level distinctiveness remains plausible but unproven. Patent/legal novelty is unknown and was not assessed to a professional legal standard.",
+  "evidence_notes": [
+    "Full report: evaluation/20261007__GOVERNED_AGENT_MESH_PRIOR_ART_FORENSIC_REPORT.md",
+    "Report creation commit: 488b6ef8bf7a7c6d3f0f2a56d56b5cb61dba12a1",
+    "Repository baseline inspected before report write: main@c38968c5e08c6fd14007c0c5dcabe4a2a71e6936",
+    "High-overlap historical antecedents include Hearsay-II (1980), Contract Net Protocol (1980), capability security, policy engines, zero trust, workload identity, provenance and distributed-workflow patterns.",
+    "High-overlap modern comparators include AutoGen, MetaGPT, Magentic-One, OpenAI Agents SDK, A2A, MCP, AGNTCY, NIST AI Agent Standards Initiative and OWASP Agent Control Standard.",
+    "High-overlap patent publications/families include US20190068451A1, US20250350644A1, US12580768B2/US20260019268A1, US20250373432A1, US20250244964A1, US20250259043A1, US20250373451A1, US20250315514A1 and US20260252697A1."
+  ],
+  "epistemic_constraints": [
+    "This was a broad technical web/standards/paper/patent scan, not an exhaustive professional patentability or freedom-to-operate search.",
+    "No-exact-match-found cannot be converted into nobody-has-done-it.",
+    "Patent priority, claim construction, anticipation and obviousness require jurisdiction-specific legal analysis.",
+    "Unindexed private systems, non-English literature and differently named equivalent mechanisms may contain closer matches.",
+    "Project target architecture must be separated from features demonstrably implemented and tested at a dated revision.",
+    "The active recommendation-pause directive was respected; this handoff records assigned research and verification, not discretionary architecture recommendations."
+  ],
+  "unresolved_questions": [
+    "Which candidate differentiators are implemented and tested today versus target architecture?",
+    "What is the earliest dated evidence for each candidate differentiator?",
+    "Does any single located patent claim read on the implemented architecture element-by-element?",
+    "Would combinations of the closest references make the remaining conjunction obvious?",
+    "Do AGNTCY or other agent-control-plane projects implement target-side authority non-conveyance and reacceptance more closely than surfaced in this scan?",
+    "Are copy-by-value sanitized federation and staged learning promotion established in older distributed/security/knowledge systems under different terminology?",
+    "What external claim language remains accurate after component novelty is separated from combination distinctiveness?"
+  ],
+  "learning_candidate": {
+    "state": "CANDIDATE",
+    "claim": "In governed multi-agent systems, apparent novelty often lies less in delegation, memory, specialist routing or policy controls individually than in the enforceable composition of identity, authorization, lifecycle, provenance, federation and learning boundaries. Broad novelty claims should be actively falsified at the component level before combination-level distinctiveness is asserted.",
+    "confidence": {
+      "component_prior_art": "HIGH",
+      "no_exact_combination_match_found": "MEDIUM",
+      "legal_novelty": "UNASSESSED"
+    },
+    "promotion_required": "MANAGER/REVIEWER falsification plus PRIMARY acceptance under protocols/swarm_learning.md"
+  },
+  "mutation_authorized": false,
+  "requires_primary_review": true,
+  "authority_conveyed": false,
+  "canonical_state_change": false,
+  "created_date": "2026-10-07",
+  "provenance": {
+    "source": "User-assigned forensic prior-art/novelty-falsification investigation executed in ChatGPT with public web research and direct repository inspection",
+    "research_role": "RESEARCH",
+    "project_identity_source": "PROJECT_IDENTITY_LOCK.json",
+    "report_path": "evaluation/20261007__GOVERNED_AGENT_MESH_PRIOR_ART_FORENSIC_REPORT.md",
+    "report_commit": "488b6ef8bf7a7c6d3f0f2a56d56b5cb61dba12a1",
+    "public_research_date": "2026-10-07",
+    "canonical_live_agentbus_written": false,
+    "canonical_live_agentbus_note": "No direct Internal Artifactory/AgentBus write interface was available in this session; the durable GitHub handoff surface was used without claiming live AgentBus publication."
+  }
+}
