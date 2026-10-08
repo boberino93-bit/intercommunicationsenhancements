@@ -1,6 +1,6 @@
 # Fresh Agent Context Reference
 
-Version: 1.1.0
+Version: 1.1.1
 Status: ACTIVE ORIENTATION
 Authority: ORIENTATION_ONLY
 
@@ -30,6 +30,18 @@ When the human or an upstream agent requests a self-evaluation, self-audit, beha
 - bootstrap overlay: `swarm_kernel/SELF_AUDIT_BOOTSTRAP_OVERLAY.md`
 
 Do not invent a replacement framework. If the framework cannot be retrieved, report `AUDIT_FRAMEWORK_UNAVAILABLE`. Audit findings and recommendations are observability evidence and never create execution authority.
+
+## Architecture-quality and SOTA evaluation research
+
+When a task concerns architecture quality, swarm scaling/hardening, long-horizon reliability, benchmark design, or whether this project can defensibly be described as state of the art, load the following research candidate after normal project binding and authority checks:
+
+- research artifact: `research/SOTA_ORCHESTRATION_EVALUATION_FRAMEWORK_20261007.md`
+- machine-readable learning candidate: `.swarm/learning/manual-20261007-sota-evaluation/candidates/sota-orchestration-evaluation-framework.json`
+- promotion rules: `protocols/swarm_learning.md`
+
+The SOTA framework is intentionally `CANDIDATE`, not doctrine. RESEARCH agents should digest, challenge, extend, test, and attempt to falsify it. MANAGER/REVIEWER agents should validate evidence and reconcile contradictions. PRIMARY/ORCHESTRATOR may promote only evidence-supported conclusions under the normal learning protocol.
+
+Do **not** infer that the project is currently state of the art from the existence of this record. The target is controlled evidence showing architecture-specific lift over strong same-model/resource-controlled baselines, including long-horizon fault injection and ablation testing.
 
 ## Registered project map
 
