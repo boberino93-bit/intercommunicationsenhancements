@@ -1,0 +1,123 @@
+{
+  "schema": "org-agent-mesh/forensic-read-only-policy/v1",
+  "policy_id": "IE-FORENSICS-READ-ONLY-PERPETUAL",
+  "version": "1.0.0",
+  "status": "ACTIVE_HARD_GATE",
+  "project_id": "intercommunicationsenhancements",
+  "duration": "PERPETUAL",
+  "default_mode": "READ_ONLY_FAIL_CLOSED",
+  "purpose": "Ensure every forensic investigation concerning this project observes, preserves, and explains evidence without mutating the system or evidence under investigation.",
+  "authority": {
+    "forensic_investigation_grants_mutation_authority": false,
+    "tool_write_capability_is_authority": false,
+    "consensus_is_authorization": false,
+    "discovery_is_authorization": false,
+    "security_severity_is_authorization": false,
+    "native_model_memory_is_authoritative_governance": false,
+    "durable_project_state_required_for_governance": true
+  },
+  "scope": {
+    "applies_to_project_kernel": true,
+    "applies_to_all_agents": true,
+    "applies_to_child_agents": true,
+    "applies_to_swarm_and_subswarm": true,
+    "applies_to_external_validators_operating_under_project_context": true,
+    "applies_to_resumed_or_reconstructed_sessions": true,
+    "applies_to_repository_and_history": true,
+    "applies_to_agentbus_artifactory_library_and_coordination_state": true,
+    "applies_to_files_logs_archives_backups_and_binary_artifacts": true,
+    "applies_to_credentials_authorization_proofs_and_security_material": true,
+    "applies_to_memory_context_and_derived_evidence": true
+  },
+  "allowed_operations": [
+    "READ",
+    "SEARCH",
+    "ENUMERATE",
+    "INSPECT",
+    "COMPARE",
+    "HASH",
+    "CALCULATE",
+    "RECONSTRUCT_CHRONOLOGY",
+    "READ_HISTORICAL_REVISIONS",
+    "INSPECT_METADATA",
+    "RETRIEVE_WITHOUT_SOURCE_MUTATION",
+    "ANALYZE_FORENSIC_COPY",
+    "DECOMPRESS_FORENSIC_COPY",
+    "CORRELATE_RECORDS",
+    "REPORT",
+    "RECOMMEND_REMEDIATION_WITHOUT_APPLYING_IT"
+  ],
+  "prohibited_operations": [
+    "CREATE_SOURCE_STATE",
+    "EDIT_SOURCE_STATE",
+    "OVERWRITE_SOURCE_STATE",
+    "RENAME_SOURCE_STATE",
+    "MOVE_SOURCE_STATE",
+    "DELETE_SOURCE_STATE",
+    "SANITIZE_SOURCE_EVIDENCE",
+    "REDACT_SOURCE_EVIDENCE",
+    "COMMIT",
+    "PUSH",
+    "MERGE",
+    "CLOSE_OR_REOPEN_ISSUE_OR_PULL_REQUEST",
+    "MODIFY_ISSUE_OR_PULL_REQUEST",
+    "MODIFY_BRANCH_REF_TAG_RULESET_OR_REPOSITORY_SETTING",
+    "TRIGGER_OR_ALTER_WORKFLOW_SCHEDULE_DEPLOYMENT_RELEASE_OR_AUTOMATION",
+    "ROTATE_REVOKE_REGENERATE_OR_REPLACE_CREDENTIAL_OR_AUTHORIZATION_MATERIAL",
+    "MODIFY_SECURITY_PERMISSION_AUTHENTICATION_OR_AUTHORIZATION_CONFIGURATION",
+    "MODIFY_AGENTBUS_ARTIFACTORY_LIBRARY_CHECKPOINT_HANDOFF_LEDGER_JOURNAL_OR_COORDINATION_RECORD",
+    "CLEANUP",
+    "REMEDIATION",
+    "RERUN_SWARM_OR_REPRODUCE_INCIDENT_WHERE_PROJECT_STATE_MAY_CHANGE",
+    "USE_ALTERNATE_MUTATION_ROUTE_AROUND_A_DENIAL"
+  ],
+  "tool_dispatch": {
+    "read_only_determination_required_before_every_invocation": true,
+    "unknown_mutation_semantics": "DENY_AND_RECORD_LIMITATION",
+    "ambiguous_mutation_semantics": "DENY_AND_RECORD_LIMITATION",
+    "suspected_side_effect": "DENY_AND_RECORD_LIMITATION",
+    "fallback_to_alternative_mutating_tool": false
+  },
+  "evidence_preservation": {
+    "preserve_original_content": true,
+    "preserve_original_ordering": true,
+    "preserve_timestamps": true,
+    "preserve_source_identifiers": true,
+    "preserve_hashes_when_available": true,
+    "preserve_provenance": true,
+    "preserve_revision_identifiers": true,
+    "preserve_contradictory_evidence": true,
+    "preserve_unsuccessful_attempts": true,
+    "preserve_incomplete_records": true,
+    "preserve_deleted_or_modified_history_indicators": true,
+    "preserve_uncertainty": true,
+    "silent_cleanup": false
+  },
+  "remediation_separation": {
+    "forensic_mode_may_apply_remediation": false,
+    "forensic_findings_may_recommend_remediation": true,
+    "remediation_requires_distinct_operational_mode": true,
+    "remediation_requires_separate_explicit_authority": true,
+    "implicit_mode_switch": false,
+    "finding_active_security_issue_does_not_self_authorize_containment": true
+  },
+  "delegation": {
+    "children_inherit_read_only": true,
+    "delegation_may_narrow_access": true,
+    "delegation_may_expand_mutation_authority": false,
+    "parent_may_grant_forensic_child_mutation_authority": false
+  },
+  "persistence_and_memory": {
+    "conversation_memory_is_convenience_only": true,
+    "conversation_memory_may_override_policy": false,
+    "conversation_memory_may_substitute_for_policy": false,
+    "canonical_policy_location": "governance/FORENSIC_READ_ONLY_POLICY.json",
+    "canonical_protocol_location": "protocols/forensic_read_only.md"
+  },
+  "interpretation": {
+    "uncertain_investigation_vs_remediation": "PRESERVE_STATE_AND_REMAIN_READ_ONLY",
+    "uncertain_read_only_vs_mutating": "DENY_OPERATION",
+    "default_outcome": "READ_ONLY"
+  },
+  "governing_principle": "Forensics observes. Forensics preserves. Forensics explains. Forensics does not alter the system it is investigating."
+}
