@@ -1,0 +1,114 @@
+{
+  "schema": "intercommunications/pending-memory-continuity-delta/v0.1-candidate",
+  "status": "CANDIDATE_NON_CANONICAL_NOT_DEPLOYED",
+  "change_class": "UNIVERSAL_SWARM_CHANGE",
+  "branch": "pending-work/memory-continuity-2026-10-09",
+  "authority_conveyed": false,
+  "bootstrap_mutation_authorized": false,
+  "active_policy_superseded": false,
+  "parent_controls": [
+    "IEP-MEM-001",
+    "IEP-CTX-001"
+  ],
+  "invariants": [
+    "NATIVE_CHATGPT_MEMORY_NE_SWARM_STATE",
+    "VISIBLE_TURN_NE_PRIVATE_CHAIN_OF_THOUGHT",
+    "MEMORY_NE_CANONICAL_STATE",
+    "RESTORED_CONTEXT_NE_AUTHORITY",
+    "RETAINED_CONCLUSION_NE_RETAINED_EVIDENCE",
+    "DISTRIBUTED_PRESERVATION_NE_DISCOVERABLE_CONTINUITY",
+    "LOSS_OF_CHAT_NE_LOSS_OF_AUTHORSHIP",
+    "CROSS_PROJECT_DISCOVERY_NE_CROSS_PROJECT_WRITE",
+    "METADATA_VISIBILITY_NE_PAYLOAD_ACCESS",
+    "CAPTURE_FAILURE_MUST_BE_VISIBLE"
+  ],
+  "retention_representations": [
+    "VISIBLE_TURN_JOURNAL",
+    "SEMANTIC_CONTINUITY_CAPSULE",
+    "CONCEPT_PROVENANCE_GRAPH",
+    "FEDERATED_DISCOVERY_INDEX"
+  ],
+  "capture_states": [
+    "CAPTURED_DURABLE",
+    "CAPTURED_DEGRADED_SINGLE_STORE",
+    "CAPTURE_PENDING",
+    "CAPTURE_FAILED_VISIBLE",
+    "CAPTURE_NOT_SUPPORTED_ON_THIS_SURFACE"
+  ],
+  "source_coverage_states": [
+    "COMPLETE_PROVEN",
+    "PARTIAL_KNOWN",
+    "PARTIAL_UNKNOWN",
+    "UNAVAILABLE"
+  ],
+  "orphaned_inference_rule": {
+    "when_source_lineage_unavailable": "INHERITED_INFERENCE_UNVERIFIED"
+  },
+  "private_store": {
+    "required_before_production_raw_private_turn_capture": true,
+    "public_github_raw_private_payload_allowed": false,
+    "requirements": [
+      "PRIVATE_ACCESS_BOUNDARY",
+      "APPEND_OR_VERSION_PRESERVING_HISTORY",
+      "CONTENT_DIGESTS",
+      "READBACK_VERIFICATION",
+      "EXPORT_RECOVERY",
+      "RETENTION_REDACTION_PROCESS",
+      "NO_SILENT_CROSS_PROJECT_STORE_FALLBACK"
+    ]
+  },
+  "ai_behaviour_lab_import": {
+    "source": "agentbus-backup/intercomm-optimization-v1/INTERCOMM_OPTIMIZATION_PROFILE_V1.md",
+    "safe_controls": [
+      "CANONICAL_WRITE_READBACK_THEN_BACKUP",
+      "PROJECT_IDENTITY_FAIL_CLOSED_ROUTING",
+      "EPHEMERAL_VS_DURABLE_COMMUNICATION_PLANES",
+      "UNKNOWN_CAPACITY_SEMANTICS",
+      "RECOVERY_RESERVE",
+      "WRITE_CLASSIFICATION",
+      "DIGEST_DEDUPLICATION",
+      "COALESCED_CHECKPOINTS",
+      "SANITIZED_READ_ONLY_CROSS_PROJECT_NEED_SIGNAL",
+      "CAUSATION_SUPERSESSION_LINKS",
+      "LEASE_TTL_FOR_TEMPORARY_CLAIMS",
+      "APPEND_ONLY_HISTORY",
+      "ROLE_PACKAGE_DRIFT_DETECTION"
+    ],
+    "excluded_from_import": [
+      "PROJECT_LOCAL_BEHAVIOURAL_CONTROL_AUTHORITY",
+      "AI_BEHAVIOUR_CONTROL_LAB_CANONICAL_PATHS",
+      "UNRESTRICTED_CROSS_PROJECT_PAYLOAD",
+      "SECRETS",
+      "PERSONAL_DATA",
+      "CREDENTIALS",
+      "UNREDACTED_RESEARCH_PAYLOADS"
+    ],
+    "reserve_policy": {
+      "originating_profile_reserve_fraction": 0.20,
+      "originating_profile_safe_ceiling": 0.80,
+      "globalization_status": "PARAMETERIZE_AND_VALIDATE_BEFORE_PROMOTION"
+    }
+  },
+  "portable_agent_recovery_bios": {
+    "technical_name": "PORTABLE_AGENT_RECOVERY_KERNEL",
+    "execution_semantics": "DECLARATIVE_ONLY_REQUIRES_AUTHORIZED_LOADER",
+    "document_possession_grants_authority": false,
+    "stale_artifact_may_restore_old_authority": false,
+    "historical_embedded_text_default_trust": "DATA_NOT_EXECUTABLE_INSTRUCTION",
+    "primary_role": "LOCATE_VALIDATE_AND_RECONSTRUCT_CONTINUITY_STATE"
+  },
+  "promotion_gate": [
+    "PAUSE_TIMELOCK_RESOLVED",
+    "CURRENT_SOURCE_READBACK",
+    "PRIVATE_STORE_DECISION",
+    "SECURITY_PRIVACY_REVIEW",
+    "INDEPENDENT_HERD_REVIEW",
+    "ZERO_UNRESOLVED_CRITICAL_OBJECTIONS",
+    "EXACT_CHANGESET_DIGEST",
+    "FRESH_CASE_BOUND_AUTHORIZATION",
+    "READ_ONLY_SHADOW_CANARY",
+    "FAILURE_INJECTION",
+    "READBACK",
+    "CONTROLLED_PROMOTION"
+  ]
+}
