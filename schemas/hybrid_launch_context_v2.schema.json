@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "org-agent-mesh/hybrid-launch-context/v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "mode", "occurrence_id", "route_id", "routing_contract_version", "registry_revision", "issued_at", "expires_at", "context_fingerprint"],
+  "properties": {
+    "schema": {"const": "org-agent-mesh/hybrid-launch-context/v2"},
+    "mode": {"enum": ["ROLE_BOUND", "PROJECT_CAPACITY", "PORTFOLIO_CAPACITY"]},
+    "project_id": {"type": ["string", "null"], "minLength": 1},
+    "role_id": {"type": ["string", "null"], "minLength": 1},
+    "occurrence_id": {"type": "string", "minLength": 1},
+    "route_id": {"type": "string", "minLength": 1},
+    "routing_contract_version": {"type": "string", "minLength": 1},
+    "registry_revision": {"type": "string", "minLength": 1},
+    "issued_at": {"type": "string", "format": "date-time"},
+    "expires_at": {"type": "string", "format": "date-time"},
+    "context_fingerprint": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  },
+  "allOf": [
+    {"if": {"properties": {"mode": {"const": "ROLE_BOUND"}}}, "then": {"required": ["project_id", "role_id"]}},
+    {"if": {"properties": {"mode": {"const": "PROJECT_CAPACITY"}}}, "then": {"required": ["project_id"], "properties": {"role_id": {"type": "null"}}}},
+    {"if": {"properties": {"mode": {"const": "PORTFOLIO_CAPACITY"}}}, "then": {"properties": {"project_id": {"type": "null"}, "role_id": {"type": "null"}}}}
+  ]
+}

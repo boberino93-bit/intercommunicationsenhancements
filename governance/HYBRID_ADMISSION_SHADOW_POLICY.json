@@ -1,0 +1,56 @@
+{
+  "schema": "org-agent-mesh/hybrid-admission-shadow-policy/v2",
+  "version": "2.0.0-shadow",
+  "status": "STAGED_DISABLED",
+  "source_project": "intercommunicationsenhancements",
+  "authorization_case": "AUTH-HYBRID-SHADOW-HARDENED-V2B-379F47DE59FC",
+  "production_activation": false,
+  "main_mutation_authorized": false,
+  "peer_propagation_authorized": false,
+  "principles": {
+    "capacity_is_not_authority": true,
+    "placement_is_not_authority": true,
+    "role_is_not_authority": true,
+    "frontier_is_discovery_only": true,
+    "generic_primary_self_admission": false,
+    "mutation_authority_conveyed": false,
+    "reuse_existing_consequence_gateway": true,
+    "consequence_gateway_is_sole_protected_effect_boundary": true,
+    "existing_mutation_authorization_remains_required": true,
+    "existing_reliability_ownership_epoch_remains_required": true,
+    "project_work_control_remains_authoritative_for_hold": true,
+    "project_local_self_admissible_roles_required": true,
+    "unknown_or_stale_state_fails_closed": true
+  },
+  "launch_modes": ["ROLE_BOUND", "PROJECT_CAPACITY", "PORTFOLIO_CAPACITY"],
+  "generic_self_admission_role_ceiling": ["research", "manager"],
+  "role_resolution_rule": "RE_RESOLVE_EXACT_TARGET_PROJECT_SELF_ADMISSIBLE_ROLES_AT_ADMISSION_TIME",
+  "peer_empty_role_policy": "DENY_SELF_ADMISSION",
+  "admission_sla": {
+    "target_seconds": 30,
+    "normal_max_seconds": 45,
+    "on_exceed": "ADMISSION_BLOCKED",
+    "infinite_crawl_allowed": false
+  },
+  "priority_model": {
+    "single_global_scalar_score": false,
+    "hard_constraints_before_ranking": true,
+    "tier_then_multidimensional_ordering": true,
+    "priority_provenance_required": true,
+    "human_priority_requires_authenticated_provenance": true,
+    "tier_0_requires_privileged_priority_verification": true
+  },
+  "ownership": {
+    "reuse_existing_claims_leases": true,
+    "reuse_reliability_ownership_epoch": true,
+    "hybrid_grant_is_fence": false,
+    "hybrid_grant_is_authorization": false
+  },
+  "rollout": {
+    "shadow_first": true,
+    "schedule_enabled": false,
+    "stage_15_launch_authorized": false,
+    "scaler_activation_authorized": false,
+    "merge_authorized": false
+  }
+}

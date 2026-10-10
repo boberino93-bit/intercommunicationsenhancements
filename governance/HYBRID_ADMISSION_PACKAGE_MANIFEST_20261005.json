@@ -1,0 +1,39 @@
+{
+  "schema": "org-agent-mesh/hybrid-admission-package-manifest/v1",
+  "package": "hardened-hybrid-admission-shadow-v2b",
+  "status": "STAGED_DISABLED",
+  "authorization_case": "AUTH-HYBRID-SHADOW-HARDENED-V2B-379F47DE59FC",
+  "pre_state": "d74b1057a0730263061b3e936da5d4aaa87b78d0",
+  "rollback_ref": "backup/pre-hybrid-admission-shadow-20261005",
+  "main_mutation": false,
+  "activation": false,
+  "merge_authorized": false,
+  "peer_propagation": false,
+  "files": [
+    "org_agent_mesh/hybrid_admission.py",
+    "schemas/hybrid_launch_context_v2.schema.json",
+    "schemas/priority_frontier_v2.schema.json",
+    "governance/HYBRID_ADMISSION_SHADOW_POLICY.json",
+    "governance/HYBRID_ADMISSION_SECURITY_RECEIPTS_20261005.json",
+    "governance/HYBRID_ADMISSION_CROSS_PROJECT_INTENT_20261005.json",
+    "research_swarm/hybrid_capacity_schedule.json",
+    "protocols/hybrid_admission_shadow_v2.md",
+    "tests/test_hybrid_admission.py",
+    "governance/HYBRID_ADMISSION_PACKAGE_MANIFEST_20261005.json"
+  ],
+  "reused_authoritative_controls": [
+    "org_agent_mesh.project_work_control",
+    "org_agent_mesh.control_plane",
+    "org_agent_mesh.reliability_kernel",
+    "org_agent_mesh.consequence_gateway",
+    "governance/MUTATION_AUTHORIZATION_POLICY.json"
+  ],
+  "shadow_guarantees": [
+    "frontier conveys no authority",
+    "generic admission conveys no mutation authority",
+    "project-local self-admissible roles are re-resolved",
+    "HOLD blocks new admission",
+    "protected effects remain outside this package",
+    "schedule definition remains disabled"
+  ]
+}

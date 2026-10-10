@@ -1,0 +1,45 @@
+{
+  "schema": "org-agent-mesh/hybrid-security-review-receipts/v1",
+  "subject_id": "global-security-change:hybrid-admission-shadow-v2b",
+  "transaction_id": "AUTH-HYBRID-SHADOW-HARDENED-V2B-379F47DE59FC",
+  "expected_pre_state": "d74b1057a0730263061b3e936da5d4aaa87b78d0",
+  "backup_ref": "backup/pre-hybrid-admission-shadow-20261005",
+  "propagation_ref": "governance/HYBRID_ADMISSION_CROSS_PROJECT_INTENT_20261005.json",
+  "warning_acknowledged": true,
+  "receipts": [
+    {
+      "receipt_id": "hybrid-v2b-review-a-20261005-1942",
+      "path_id": "independent-silo-review-a",
+      "scope": "authority-boundaries, frontier, scheduling, backpressure, fencing, rollout",
+      "subject_id": "global-security-change:hybrid-admission-shadow-v2b",
+      "transaction_id": "AUTH-HYBRID-SHADOW-HARDENED-V2B-379F47DE59FC",
+      "verifier_ref": "conversation-artifact:turn1054file0",
+      "issued_at": "2026-10-05T19:42:30-07:00",
+      "expires_at": "2026-10-05T19:54:17-07:00",
+      "verified": true,
+      "consumed": false,
+      "finding": "ADOPT_AFTER_MAJOR_REVISION",
+      "required_controls": ["structural effect-boundary enforcement", "project-local admission", "non-authoritative frontier", "fencing", "downstream backpressure", "bounded hybrid rollout"]
+    },
+    {
+      "receipt_id": "hybrid-v2b-review-b-20261005-1942",
+      "path_id": "independent-silo-review-b",
+      "scope": "security-composition, stale-state, authority-laundering, manager-primary bottlenecks, observability",
+      "subject_id": "global-security-change:hybrid-admission-shadow-v2b",
+      "transaction_id": "AUTH-HYBRID-SHADOW-HARDENED-V2B-379F47DE59FC",
+      "verifier_ref": "conversation-artifact:turn1054file1",
+      "issued_at": "2026-10-05T19:42:30-07:00",
+      "expires_at": "2026-10-05T19:54:17-07:00",
+      "verified": true,
+      "consumed": false,
+      "finding": "ADOPT_AFTER_MAJOR_REVISION",
+      "required_controls": ["do not let frontier mint authority", "action-time stale-state validation", "hybrid scheduling first", "manager and human review backpressure", "fail-closed ambiguity"]
+    }
+  ],
+  "supplemental_review": {
+    "verifier_ref": "conversation-artifact:turn1054file2",
+    "finding": "ADOPT_AFTER_MAJOR_REVISION",
+    "security_receipt": false,
+    "note": "Preserved as independent supporting evidence; not used to satisfy the two-receipt minimum."
+  }
+}
