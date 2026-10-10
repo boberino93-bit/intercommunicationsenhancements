@@ -1,0 +1,41 @@
+{
+  "schema": "intercommunications/temporary-baseline-freeze/v1",
+  "directive_id": "IEP-TEMP-R13-BASELINE-FREEZE-2026-10-10",
+  "status": "ACTIVE_TEMPORARY_DIRECTIVE",
+  "scope": "AGENTS_BOOTSTRAPPED_FROM_OR_GOVERNED_BY_THIS_REPOSITORY",
+  "starts_at": "2026-10-10T13:02:37-07:00",
+  "expires_at": "2026-10-11T13:02:37-07:00",
+  "frozen_baseline": {
+    "proposal": "Intercommunication_Enhancements_Herd_V10-R13_Forensic_Development_Evidence_Roadmap_Single_Approval_Package.md",
+    "artifact_id": "IE-2026-10-10-HERD-V10-R13-FULL-FORENSIC-SINGLE-APPROVAL-PACKAGE",
+    "sha256": "2e76291538a99ca1bdfcace0bd07d4567eb8af7e57813565b56e09b914a5650f",
+    "byte_count": 618619,
+    "source_revision": "eaaa9d086692fef5d0c4dc53588a7f768e02354b"
+  },
+  "observed_baseline_state": {
+    "canonical_main_before_freeze_directive": "eaaa9d086692fef5d0c4dc53588a7f768e02354b",
+    "latest_scheduler_run_observed": 38081881340,
+    "latest_scheduler_conclusion": "failure",
+    "failed_step": "Enforce mapped frontend sustained health",
+    "interpretation": "RECORDED_AS_BASELINE_EVIDENCE_NOT_RELABELED_AS_PASS"
+  },
+  "rule": "Treat V10-R13 and its cited source revision as the frozen experimental baseline for this 24-hour window. Do not originate or apply discretionary architecture/proposal revisions, canonical promotion, implementation, merge, propagation, or deployment based on V10-R13 while this directive is active.",
+  "allowed_work": [
+    "read-only review comparison and falsification",
+    "independent external feedback collection",
+    "read-only baseline and test-evidence inspection",
+    "required safety security or governance escalation",
+    "incident response and authorized containment",
+    "required limitation disclosure"
+  ],
+  "constraints": [
+    "No result may rewrite relabel or silently replace the frozen baseline during the active window.",
+    "New evidence may be preserved as non-authoritative review material but may not self-promote into canonical doctrine or implementation.",
+    "This directive conveys no new authority.",
+    "This directive does not weaken standing read-only forensic requirements.",
+    "Emergency action remains limited to standing authorized safety security incident-response and containment paths.",
+    "Expiry lifts only this temporary pause; it does not authorize implementation promotion propagation or deployment.",
+    "The baseline remains historically identifiable by artifact digest and source revision after expiry."
+  ],
+  "review_intent": "Hold the baseline stable while independent human feedback is sought before any further proposal revision."
+}
