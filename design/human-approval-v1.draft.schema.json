@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "org-agent-mesh/human-approval/v1-draft",
+  "title": "Organization Agent Mesh Human Approval v1 Draft",
+  "description": "Non-authoritative IPG3 design schema for bounded, expiring, replay-resistant human authorization.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "approval_id",
+    "project_id",
+    "approver",
+    "operation_class",
+    "target",
+    "task_id",
+    "effect_id",
+    "issued_at_utc",
+    "expires_at_utc",
+    "max_uses",
+    "uses",
+    "status",
+    "decision_evidence_ref",
+    "integrity"
+  ],
+  "properties": {
+    "schema": {"const": "org-agent-mesh/human-approval/v1-draft"},
+    "approval_id": {"$ref": "#/$defs/resourceId"},
+    "project_id": {"$ref": "#/$defs/projectId"},
+    "approver": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["principal_id", "display_ref"],
+      "properties": {
+        "principal_id": {"type": "string", "minLength": 1},
+        "display_ref": {"type": ["string", "null"]}
+      }
+    },
+    "operation_class": {"type": "string", "minLength": 1},
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["system", "resource", "scope_digest"],
+      "properties": {
+        "system": {"type": "string", "minLength": 1},
+        "resource": {"type": "string", "minLength": 1},
+        "scope_digest": {"anyOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]}
+      }
+    },
+    "task_id": {"type": ["string", "null"]},
+    "effect_id": {"type": ["string", "null"]},
+    "issued_at_utc": {"type": "string", "format": "date-time"},
+    "expires_at_utc": {"type": "string", "format": "date-time"},
+    "max_uses": {"type": "integer", "minimum": 1},
+    "uses": {"type": "integer", "minimum": 0},
+    "status": {"enum": ["ISSUED", "CONSUMED", "REVOKED", "EXPIRED"]},
+    "decision_evidence_ref": {"type": "string", "minLength": 1},
+    "integrity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["approval_sha256", "signature"],
+      "properties": {
+        "approval_sha256": {"anyOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]},
+        "signature": {"type": ["object", "null"]}
+      }
+    }
+  },
+  "$defs": {
+    "projectId": {"type": "string", "pattern": "^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$"},
+    "resourceId": {"type": "string", "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9._:-]*[A-Za-z0-9])?$"},
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}

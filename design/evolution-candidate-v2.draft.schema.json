@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "org-agent-mesh/evolution-candidate/v2-draft",
+  "title": "IPG3 Evolution Candidate v2 Draft",
+  "description": "Candidate lineage and promotion record for benchmark-gated recursive framework improvement.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "candidate_id", "project_id", "generation", "parent_candidate_ids", "improvement_algorithm_version",
+    "title", "hypothesis", "source_patterns", "affected_dimensions", "expected_benefits", "risk", "threat_model",
+    "baseline_ref", "sandbox_ref", "required_benchmarks", "required_adversarial_tests", "status", "created_by", "created_at_utc"
+  ],
+  "properties": {
+    "schema": {"const": "org-agent-mesh/evolution-candidate/v2-draft"},
+    "candidate_id": {"type": "string", "minLength": 12},
+    "project_id": {"type": "string", "pattern": "^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$"},
+    "generation": {"type": "integer", "minimum": 0},
+    "parent_candidate_ids": {"type": "array", "items": {"type": "string", "minLength": 12}, "uniqueItems": true},
+    "improvement_algorithm_version": {"type": "string", "minLength": 1},
+    "title": {"type": "string", "minLength": 1},
+    "hypothesis": {"type": "string", "minLength": 1},
+    "source_patterns": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["source_id", "revision", "path", "sha256", "pattern"],
+        "properties": {
+          "source_id": {"type": "string", "minLength": 1},
+          "revision": {"type": ["string", "null"]},
+          "path": {"type": ["string", "null"]},
+          "sha256": {"type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"},
+          "pattern": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "affected_dimensions": {
+      "type": "array",
+      "items": {"enum": ["IDENTITY", "AUTHORIZATION", "ISOLATION", "MESSAGING", "DELIVERY", "TASK_STATE", "ARTIFACTS", "CONCURRENCY", "RECOVERY", "INTEROPERABILITY", "TRANSPORT_SECURITY", "OBSERVABILITY", "EVALUATION", "DEPLOYMENT", "SELF_IMPROVEMENT", "OTHER"]},
+      "uniqueItems": true,
+      "minItems": 1
+    },
+    "expected_benefits": {"type": "array", "items": {"type": "string", "minLength": 1}, "minItems": 1},
+    "risk": {"enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"]},
+    "threat_model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["new_attack_surfaces", "invariants_at_risk", "abuse_cases"],
+      "properties": {
+        "new_attack_surfaces": {"type": "array", "items": {"type": "string"}},
+        "invariants_at_risk": {"type": "array", "items": {"type": "string"}},
+        "abuse_cases": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "baseline_ref": {"type": "string", "minLength": 1},
+    "sandbox_ref": {"type": ["string", "null"]},
+    "required_benchmarks": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+    "required_adversarial_tests": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+    "benchmark_result_refs": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+    "review_refs": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+    "status": {
+      "enum": ["DISCOVERED", "NORMALIZED", "THREAT_MODELED", "SANDBOXED", "TESTED", "ADVERSARIALLY_TESTED", "BENCHMARKED", "REVIEWED", "PRIMARY_ACCEPTED", "INTEGRATED", "RELEASE_VALIDATED", "REJECTED", "SUPERSEDED", "BLOCKED", "ROLLED_BACK"]
+    },
+    "disposition_reason": {"type": ["string", "null"]},
+    "created_by": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["agent_id", "agent_instance_id"],
+      "properties": {
+        "agent_id": {"type": "string", "minLength": 1},
+        "agent_instance_id": {"type": "string", "minLength": 1}
+      }
+    },
+    "created_at_utc": {"type": "string", "format": "date-time"}
+  }
+}

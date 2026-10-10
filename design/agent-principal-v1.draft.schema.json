@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "org-agent-mesh/agent-principal/v1-draft",
+  "title": "IPG3 Agent Principal v1 Draft",
+  "description": "Algorithm-neutral identity/capability binding for authenticated distributed agent execution. Possession of a valid principal never bypasses local project authorization.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "principal_id", "issuer", "subject", "project_id", "agent_id", "agent_instance_id", "role",
+    "capability_claims", "issued_at_utc", "expires_at_utc", "key_binding", "revocation", "integrity"
+  ],
+  "properties": {
+    "schema": {"const": "org-agent-mesh/agent-principal/v1-draft"},
+    "principal_id": {"type": "string", "minLength": 8},
+    "issuer": {"type": "string", "minLength": 1},
+    "subject": {"type": "string", "minLength": 1},
+    "project_id": {"type": "string", "pattern": "^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$"},
+    "agent_id": {"type": "string", "minLength": 1},
+    "agent_instance_id": {"type": "string", "minLength": 1},
+    "role": {"type": "string", "minLength": 1},
+    "capability_claims": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+    "issued_at_utc": {"type": "string", "format": "date-time"},
+    "expires_at_utc": {"type": "string", "format": "date-time"},
+    "key_binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key_id", "algorithm", "public_key_fingerprint"],
+      "properties": {
+        "key_id": {"type": "string", "minLength": 1},
+        "algorithm": {"type": "string", "minLength": 1},
+        "public_key_fingerprint": {"type": "string", "minLength": 16}
+      }
+    },
+    "revocation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["registry", "credential_version"],
+      "properties": {
+        "registry": {"type": "string", "minLength": 1},
+        "credential_version": {"type": "integer", "minimum": 1}
+      }
+    },
+    "integrity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["credential_sha256", "signature"],
+      "properties": {
+        "credential_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "signature": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["algorithm", "key_id", "value"],
+          "properties": {
+            "algorithm": {"type": "string", "minLength": 1},
+            "key_id": {"type": "string", "minLength": 1},
+            "value": {"type": "string", "minLength": 1}
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "org-agent-mesh/research-assistance-request/v1-draft",
+  "title": "Research Assistance Request v1 (draft)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema","request_id","project_id","requesting_agent","task_id","created_at_utc","problem","signals","attempts","evidence_gaps","proposed_workstreams","status"],
+  "properties": {
+    "schema": {"const": "org-agent-mesh/research-assistance-request/v1-draft"},
+    "request_id": {"type":"string","minLength":1},
+    "project_id": {"type":"string","minLength":1},
+    "requesting_agent": {
+      "type":"object","additionalProperties":false,
+      "required":["agent_id","agent_instance_id","role"],
+      "properties": {
+        "agent_id":{"type":"string","minLength":1},
+        "agent_instance_id":{"type":"string","minLength":1},
+        "role":{"enum":["PRIMARY","MANAGER","RESEARCH"]}
+      }
+    },
+    "task_id": {"type":"string","minLength":1},
+    "created_at_utc": {"type":"string","format":"date-time"},
+    "problem": {"type":"string","minLength":1},
+    "signals": {
+      "type":"object","additionalProperties":false,
+      "required":["confidence","independent_workstreams","domains","conflicting_evidence","stall_count","consequence","verification_needed","tool_gap","context_pressure","attempt_count","dependency_density","novelty"],
+      "properties": {
+        "confidence":{"type":"number","minimum":0,"maximum":1},
+        "independent_workstreams":{"type":"integer","minimum":1,"maximum":32},
+        "domains":{"type":"integer","minimum":1,"maximum":16},
+        "conflicting_evidence":{"type":"boolean"},
+        "stall_count":{"type":"integer","minimum":0},
+        "consequence":{"enum":["LOW","MEDIUM","HIGH","CRITICAL"]},
+        "verification_needed":{"type":"boolean"},
+        "tool_gap":{"type":"boolean"},
+        "context_pressure":{"type":"number","minimum":0,"maximum":1},
+        "attempt_count":{"type":"integer","minimum":0,"maximum":64},
+        "dependency_density":{"type":"number","minimum":0,"maximum":1,"description":"0 means workstreams are independently parallelizable; 1 means predominantly sequential/dependent."},
+        "novelty":{"type":"number","minimum":0,"maximum":1,"description":"Estimated novelty/absence of established precedent; advisory evidence only."}
+      }
+    },
+    "attempts": {"type":"array","items":{"type":"string","minLength":1},"maxItems":64},
+    "evidence_gaps": {"type":"array","items":{"type":"string","minLength":1},"minItems":1,"maxItems":32},
+    "proposed_workstreams": {"type":"array","items":{"type":"string","minLength":1},"minItems":1,"maxItems":32},
+    "source_refs": {"type":"array","items":{"type":"string","minLength":1},"default":[]},
+    "requested_by_policy": {"type":["string","null"]},
+    "status": {"enum":["REQUESTED","ACCEPTED","PARTIALLY_ACCEPTED","REJECTED","SUPERSEDED","CANCELLED"]}
+  }
+}

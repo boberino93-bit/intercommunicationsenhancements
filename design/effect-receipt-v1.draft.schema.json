@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "org-agent-mesh/effect-receipt/v1-draft",
+  "title": "Organization Agent Mesh Effect Receipt v1 Draft",
+  "description": "Non-authoritative IPG3 design schema separating message delivery from committed side effects.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "effect_id",
+    "project_id",
+    "task_id",
+    "message_id",
+    "idempotency_key",
+    "operation",
+    "target",
+    "request_sha256",
+    "committing_agent",
+    "status",
+    "prepared_at_utc",
+    "committed_at_utc",
+    "result",
+    "resulting_version",
+    "external_receipt",
+    "replay_disposition",
+    "evidence_refs"
+  ],
+  "properties": {
+    "schema": {"const": "org-agent-mesh/effect-receipt/v1-draft"},
+    "effect_id": {"$ref": "#/$defs/resourceId"},
+    "project_id": {"$ref": "#/$defs/projectId"},
+    "task_id": {"type": ["string", "null"]},
+    "message_id": {"type": ["string", "null"]},
+    "idempotency_key": {"$ref": "#/$defs/resourceId"},
+    "operation": {"type": "string", "minLength": 1},
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["system", "resource"],
+      "properties": {
+        "system": {"type": "string", "minLength": 1},
+        "resource": {"type": "string", "minLength": 1}
+      }
+    },
+    "request_sha256": {"$ref": "#/$defs/sha256"},
+    "committing_agent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["agent_id", "agent_instance_id", "principal_id"],
+      "properties": {
+        "agent_id": {"type": "string", "minLength": 1},
+        "agent_instance_id": {"type": "string", "minLength": 1},
+        "principal_id": {"type": ["string", "null"]}
+      }
+    },
+    "status": {
+      "enum": ["PREPARED", "COMMITTED", "FAILED", "REJECTED", "DUPLICATE_NOOP", "UNKNOWN"]
+    },
+    "prepared_at_utc": {"type": ["string", "null"], "format": "date-time"},
+    "committed_at_utc": {"type": ["string", "null"], "format": "date-time"},
+    "result": {},
+    "resulting_version": {"type": ["string", "integer", "null"]},
+    "external_receipt": {},
+    "replay_disposition": {
+      "enum": ["FIRST_COMMIT", "REPLAY_MATCHED", "REPLAY_REJECTED", "NOT_APPLICABLE"]
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "uniqueItems": true
+    }
+  },
+  "$defs": {
+    "projectId": {"type": "string", "pattern": "^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$"},
+    "resourceId": {"type": "string", "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9._:-]*[A-Za-z0-9])?$"},
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}

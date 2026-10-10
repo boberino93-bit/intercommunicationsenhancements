@@ -1,0 +1,31 @@
+{
+  "schema": "org-agent-mesh/message/v2",
+  "protocol_version": "2.4.0-alpha.1",
+  "id": "fixture-release-close-001",
+  "project_id": "intercommunicationsenhancements",
+  "destination_project_id": "intercommunicationsenhancements",
+  "timestamp_utc": "2026-10-04T02:26:00Z",
+  "from_agent": "primary",
+  "from_agent_instance_id": "primary-fixture-001",
+  "from_role": "PRIMARY",
+  "to": ["project-forum", "MANAGER", "RESEARCH"],
+  "kind": "RELEASE_CLOSE",
+  "priority": "high",
+  "subject": "Validated synchronized release fixture",
+  "summary": "Sanitized fixture representing a successful coordinated release record.",
+  "applies_to_state": {
+    "framework_version": "1.6.0-alpha.1",
+    "protocol_version": "2.4.0-alpha.1",
+    "package_status": "SYNCHRONIZED_AND_VALIDATED"
+  },
+  "evidence": [{"type": "ci", "result": "success"}],
+  "artifacts": [{"role": "PRIMARY", "sha256": "1111111111111111111111111111111111111111111111111111111111111111"}],
+  "reply_to": null,
+  "supersedes": [],
+  "requires_ack": false,
+  "tags": ["fixture", "release"],
+  "correlation_id": "fixture-release-001",
+  "causation_id": null,
+  "idempotency_key": "fixture-release-close-001",
+  "expires_at_utc": null
+}

@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "org-agent-mesh/benchmark-result/v1-draft",
+  "title": "IPG3 Benchmark Result v1 Draft",
+  "description": "Evidence record comparing an evolution candidate against an incumbent or explicit baseline before promotion.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "benchmark_result_id", "project_id", "candidate_id", "baseline_ref", "suite_id", "suite_revision",
+    "executed_at_utc", "executor", "metrics", "security_results", "regressions", "reproducibility", "decision"
+  ],
+  "properties": {
+    "schema": {"const": "org-agent-mesh/benchmark-result/v1-draft"},
+    "benchmark_result_id": {"type": "string", "minLength": 12},
+    "project_id": {"type": "string", "pattern": "^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$"},
+    "candidate_id": {"type": "string", "minLength": 12},
+    "baseline_ref": {"type": "string", "minLength": 1},
+    "suite_id": {"type": "string", "minLength": 1},
+    "suite_revision": {"type": "string", "minLength": 1},
+    "executed_at_utc": {"type": "string", "format": "date-time"},
+    "executor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["agent_id", "agent_instance_id", "principal_id"],
+      "properties": {
+        "agent_id": {"type": "string", "minLength": 1},
+        "agent_instance_id": {"type": "string", "minLength": 1},
+        "principal_id": {"type": ["string", "null"]}
+      }
+    },
+    "metrics": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "direction", "baseline", "candidate", "unit", "passed"],
+        "properties": {
+          "name": {"type": "string", "minLength": 1},
+          "direction": {"enum": ["HIGHER_IS_BETTER", "LOWER_IS_BETTER", "EQUAL_REQUIRED", "THRESHOLD"]},
+          "baseline": {},
+          "candidate": {},
+          "unit": {"type": ["string", "null"]},
+          "threshold": {},
+          "passed": {"type": "boolean"}
+        }
+      }
+    },
+    "security_results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["test_id", "result", "evidence_ref"],
+        "properties": {
+          "test_id": {"type": "string", "minLength": 1},
+          "result": {"enum": ["PASS", "FAIL", "NOT_APPLICABLE", "INCONCLUSIVE"]},
+          "evidence_ref": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "regressions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["invariant", "severity", "evidence_ref"],
+        "properties": {
+          "invariant": {"type": "string", "minLength": 1},
+          "severity": {"enum": ["INFO", "LOW", "MEDIUM", "HIGH", "CRITICAL"]},
+          "evidence_ref": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "reproducibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["runs", "consistent", "environment_refs"],
+      "properties": {
+        "runs": {"type": "integer", "minimum": 1},
+        "consistent": {"type": "boolean"},
+        "environment_refs": {"type": "array", "items": {"type": "string", "minLength": 1}}
+      }
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["outcome", "reason"],
+      "properties": {
+        "outcome": {"enum": ["SUPERIOR", "NON_INFERIOR", "INFERIOR", "UNSAFE", "INCONCLUSIVE"]},
+        "reason": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

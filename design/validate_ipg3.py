@@ -1,0 +1,101 @@
+"""Design-only validation harness for IPG3 artifacts."""
+
+from __future__ import annotations
+
+import json
+import subprocess
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent
+REPO = ROOT.parent
+
+
+def validate_json_schemas() -> list[str]:
+    failures = []
+    try:
+        from jsonschema.validators import Draft202012Validator
+    except ImportError as exc:
+        return [f"jsonschema dependency unavailable: {exc}"]
+    for path in sorted(ROOT.glob("*.draft.schema.json")):
+        try:
+            schema = json.loads(path.read_text(encoding="utf-8"))
+            Draft202012Validator.check_schema(schema)
+        except Exception as exc:
+            failures.append(f"{path.name}: {exc}")
+    return failures
+
+
+def validate_isolation() -> list[str]:
+    failures = []
+    package_map = json.loads((REPO / "packaging" / "agent_package_dependencies.json").read_text(encoding="utf-8"))
+    shared_patterns = set(package_map.get("shared_patterns", []))
+    if "design/*" in shared_patterns or "design/**" in shared_patterns:
+        failures.append("design/ is included in authoritative deployment dependency closure")
+    for path in ROOT.glob("*"):
+        if path.is_file() and path.name.startswith((
+            "message-v3",
+            "delegation-contract",
+            "effect-receipt",
+            "human-approval",
+            "trust-provenance",
+            "causal-event",
+            "evolution-candidate",
+            "benchmark-result",
+            "progress-ledger",
+            "cross-project-exchange",
+            "agent-principal",
+            "research-assistance-request",
+            "swarm-allocation-decision",
+            "swarm-state",
+            "project-initialization",
+            "epistemic-promotion-grant",
+        )):
+            if path.parent.name != "design":
+                failures.append(f"draft artifact escaped design/: {path}")
+    return failures
+
+
+def run_python_checks() -> list[str]:
+    failures = []
+    for name in (
+        "test_shadow_projection.py",
+        "test_ipg3_validators.py",
+        "test_ipg3_reference_state.py",
+        "test_ipg3_identity_validators.py",
+        "test_durable_adapters.py",
+        "test_ipg3_evolution_engine.py",
+        "test_external_mappings.py",
+        "test_ipg3_swarm_regulator.py",
+        "test_ipg3_swarm_validators.py",
+        "test_ipg3_project_initializer.py",
+        "test_ipg3_epistemic_authority.py",
+        "field_test_project_initializer.py",
+        "field_test_swarm_regulator.py",
+        "field_test_swarm_lifecycle.py",
+        "shadow_replay.py",
+    ):
+        completed = subprocess.run([sys.executable, name], cwd=ROOT, capture_output=True, text=True)
+        if completed.returncode != 0:
+            failures.append(f"{name} failed:\n{completed.stdout}\n{completed.stderr}")
+    return failures
+
+
+def main() -> int:
+    failures = []
+    failures.extend(validate_json_schemas())
+    failures.extend(validate_isolation())
+    failures.extend(run_python_checks())
+    if failures:
+        print("IPG3 DESIGN VALIDATION: FAIL")
+        for failure in failures:
+            print(f"- {failure}")
+        return 1
+    print("IPG3 DESIGN VALIDATION: PASS")
+    print(f"Validated {len(list(ROOT.glob('*.draft.schema.json')))} draft schemas plus shadow, relational, identity, atomic-state, durable-adapter, recursive-evolution, interoperability, adaptive-swarm, swarm-authority, project-initialization, epistemic-authority, initializer field-campaign, static/dynamic swarm field-campaign, and replay checks.")
+    print("Confirmed design/ remains outside authoritative deployment dependency closure.")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

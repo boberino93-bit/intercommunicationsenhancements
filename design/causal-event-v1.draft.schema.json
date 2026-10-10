@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "org-agent-mesh/causal-event/v1-draft",
+  "title": "IPG3 Causal Event v1 Draft",
+  "description": "Append-oriented event record for reconstructing distributed project history without treating free-form conversation as control state.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "event_id", "project_id", "event_sequence", "occurred_at_utc", "actor", "event_type",
+    "trace_id", "correlation_id", "causation_id", "parent_event_id", "task_id", "resource_refs",
+    "before_version", "after_version", "evidence_refs", "previous_event_hash", "event_hash"
+  ],
+  "properties": {
+    "schema": {"const": "org-agent-mesh/causal-event/v1-draft"},
+    "event_id": {"$ref": "#/$defs/resourceId"},
+    "project_id": {"$ref": "#/$defs/projectId"},
+    "event_sequence": {"type": "integer", "minimum": 0},
+    "occurred_at_utc": {"type": "string", "format": "date-time"},
+    "actor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["agent_id", "agent_instance_id", "principal_id", "role"],
+      "properties": {
+        "agent_id": {"type": "string", "minLength": 1},
+        "agent_instance_id": {"type": "string", "minLength": 1},
+        "principal_id": {"type": ["string", "null"]},
+        "role": {"type": "string", "minLength": 1}
+      }
+    },
+    "event_type": {
+      "enum": [
+        "MESSAGE_PUBLISHED", "MESSAGE_ACCEPTED", "TASK_CLAIMED", "TASK_TRANSITIONED", "LEASE_ACQUIRED",
+        "LEASE_RELEASED", "STATE_MUTATED", "ARTIFACT_PUBLISHED", "EFFECT_PREPARED", "EFFECT_COMMITTED",
+        "APPROVAL_CONSUMED", "SECURITY_REJECTION", "QUARANTINE", "DELEGATION_CREATED", "DELEGATION_COMPLETED",
+        "CANDIDATE_CREATED", "CANDIDATE_PROMOTED", "CANDIDATE_REJECTED", "RELEASE_VALIDATED", "OTHER"
+      ]
+    },
+    "trace_id": {"type": ["string", "null"]},
+    "correlation_id": {"type": ["string", "null"]},
+    "causation_id": {"type": ["string", "null"]},
+    "parent_event_id": {"type": ["string", "null"]},
+    "task_id": {"type": ["string", "null"]},
+    "resource_refs": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+    "before_version": {"type": ["integer", "string", "null"]},
+    "after_version": {"type": ["integer", "string", "null"]},
+    "evidence_refs": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+    "previous_event_hash": {"anyOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]},
+    "event_hash": {"$ref": "#/$defs/sha256"},
+    "signature": {"type": ["object", "null"]}
+  },
+  "$defs": {
+    "projectId": {"type": "string", "pattern": "^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$"},
+    "resourceId": {"type": "string", "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9._:-]*[A-Za-z0-9])?$"},
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}

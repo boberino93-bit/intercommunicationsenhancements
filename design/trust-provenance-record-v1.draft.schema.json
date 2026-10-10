@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "org-agent-mesh/trust-provenance-record/v1-draft",
+  "title": "IPG3 Trust and Provenance Record v1 Draft",
+  "description": "Non-authoritative draft for classifying durable knowledge and preserving evidence provenance before promotion into trusted state.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "record_id", "project_id", "subject", "trust_class", "validation_state",
+    "provenance", "created_by", "created_at_utc", "promotion_history", "integrity"
+  ],
+  "properties": {
+    "schema": {"const": "org-agent-mesh/trust-provenance-record/v1-draft"},
+    "record_id": {"$ref": "#/$defs/resourceId"},
+    "project_id": {"$ref": "#/$defs/projectId"},
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "id"],
+      "properties": {
+        "type": {"enum": ["CONFIG", "MESSAGE", "ARTIFACT", "FACT", "RESEARCH", "REFLECTION", "DECISION", "EFFECT", "BENCHMARK", "OTHER"]},
+        "id": {"type": "string", "minLength": 1}
+      }
+    },
+    "trust_class": {
+      "enum": ["AUTHORITATIVE_CONFIG", "VERIFIED_FACT", "EXECUTION_EVIDENCE", "DERIVED_KNOWLEDGE", "AGENT_REFLECTION", "EXTERNAL_UNTRUSTED", "QUARANTINED"]
+    },
+    "validation_state": {
+      "enum": ["UNVERIFIED", "SOURCE_VERIFIED", "CONTENT_VERIFIED", "POLICY_VERIFIED", "PROMOTED", "REJECTED", "REVOKED"]
+    },
+    "provenance": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["source_type", "source_id", "revision", "path", "sha256", "observed_at_utc"],
+        "properties": {
+          "source_type": {"enum": ["LOCAL_REPOSITORY", "PEER_REPOSITORY", "TOOL_RESULT", "HUMAN_INPUT", "EXTERNAL_STANDARD", "EXTERNAL_RESEARCH", "RUNTIME_EVENT", "OTHER"]},
+          "source_id": {"type": "string", "minLength": 1},
+          "revision": {"type": ["string", "null"]},
+          "path": {"type": ["string", "null"]},
+          "sha256": {"anyOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]},
+          "observed_at_utc": {"type": "string", "format": "date-time"}
+        }
+      }
+    },
+    "created_by": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["agent_id", "agent_instance_id", "principal_id"],
+      "properties": {
+        "agent_id": {"type": "string", "minLength": 1},
+        "agent_instance_id": {"type": "string", "minLength": 1},
+        "principal_id": {"type": ["string", "null"]}
+      }
+    },
+    "created_at_utc": {"type": "string", "format": "date-time"},
+    "expires_at_utc": {"type": ["string", "null"], "format": "date-time"},
+    "promotion_history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["from", "to", "decision_id", "decided_at_utc", "decided_by"],
+        "properties": {
+          "from": {"type": "string"},
+          "to": {"type": "string"},
+          "decision_id": {"type": "string", "minLength": 1},
+          "decided_at_utc": {"type": "string", "format": "date-time"},
+          "decided_by": {"type": "string", "minLength": 1},
+          "reason": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "integrity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["content_sha256", "signature"],
+      "properties": {
+        "content_sha256": {"$ref": "#/$defs/sha256"},
+        "signature": {"type": ["object", "null"]}
+      }
+    }
+  },
+  "$defs": {
+    "projectId": {"type": "string", "pattern": "^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$"},
+    "resourceId": {"type": "string", "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9._:-]*[A-Za-z0-9])?$"},
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}
