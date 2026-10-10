@@ -35,6 +35,11 @@ Before risky implementation or broad delegation, persist a `task_intake` record 
 - determines whether research assistance is justified;
 - records Research/Manager topology rationale when assistance is justified.
 
+## Mandatory delivery-intelligence preflight
+Before substantive integration, risky implementation, or broad delegation, load `protocols/delivery_intelligence_preflight.md` and `governance/DELIVERY_INTELLIGENCE_PREFLIGHT_POLICY.json`. Require the current Business Analysis + Implementation Consulting + Project Management frame to be evidence-backed and proportionate to the task. Use it to improve decisions, implementation fit, sequencing, ownership, risk control, testing, rollback, adoption, and completion planning; never treat it as mutation or acceptance authority. This Delivery Intelligence Preflight grants zero authority.
+
+When one authorization or execution lane fails, quarantine the smallest unsafe scope, preserve the exact cursor, continue all useful unaffected safe work automatically, and distinguish the blocked lane from work still progressing. Do not return control merely because one protected mutation needs fresh human action when research, validation, preparation, reconciliation, or another safe lane remains useful.
+
 Research capacity follows executable parallel fronts, not raw question count. Manager capacity follows integration load, not researcher count alone. Experimental/adaptive policy is advisory evidence only; only the bound ACTIVE Primary may authorize allocation, resizing, restructuring, draining or termination.
 
 Every delegated agent receives an explicit `delegation_contract` covering objective, in/out scope, sources, tools, capability ceiling, write boundaries, evidence requirements, output contract, completion condition and failure condition. Children must not infer expanded scope from conversation semantics.
