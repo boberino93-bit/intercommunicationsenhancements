@@ -115,6 +115,45 @@
         "repository_ci": "NOT_YET_OBSERVED_AT_MEMO_WRITE_TIME",
         "readback_required": true
       }
+    },
+    {
+      "interjection_id": "INT-20261011-HERD-MEMORY-GOVERNANCE-002",
+      "recorded_at": "2026-10-11T06:16:34-07:00",
+      "author": {
+        "claimed_name": "Robert Leonard",
+        "source_surface": "ChatGPT project conversation",
+        "proof_disposition": "EXPLICIT_CURRENT_CONVERSATION_REQUEST; SPEAKER CLAIM NOT INDEPENDENT AUTHENTICATION"
+      },
+      "primary_reason": "Permit a bounded nonauthoritative Herd proposal rewrite to preserve newly identified memory-bus and control-plane safety requirements: automatic raw capture must remain distinct from trust; captured material must enter quarantine before epistemic promotion; human review is required before trusted/canonical promotion; false or manipulated material remains preserved as evidence; the governed AI must not control its own governance, audit, capture, or restoration mechanisms; and awareness of governance must not grant the ability to defeat it.",
+      "requested_action": {
+        "scope": "NONAUTHORITATIVE_SINGLE_FILE_HERD_PROPOSAL_REWRITE_ONLY",
+        "canonical_promotion": false,
+        "merge": false,
+        "deployment": false,
+        "runtime_implementation": false,
+        "cross_project_propagation": false
+      },
+      "timer_effect": {
+        "status": "TIMER_REMAINS_ACTIVE",
+        "starts_at_unchanged": "2026-10-10T13:02:37-07:00",
+        "expires_at_unchanged": "2026-10-11T13:02:37-07:00",
+        "baseline_digest_unchanged": "2e76291538a99ca1bdfcace0bd07d4567eb8af7e57813565b56e09b914a5650f"
+      },
+      "authority_effect": {
+        "general_mutation_authority": false,
+        "cross_project_authority": false,
+        "scheduler_authority": false,
+        "routing_authority": false,
+        "deployment_authority": false,
+        "runtime_implementation_authority": false,
+        "proposal_review_material_only": true
+      },
+      "required_record": {
+        "single_file": true,
+        "status": "NONAUTHORITATIVE_REVIEW_MATERIAL",
+        "must_preserve_existing_parent_lineage": true,
+        "must_not_silently_remove_material_concepts": true
+      }
     }
   ]
 }
