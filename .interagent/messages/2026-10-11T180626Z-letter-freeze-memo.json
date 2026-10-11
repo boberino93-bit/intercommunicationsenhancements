@@ -1,0 +1,39 @@
+{
+  "schema": "intercommunications/timer-interjection-memo/v1",
+  "memo_id": "INT-20261011-LETTER-FREEZE-004",
+  "recorded_at": "2026-10-11T11:06:26-07:00",
+  "author": {
+    "claimed_name": "Robert Leonard",
+    "source_surface": "ChatGPT project conversation",
+    "proof_disposition": "EXPLICIT_CURRENT_CONVERSATION_REQUEST; NOT_INDEPENDENT_ACCOUNT_AUTHENTICATION"
+  },
+  "primary_reason": "Robert explicitly requested a strict 24-hour time lock with no changes and no additional modifications to existing letters, current letters, or future letters. The intent is to preserve the current project state and stop further iterative drafting during the review window.",
+  "directive": {
+    "path": ".interagent/directives/2026-10-11-24h-letter-freeze.json",
+    "commit": "53fda9fecb91cbc4b7de4d3f7d9e78ff351fc094",
+    "starts_at": "2026-10-11T11:06:26-07:00",
+    "expires_at": "2026-10-12T11:06:26-07:00"
+  },
+  "explicit_scope": [
+    "No change or additional modification to any existing letter.",
+    "No change or additional modification to any current letter.",
+    "No creation or modification of any future letter during the lock.",
+    "No message-to-Herd rewrite, proposal rewrite, appendix, index, addendum, successor revision, correction pass, or additive-only modification during the lock.",
+    "No modification of R23 or any ancestor/successor review artifact during the lock."
+  ],
+  "allowed_scope": [
+    "Read-only discussion.",
+    "Read-only inspection.",
+    "Read-only forensic analysis.",
+    "Required safety or security disclosure."
+  ],
+  "expiry_effect": "The timer ending removes only this temporary pause. It does not itself authorize any edit, rewrite, new letter, implementation, promotion, merge, propagation, or deployment. Fresh explicit user instruction is required after expiry.",
+  "authority_effect": {
+    "general_mutation_authority": false,
+    "letter_edit_authority_during_lock": false,
+    "new_letter_authority_during_lock": false,
+    "canonical_promotion_authority": false,
+    "merge_authority": false,
+    "deployment_authority": false
+  }
+}
