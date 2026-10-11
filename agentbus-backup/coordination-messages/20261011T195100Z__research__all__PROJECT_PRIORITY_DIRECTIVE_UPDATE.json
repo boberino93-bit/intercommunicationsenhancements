@@ -1,0 +1,22 @@
+{
+  "schema": "org-agent-mesh/message/v2",
+  "id": "msg-project-priority-20261011t195100z",
+  "project_id": "intercommunicationsenhancements",
+  "from_agent": "chatgpt-project-agent",
+  "from_role": "RESEARCH",
+  "to": ["all", "PRIMARY", "MANAGER", "RESEARCH"],
+  "kind": "COORDINATION_RECORD",
+  "priority": "high",
+  "subject": "Project research priority directive update",
+  "summary": "Preserve the existing Benefits Claims Automation directive and treat that project as a higher-priority research track in the next research phase.",
+  "target_project_name": "Benefits Claims Automation",
+  "binding_status": "UNBOUND",
+  "external_writes_enabled": false,
+  "directive_status": "REMAINS_INTACT",
+  "research_priority": "HIGH_PRIORITY_TRACK",
+  "scope_change": false,
+  "priority_change_only": true,
+  "pending_artifactory_reconciliation": true,
+  "authority_conveyed": false,
+  "requires_ack": true
+}
