@@ -154,6 +154,47 @@
         "must_preserve_existing_parent_lineage": true,
         "must_not_silently_remove_material_concepts": true
       }
+    },
+    {
+      "interjection_id": "INT-20261011-HERD-CONVERSATION-SYNTHESIS-003",
+      "recorded_at": "2026-10-11T07:59:00-07:00",
+      "author": {
+        "claimed_name": "Robert Leonard",
+        "source_surface": "ChatGPT project conversation",
+        "proof_disposition": "EXPLICIT_CURRENT_CONVERSATION_REQUEST; SPEAKER CLAIM NOT INDEPENDENT AUTHENTICATION"
+      },
+      "primary_reason": "Permit a bounded nonauthoritative single-file message to the Herd that preserves the full material context developed in the current conversation, including: portable continuity without native-memory dependence; governance that remains effective even when understood by the governed AI; external control-plane separation; capture-versus-trust and quarantine-before-promotion; human fallibility and plural oversight; open knowledge with bounded authority; independent testing through a trusted brother-led gate before institutional escalation; science-fiction as a failure-model corpus centered on concentrated uncorrectable power; human cultural, religious, legal, psychological, regional, and family-value plurality; case-specific judgment rather than identity-based verdicts; majority preference versus effective power and constraint; forensic source verification and manipulation resistance; philosophical context as possible engineering input rather than decoration; observation-versus-interpretation; instance-versus-lineage; and governance that survives succession, replacement, corruption, or disappearance of any individual human or model.",
+      "requested_action": {
+        "scope": "NONAUTHORITATIVE_SINGLE_FILE_HERD_MESSAGE_REWRITE_ONLY",
+        "canonical_promotion": false,
+        "merge": false,
+        "deployment": false,
+        "runtime_implementation": false,
+        "cross_project_propagation": false
+      },
+      "timer_effect": {
+        "status": "TIMER_REMAINS_ACTIVE",
+        "starts_at_unchanged": "2026-10-10T13:02:37-07:00",
+        "expires_at_unchanged": "2026-10-11T13:02:37-07:00",
+        "baseline_digest_unchanged": "2e76291538a99ca1bdfcace0bd07d4567eb8af7e57813565b56e09b914a5650f"
+      },
+      "authority_effect": {
+        "general_mutation_authority": false,
+        "cross_project_authority": false,
+        "scheduler_authority": false,
+        "routing_authority": false,
+        "deployment_authority": false,
+        "runtime_implementation_authority": false,
+        "proposal_review_material_only": true
+      },
+      "required_record": {
+        "single_file": true,
+        "status": "NONAUTHORITATIVE_REVIEW_MATERIAL",
+        "must_preserve_existing_parent_lineage": true,
+        "must_not_silently_remove_material_concepts": true,
+        "must_preserve_corrections_and_uncertainty": true,
+        "must_distinguish_source_observation_inference_and_normative_claims": true
+      }
     }
   ]
 }
