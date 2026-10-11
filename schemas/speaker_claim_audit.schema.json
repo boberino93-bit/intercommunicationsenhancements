@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Speaker Claim Audit Event",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "event_id": {"type": "string", "minLength": 1},
+    "project_id": {"type": "string", "minLength": 1},
+    "session_id": {"type": "string", "minLength": 1},
+    "timestamp_utc": {"type": "string", "minLength": 1},
+    "claimed_name": {"type": "string", "minLength": 1},
+    "claim_status": {"const": "CLAIMED_NOT_AUTHENTICATED"},
+    "reason": {
+      "enum": [
+        "STARTUP",
+        "VOCAL_MODULATION_CHANGE",
+        "SPEAKER_CHANGE_SUSPECTED",
+        "VOCAL_MODULATION_OR_SPEAKER_CHANGE",
+        "MANUAL_REBIND"
+      ]
+    },
+    "voice_signal_is_identity_proof": {"const": false},
+    "authentication_effect": {"const": "NONE"},
+    "authorization_effect": {"const": "NONE"},
+    "mutation_authority": {"const": false},
+    "previous_event_hash": {"type": ["string", "null"]},
+    "event_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  },
+  "required": [
+    "event_id",
+    "project_id",
+    "session_id",
+    "timestamp_utc",
+    "claimed_name",
+    "claim_status",
+    "reason",
+    "voice_signal_is_identity_proof",
+    "authentication_effect",
+    "authorization_effect",
+    "mutation_authority",
+    "previous_event_hash",
+    "event_hash"
+  ]
+}
