@@ -1,0 +1,40 @@
+{
+  "schema": "intercommunications/temporary-letter-freeze/v1",
+  "directive_id": "IEP-TEMP-LETTER-FREEZE-2026-10-11",
+  "status": "ACTIVE_TEMPORARY_DIRECTIVE",
+  "starts_at": "2026-10-11T11:06:26-07:00",
+  "expires_at": "2026-10-12T11:06:26-07:00",
+  "duration": "PT24H",
+  "scope": "INTERCOMMUNICATION_ENHANCEMENTS_PROJECT",
+  "requested_by": "Robert Leonard via explicit current-conversation instruction",
+  "primary_reason": "Impose a strict 24-hour pause on all letter and proposal drafting or modification so the current state remains unchanged during the review period.",
+  "explicit_rule": "NO CHANGES OR ADDITIONAL MODIFICATIONS TO ANY EXISTING LETTER, CURRENT LETTER, OR FUTURE LETTER DURING THIS 24-HOUR WINDOW. DO NOT CREATE, REWRITE, APPEND, AMEND, CORRECT, EXPAND, CONDENSE, REINDEX, REFORMAT, SUPERSEDE, OR OTHERWISE ALTER ANY LETTER, MESSAGE-TO-HERD, PROPOSAL, DRAFT, APPENDIX, INDEX, ADDENDUM, SUCCESSOR REVISION, OR REVIEWER COMMUNICATION. ADDITIVE-ONLY WORK IS STILL A CHANGE AND IS PROHIBITED.",
+  "also_prohibited": [
+    "discretionary architecture changes",
+    "proposal successor revisions",
+    "canonical promotion",
+    "implementation, merge, propagation, or deployment",
+    "modification of R23 or any ancestor or successor review artifact"
+  ],
+  "allowed": [
+    "read-only discussion",
+    "read-only inspection",
+    "read-only forensic analysis",
+    "required safety or security disclosure",
+    "this directive record itself, solely to establish the requested freeze"
+  ],
+  "expiry_semantics": "Expiry ends this temporary pause but grants no editing, mutation, promotion, merge, deployment, or implementation authority. Any post-expiry change requires a fresh explicit user instruction.",
+  "baseline": {
+    "repository_main_at_request": "c20a69329074e2edae78e2721ef8913a0e75e085",
+    "latest_local_review_artifact": "Intercommunication_Enhancements_Herd_V10-R23_INDEXED_EPISTEMIC_GOVERNANCE_FULL_SINGLE_FILE_DRAFT.md",
+    "latest_local_review_sha256": "1493adc4cb2dbe65c20618676c8760d06791f864bee3f365fe7516c21bc09c9d",
+    "r23_status": "NONAUTHORITATIVE_LOCAL_REVIEW_MATERIAL"
+  },
+  "invariants": [
+    "NO LETTER CHANGES DURING THE LOCK",
+    "NO NEW LETTERS DURING THE LOCK",
+    "ADDITIVE_ONLY IS STILL A CHANGE",
+    "READ_ONLY_ANALYSIS IS ALLOWED",
+    "EXPIRY IS NOT AUTHORIZATION"
+  ]
+}
