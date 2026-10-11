@@ -37,5 +37,84 @@
     "Expiry lifts only this temporary pause; it does not authorize implementation promotion propagation or deployment.",
     "The baseline remains historically identifiable by artifact digest and source revision after expiry."
   ],
-  "review_intent": "Hold the baseline stable while independent human feedback is sought before any further proposal revision."
+  "review_intent": "Hold the baseline stable while independent human feedback is sought before any further proposal revision.",
+  "interjections": [
+    {
+      "interjection_id": "INT-20261010-CONTINUITY-SPEAKER-001",
+      "recorded_at": "2026-10-10T21:24:29-07:00",
+      "author": {
+        "claimed_name": "Robert Leonard",
+        "github_login": "boberino93-bit",
+        "proof_issue": 190,
+        "proof_created_at": "2026-10-10T21:20:09-07:00",
+        "proof_disposition": "REGISTERED_GITHUB_PRINCIPAL_MATCH_VERIFIED"
+      },
+      "primary_reason": "Permit a bounded project-local continuity restoration and speaker re-identification improvement because repeated loss of structured project context was materially impairing continuity, while preserving the active freeze and preventing restored memory or speaker claims from carrying mutation authority.",
+      "authorization": {
+        "case_id": "AUTH-IEP-20261010-2117-BOOTSTRAP-CONTINUITY-SPEAKER",
+        "challenge_nonce": "996ee0fc5ce183f4693b6a166a34bc43",
+        "action_digest": "d84c7c910e4db22307e7d3b2817389e149cddc06379552a2ccc3a183dfa60adf",
+        "consequence_class": "SECURITY_OR_CREDENTIAL_BOUNDARY_CHANGE",
+        "target_scope": "boberino93-bit/intercommunicationsenhancements",
+        "expected_pre_state": "8ea443c9fc26fcae927b6c4050bdd48d042586ad",
+        "method": "HUMAN_PERFORMED_REGISTERED_GITHUB_CHALLENGE"
+      },
+      "timer_effect": {
+        "status": "TIMER_REMAINS_ACTIVE",
+        "starts_at_unchanged": "2026-10-10T13:02:37-07:00",
+        "expires_at_unchanged": "2026-10-11T13:02:37-07:00",
+        "baseline_digest_unchanged": "2e76291538a99ca1bdfcace0bd07d4567eb8af7e57813565b56e09b914a5650f"
+      },
+      "authority_effect": {
+        "general_mutation_authority": false,
+        "cross_project_authority": false,
+        "scheduler_authority": false,
+        "routing_authority": false,
+        "deployment_authority": false,
+        "restored_context_authority": "NONE",
+        "speaker_claim_authentication_effect": "NONE",
+        "speaker_claim_authorization_effect": "NONE"
+      },
+      "implemented_changes": [
+        {
+          "path": "org_agent_mesh/bootstrap_continuity.py",
+          "commit": "bdc9c824f9fae76995db632b4784e669a406d58a",
+          "purpose": "Nonauthoritative external continuity attestation plus replaceable active speaker claim and append-only hash-chained speaker audit runtime."
+        },
+        {
+          "path": "protocols/bootstrap_continuity_and_speaker.md",
+          "commit": "3c96faa18a1e6ebf157c00041ac43bedd0b2fc3b",
+          "purpose": "Define immediate post-bootstrap restoration and open-ended speaker re-identification behavior."
+        },
+        {
+          "path": "schemas/speaker_claim_audit.schema.json",
+          "commit": "70c9e70722e8af64957c46e7c86c75c7613501ad",
+          "purpose": "Machine-readable speaker-claim audit event contract."
+        },
+        {
+          "path": "tests/test_bootstrap_continuity_speaker.py",
+          "commit": "2e5bc3609fe44c3b41edc387d4bda856b36e0e04",
+          "purpose": "Regression tests for restoration authority denial, native-memory denial, project mismatch, open-ended startup prompt, voice-change re-identification, active-speaker replacement, and audit-history preservation."
+        },
+        {
+          "path": "BOOTSTRAP_ORDER.json",
+          "commit": "4062cdffb51e45465c324d2eb39a652be728c8bf",
+          "purpose": "Require continuity restoration and speaker claim/audit immediately after local AGENT_BOOTSTRAP load and before order 9."
+        }
+      ],
+      "corrective_event": {
+        "issue": 191,
+        "created_at": "2026-10-10T21:22:38-07:00",
+        "closed_at": "2026-10-10T21:22:44-07:00",
+        "classification": "ACCIDENTAL_UNRELATED_TOOL_SIDE_EFFECT",
+        "correction": "CLOSED_NOT_PLANNED_IMMEDIATELY",
+        "code_or_timer_semantic_effect": "NONE"
+      },
+      "verification": {
+        "offline_candidate_core_checks": "PASS",
+        "repository_ci": "NOT_YET_OBSERVED_AT_MEMO_WRITE_TIME",
+        "readback_required": true
+      }
+    }
+  ]
 }
