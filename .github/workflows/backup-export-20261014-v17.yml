@@ -1,0 +1,53 @@
+name: Backup Export V17 Non-CV
+
+on:
+  push:
+    branches:
+      - backup-export-20261014-v17
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build repository bundles
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$GITHUB_WORKSPACE/export" "$GITHUB_WORKSPACE/mirrors"
+          repos=(
+            warp-propulsion-lab
+            ai-behaviour-control-lab
+            duo-open
+            benefitflow
+            intercommunicationsenhancements
+            samsungpowerbootstrap
+            XRPTHESIS
+          )
+          for repo in "${repos[@]}"; do
+            echo "Exporting ${repo}"
+            git clone --mirror "https://github.com/boberino93-bit/${repo}.git" "$GITHUB_WORKSPACE/mirrors/${repo}.git"
+            git -C "$GITHUB_WORKSPACE/mirrors/${repo}.git" bundle create "$GITHUB_WORKSPACE/export/${repo}.bundle" --all
+            git -C "$GITHUB_WORKSPACE/mirrors/${repo}.git" show-ref | sort > "$GITHUB_WORKSPACE/export/${repo}.refs.txt"
+          done
+          (
+            cd "$GITHUB_WORKSPACE/export"
+            sha256sum *.bundle > SHA256SUMS.txt
+          )
+          cat > "$GITHUB_WORKSPACE/export/README_BACKUP.txt" <<'EOF'
+          Intercommunication Enhancements V17 backup repository export.
+          Scope: seven non-CV repositories accessible to the owner at export time.
+          Format: Git bundle per repository plus ref inventory and SHA-256 manifest.
+          CVSupport is intentionally excluded and exported separately.
+          Restore example: git clone <repository>.bundle <repository>
+          EOF
+
+      - name: Upload backup artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: full-project-backup-non-cv-20261014-v17
+          path: export/
+          if-no-files-found: error
+          retention-days: 7
