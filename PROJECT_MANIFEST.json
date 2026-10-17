@@ -33,22 +33,36 @@
     "project_scoped": true
   },
   "assumptions": [
-    "The uploaded Organization Agent Mesh v1.0.0 package is the seed baseline."
+    "The uploaded Organization Agent Mesh v1.0.0 package is the seed baseline.",
+    "V26 is the canonical active bootstrap generation; V25 R11 and earlier remain preserved historical lineage only."
   ],
   "authoritative_sources": [
-    "uploaded org-agent-mesh-framework-v1.0.0 package",
-    "this repository after accepted integration"
+    "PROJECT_MANIFEST_V26.json",
+    "bootstrap/V26_BOOTSTRAP_ADAPTER.json",
+    "BOOTSTRAP_ORDER.json",
+    "this repository after accepted integration",
+    "uploaded org-agent-mesh-framework-v1.0.0 package as preserved seed lineage"
   ],
+  "canonical_bootstrap_generation": "V26",
+  "canonical_generation_manifest": "PROJECT_MANIFEST_V26.json",
+  "canonical_bootstrap_adapter": "bootstrap/V26_BOOTSTRAP_ADAPTER.json",
+  "canonical_artifact_sha256": "122e73dc7ba01384d799fc508c337081948ae1714f869a318d2ab96cd142d778",
   "communication_policy": {
     "append_only": true,
     "cross_project_default": "DENY",
     "internal_bus_cross_project_override": "NOT_AVAILABLE",
     "messages_point_to_evidence": true,
     "project_identity_required": true,
-    "supersession_not_deletion": true
+    "supersession_not_deletion": true,
+    "shared_intercommunication_protocol_implies_shared_project_state": false,
+    "cv_support_federated": false
   },
-  "completion_definition": "Identity, capability, communication, concurrency, deployment package, test and documentation controls are synchronized and exact-SHA release-gate validated.",
+  "completion_definition": "V26 canonical bootstrap identity, VMBUS/principal-context readiness, project isolation, capability, communication, concurrency, deployment package, test and documentation controls are synchronized and exact-SHA release-gate validated.",
   "constraints": [
+    "V26 VMBUS_READY must be satisfied before project binding",
+    "V26 PRINCIPAL_CONTEXT_READY must be satisfied before project binding and task interpretation",
+    "Intercommunication Enhancements is the only shared coordination project; shared protocol does not imply shared project state or authority",
+    "CV Support remains non-federated and isolated from shared project coordination",
     "Do not modify peer project repositories from this project",
     "Deny cross-project access by default",
     "Preserve evidence and auditability",
@@ -57,9 +71,9 @@
     "Recursive learning may observe peers read-only but may graft changes only into this project after local review",
     "Preserve at least 20 percent verified repository/artifact capacity for essential writes when a hard limit is known",
     "Unknown repository/artifact capacity must never be interpreted as unlimited",
-    "Current human project intent and the local identity lock must be validated before continuation state becomes actionable",
+    "Current human project intent and the local identity lock must be validated after V26 standalone readiness and project binding before continuation state becomes actionable",
     "Durable persistence adapters must preserve atomic lease and compare-and-set semantics or fail closed",
-    "Mutation authority must be derived from an ACTIVE bound execution session, not caller-supplied identity strings",
+    "Mutation authority must be derived from an ACTIVE bound execution session plus current case-bound authorization, not caller-supplied identity strings",
     "Canonical identifiers must be validated without lossy sanitization"
   ],
   "control_plane_policy": {
@@ -76,10 +90,10 @@
     "child_execution_instance": "FRESH",
     "child_project_binding": "INHERIT_PARENT",
     "durable_adapter_policy": "PRESERVE_ATOMICITY_OR_FAIL_CLOSED",
-    "identity_gate": "CURRENT_HUMAN_INTENT_THEN_PROJECT_IDENTITY_LOCK",
+    "identity_gate": "V26_VMBUS_READY_AND_PRINCIPAL_CONTEXT_READY_THEN_PROJECT_BIND_THEN_CURRENT_HUMAN_INTENT_AND_PROJECT_IDENTITY_LOCK",
     "lease_expiry_recovery": true,
     "lease_scope": "PROJECT_RESOURCE_AND_EXECUTION_INSTANCE",
-    "mutation_authority_source": "ACTIVE_BOUND_SESSION",
+    "mutation_authority_source": "ACTIVE_BOUND_SESSION_PLUS_CURRENT_CASE_BOUND_AUTHORIZATION",
     "project_lifecycle": [
       "ACTIVE",
       "DRAINING",
@@ -96,7 +110,7 @@
     "adversarial tests",
     "agent deployment packages"
   ],
-  "desired_outcome": "A reusable, fail-closed, project-scoped communication and deployment control plane suitable for autonomous multi-project operation.",
+  "desired_outcome": "A reusable, fail-closed V26 intercommunication control plane in which Intercommunication Enhancements supplies the shared coordination interface while every participating project retains isolated state, authority and VMBUS namespaces, with CV Support excluded from federation.",
   "framework_version": "1.6.0-alpha.1",
   "integration_authority": "ORCHESTRATOR",
   "lock_namespace": "intercommunicationsenhancements::locks",
@@ -104,6 +118,7 @@
   "non_goals": [
     "Implement domain logic for Duo Open",
     "Implement domain logic for BenefitFlow",
+    "Federate or mutate CV Support",
     "Create shared mutable state between projects",
     "Use Slack as canonical accepted state",
     "Create a central controller that may mutate peer projects"
@@ -116,13 +131,18 @@
     "deterministic_archive_metadata": true,
     "exact_source_revision_required": true,
     "manifest_schema": "org-agent-mesh/agent-package-manifest/v3",
-    "release_set_manifest": "dist/release-set.json"
+    "release_set_manifest": "dist/release-set.json",
+    "canonical_bootstrap_generation": "V26",
+    "required_v26_components": [
+      "PROJECT_MANIFEST_V26.json",
+      "bootstrap/V26_BOOTSTRAP_ADAPTER.json"
+    ]
   },
   "parallelism_limits": {
     "max_active_specialists": 8,
     "status": "INITIAL"
   },
-  "problem_statement": "Harden the Organization Agent Mesh inter-agent communication architecture for safe simultaneous operation of multiple unrelated projects while preserving project-specific autonomy and synchronized deployable agent packages.",
+  "problem_statement": "Harden the Organization Agent Mesh inter-agent communication architecture for safe simultaneous operation of multiple unrelated projects while preserving project-specific autonomy, isolated state/authority, and synchronized V26 deployable agent packages.",
   "project_id": "intercommunicationsenhancements",
   "project_name": "Intercommunications Enhancements",
   "project_root": ".",
@@ -132,6 +152,7 @@
   "prohibited_actions": [
     "Write to Duo Open repository",
     "Write to BenefitFlow repository",
+    "Write to CV Support or federate CV Support",
     "Write to any peer repository during self-enhancement observation",
     "Guess project identity for mutating operations",
     "Authorize mutation from an unverified caller-supplied project_id",
@@ -140,7 +161,8 @@
     "Invent a provider hard limit or treat an unknown capacity limit as unlimited",
     "Allow an unbound agent to mutate project state",
     "Silently accept a stale state version",
-    "Allow a restarted execution instance to inherit an earlier instance-owned lease"
+    "Allow a restarted execution instance to inherit an earlier instance-owned lease",
+    "Treat V25 R11 or earlier lineage as the current active bootstrap generation"
   ],
   "protocol_version": "2.4.0-alpha.1",
   "repository_identity": "boberino93-bit/intercommunicationsenhancements",
@@ -149,11 +171,15 @@
   "security_classification": "INTERNAL_DESIGN",
   "source_systems": [
     "GitHub",
-    "Slack"
+    "Slack",
+    "ChatGPT Library AgentBus when available"
   ],
   "success_criteria": [
-    "Current project intent and identity lock are validated before continuation state or mutable work",
+    "V26 is the only canonical active bootstrap generation on current surfaces",
+    "VMBUS_READY and PRINCIPAL_CONTEXT_READY occur before project binding and task interpretation",
+    "Current project intent and identity lock are validated after V26 standalone readiness before continuation state or mutable work",
     "Concurrent projects cannot accidentally route or mutate across namespaces",
+    "CV Support remains outside federation",
     "Unbound or forged caller identity cannot authorize mutation",
     "Child agents inherit project identity and cannot escalate parent capabilities",
     "Canonical resource identifiers cannot collide through normalization",
@@ -161,15 +187,16 @@
     "Compare-and-set rejects stale mutations",
     "One project can pause or drain without stopping unrelated projects",
     "Duplicate deliveries are safe no-ops and invalid/expired messages remain non-executable quarantine evidence",
-    "Every deployable runtime/schema/protocol dependency is captured by the package dependency map",
+    "Every deployable runtime/schema/protocol dependency and the V26 canonical adapter/manifest are captured by the package dependency map",
     "PRIMARY, MANAGER and RESEARCH packages are reproducible, role-correct and traceable to one exact source revision",
-    "A third project can adopt the protocol without code changes to the core"
+    "A participating project can adopt the shared interface without receiving another project's state or authority"
   ],
   "task_namespace": "intercommunicationsenhancements::tasks",
   "validation_methods": [
     "unit tests",
     "integration tests",
     "adversarial isolation tests",
+    "V26 canonical alignment tests",
     "lease contention and expiry tests",
     "compare-and-set stale-write tests",
     "delivery acknowledgement/retry/quarantine tests",
