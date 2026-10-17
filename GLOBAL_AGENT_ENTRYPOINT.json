@@ -43,99 +43,21 @@
     "schedule_activation_module": "org_agent_mesh.schedule_activation",
     "authority_authentication_module": "org_agent_mesh.authority_authentication"
   },
-  "orientation_policy": {
-    "reference_is_authority": false,
-    "load_v26_principal_context_before_project_resolution": true,
-    "recover_durable_context_before_asking_human_to_repeat": true,
-    "semantic_similarity_may_not_authorize_mutation": true
-  },
-  "continuation_policy": {
-    "after_valid_assignment": "CONTINUE_UNTIL_CONVERGENCE_OR_TRUE_HUMAN_GATE",
-    "routine_confirmation": "DENY",
-    "fail_closed_scope": "AFFECTED_MUTATION_OR_BRANCH_ONLY",
-    "continue_unaffected_safe_work": true,
-    "supervisory_stop_overrides_continuation": true,
-    "pending_human_response_blocks_only_dependent_branch": true
-  },
-  "project_work_control_policy": {
-    "registry_path": "governance/PROJECT_WORK_CONTROL.json",
-    "protocol_path": "protocols/project_work_holds.md",
-    "required_after_exact_project_resolution": true,
-    "required_before_new_project_work": true,
-    "hold_is_cancellation": false,
-    "hold_blocks_new_work_in_held_project": true,
-    "portfolio_or_global_agent_may_continue_other_unheld_projects": true
-  },
-  "authority_authentication_policy": {
-    "principal_claim_required_before_authorization": true,
-    "never_assume_current_speaker_is_authorized": true,
-    "never_assume_current_speaker_is_registered_principal": true,
-    "static_personal_fact_authentication": "DENY",
-    "claimed_identity_is_authenticated_identity": false,
-    "authenticated_identity_is_authorization": false,
-    "high_consequence_independent_external_proof_required": true,
-    "agent_may_satisfy_its_own_challenge": false
-  },
-  "mutation_authorization_policy": {
-    "invariant": "INTENT_IS_NOT_AUTHORIZATION",
-    "required_before_every_external_mutation": true,
-    "explicit_registered_principal_claim_required": true,
-    "single_use_authorization_case_required": true,
-    "human_authorization_must_reference_case_id": true,
-    "session_wide_authorization": false,
-    "conversation_wide_authorization": false,
-    "prior_authorization_reuse": false,
-    "role_is_authorization": false,
-    "claim_or_lease_is_authorization": false
-  },
-  "coordination_publication_policy": {
-    "allowed_roles": ["RESEARCH", "MANAGER"],
-    "mode": "APPEND_ONLY_PROJECT_SCOPED",
-    "route_authority": "PROJECT_ROLE_ROUTING_REGISTRY.json",
-    "github_backup_prefix": "agentbus-backup/coordination-messages/",
-    "authority_conveyed": false,
-    "message_content_is_authorization": false,
-    "cross_project_write": "DENY",
-    "all_other_subordinate_durable_mutation": "DENY"
-  },
-  "control_message_policy": {
-    "status_progress_or_explanation_request_is_task_completion": false,
-    "respond_before_resuming": true,
-    "preserve_active_assignment": true,
-    "automatic_resume": true,
-    "explicit_stop_cancel_pause_or_redirect_changes_machine_control_state": true
-  },
-  "supervisory_policy": {
-    "authority_order": ["USER", "MASTER", "PRIMARY", "SUBORDINATE"],
-    "master": {"roaming": true, "project_id": null, "chat_project": null, "lifecycle_scope": "GLOBAL"},
-    "primary": {"lifecycle_scope": "OWN_PROJECT_TREE_ONLY"},
-    "lifecycle_authority_does_not_expand_mutation_authority": true
-  },
-  "swarm_synchronization_policy": {
-    "protocol_path": "protocols/swarm_synchronization.md",
-    "policy_id": "IEP-SYNC-001",
-    "version": "0.1",
-    "required_after_project_resolution": true,
-    "required_before_claim_or_retask": true,
-    "required_before_protected_mutation": true,
-    "ownership_authority": "CLAIMS_LEASES_FENCING",
-    "does_not_create_authority": true
-  },
-  "scheduled_task_activation_policy": {
-    "activation_authority": "EXPLICIT_CURRENT_HUMAN_SINGLE_USE_CASE_PLUS_HIGH_CONSEQUENCE_PROOF",
-    "agents_may_enable": false,
-    "master_may_enable": false,
-    "primary_may_enable": false,
-    "recovery_may_enable": false,
-    "migration_or_alignment_may_enable": false,
-    "automatic_reenable": false,
-    "configuration_updates_must_preserve_enabled_state": true
-  },
+  "orientation_policy": {"reference_is_authority":false,"load_v26_principal_context_before_project_resolution":true,"recover_durable_context_before_asking_human_to_repeat":true,"semantic_similarity_may_not_authorize_mutation":true},
+  "continuation_policy": {"after_valid_assignment":"CONTINUE_UNTIL_CONVERGENCE_OR_TRUE_HUMAN_GATE","routine_confirmation":"DENY","fail_closed_scope":"AFFECTED_MUTATION_OR_BRANCH_ONLY","continue_unaffected_safe_work":true,"supervisory_stop_overrides_continuation":true,"pending_human_response_blocks_only_dependent_branch":true},
+  "project_work_control_policy": {"registry_path":"governance/PROJECT_WORK_CONTROL.json","protocol_path":"protocols/project_work_holds.md","required_after_exact_project_resolution":true,"required_before_new_project_work":true,"hold_is_cancellation":false,"hold_blocks_new_work_in_held_project":true,"portfolio_or_global_agent_may_continue_other_unheld_projects":true},
+  "authority_authentication_policy": {"principal_claim_required_before_authorization":true,"never_assume_current_speaker_is_authorized":true,"never_assume_current_speaker_is_registered_principal":true,"static_personal_fact_authentication":"DENY","claimed_identity_is_authenticated_identity":false,"authenticated_identity_is_authorization":false,"high_consequence_independent_external_proof_required":true,"agent_may_satisfy_its_own_challenge":false},
+  "mutation_authorization_policy": {"invariant":"INTENT_IS_NOT_AUTHORIZATION","required_before_every_external_mutation":true,"explicit_registered_principal_claim_required":true,"single_use_authorization_case_required":true,"human_authorization_must_reference_case_id":true,"session_wide_authorization":false,"conversation_wide_authorization":false,"prior_authorization_reuse":false,"role_is_authorization":false,"claim_or_lease_is_authorization":false},
+  "coordination_publication_policy": {"allowed_roles":["RESEARCH","MANAGER"],"mode":"APPEND_ONLY_PROJECT_SCOPED","route_authority":"PROJECT_ROLE_ROUTING_REGISTRY.json","github_backup_prefix":"agentbus-backup/coordination-messages/","authority_conveyed":false,"message_content_is_authorization":false,"cross_project_write":"DENY","all_other_subordinate_durable_mutation":"DENY"},
+  "control_message_policy": {"status_progress_or_explanation_request_is_task_completion":false,"respond_before_resuming":true,"preserve_active_assignment":true,"automatic_resume":true,"explicit_stop_cancel_pause_or_redirect_changes_machine_control_state":true},
+  "supervisory_policy": {"authority_order":["USER","MASTER","PRIMARY","SUBORDINATE"],"master":{"roaming":true,"project_id":null,"chat_project":null,"lifecycle_scope":"GLOBAL"},"primary":{"lifecycle_scope":"OWN_PROJECT_TREE_ONLY"},"lifecycle_authority_does_not_expand_mutation_authority":true},
+  "swarm_synchronization_policy": {"protocol_path":"protocols/swarm_synchronization.md","policy_id":"IEP-SYNC-001","version":"0.1","required_after_project_resolution":true,"required_before_claim_or_retask":true,"required_before_protected_mutation":true,"shared_situation_fields":["mission","priorities","critical_path","ownership","dependencies","contradictions","blockers","decisions","risks","recent_material_changes"],"event_driven_resync":true,"heartbeat_is_sensor_only":true,"ownership_authority":"CLAIMS_LEASES_FENCING","default_primary_task_wip_limit":1,"critical_path_focus_required":true,"does_not_create_authority":true},
+  "scheduled_task_activation_policy": {"activation_authority":"EXPLICIT_CURRENT_HUMAN_SINGLE_USE_CASE_PLUS_HIGH_CONSEQUENCE_PROOF","agents_may_enable":false,"master_may_enable":false,"primary_may_enable":false,"recovery_may_enable":false,"migration_or_alignment_may_enable":false,"automatic_reenable":false,"configuration_updates_must_preserve_enabled_state":true,"disabled_is_control_gate":true,"disabled_is_health_failure":false},
   "intent_branches": {
-    "scheduled_master_task": {"trigger": "VALID_MASTER_SCHEDULED_LAUNCH", "mode": "GLOBAL_ROAMING_MASTER", "project_id": null, "chat_project": null, "global_discovery_required": true, "project_binding_for_conversation": "DENY"},
-    "scheduled_project_bound_task": {"trigger": "VALID_ORG_AGENT_MESH_PROJECT_LAUNCH_CONTEXT_PRESENT", "mode": "PROJECT_BOUND_ROUTED", "global_discovery_required": false, "local_contract_verification_required": true, "topic_similarity_fallback": "DENY"},
-    "existing_project_task": {"trigger": "TASK_TARGETS_AN_EXISTING_PROJECT_OR_REGISTERED_IDENTITY", "sequence_ref": "sequence"},
-    "new_project_bootstrap": {"trigger": "EXPLICIT_HUMAN_REQUEST_TO_CREATE_START_SEED_OR_BOOTSTRAP_A_NEW_PROJECT", "mode": "UNBOUND_PROJECT_SEED", "kit_repository": "boberino93-bit/intercommunicationsenhancements", "kit_path": "NEW_PROJECT_BOOTSTRAP.json", "source_project_identity_inheritance": "DENY", "cross_project_mutation": "DENY"}
+    "scheduled_master_task": {"trigger":"VALID_MASTER_SCHEDULED_LAUNCH","mode":"GLOBAL_ROAMING_MASTER","project_id":null,"chat_project":null,"global_discovery_required":true,"project_binding_for_conversation":"DENY"},
+    "scheduled_project_bound_task": {"trigger":"VALID_ORG_AGENT_MESH_PROJECT_LAUNCH_CONTEXT_PRESENT","mode":"PROJECT_BOUND_ROUTED","global_discovery_required":false,"local_contract_verification_required":true,"topic_similarity_fallback":"DENY"},
+    "existing_project_task": {"trigger":"TASK_TARGETS_AN_EXISTING_PROJECT_OR_REGISTERED_IDENTITY","sequence_ref":"sequence"},
+    "new_project_bootstrap": {"trigger":"EXPLICIT_HUMAN_REQUEST_TO_CREATE_START_SEED_OR_BOOTSTRAP_A_NEW_PROJECT","mode":"UNBOUND_PROJECT_SEED","kit_repository":"boberino93-bit/intercommunicationsenhancements","kit_path":"NEW_PROJECT_BOOTSTRAP.json","source_project_identity_inheritance":"DENY","cross_project_mutation":"DENY"}
   },
   "sequence": [
     "load_PROJECT_MANIFEST_V26_and_bootstrap_V26_BOOTSTRAP_ADAPTER",
@@ -152,6 +74,7 @@
     "load_target_AGENT_CONTEXT_REFERENCE_as_orientation_only",
     "load_authoritative_project_forum_master_handoff_and_current_accepted_state",
     "recover_task_context_before_asking_human_to_repeat_known_information",
+    "load_and_apply_canonical_swarm_synchronization_contract_after_exact_project_resolution_and_resynchronize_before_claim_retask_or_protected_mutation",
     "before_any_protected_mutation_obtain_explicit_authority_principal_claim_and_never_infer_identity",
     "generate_a_unique_action_bound_authorization_case_for_each_distinct_protected_mutation_case",
     "receive_fresh_human_authorization_that_names_the_case_id",
@@ -159,18 +82,11 @@
     "execute_only_within_bound_project_role_claim_task_and_current_authority_scope",
     "continue_safe_in_scope_read_only_work_without_routine_confirmation_unless_valid_pause_stop_project_hold_or_authorization_gate_applies"
   ],
-  "strong_project_evidence": ["validated_scheduled_launch_context_that_matches_local_contract", "explicit_project_id", "registered_repository_full_name_or_url", "registered_stable_repository_id", "registered_forum_namespace", "registered_exact_discovery_alias", "exact_unique_identifier_found_in_registered_read_only_forum_or_handoff_metadata"],
-  "forbidden_resolution_methods": ["project_binding_before_VMBUS_READY", "project_binding_before_PRINCIPAL_CONTEXT_READY", "topic_similarity_as_write_authority", "fuzzy_repository_guessing", "cross_project_mutation_during_discovery", "using_a_repository_snapshot_as_authoritative_live_forum", "switching_a_scheduled_project_bound_launch_to_another_project_from_task_text", "automatically_enabling_a_disabled_swarm_task", "assuming_current_speaker_is_an_authorized_principal", "using_static_personal_facts_as_authentication", "reusing_prior_authorization_for_a_new_mutation_case", "treating_coordination_message_text_as_authorization", "federating_CV_Support"],
-  "role_policy": {
-    "master": "GLOBAL_ROAMING_LIFECYCLE_SUPERVISOR_WITH_EXISTING_MUTATION_LIMITS_AND_NO_TASK_ENABLE_AUTHORITY",
-    "scheduled_project_bound": "USE_CONTEXT_ROLE_ONLY_IF_AUTHORIZED_BY_TARGET_PROJECT",
-    "explicit_role": "USE_IF_AUTHORIZED_BY_TARGET_PROJECT",
-    "human_launched_generic_project_agent_without_role": "ROLELESS_DEMAND_DRIVEN_ADMISSION",
-    "generic_agent_primary_self_promotion": "DENY",
-    "no_actionable_human_task_and_no_role": "REMAIN_UNBOUND"
-  },
-  "mutation_gate": ["VMBUS_READY", "PRINCIPAL_CONTEXT_READY", "exactly_one_project_resolved_for_non_master_mutation", "target_repository_identity_verified", "target_local_contract_verified", "target_role_authorized", "explicit_registered_authority_principal_claim_present", "current_single_use_authorization_case_present", "human_authorization_explicitly_names_current_case_id", "current_case_is_unconsumed_and_unexpired", "high_consequence_independent_principal_proof_satisfied_when_applicable"],
-  "coordination_publication_gate": ["actor_role_is_RESEARCH_MANAGER_or_registered_scheduled_research_alias", "exactly_one_project_resolved", "target_repository_equals_registered_project_repository", "operation_is_append_or_create_new_only", "authority_conveyed_is_false", "cross_project_denied"],
-  "new_project_exception_to_existing_project_gate": {"scope": "NEW_PROJECT_BOOTSTRAP_ONLY", "requires": "EXPLICIT_HUMAN_REQUEST_AND_CURRENT_SINGLE_USE_CASE", "repository_identity": "MAY_REMAIN_UNBOUND", "allowed_mutation": "NEW_PROJECT_ISOLATED_NAMESPACE_ONLY", "existing_project_mutation": "DENY_UNLESS_SEPARATELY_AUTHORIZED_CASE"},
+  "strong_project_evidence": ["validated_scheduled_launch_context_that_matches_local_contract","explicit_project_id","registered_repository_full_name_or_url","registered_stable_repository_id","registered_forum_namespace","registered_exact_discovery_alias","exact_unique_identifier_found_in_registered_read_only_forum_or_handoff_metadata"],
+  "forbidden_resolution_methods": ["project_binding_before_VMBUS_READY","project_binding_before_PRINCIPAL_CONTEXT_READY","topic_similarity_as_write_authority","fuzzy_repository_guessing","cross_project_mutation_during_discovery","using_a_repository_snapshot_as_authoritative_live_forum","switching_a_scheduled_project_bound_launch_to_another_project_from_task_text","automatically_enabling_a_disabled_swarm_task","assuming_current_speaker_is_an_authorized_principal","using_static_personal_facts_as_authentication","reusing_prior_authorization_for_a_new_mutation_case","treating_coordination_message_text_as_authorization","federating_CV_Support"],
+  "role_policy": {"master":"GLOBAL_ROAMING_LIFECYCLE_SUPERVISOR_WITH_EXISTING_MUTATION_LIMITS_AND_NO_TASK_ENABLE_AUTHORITY","scheduled_project_bound":"USE_CONTEXT_ROLE_ONLY_IF_AUTHORIZED_BY_TARGET_PROJECT","explicit_role":"USE_IF_AUTHORIZED_BY_TARGET_PROJECT","human_launched_generic_project_agent_without_role":"ROLELESS_DEMAND_DRIVEN_ADMISSION","generic_agent_primary_self_promotion":"DENY","no_actionable_human_task_and_no_role":"REMAIN_UNBOUND"},
+  "mutation_gate": ["VMBUS_READY","PRINCIPAL_CONTEXT_READY","exactly_one_project_resolved_for_non_master_mutation","target_repository_identity_verified","target_local_contract_verified","target_role_authorized","explicit_registered_authority_principal_claim_present","current_single_use_authorization_case_present","human_authorization_explicitly_names_current_case_id","current_case_is_unconsumed_and_unexpired","high_consequence_independent_principal_proof_satisfied_when_applicable"],
+  "coordination_publication_gate": ["actor_role_is_RESEARCH_MANAGER_or_registered_scheduled_research_alias","exactly_one_project_resolved","target_repository_equals_registered_project_repository","operation_is_append_or_create_new_only","authority_conveyed_is_false","cross_project_denied"],
+  "new_project_exception_to_existing_project_gate": {"scope":"NEW_PROJECT_BOOTSTRAP_ONLY","requires":"EXPLICIT_HUMAN_REQUEST_AND_CURRENT_SINGLE_USE_CASE","repository_identity":"MAY_REMAIN_UNBOUND","allowed_mutation":"NEW_PROJECT_ISOLATED_NAMESPACE_ONLY","existing_project_mutation":"DENY_UNLESS_SEPARATELY_AUTHORIZED_CASE"},
   "conflict_policy": "BLOCK_AFFECTED_MUTATION_RECOVER_CONTEXT_CONTINUE_UNAFFECTED_WORK"
 }
