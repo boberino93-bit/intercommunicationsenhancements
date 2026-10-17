@@ -1,12 +1,15 @@
 {
   "schema": "intercommunications/v26-project-manifest/v1",
   "version": "V26",
-  "status": "AUTHORIZED_CANONICAL_PROMOTION",
+  "status": "CANONICAL_ACTIVE",
   "canonical_promotion": true,
+  "canonical_bootstrap_generation": "V26",
   "activation": {
-    "condition": "THIS_FILE_PRESENT_ON_DEFAULT_BRANCH_MAIN_VIA_AUTHORIZED_MERGE",
+    "condition": "SATISFIED_BY_AUTHORIZED_V26_MERGE_TO_DEFAULT_BRANCH_MAIN",
     "effective_on_main_after_merge": true,
-    "candidate_branch_is_not_itself_canonical": true
+    "candidate_branch_is_not_itself_canonical": true,
+    "v25_r11_active": false,
+    "v25_r11_role": "HISTORICAL_LINEAGE_ONLY"
   },
   "artifact": {
     "name": "Intercommunication_Enhancements_Herd_AI_BIOS_V26_CONSOLIDATED_PROMOTION_FULL_PRESERVATION_VALIDATED_CANDIDATE.md",
@@ -21,11 +24,16 @@
     "immediate_parent_bytes": 107989882,
     "immediate_parent_sha256": "a71e89a1c9eb0b0ea825e5cb5f304575b26365432c604388a55488e68bb15169",
     "nested_r10_sha256": "88d912e854748e80aa569107cf048a1c93b18ac15ea564068f7ca2fbe20e93e8",
-    "historical_candidate_records_preserved": true
+    "historical_candidate_records_preserved": true,
+    "historical_records_are_active_bootstrap": false
   },
   "bootstrap": {
     "adapter": "bootstrap/V26_BOOTSTRAP_ADAPTER.json",
+    "canonical_order": "BOOTSTRAP_ORDER.json",
     "external_service_required_for_standalone_boot": false,
+    "vmbus_ready_required_before_project_bind": true,
+    "principal_context_ready_required_before_project_bind": true,
+    "principal_context_ready_required_before_task_interpretation": true,
     "principal_context_conveys_identity_or_authority": false
   },
   "project_sharing_boundary": {
@@ -52,11 +60,13 @@
   },
   "scheduler": {
     "state_mutated_by_v26_promotion": false,
+    "state_mutated_by_v26_canonical_alignment": false,
     "pipeline_ordering": "CHECKPOINT_READINESS_AND_FENCING_NOT_SHARED_CLOCK_TIME"
   },
   "authorization": {
     "original_promotion_case_id": "AUTH-20261016-V26-PROMOTION-01",
     "agentbus_recovery_case_id": "AUTH-20261016-V26-AGENTBUS-RECOVERY-01",
+    "canonical_alignment_case_id": "AUTH-20261016-V26-CANONICAL-ALIGNMENT-01",
     "scope": "INTERCOMMUNICATION_ENHANCEMENTS_ONLY",
     "cv_support_mutation": false,
     "cross_project_mutation": false,

@@ -1,10 +1,22 @@
 {
   "schema": "org-agent-mesh/project-context-binding-policy/v1",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "status": "ACTIVE_HARD_GATE",
+  "canonical_bootstrap_generation": "V26",
+  "v26_prebind_readiness": {
+    "required": true,
+    "startup_mode": "UNBOUND_READ_ONLY",
+    "required_barriers": ["VMBUS_READY", "PRINCIPAL_CONTEXT_READY"],
+    "project_binding_before_vmbus_ready": "DENY",
+    "project_binding_before_principal_context_ready": "DENY",
+    "task_interpretation_before_principal_context_ready": "DENY",
+    "external_service_required_for_standalone_readiness": false,
+    "principal_context_conveys_identity_or_authority": false,
+    "v25_r11_role": "HISTORICAL_LINEAGE_ONLY"
+  },
   "host_project_context": {
-    "when_available": "REQUIRED_STRONG_EVIDENCE",
-    "binding_mode": "HARD_BIND_BEFORE_TASK_INTERPRETATION",
+    "when_available": "REQUIRED_STRONG_EVIDENCE_AFTER_V26_READINESS",
+    "binding_mode": "HARD_BIND_AFTER_V26_READINESS_BEFORE_TASK_INTERPRETATION",
     "task_text_may_override": false,
     "conversation_history_may_override": false,
     "recent_repository_may_override": false,
@@ -12,17 +24,28 @@
     "explicit_structured_project_switch": "FAIL_CLOSED_REBIND_REQUIRED"
   },
   "required_before_task_interpretation": [
+    "require_VMBUS_READY",
+    "require_PRINCIPAL_CONTEXT_READY",
     "resolve_host_project_to_registered_project_id",
     "verify_repository_identity",
+    "bind_project_scoped_vmbus_namespace",
     "load_local_AGENT_BOOTSTRAP",
     "load_local_AGENT_CONTEXT_REFERENCE",
     "load_project_identity_lock_when_present",
-    "load_master_handoff_and_authoritative_internal_message_route",
+    "load_master_handoff_work_control_and_authoritative_internal_message_route",
     "emit_project_context_bound_receipt"
   ],
-  "project_bound_worker_rule": "A_WORKER_LAUNCHED_IN_A_PROJECT_STAYS_BOUND_TO_THAT_PROJECT_UNLESS_A_DELIBERATE_REBIND_OCCURS",
+  "project_bound_worker_rule": "A_WORKER_LAUNCHED_IN_A_PROJECT_BINDS_TO_THAT_PROJECT_AFTER_V26_READINESS_AND_STAYS_BOUND_UNLESS_A_DELIBERATE_REBIND_OCCURS",
+  "project_separation": {
+    "shared_protocol_implies_shared_project_state": false,
+    "shared_protocol_implies_shared_project_authority": false,
+    "project_vmbus_namespaces_are_distinct": true,
+    "cross_project_discovery_implies_data_access": false,
+    "cv_support_federated": false,
+    "only_shared_coordination_project": "INTERCOMMUNICATION_ENHANCEMENTS"
+  },
   "generic_unbound_role_rule": "ROLELESS_DEMAND_DRIVEN_ADMISSION",
   "generic_unbound_primary_default": false,
-  "failure_mode": "NO_TASK_EXECUTION_OR_MUTATION_UNTIL_CONTEXT_BOUND",
-  "authority_semantics": "PROJECT_CONTEXT_BINDS_SCOPE_BUT_DOES_NOT_GRANT_PROTECTED_MUTATION_AUTHORITY"
+  "failure_mode": "BLOCK_AFFECTED_TASK_EXECUTION_OR_MUTATION_UNTIL_V26_READINESS_AND_PROJECT_CONTEXT_ARE_SATISFIED_CONTINUE_SAFE_UNRELATED_READ_ONLY_WORK",
+  "authority_semantics": "V26_READINESS_AND_PROJECT_CONTEXT_BIND_SCOPE_BUT_DO_NOT_GRANT_PROTECTED_MUTATION_AUTHORITY"
 }

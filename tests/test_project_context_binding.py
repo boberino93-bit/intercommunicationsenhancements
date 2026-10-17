@@ -79,31 +79,32 @@ class ProjectContextBindingTests(unittest.TestCase):
             )
         )
 
-    def test_all_deployable_role_bootstraps_gate_host_project_before_bootstrap_order(self):
+    def test_all_deployable_role_bootstraps_gate_v26_readiness_before_project_context(self):
         for role in ("PRIMARY", "MANAGER", "RESEARCH"):
             text = (ROOT / "bootstrap" / f"{role}.md").read_text()
             with self.subTest(role=role):
+                self.assertIn("Mandatory V26 pre-bind gate", text)
+                self.assertIn("VMBUS_READY", text)
+                self.assertIn("PRINCIPAL_CONTEXT_READY", text)
                 self.assertIn("Mandatory project-context gate", text)
+                v26_pos = text.index("Mandatory V26 pre-bind gate")
+                project_pos = text.index("Mandatory project-context gate")
+                self.assertLess(v26_pos, project_pos)
                 self.assertIn("protocols/project_context_binding.md", text)
                 self.assertIn("org_agent_mesh.project_context_binding", text)
-                gate_pos = text.index("Mandatory project-context gate")
-                order_pos = text.index("execute `BOOTSTRAP_ORDER.json`")
-                self.assertLess(gate_pos, order_pos)
-                self.assertIn(
-                    "Only when no host project context can be verified may startup enter `UNIVERSAL_AGENT_ENTRYPOINT.md`",
-                    text,
-                )
-                self.assertIn(
-                    "before role admission, task interpretation, handoff execution, or mutation evaluation",
-                    text,
-                )
+                self.assertIn("before role admission, task interpretation, handoff execution, or mutation evaluation", text)
 
-    def test_machine_bootstrap_makes_project_context_step_zero_and_guards_execution(self):
+    def test_machine_bootstrap_requires_v26_readiness_before_project_binding(self):
         bootstrap = json.loads((ROOT / "BOOTSTRAP_ORDER.json").read_text())
         self.assertEqual(bootstrap["schema"], "org-agent-mesh/bootstrap-order/v7")
+        self.assertEqual(bootstrap["canonical_bootstrap_generation"], "V26")
         contract = bootstrap["project_context_binding_contract"]
-        self.assertTrue(
+        self.assertFalse(
             contract["required_before_every_other_bootstrap_step_when_host_context_available"]
+        )
+        self.assertTrue(contract["v26_prebind_readiness_required"])
+        self.assertTrue(
+            contract["required_before_every_project_scoped_bootstrap_step_after_v26_readiness"]
         )
         self.assertFalse(contract["task_text_may_override_host_context"])
         self.assertTrue(
@@ -112,16 +113,34 @@ class ProjectContextBindingTests(unittest.TestCase):
             ]
         )
 
-        steps = {step["id"]: step for step in bootstrap["steps"]}
-        gate = steps["bind_host_chat_project_context_before_all_other_bootstrap"]
-        self.assertEqual(gate["order"], 0)
+        ordered = bootstrap["steps"]
+        ids = [step["id"] for step in ordered]
+        expected_prefix = [
+            "load_v26_canonical_bootstrap_adapter",
+            "enter_unbound_read_only_and_initialize_validate_vmbus",
+            "require_vmbus_ready",
+            "load_principal_context_layers_build_indexes_and_require_principal_context_ready",
+            "bind_host_chat_project_context_after_v26_readiness",
+        ]
+        self.assertEqual(ids[:5], expected_prefix)
+        steps = {step["id"]: step for step in ordered}
+        gate = steps["bind_host_chat_project_context_after_v26_readiness"]
+        self.assertEqual(gate["order"], 4)
         self.assertEqual(gate["task_text_override"], "DENY")
         self.assertEqual(
             gate["unbound_fallback"],
             "ONLY_IF_HOST_CONTEXT_UNAVAILABLE_OR_UNVERIFIABLE",
         )
+        self.assertIn("VMBUS_READY", gate["requires"])
+        self.assertIn("PRINCIPAL_CONTEXT_READY", gate["requires"])
         self.assertFalse(gate["mutation_allowed"])
 
+        self.assertTrue(
+            steps["classify_task_and_bind_work_context"]["vmbus_ready_required"]
+        )
+        self.assertTrue(
+            steps["classify_task_and_bind_work_context"]["principal_context_ready_required"]
+        )
         self.assertTrue(
             steps["classify_task_and_bind_work_context"]["project_context_ready_required"]
         )
@@ -136,6 +155,8 @@ class ProjectContextBindingTests(unittest.TestCase):
             "persist_learning_checkpoint_and_handoff",
             "checkpoint_master_handoff_after_material_transition_or_before_yield",
         ):
+            self.assertIn("vmbus_ready", steps[step_id]["additional_guards"])
+            self.assertIn("principal_context_ready", steps[step_id]["additional_guards"])
             self.assertIn("project_context_ready", steps[step_id]["additional_guards"])
 
 

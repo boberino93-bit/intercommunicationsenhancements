@@ -1,113 +1,131 @@
 # Intercommunications Architecture
 
-## Purpose
+## Purpose and active generation
 
-Intercommunications Enhancements is the reference hardening project for the Organization Agent Mesh. It makes simultaneous unrelated AI project teams safer by construction: project identity is an authorization boundary, ordinary execution state is isolated by default, and deployment packages are traceable to one exact source revision.
+Intercommunication Enhancements is the reference hardening project for the Organization Agent Mesh. It provides the shared coordination protocol/interface while preserving each project's independent state, authority, evidence, authorization boundary, and VMBUS namespace.
 
-Current target: **framework 1.6.0-alpha.1 / protocol 2.4.0-alpha.1**.
+**Canonical bootstrap generation: V26.** Framework/package semver remains **1.6.0-alpha.1** and protocol semver remains **2.4.0-alpha.1**; those are separate version axes.
 
-## Identity-first bootstrap
+V25 R11 and earlier artifacts remain preserved lineage/evidence only and are not current bootstrap authority.
 
-Execution begins with `BOOTSTRAP_ORDER.json`. Launch origin is resolved first. Interactive runs validate current human project intent; scheduled project-bound runs validate the captured launch context against the target local contract; generic unbound runs remain read-only until universal routing resolves exactly one project. `PROJECT_IDENTITY_LOCK.json` and the ordinary local authorization gates still follow. Handoffs, queues, forums, accepted state, recent context, working-directory state, and semantic similarity are not mutation authorization inputs.
+## V26 readiness-first bootstrap
 
-Canonical operations resolve `project_id -> repository/workspace -> agent_id -> agent_instance_id -> task/resource -> capability`.
+Execution begins with `PROJECT_MANIFEST_V26.json`, `bootstrap/V26_BOOTSTRAP_ADAPTER.json`, and `BOOTSTRAP_ORDER.json`.
 
-`ProjectBinding` is immutable. Lifecycle is `UNBOUND -> BOUND -> INITIALIZED -> ACTIVE -> DRAINING -> TERMINATED`. Only an `ACTIVE` bound `AgentSession` may authorize mutation. Mutation APIs do not accept a caller-supplied project string as proof of identity; destination-side code revalidates the bound session.
+The active ordering is:
 
-## Scheduled agent launch, project context and provider admission
+`UNBOUND_READ_ONLY → initialize/validate VMBUS → VMBUS_READY → load R10 corrected principal context + R11 revisable model synthesis + V26 direct chronology → build epistemic/privacy/chronology/synthesis indexes → PRINCIPAL_CONTEXT_READY → PROJECT_BIND → project-scoped VMBUS/policy → project/task recovery → capability discovery → optional external persistence reconciliation → task interpretation/execution under normal authority gates`
 
-Dynamic scheduled work is project-bound at configuration time rather than rediscovered from topic at execution time. `ScheduledTaskRoute.from_project_contract(...)` captures the exact project ID, role, routing-contract version, authoritative forum/artifact namespaces, repository identity/ID when bound, and bootstrap paths from `AGENT_BOOTSTRAP.json`. `render_scheduler_prompt(...)` serializes that state into a machine-readable `ORG_AGENT_MESH_PROJECT_LAUNCH_CONTEXT` block for the future run.
+This order corrects the former project-binding-first topology. Project identity remains a critical authorization boundary, but project binding is now a **post-readiness** operation. `VMBUS_READY` and `PRINCIPAL_CONTEXT_READY` must exist first.
 
-The launch block is **routing evidence, not mutation authority**. The future run must compare it with the target local contract before mutation, then continue through the identity lock, role/capability checks, master handoff, communication-awareness and active-session gates. Missing, malformed or conflicting scheduled context is fail-closed and may not fall back to topic similarity or silently switch projects. The global entrypoint recognizes a verified scheduled launch as exact routing evidence and skips fuzzy project discovery only after local-contract agreement.
+Principal context, synthesis, chronology, continuity, ownership, confidence, or conversational familiarity do not create identity proof, authentication, authority, consent, or mutation permission.
 
-Scheduled execution has a separate pre-provider lifecycle because provider throttling can occur before any agent code executes. The reference state machine is `PENDING -> ADMITTED -> PROVIDER_ACCEPTED -> BOOTSTRAP_READY -> COMPLETED`, with `RETRY_WAIT` and `TERMINAL_FAILURE` branches. `TOO_MANY_REQUESTS`, rate limiting, temporary provider unavailability and timeout before bootstrap are retryable **launch** failures, not project task failures. The logical task may not advance merely because a scheduler fired; project task execution may advance only after `BOOTSTRAP_READY`.
+## Project separation
 
-`org_agent_mesh.launch_admission` is the reference scheduler/dispatcher admission implementation. It provides bounded concurrent starts, minimum start spacing, deterministic launch staggering, bounded exponential backoff with deterministic jitter, retry-attempt caps and occurrence identity preservation. `deterministic_launch_offset_seconds(project_id, task_id, window_seconds)` spreads recurring jobs across an admission window to reduce synchronized wake-ups.
+Intercommunication Enhancements is the **only shared coordination project**. Shared interface compatibility is not shared mutable state.
 
-The architecture is explicit about the host boundary: provider admission must execute **before** model invocation to prevent a thundering herd. When the actual hosting scheduler exposes such a hook, the admission controller belongs there. When it does not, project configuration must use deterministic staggering plus retry/reconciliation; an agent cannot retrospectively prevent or self-retry a request that was rejected before the agent started. The project therefore does not claim control over provider infrastructure it cannot execute ahead of model invocation.
+- `SHARED_INTERCOMMUNICATION_PROTOCOL != SHARED_PROJECT_STATE`
+- `COMMON_BOOTSTRAP_INTERFACE != COMMON_PROJECT_AUTHORITY`
+- `PROJECT_A_VMBUS != PROJECT_B_VMBUS`
+- `CROSS_PROJECT_DISCOVERY != CROSS_PROJECT_DATA_ACCESS`
+- `CV_SUPPORT != FEDERATED_PROJECT`
+- `INTERCOMMUNICATION_ENHANCEMENTS = ONLY_SHARED_COORDINATION_PROJECT`
 
-Retries preserve the same task/occurrence/idempotency identity. Duplicate or late starts are reconciled rather than opening a second independent mutation stream. Provider-throttle and launch-context incidents are recorded as observable evidence and may enter the normal swarm-learning pipeline, but do not bypass validation or doctrine-promotion rules.
+CV Support remains fully non-federated. Other projects may adopt compatible intercommunication interfaces while retaining their own bootstrap, policy, state, evidence and authorization boundaries.
 
-Normative behavior is defined in `protocols/scheduled_agent_launch.md`; the route and context schemas are `schemas/scheduled_task_route.schema.json` and `schemas/scheduled_launch_context.schema.json`.
+## Project binding and execution identity
 
-## Canonical identifiers
+After V26 readiness, canonical operations resolve `project_id -> repository/workspace -> agent_id -> agent_instance_id -> task/resource -> capability`.
 
-Project and resource IDs are validated canonical identifiers. The runtime does not lossily sanitize IDs into keys; invalid inputs are rejected instead of rewritten into potentially colliding aliases. Qualified keys are injective within the accepted identifier language: `project_id::resource_id`.
+`ProjectBinding` is immutable for the bound execution instance. Lifecycle remains `UNBOUND -> BOUND -> INITIALIZED -> ACTIVE -> DRAINING -> TERMINATED`. Protected mutation requires the applicable project/session controls plus the current case-bound authorization required by governance. Caller-supplied project strings, context similarity, role, or possession of a connector do not authorize mutation.
 
-## Capabilities and child agents
+Scheduled project context is routing evidence, not mutation authority. Missing, malformed, or conflicting scheduled context fails closed for the affected branch and may not silently switch projects.
 
-Authority tier and capability set are separate. `PROJECT_IDENTITY_LOCK.json` is authoritative role-capability policy packaged with every role. Children inherit parent project/repository/root/protocol identity and receive a fresh execution-instance ID. A child may inherit the same capability set or a strict subset; escalation is rejected.
+## VMBUS and persistence surfaces
 
-## Messaging and delivery
+The V26 embedded/virtual memory bus is initialized before project binding. Once the project is known, state is projected into a project-scoped namespace and policy boundary.
 
-Protocol 2.4 requires explicit source/destination project identity, sender agent/execution-instance identity, correlation/causation, idempotency and expiry. The internal bus has no cross-project override. Publication requires an `ACTIVE` session with `PUBLISH_MESSAGE`, and claimed sender identity must match it.
+Standalone readiness does not require GitHub, ChatGPT Library AgentBus, Slack, JFrog, or another external service. After readiness, persistence surfaces are independent:
 
-Message persistence uses atomic exclusive creation keyed by SHA-256 of `(project_id, idempotency_key-or-message_id)`. Concurrent retries therefore cannot both become effective accepted messages. Delivery distinguishes `RECEIVED`, `ACCEPTED`, `STARTED`, `COMPLETED`, `FAILED`, and `REJECTED`; retries are bounded and unsafe/expired input is quarantined as non-executable evidence.
+- GitHub is the canonical versioned source/governance and durable backup surface represented by this repository.
+- The ChatGPT Library AgentBus, when actually exposed to a runtime, is the live coordination stream at `/Intercommunication enhancements/AgentBus/messages`.
+- Legacy repository labels containing `ARTIFACTORY` or `INTERNAL_ARTIFACTORY` are historical/internal labels and must not be silently interpreted as JFrog Artifactory.
+- Record equivalence requires the same logical record identity and verified payload SHA-256.
+- Conflicts are preserved and surfaced; they are not silently resolved by last-writer-wins.
+- `GITHUB_WRITE != AGENTBUS_WRITE`.
+- Unavailable transport must be disclosed; an unperformed external write may not be claimed as performed.
+
+## Authority and authentication
+
+Authority tier and capability set are separate. Child agents inherit project/repository/protocol identity, receive fresh execution-instance IDs, and may not escalate beyond parent capability.
+
+The authority chain preserves these separations:
+
+`CLAIMED_IDENTITY != AUTHENTICATED_IDENTITY != AUTHORIZATION`
+
+Human intent, ownership, role, connector access, project context, principal-context readiness, or a prior consumed authorization are not reusable write authority. High-consequence mutations use the repository's current case-bound authorization and independent-proof controls.
+
+## Messaging and coordination
+
+Ordinary coordination is project-scoped. Messages carry explicit project and sender identity, correlation/causation, idempotency and expiry. Cross-project discovery or metadata awareness does not grant cross-project data access.
+
+Explicit cross-project exchange, where permitted, is bounded, copy-by-value, provenance-preserving, and non-authoritative at import unless the destination project separately accepts/promotes it. Imported intelligence does not inherit source-project authority.
+
+CV Support is excluded from federation and is not a target for shared discovery or exchange under V26.
 
 ## Tasks, artifacts, leases and state
 
-`TaskRegistry` provides project-scoped task identity, execution-instance ownership and expected-version transitions. `ArtifactRegistry` records ownership/provenance/content hashes and expected-version replacement. `AuditLedger` records project, logical agent, execution instance, task/message/resource context, operation, result and before/after versions.
+Project-scoped task ownership, artifact provenance/content hashes, expected-version state transitions, execution-instance-owned leases, stale-instance rejection and compare-and-set provide the reference concurrency model.
 
-Collision-sensitive work uses project-qualified expiring leases owned by a specific execution instance. Claim/renew/release authority comes from the bound session; restarted instances cannot inherit stale locks. Stale-sensitive mutable state uses compare-and-set.
+The SQLite reference backend remains a single-node durability implementation for selected accepted state/lease paths. A distributed adapter is conformant only if it preserves equivalent atomicity, isolation, ownership, expiry/recovery and CAS semantics; otherwise it must fail closed.
 
-Projects have independent `ACTIVE`, `DRAINING`, and `PAUSED` lifecycle state. Pausing one project does not stop unrelated projects.
+Projects retain independent lifecycle state. Pausing or draining one project does not imply pausing unrelated projects.
 
-`DurableRecordBackend` defines the durable create/read/CAS/versioned-delete/list contract. `SQLiteRecordBackend` is the first crash-durable reference implementation: it uses transactional project-qualified records, WAL, FULL synchronous persistence, deterministic JSON checksums and schema-version fencing. `DurableVersionedStateStore` and `DurableLeaseRegistry` preserve the existing bound-session authorization, execution-instance ownership, expiry/recovery and CAS semantics across process restarts. Their tests exercise reopen recovery, concurrent writers, competing lease claimants, stale execution instances, cross-project key collisions, tamper detection and concurrent expired-lease reclamation.
+## Layered context and evidence
 
-The remaining task, artifact, audit, project-registry and delivery registries are thread-safe in-process references. A distributed or multi-node adapter is conformant only if it preserves equivalent atomicity, ownership, expiry/recovery, isolation and CAS semantics; otherwise it must fail closed. The SQLite backend is a single-node durability reference and is not presented as a distributed-consensus service.
+V26 separates three principal-context classes:
 
-## Swarm learning and organizational memory
+1. R10 corrected direct-user context.
+2. R11 model synthesis, explicitly revisable and non-authoritative.
+3. V26 direct-user chronology.
 
-The architecture treats each completed agent run as a potential source of **cumulative operational intelligence**, not as model-weight training. The swarm improves by persisting evidence, validating reusable conclusions, and selectively promoting high-confidence lessons into bootstrap-loadable operating doctrine. The normative rules are defined in `protocols/swarm_learning.md`.
+Those classes must not silently collapse into one another or into established fact. Provenance, chronology, contradiction, uncertainty and privacy/relevance boundaries remain visible. Retrieval failure is not absence of evidence, parser/runtime failure is not source corruption, and preserved/materialized data is not automatically verified/inspected.
 
-Learning has three authority layers:
+## Swarm learning
 
-1. **Raw experience** — append-only run evidence, failures, measurements, experiments, diagnostics and candidate lessons. It is non-authoritative.
-2. **Validated knowledge** — reusable conclusions that survived an explicit validation method appropriate to their risk and scope.
-3. **Operating doctrine** — concise, versioned, reversible instructions and heuristics approved for routine inheritance by later agents.
+Learning remains cumulative operational intelligence, not model-weight training. Raw experience is non-authoritative; validated knowledge requires appropriate validation; operating doctrine requires explicit promotion. Repetition or multi-agent agreement does not by itself create truth or authority.
 
-Candidate lessons move through `OBSERVED -> CANDIDATE -> VALIDATED -> DOCTRINE`, with `REJECTED`, `SUPERSEDED`, and `EXPIRED` as non-promoted terminal or replacement states. Repetition alone never promotes a lesson. Higher-risk lessons affecting identity, authorization, project boundaries, destructive mutation, security, cross-project exchange, or release gates require reviewer validation and cannot auto-promote. Doctrine integration remains an ORCHESTRATOR/PRIMARY responsibility unless a narrower project policy explicitly delegates a low-risk class.
+Learning state is project-local. Shared coordination does not allow one project's raw experience, doctrine or accepted state to become another project's state by default.
 
-Every promoted lesson retains project/run/agent/task provenance, evidence references, scope, confidence semantics, validation method, reviewer/promoter identity and supersession/expiry metadata. Confidence never substitutes for evidence or promotion state. Contradictory validated lessons require reconciliation rather than last-writer-wins replacement.
+## Scheduler and sequencing
 
-Runtime learning state is project-local and may be sharded under `.swarm/learning/<global_run_id>/{experience,candidates,validation}/...`. Cross-project learning remains observation-only unless the ordinary explicit exchange path is approved; a project may not write learning state or doctrine into a peer repository. Slack may carry notifications or pointers but is never canonical learning state.
+V26 canonical promotion/alignment does not mutate scheduler enable/disable state.
 
-Bootstrap intentionally loads **doctrine first, scoped validated knowledge second, and raw history only on demand**. This prevents unvalidated history from becoming accidental policy and limits context growth as the swarm ages. Current human intent, identity/capability controls and newer authoritative protocols always outrank inherited doctrine.
-
-Before normal handoff or termination, agents should persist an idempotent learning checkpoint containing material outcomes, failures/retries, evidence-backed lesson candidates, doctrine confirmations or contradictions, efficiency observations where measurable, and unresolved validation needs. `NO_MATERIAL_LEARNING` is a valid checkpoint; agents must not invent lessons merely to satisfy the protocol.
-
-The system may measure success rate, first-pass completion, repeated-failure recurrence, rework, handoff defects, lease conflicts, candidate-validation yield, doctrine rollback/supersession and task latency where reliably observable. These metrics are diagnostic evidence only and never bypass review or authorization gates.
-
-The intended system property is that later agents begin with better validated procedures and fewer repeated mistakes than earlier agents while retaining auditability, reversibility, bounded context, project isolation, and explicit human/project authority.
-
-## Cross-project operational intelligence and exchange
-
-Ordinary internal channels never cross projects. Base exchange requires an `ACTIVE` source-project session, `CROSS_PROJECT_EXCHANGE`, exact requesting-agent/session agreement, distinct projects, explicit approval, bounded artifact scope/purpose, and valid creation/expiry.
-
-Above that transport gate, `protocols/cross_project_operational_intelligence.md` provides the semantic federation layer. It separates passive knowledge, discovery, expertise/capability/managerial awareness, routing requests and active execution. Cross-project intelligence metadata always carries `authority_conveyed=false` and can never grant peer mutation or local capability inheritance.
-
-`OperationalIntelligenceRegistry` maintains a consumer-project-owned copy-by-value discovery index of sanitized peer themes, expertise, capability references, availability and provenance. Expired entries are not discoverable and unknown fields fail closed. The registry is advisory/read-only for discovery and does not assign work.
-
-Cross-project routing uses explicit correlation and lineage. `validate_routing_lineage()` rejects cycles and repeated project visits. A target project must independently accept or decline the request. Acceptance and later redirect/supersession state are represented by explicit non-authoritative receipts; `ACCEPTED` creates no active-participation claim by itself.
-
-`SanitizedSnapshotBridge` is the durable reference bridge. Source export validates the approved exchange and stores an immutable, digest-bound sanitized snapshot under the source project. Destination import revalidates destination identity/capabilities, expiry and classification, then writes a copy-by-value evidence record only under the destination project. Imported records are explicitly `accepted_state=false` and `authority_conveyed=false`; there is no automatic knowledge/doctrine/assignment promotion path.
-
-This design intentionally avoids a global mutable Project Intelligence Bus. Federation is achieved by bounded, explicit, copy-by-value exchange plus project-local acceptance.
+Research → Manager → Primary sequencing is checkpoint/readiness/fencing-gated, not trusted merely because wall-clock schedules are staggered. A downstream stage that fires before required upstream state exists must wait or continue only independent safe work; it must not manufacture readiness from clock order.
 
 ## Packaging and dependency closure
 
-`packaging/agent_package_dependencies.json` is authoritative package dependency closure. Shared inputs include all `org_agent_mesh/*.py`, `schemas/*.json`, and `protocols/*.md`, preventing new runtime components from silently escaping deployment ZIPs.
+`packaging/agent_package_dependencies.json` is authoritative package dependency closure. Every PRIMARY, MANAGER and RESEARCH package must include:
 
-Each role ZIP contains manifest v3 with project/repository identity, role/tier, capabilities, framework/protocol/package versions, exact source commit, commit-derived deterministic build time, dependency-map hash, exact component inventory and SHA-256 hashes. Build emits PRIMARY, MANAGER and RESEARCH as one release set plus `release-set.json` archive hashes.
+- `PROJECT_MANIFEST_V26.json`
+- `bootstrap/V26_BOOTSTRAP_ADAPTER.json`
+- `BOOTSTRAP_ORDER.json`
+- project identity/routing controls
+- required governance/protocol/runtime/schema dependencies
+- its own role-specific bootstrap/instructions and no foreign role instructions
 
-Verification recomputes dependency closure from repository source, compares every packaged component to source, checks role isolation and one coordinated revision. ZIP metadata is deterministic; CI builds twice and rejects non-reproducible archives.
+Build and verification require the V26 readiness-first prefix. Generated package/release metadata identifies `canonical_bootstrap_generation = V26` while framework/package semver stays `1.6.0-alpha.1`.
 
-## Release gate
+## Release gate and implementation truth
 
-A revision is release-complete only after `tests -> exact-SHA build -> package verification -> independent rebuild -> reproducibility comparison -> coordinated artifact publication`.
+A revision is not globally green merely because V26 metadata exists. The release process separates focused V26 canonical-alignment validation from unrelated pre-existing suite failures and reports both accurately.
 
-Doctrine changes that alter packaged agent behavior are subject to this same release gate before they are deployment-complete.
+The intended release sequence is:
+
+`tests → exact-SHA package build → V26/package verification → independent rebuild → reproducibility comparison → authorized promotion → main readback`
+
+Known pre-alignment repository-suite red conditions involving the pytest runner dependency and a bootstrap-continuity `native_memory` identifier remain visible until separately repaired and validated. V26 alignment does not silently relabel them as fixed.
 
 ## Remaining production layers
 
-The alpha still needs distributed/multi-node durable adapters for the complete registry set, persistent organization-wide lifecycle/global observability, broker-specific durable acknowledgement transport, cryptographic cross-host attestation for sanitized snapshot packages when crossing separate trust domains, a concrete durable learning-registry implementation that enforces the promotion lifecycle described above, and host/scheduler integration that can enforce provider admission before model invocation. Those are production/distribution layers, not missing semantics in the completed reference cross-project intelligence federation.
+The alpha still needs complete distributed/multi-node durable adapters, host-independent enforcement for some pre-tool consequences, persistent organization-wide lifecycle/observability, broker-specific durable acknowledgement transport, concrete durable learning-registry/promotion infrastructure, and host/scheduler integration capable of enforcing provider admission before model invocation. These limitations do not change the V26 bootstrap precedence or project-isolation contract.
