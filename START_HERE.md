@@ -2,36 +2,68 @@
 
 This repository hardens the Organization Agent Mesh for simultaneous unrelated projects.
 
-## First decision: project-bound or unbound
+## V25 R11 candidate bootstrap precedence
 
-A worker launched **inside a ChatGPT Project is already project-bound for routing purposes**. It MUST run `protocols/project_context_binding.md` and `org_agent_mesh.project_context_binding` before task interpretation. Do not send a project-bound worker through fuzzy/unbound discovery first.
+On the `candidate/v25-r11-bootstrap-upgrade-20261016` branch, load `bootstrap/V25_R11_BOOTSTRAP_ADAPTER.json` **before** legacy project binding or task interpretation.
 
-A worker launched **outside every project**, or one for which the host project cannot be verified, starts at `UNIVERSAL_AGENT_ENTRYPOINT.md` and remains read-only until exactly one project is resolved.
+The candidate order is:
 
-## Project-bound bootstrap order
+1. Enter `UNBOUND_READ_ONLY`.
+2. Initialize and validate the embedded VMBUS without requiring GitHub, Artifactory, Slack, or any other external service.
+3. Require `VMBUS_READY`.
+4. Load the corrected R10 principal-context profile and the R11 synthesis extension into protected, non-authoritative overlays.
+5. Require `PRINCIPAL_CONTEXT_READY`.
+6. Only then bind the project and project VMBUS namespace.
+7. Load project policy, continuity, and task-relevant state.
+8. Discover runtime capabilities.
+9. Reconcile optional external mirrors only after standalone readiness.
+10. Recover and interpret the task, then apply normal authority/mutation gates.
 
-For a worker launched inside a project:
+R11 remains a `FORENSIC_IMPLEMENTATION_CANDIDATE`; this branch does not canonically promote it. Principal context and model synthesis are not authentication, authority, or protected-action permission.
 
-1. Resolve the exact host ChatGPT Project through `governance/PROJECT_CONTEXT_BINDING_REGISTRY.json`.
-2. Bind the project ID, registered repository, canonical internal AgentBus/Artifactory message namespace, artifact namespace, and local bootstrap path.
-3. Load the target project's `AGENT_BOOTSTRAP.json`.
-4. Load the target project's `AGENT_CONTEXT_REFERENCE.md` **before interpreting the task**.
-5. Validate the local project identity lock when present.
-6. Load the current master handoff and authoritative internal coordination state.
-7. Enter explicit-role validation or roleless demand-driven admission.
-8. Classify and execute the task only after the project-context READY barrier passes.
+## First decision after standalone readiness: project-bound or unbound
 
-Task topic, recent conversation history, recently accessed repositories, stale handoffs, or neighboring project state may not override the verified host project context. A real project switch requires a deliberate rebind/new launch.
+A worker launched **inside a ChatGPT Project** uses the verified host project as strong routing evidence, but host/project binding MUST NOT complete before the R11 standalone readiness barrier above.
+
+A worker launched **outside every project**, or one for which the host project cannot be verified, remains read-only until exactly one project is resolved.
+
+Task topic, recent conversation history, recently accessed repositories, stale handoffs, or neighboring project state may not override a verified host project context after the readiness barrier. A real project switch requires a deliberate rebind/new launch.
+
+## Project-bound bootstrap after R11 readiness
+
+After `PRINCIPAL_CONTEXT_READY`:
+
+1. Resolve the exact host ChatGPT Project through `governance/PROJECT_CONTEXT_BINDING_REGISTRY.json` or another registered exact identity.
+2. Bind the project ID, repository identity, project VMBUS namespace, artifact namespace, and local bootstrap path.
+3. Load the target project's `AGENT_BOOTSTRAP.json` and identity lock.
+4. Load project continuity, handoffs, accepted state, work-control state, and task-relevant evidence.
+5. Reconcile chronology and contradictions; do not silently rewrite history.
+6. Enter explicit-role validation or roleless demand-driven admission.
+7. Assess optional external mirrors and runtime transports.
+8. Classify and execute the task only after the required readiness and authority gates pass.
 
 ## Role rule
 
 A generic human-launched worker does **not** default to PRIMARY. If no role is explicitly and validly assigned, use roleless demand-driven admission. PRIMARY may not be self-selected from generic project context.
 
-## Coordination authority
+## Coordination and persistence authority — V25 R11 candidate
 
-Internal project AgentBus/Artifactory state is the canonical coordination/message-board surface. GitHub is downstream source/version control and backup. Routine project-bound append-only coordination messages may use the narrow token-free publication lane; workflow runs or workflow changes, approvals/reviews, releases, deployments, destructive operations, branch creation, and cross-project writes remain outside that lane.
+Standalone VMBUS readiness is the bootstrap dependency. GitHub and internal Artifactory/message services are **optional external persistence or mirror surfaces after readiness**.
 
-XRP follows the same rule: `/XRPTHESIS-AgentBus/messages` is canonical internal coordination; `boberino93-bit/XRPTHESIS` is downstream source/backup.
+- Unavailable external transport does not invalidate standalone bootstrap.
+- No external mirror is silently promoted to authority merely because it is reachable.
+- Mirror equivalence requires the same logical record identity and verified payload digest.
+- Conflicts are preserved and surfaced; they are never silently overwritten.
+- A mirror write is not proof that another mirror was written.
+- R11 principal-context loading is not a durable external VMBUS commit.
+
+The legacy Artifactory-first rules remain historical/current-main policy until a separately authorized promotion changes them. This candidate branch tests the successor semantics without pretending that promotion already occurred.
+
+## Scheduled swarm sequencing
+
+Do not assume schedule clock offsets serialize Research → Manager → Primary execution. Multiple stages may have the same scheduled start time. Stage ordering therefore depends on project-scoped checkpoint identity, upstream readiness, sequence/fencing validation, and explicit consumption rules rather than wall-clock staggering.
+
+A downstream stage that starts before its required upstream checkpoint is ready must remain in progress/waiting or continue only independent safe work; it must not manufacture readiness from schedule order.
 
 ## Task entry and routing
 
@@ -45,15 +77,18 @@ After project binding and role admission, classify the request through `protocol
 
 Project binding establishes scope, not protected mutation authority. Protected effects continue through their existing authorization gates.
 
-## Current invariants
+## Candidate invariants
 
-- Host project context is a hard routing boundary when available.
-- Local context is loaded before task interpretation.
+- VMBUS standalone readiness precedes project binding.
+- Principal-context readiness precedes project binding and task interpretation.
+- External services are optional after standalone readiness, not bootstrap prerequisites.
+- R10 user-context and R11 model-synthesis remain epistemically distinct.
 - Generic workers do not default to PRIMARY.
-- Internal AgentBus/Artifactory is canonical coordination; GitHub is downstream.
 - Cross-project writes are denied by default.
 - Children retain the same project binding unless deliberately relaunched/rebound.
 - Task, lease, artifact, and state mutations remain project-scoped and version/ownership protected.
 - A child never infers expanded task scope from conversation context.
+- Scheduled stage order is state-gated, not clock-trusted.
+- Candidate status does not equal canonical promotion.
 
 Run `python tests/run_all.py` for the full test suite. Build with `python tools/build_agent_packages.py --source-revision <commit> --out dist`, validate with `python tools/verify_agent_packages.py`, independently rebuild to another directory, then compare with `python tools/check_reproducible_packages.py dist <other-dir>`.
