@@ -6,7 +6,12 @@
     "source_hash_mismatch": "FAIL",
     "unknown_shared_runtime_file": "INCLUDE_BY_PATTERN"
   },
-  "purpose": "Deterministic dependency closure for deployable agent role packages, including continuity, project-factory, mutation-authorization, roleless-admission, regression-learning, canonical self-audit, and staged 100-agent scaling dependencies.",
+  "purpose": "Deterministic dependency closure for deployable V26 agent role packages, including the canonical V26 bootstrap adapter and generation manifest plus continuity, project-factory, mutation-authorization, roleless-admission, regression-learning, canonical self-audit, and staged scaling dependencies.",
+  "canonical_bootstrap_generation": "V26",
+  "required_v26_components": [
+    "PROJECT_MANIFEST_V26.json",
+    "bootstrap/V26_BOOTSTRAP_ADAPTER.json"
+  ],
   "role_components": {
     "MANAGER": ["roles/MANAGER.md", "bootstrap/MANAGER.md"],
     "PRIMARY": ["roles/PRIMARY.md", "bootstrap/PRIMARY.md"],
@@ -24,11 +29,13 @@
     "SWARM_SCALE_ENTRYPOINT.json",
     "BOOTSTRAP_ORDER.json",
     "MASTER_HANDOFF.json",
+    "bootstrap/V26_BOOTSTRAP_ADAPTER.json",
     "bootstrap/IDENTITY_GATE.md",
     "bootstrap/PROJECT_ROLE_DISCOVERY.md",
     ".interagent/directives/*.json",
     ".interagent/capacity/freshness_policy.json",
     "PROJECT_MANIFEST.json",
+    "PROJECT_MANIFEST_V26.json",
     "PROJECT_CHARTER.md",
     "ARCHITECTURE.md",
     "START_HERE.md",
