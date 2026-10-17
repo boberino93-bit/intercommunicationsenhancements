@@ -1,0 +1,45 @@
+{
+  "schema": "intercommunications/v26-canonical-project-bootstrap-pointer/v1",
+  "version": "V26",
+  "status": "CANONICAL_ACTIVE",
+  "canonical_bootstrap_generation": "V26",
+  "canonical_project_bootstrap_artifact": {
+    "name": "Intercommunication_Enhancements_Herd_AI_BIOS_V26_CANONICAL_PROJECT_BOOTSTRAP_SINGLE_FILE.md",
+    "bytes": 108015662,
+    "sha256": "e85a52c01dcc1e359db93d18a5b73e1328fd9f5a7943cf7999579b4e7e4a4348",
+    "canonical_promotion": true,
+    "project_file_role": "ONE_FILE_CANONICAL_PROJECT_BOOTSTRAP_AND_FULL_PRESERVATION_AUDIT_BUNDLE"
+  },
+  "embedded_validated_v26_parent": {
+    "name": "Intercommunication_Enhancements_Herd_AI_BIOS_V26_CONSOLIDATED_PROMOTION_FULL_PRESERVATION_VALIDATED_CANDIDATE.md",
+    "bytes": 108008506,
+    "sha256": "122e73dc7ba01384d799fc508c337081948ae1714f869a318d2ab96cd142d778",
+    "embedded_byte_for_byte": true
+  },
+  "active_surfaces": {
+    "generation_manifest": "PROJECT_MANIFEST_V26.json",
+    "bootstrap_adapter": "bootstrap/V26_BOOTSTRAP_ADAPTER.json",
+    "bootstrap_order": "BOOTSTRAP_ORDER.json",
+    "publication_record": "governance/V26_CANONICAL_ARTIFACT_PUBLICATION.json",
+    "agentbus_pending_record": "agentbus-backup/coordination-messages/v26-canonical-artifact/V26_CANONICAL_ARTIFACT_PUBLICATION_PENDING_AGENTBUS.json"
+  },
+  "precedence": {
+    "v26_current": true,
+    "v25_r11_current": false,
+    "v25_r11_role": "HISTORICAL_LINEAGE_ONLY",
+    "retrieval_rank_is_canonical_precedence": false
+  },
+  "github_representation": {
+    "full_artifact_embedded_in_git": false,
+    "reason": "ARTIFACT_EXCEEDS_NORMAL_GITHUB_SINGLE_FILE_LIMIT_AND_CURRENT_CONNECTOR_HAS_NO_GIT_LFS_OR_RELEASE_ASSET_UPLOAD",
+    "canonical_identity_is_committed": true
+  },
+  "project_separation": {
+    "only_shared_coordination_project": "INTERCOMMUNICATION_ENHANCEMENTS",
+    "cv_support_federated": false
+  },
+  "authorization": {
+    "case_id": "AUTH-20261016-V26-CANONICAL-ARTIFACT-PUBLISH-01",
+    "proof_issue": 201
+  }
+}

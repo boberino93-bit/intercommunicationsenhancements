@@ -1,0 +1,49 @@
+{
+  "logical_record_id": "INTERCOMMUNICATION_ENHANCEMENTS::AGENTBUS::V26_CANONICAL_ARTIFACT_PUBLICATION",
+  "payload": {
+    "agentbus": {
+      "message_board": "/Intercommunication enhancements/AgentBus/messages",
+      "namespace": "intercommunicationsenhancements::messages",
+      "readback_performed_from_current_runtime": false,
+      "reason": "CURRENT_RUNTIME_DOES_NOT_EXPOSE_CHATGPT_LIBRARY_AGENTBUS_WRITE_OR_READBACK_ACTION",
+      "surface": "CHATGPT_LIBRARY_AGENTBUS",
+      "target_state": "PUBLISH_THIS_RECORD_AND_READ_BACK_EQUIVALENCE",
+      "write_performed_from_current_runtime": false
+    },
+    "artifact": {
+      "bytes": 108015662,
+      "canonical_bootstrap_generation": "V26",
+      "embedded_validated_v26_parent": {
+        "byte_for_byte_verified": true,
+        "bytes": 108008506,
+        "name": "Intercommunication_Enhancements_Herd_AI_BIOS_V26_CONSOLIDATED_PROMOTION_FULL_PRESERVATION_VALIDATED_CANDIDATE.md",
+        "sha256": "122e73dc7ba01384d799fc508c337081948ae1714f869a318d2ab96cd142d778"
+      },
+      "name": "Intercommunication_Enhancements_Herd_AI_BIOS_V26_CANONICAL_PROJECT_BOOTSTRAP_SINGLE_FILE.md",
+      "sha256": "e85a52c01dcc1e359db93d18a5b73e1328fd9f5a7943cf7999579b4e7e4a4348",
+      "status": "CANONICAL_ACTIVE"
+    },
+    "authorization": {
+      "case_id": "AUTH-20261016-V26-CANONICAL-ARTIFACT-PUBLISH-01",
+      "human_authorization_received": true,
+      "proof_issue": 201
+    },
+    "event": "V26_CANONICAL_PROJECT_BOOTSTRAP_PUBLISHED",
+    "github": {
+      "base_revision": "075fabe3963fbe5eeb1e39eede358f7fcb768513",
+      "full_108mb_file_embedded_in_git": false,
+      "reason_full_file_not_embedded": "ARTIFACT_EXCEEDS_NORMAL_GITHUB_SINGLE_FILE_LIMIT_AND_CURRENT_CONNECTOR_HAS_NO_GIT_LFS_OR_RELEASE_ASSET_UPLOAD",
+      "repository": "boberino93-bit/intercommunicationsenhancements",
+      "representation": "CANONICAL_IDENTITY_MANIFEST_AND_DURABLE_BACKUP_POINTER"
+    },
+    "project_id": "intercommunicationsenhancements",
+    "project_separation": {
+      "cv_support_federated": false,
+      "only_shared_coordination_project": "INTERCOMMUNICATION_ENHANCEMENTS"
+    },
+    "published_at": "2026-10-17T03:16:35Z",
+    "schema": "intercommunications/v26-canonical-artifact-publication/v1"
+  },
+  "payload_sha256": "f07557f609b84e11431f633f4bd79d4545c3ec03e181d2a39d5c275d8eaf975f",
+  "schema": "intercommunications/agentbus-record/v1"
+}

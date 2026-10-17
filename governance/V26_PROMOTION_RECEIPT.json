@@ -1,10 +1,13 @@
 {
   "schema": "intercommunications/v26-promotion-receipt/v1",
   "version": "V26",
-  "status": "GITHUB_MAIN_MERGED_AGENTBUS_RECOVERY_PREPARED",
+  "status": "GITHUB_CANONICAL_PROJECT_ARTIFACT_PUBLISHED_AGENTBUS_PENDING",
   "authorization": {
     "original_promotion_case_id": "AUTH-20261016-V26-PROMOTION-01",
     "agentbus_recovery_case_id": "AUTH-20261016-V26-AGENTBUS-RECOVERY-01",
+    "canonical_alignment_case_id": "AUTH-20261016-V26-CANONICAL-ALIGNMENT-02",
+    "canonical_artifact_publication_case_id": "AUTH-20261016-V26-CANONICAL-ARTIFACT-PUBLISH-01",
+    "canonical_artifact_publication_proof_issue": 201,
     "registered_github_principal": "boberino93-bit",
     "human_authorization_statement_received": true
   },
@@ -23,23 +26,41 @@
     "primary_validation_checks_failed": 0,
     "independent_parent_byte_comparison": "PASS"
   },
+  "canonical_project_bootstrap_artifact": {
+    "name": "Intercommunication_Enhancements_Herd_AI_BIOS_V26_CANONICAL_PROJECT_BOOTSTRAP_SINGLE_FILE.md",
+    "bytes": 108015662,
+    "sha256": "e85a52c01dcc1e359db93d18a5b73e1328fd9f5a7943cf7999579b4e7e4a4348",
+    "canonical_promotion": true,
+    "embedded_validated_parent_sha256": "122e73dc7ba01384d799fc508c337081948ae1714f869a318d2ab96cd142d778",
+    "embedded_validated_parent_bytes": 108008506,
+    "embedded_parent_byte_for_byte_verified": true,
+    "github_full_file_embedded": false,
+    "github_identity_pointer": "V26_CANONICAL_PROJECT_BOOTSTRAP_POINTER.json",
+    "publication_record": "governance/V26_CANONICAL_ARTIFACT_PUBLICATION.json"
+  },
   "github_activation": {
-    "main_merge_completed": true,
-    "merge_commit": "e053ee43ec5038303c139f13f44b28bef6e330c1",
-    "main_readback_verified": true
+    "original_v26_activation_merge_completed": true,
+    "original_v26_activation_merge_commit": "e053ee43ec5038303c139f13f44b28bef6e330c1",
+    "agentbus_linkage_repair_merge_commit": "f057e7b935333fe4a1ee5cf835b35af43dc42092",
+    "canonical_alignment_merge_commit": "075fabe3963fbe5eeb1e39eede358f7fcb768513",
+    "canonical_artifact_publication_target_branch": "publication/v26-canonical-artifact-20261016",
+    "main_readback_verified_through_canonical_alignment": true
   },
   "agentbus_recovery": {
     "surface": "CHATGPT_LIBRARY_AGENTBUS",
     "message_board": "/Intercommunication enhancements/AgentBus/messages",
     "linkage_policy": "governance/V26_AGENTBUS_LINKAGE_POLICY.json",
     "migration_plan": "docs/V26_AGENTBUS_RECOVERY_MIGRATION.md",
+    "canonical_artifact_logical_record_id": "INTERCOMMUNICATION_ENHANCEMENTS::AGENTBUS::V26_CANONICAL_ARTIFACT_PUBLICATION",
+    "canonical_artifact_payload_sha256": "f07557f609b84e11431f633f4bd79d4545c3ec03e181d2a39d5c275d8eaf975f",
+    "github_backup_record": "agentbus-backup/coordination-messages/v26-canonical-artifact/V26_CANONICAL_ARTIFACT_PUBLICATION_PENDING_AGENTBUS.json",
     "current_board_inspected_from_this_runtime": false,
     "current_board_archive_verified": false,
     "reset_performed": false,
-    "reseed_performed": false,
+    "canonical_artifact_record_written": false,
     "readback_performed": false,
-    "reason": "CURRENT_RUNTIME_DOES_NOT_EXPOSE_CHATGPT_LIBRARY_WRITE_DELETE_OR_READBACK_SURFACE",
+    "reason": "CURRENT_RUNTIME_DOES_NOT_EXPOSE_CHATGPT_LIBRARY_AGENTBUS_WRITE_DELETE_OR_READBACK_SURFACE",
     "github_write_proves_agentbus_write": false
   },
-  "completion_rule": "V26 GitHub activation is complete. AgentBus synchronization is a separate persistence recovery branch and may be called complete only after direct AgentBus archive/reset/reseed/readback and record-equivalence verification."
+  "completion_rule": "V26 GitHub activation and canonical project-artifact identity publication are complete after this publication branch merges to main and is read back. AgentBus synchronization remains separate and may be called complete only after the exact logical record and payload SHA-256 are directly written to and read back from the ChatGPT Library AgentBus."
 }
