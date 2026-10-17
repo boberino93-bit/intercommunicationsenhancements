@@ -15,9 +15,24 @@
     "name": "Intercommunication_Enhancements_Herd_AI_BIOS_V26_CONSOLIDATED_PROMOTION_FULL_PRESERVATION_VALIDATED_CANDIDATE.md",
     "bytes": 108008506,
     "sha256": "122e73dc7ba01384d799fc508c337081948ae1714f869a318d2ab96cd142d778",
-    "role": "ONE_FILE_MASTER_RUNTIME_AUDIT_BUNDLE",
+    "role": "VALIDATED_V26_RUNTIME_PARENT_AND_FULL_PRESERVATION_BUNDLE",
     "github_full_artifact_embedded": false,
     "github_representation": "DIGEST_AND_CANONICAL_BOOTSTRAP_OVERLAY"
+  },
+  "canonical_project_file_representation": {
+    "name": "Intercommunication_Enhancements_Herd_AI_BIOS_V26_CANONICAL_PROJECT_BOOTSTRAP_SINGLE_FILE.md",
+    "bytes": 108015662,
+    "sha256": "e85a52c01dcc1e359db93d18a5b73e1328fd9f5a7943cf7999579b4e7e4a4348",
+    "status": "CANONICAL_ACTIVE",
+    "canonical_promotion": true,
+    "role": "ONE_FILE_CANONICAL_PROJECT_BOOTSTRAP_AND_FULL_PRESERVATION_AUDIT_BUNDLE",
+    "embedded_validated_parent_name": "Intercommunication_Enhancements_Herd_AI_BIOS_V26_CONSOLIDATED_PROMOTION_FULL_PRESERVATION_VALIDATED_CANDIDATE.md",
+    "embedded_validated_parent_bytes": 108008506,
+    "embedded_validated_parent_sha256": "122e73dc7ba01384d799fc508c337081948ae1714f869a318d2ab96cd142d778",
+    "embedded_validated_parent_byte_for_byte_verified": true,
+    "github_full_file_embedded": false,
+    "github_identity_pointer": "V26_CANONICAL_PROJECT_BOOTSTRAP_POINTER.json",
+    "publication_record": "governance/V26_CANONICAL_ARTIFACT_PUBLICATION.json"
   },
   "lineage": {
     "immediate_parent_version": "V25_R11",
@@ -30,6 +45,7 @@
   "bootstrap": {
     "adapter": "bootstrap/V26_BOOTSTRAP_ADAPTER.json",
     "canonical_order": "BOOTSTRAP_ORDER.json",
+    "canonical_project_file_pointer": "V26_CANONICAL_PROJECT_BOOTSTRAP_POINTER.json",
     "external_service_required_for_standalone_boot": false,
     "vmbus_ready_required_before_project_bind": true,
     "principal_context_ready_required_before_project_bind": true,
@@ -56,17 +72,23 @@
     "whole_store_difference_is_record_conflict": false,
     "github_write_proves_agentbus_write": false,
     "agentbus_write_proves_github_write": false,
-    "current_library_write_state": "NOT_PERFORMED_RUNTIME_SURFACE_UNAVAILABLE"
+    "current_library_write_state": "PENDING_PUBLICATION_RUNTIME_SURFACE_UNAVAILABLE",
+    "pending_logical_record_id": "INTERCOMMUNICATION_ENHANCEMENTS::AGENTBUS::V26_CANONICAL_ARTIFACT_PUBLICATION",
+    "pending_payload_sha256": "f07557f609b84e11431f633f4bd79d4545c3ec03e181d2a39d5c275d8eaf975f",
+    "github_backup_record": "agentbus-backup/coordination-messages/v26-canonical-artifact/V26_CANONICAL_ARTIFACT_PUBLICATION_PENDING_AGENTBUS.json"
   },
   "scheduler": {
     "state_mutated_by_v26_promotion": false,
     "state_mutated_by_v26_canonical_alignment": false,
+    "state_mutated_by_v26_canonical_artifact_publication": false,
     "pipeline_ordering": "CHECKPOINT_READINESS_AND_FENCING_NOT_SHARED_CLOCK_TIME"
   },
   "authorization": {
     "original_promotion_case_id": "AUTH-20261016-V26-PROMOTION-01",
     "agentbus_recovery_case_id": "AUTH-20261016-V26-AGENTBUS-RECOVERY-01",
-    "canonical_alignment_case_id": "AUTH-20261016-V26-CANONICAL-ALIGNMENT-01",
+    "canonical_alignment_case_id": "AUTH-20261016-V26-CANONICAL-ALIGNMENT-02",
+    "canonical_artifact_publication_case_id": "AUTH-20261016-V26-CANONICAL-ARTIFACT-PUBLISH-01",
+    "canonical_artifact_publication_proof_issue": 201,
     "scope": "INTERCOMMUNICATION_ENHANCEMENTS_ONLY",
     "cv_support_mutation": false,
     "cross_project_mutation": false,
