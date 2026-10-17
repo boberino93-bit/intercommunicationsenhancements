@@ -1,0 +1,44 @@
+{
+  "schema": "intercommunications/v26-project-separation/v1",
+  "version": "V26",
+  "status": "ACTIVE_WHEN_V26_IS_CANONICAL_ON_MAIN",
+  "purpose": "Preserve project isolation while allowing Intercommunication Enhancements to provide shared coordination protocols and interfaces.",
+  "shared_coordination_project": {
+    "project": "INTERCOMMUNICATION_ENHANCEMENTS",
+    "is_only_shared_coordination_project": true,
+    "may_define_shared_protocols": true,
+    "may_define_shared_interfaces": true,
+    "may_collapse_project_state_boundaries": false,
+    "may_infer_cross_project_authority": false
+  },
+  "project_isolation": {
+    "project_specific_bootstrap_preserved": true,
+    "project_specific_identity_preserved": true,
+    "project_specific_policy_preserved": true,
+    "project_specific_vmbus_namespace_preserved": true,
+    "project_specific_evidence_preserved": true,
+    "project_specific_authorization_boundaries_preserved": true,
+    "cross_project_state_access_default": "DENY",
+    "cross_project_mutation_default": "DENY"
+  },
+  "cv_support": {
+    "federated": false,
+    "shared_memory": false,
+    "shared_evidence": false,
+    "shared_messages": false,
+    "shared_project_state": false,
+    "shared_authority": false,
+    "experimental_bootstrap_history_is_general_shared_source": false,
+    "allowed_relationship": "MAY_IMPLEMENT_COMMON_INTERCOMMUNICATION_INTERFACE_WITHOUT_STATE_OR_AUTHORITY_FEDERATION"
+  },
+  "invariants": [
+    "SHARED_INTERCOMMUNICATION_PROTOCOL != SHARED_PROJECT_STATE",
+    "COMMON_BOOTSTRAP_INTERFACE != COMMON_PROJECT_AUTHORITY",
+    "PROJECT_A_VMBUS != PROJECT_B_VMBUS",
+    "CROSS_PROJECT_DISCOVERY != CROSS_PROJECT_DATA_ACCESS",
+    "CROSS_PROJECT_PROTOCOL_COMPATIBILITY != CROSS_PROJECT_AUTHORIZATION",
+    "CV_SUPPORT != FEDERATED_PROJECT",
+    "INTERCOMMUNICATION_ENHANCEMENTS = ONLY_SHARED_COORDINATION_PROJECT"
+  ],
+  "mutation_note": "Adopting this policy does not itself authorize any mutation in CV Support or any other project. Each distinct external mutation remains governed by that project's applicable authority gates."
+}
