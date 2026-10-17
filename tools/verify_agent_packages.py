@@ -10,7 +10,7 @@ ROOT=Path(__file__).resolve().parents[1]; sys.path.insert(0,str(ROOT))
 from org_agent_mesh.constants import DEPLOYMENT_ROLES
 from org_agent_mesh.package_manifest import validate_agent_package_manifest
 
-PROJECT=json.loads((ROOT/"PROJECT_MANIFEST.json").read_text(encoding="utf-8")); IDENTITY=json.loads((ROOT/"PROJECT_IDENTITY_LOCK.json").read_text(encoding="utf-8")); BOOTSTRAP=json.loads((ROOT/"BOOTSTRAP_ORDER.json").read_text(encoding="utf-8")); DEPENDENCY_MAP_PATH=ROOT/"packaging"/"agent_package_dependencies.json"; DEPENDENCY_MAP=json.loads(DEPENDENCY_MAP_PATH.read_text(encoding="utf-8")); errors=[]; packages=sorted((ROOT/"dist").glob("*.zip"))
+PROJECT=json.loads((ROOT/"PROJECT_MANIFEST.json").read_text(encoding="utf-8")); IDENTITY=json.loads((ROOT/"PROJECT_IDENTITY_LOCK.json").read_text(encoding="utf-8")); BOOTSTRAP=json.loads((ROOT/"BOOTSTRAP_ORDER.json").read_text(encoding="utf-8")); DEPENDENCY_MAP_PATH=ROOT/"packaging"/"agent_package_dependencies.json"; DEPENDENCY_MAP=json.loads(DEPENDENCY_MAP_PATH.read_text(encoding="utf-8")); V26_MANIFEST=json.loads((ROOT/"PROJECT_MANIFEST_V26.json").read_text(encoding="utf-8")); V26_ADAPTER=json.loads((ROOT/"bootstrap"/"V26_BOOTSTRAP_ADAPTER.json").read_text(encoding="utf-8")); errors=[]; packages=sorted((ROOT/"dist").glob("*.zip"))
 if not packages: errors.append("no deployment ZIP packages found")
 
 def digest_bytes(payload): return hashlib.sha256(payload).hexdigest()
@@ -29,11 +29,20 @@ def expected_components(role):
     for rel in role_files:
         if not (ROOT/rel).is_file(): raise ValueError(f"role component missing: {rel}")
         components.add(rel)
+    required=set(DEPENDENCY_MAP.get("required_v26_components",[]))
+    if required-components: raise ValueError(f"V26 dependency closure missing: {sorted(required-components)}")
     return sorted(components)
 
-EXPECTED_REVISION=checked_out_revision(); EXPECTED_DEPENDENCY_HASH=digest_file(DEPENDENCY_MAP_PATH); EXPECTED_PREFIX=["bind_host_chat_project_context_before_all_other_bootstrap","validate_current_human_project_intent","load_and_validate_project_identity_lock"]
-if [step.get("id") for step in BOOTSTRAP.get("steps",[])][:3] != EXPECTED_PREFIX: errors.append("repository bootstrap order is not identity-first")
+EXPECTED_REVISION=checked_out_revision(); EXPECTED_DEPENDENCY_HASH=digest_file(DEPENDENCY_MAP_PATH); EXPECTED_PREFIX=["load_v26_canonical_bootstrap_adapter","enter_unbound_read_only_and_initialize_validate_vmbus","require_vmbus_ready","load_principal_context_layers_build_indexes_and_require_principal_context_ready","bind_host_chat_project_context_after_v26_readiness"]
+if [step.get("id") for step in BOOTSTRAP.get("steps",[])][:len(EXPECTED_PREFIX)] != EXPECTED_PREFIX: errors.append("repository bootstrap order is not V26 readiness-first")
+if BOOTSTRAP.get("canonical_bootstrap_generation") != "V26": errors.append("repository bootstrap generation is not V26")
+if PROJECT.get("canonical_bootstrap_generation") != "V26": errors.append("root project manifest does not declare V26")
+if PROJECT.get("canonical_generation_manifest") != "PROJECT_MANIFEST_V26.json": errors.append("root project manifest V26 manifest pointer mismatch")
+if PROJECT.get("canonical_bootstrap_adapter") != "bootstrap/V26_BOOTSTRAP_ADAPTER.json": errors.append("root project manifest V26 adapter pointer mismatch")
+if V26_MANIFEST.get("version") != "V26" or V26_MANIFEST.get("status") != "CANONICAL_ACTIVE" or V26_MANIFEST.get("canonical_promotion") is not True: errors.append("V26 manifest is not canonical active")
+if V26_ADAPTER.get("version") != "V26" or V26_ADAPTER.get("status") != "CANONICAL_ACTIVE_ON_MAIN": errors.append("V26 adapter is not canonical active")
 if DEPENDENCY_MAP.get("schema") != "org-agent-mesh/package-dependency-map/v1": errors.append("unsupported package dependency map schema")
+if DEPENDENCY_MAP.get("canonical_bootstrap_generation") != "V26": errors.append("package dependency map generation is not V26")
 seen_roles=set(); source_revisions=set(); package_hashes={}
 for path in packages:
     try:
@@ -50,6 +59,9 @@ for path in packages:
             if manifest["bootstrap_order_path"] != "BOOTSTRAP_ORDER.json": raise ValueError("unexpected bootstrap order path")
             if manifest["dependency_map_path"] != "packaging/agent_package_dependencies.json": raise ValueError("unexpected package dependency map path")
             if manifest["dependency_map_sha256"] != EXPECTED_DEPENDENCY_HASH: raise ValueError("package dependency map hash mismatch")
+            if manifest.get("canonical_bootstrap_generation") != "V26": raise ValueError("package manifest does not declare V26")
+            if manifest.get("v26_manifest_path") != "PROJECT_MANIFEST_V26.json": raise ValueError("package V26 manifest pointer mismatch")
+            if manifest.get("v26_adapter_path") != "bootstrap/V26_BOOTSTRAP_ADAPTER.json": raise ValueError("package V26 adapter pointer mismatch")
             components=list(manifest["included_components"])
             if len(components)!=len(set(components)): raise ValueError("manifest contains duplicate included components")
             expected_for_role=expected_components(role)
@@ -60,6 +72,7 @@ for path in packages:
             if set(manifest["component_sha256"]) != set(components): raise ValueError("component hash index does not match included components")
             expected_role_files={f"roles/{role}.md",f"bootstrap/{role}.md"}
             if not expected_role_files.issubset(names): raise ValueError(f"role bootstrap/instructions missing for {role}")
+            if not {"PROJECT_MANIFEST_V26.json","bootstrap/V26_BOOTSTRAP_ADAPTER.json"}.issubset(names): raise ValueError("V26 canonical components missing from package")
             foreign={f"roles/{other}.md" for other in DEPLOYMENT_ROLES if other!=role}|{f"bootstrap/{other}.md" for other in DEPLOYMENT_ROLES if other!=role}
             if foreign & names: raise ValueError(f"foreign role-specific instructions present: {sorted(foreign & names)}")
             expected_capabilities=sorted(set(IDENTITY["authority_model"]["role_capabilities"][role]))
@@ -70,8 +83,12 @@ for path in packages:
                 if actual_hash != digest_file(ROOT/rel): raise ValueError(f"packaged component drifts from repository source: {rel}")
             packaged_identity=json.loads(archive.read(manifest["identity_lock_path"]))
             if packaged_identity["mode"]!="FAIL_CLOSED" or packaged_identity["project_id"]!=PROJECT["project_id"] or packaged_identity["writable_repository"]!=PROJECT["repository_identity"] or packaged_identity["coordination_root"]!=IDENTITY["coordination_root"]: raise ValueError("packaged identity lock mismatch")
-            packaged_bootstrap=json.loads(archive.read(manifest["bootstrap_order_path"])); prefix=[step.get("id") for step in packaged_bootstrap.get("steps",[])][:3]
-            if prefix != EXPECTED_PREFIX: raise ValueError("packaged bootstrap order is not identity-first")
+            packaged_bootstrap=json.loads(archive.read(manifest["bootstrap_order_path"])); prefix=[step.get("id") for step in packaged_bootstrap.get("steps",[])][:len(EXPECTED_PREFIX)]
+            if prefix != EXPECTED_PREFIX: raise ValueError("packaged bootstrap order is not V26 readiness-first")
+            if packaged_bootstrap.get("canonical_bootstrap_generation") != "V26": raise ValueError("packaged bootstrap generation is not V26")
+            packaged_v26_manifest=json.loads(archive.read("PROJECT_MANIFEST_V26.json")); packaged_v26_adapter=json.loads(archive.read("bootstrap/V26_BOOTSTRAP_ADAPTER.json"))
+            if packaged_v26_manifest.get("status") != "CANONICAL_ACTIVE": raise ValueError("packaged V26 manifest is not active")
+            if packaged_v26_adapter.get("status") != "CANONICAL_ACTIVE_ON_MAIN": raise ValueError("packaged V26 adapter is not active")
             expected_filename=f"{PROJECT['project_id']}-{role.lower()}-{PROJECT['framework_version']}.zip"
             if path.name != expected_filename: raise ValueError(f"unexpected package filename: {path.name!r} != {expected_filename!r}")
             package_hashes[role]=digest_file(path)
@@ -90,6 +107,7 @@ else:
         if release.get("source_revision")!=EXPECTED_REVISION: raise ValueError("release set source revision mismatch")
         if release.get("framework_version")!=PROJECT["framework_version"]: raise ValueError("release set framework version mismatch")
         if release.get("protocol_version")!=PROJECT["protocol_version"]: raise ValueError("release set protocol version mismatch")
+        if release.get("canonical_bootstrap_generation")!="V26": raise ValueError("release set generation is not V26")
         if release.get("dependency_map_sha256")!=EXPECTED_DEPENDENCY_HASH: raise ValueError("release set dependency map hash mismatch")
         release_packages={item["deployment_role"]:item for item in release.get("packages",[])}
         if set(release_packages)!=expected_roles: raise ValueError("release set role set mismatch")
@@ -100,4 +118,4 @@ else:
     except Exception as exc: errors.append(f"release-set.json: {exc}")
 if errors:
     print("\n".join(errors)); raise SystemExit(1)
-print("agent package verification PASS")
+print("agent package verification PASS: V26 canonical alignment")
