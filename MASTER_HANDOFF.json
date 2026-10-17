@@ -3,10 +3,10 @@
   "project_id": "intercommunicationsenhancements",
   "generation": 26,
   "canonical_bootstrap_generation": "V26",
-  "updated_at_utc": "2026-10-17T02:39:20Z",
+  "updated_at_utc": "2026-10-17T03:02:48Z",
   "updated_by": {
     "agent_id": "primary-v26-canonical-alignment",
-    "agent_instance_id": "AUTH-20261016-V26-CANONICAL-ALIGNMENT-01",
+    "agent_instance_id": "AUTH-20261016-V26-CANONICAL-ALIGNMENT-02",
     "role": "PRIMARY",
     "execution_mode": "PROMOTION_ALIGNMENT"
   },
@@ -30,7 +30,9 @@
     "artifact_sha256": "122e73dc7ba01384d799fc508c337081948ae1714f869a318d2ab96cd142d778",
     "framework_release": "1.6.0-alpha.1",
     "alignment_base_revision": "f057e7b935333fe4a1ee5cf835b35af43dc42092",
-    "alignment_case": "AUTH-20261016-V26-CANONICAL-ALIGNMENT-01"
+    "alignment_case": "AUTH-20261016-V26-CANONICAL-ALIGNMENT-02",
+    "independent_proof_issue": 199,
+    "activation_condition": "ALIGNMENT_BRANCH_MERGED_TO_DEFAULT_BRANCH_MAIN"
   },
   "v26_readiness": {
     "startup_mode": "UNBOUND_READ_ONLY",
@@ -50,54 +52,34 @@
   },
   "active_agents": [],
   "workstreams": [
-    {
-      "id": "v26-canonical-promotion",
-      "status": "COMPLETE",
-      "summary": "V26 digest/manifest/bootstrap overlay was promoted to main under the original V26 promotion authorization."
-    },
-    {
-      "id": "v26-agentbus-recovery",
-      "status": "COMPLETE_GITHUB_SIDE",
-      "summary": "V26 GitHub-side AgentBus linkage semantics were repaired without claiming an unavailable ChatGPT Library AgentBus write."
-    },
-    {
-      "id": "v26-canonical-alignment",
-      "status": "AUTHORIZED_IN_PROGRESS_UNTIL_MERGED_AND_READ_BACK",
-      "summary": "Align active root/bootstrap/package/documentation surfaces so no active surface identifies V25 R11 as current."
-    }
+    {"id":"v26-canonical-promotion","status":"COMPLETE","summary":"V26 digest/manifest/bootstrap overlay was promoted to main under the original V26 promotion authorization."},
+    {"id":"v26-agentbus-recovery","status":"COMPLETE_GITHUB_SIDE","summary":"V26 GitHub-side AgentBus linkage semantics were repaired without claiming an unavailable ChatGPT Library AgentBus write."},
+    {"id":"v26-canonical-alignment","status":"CONTENT_COMPLETE_ACTIVATES_ON_AUTHORIZED_MAIN_MERGE","summary":"Active root/bootstrap/package/documentation surfaces identify V26 as current; V25 R11 and earlier remain historical lineage. Final activation is the authorized merge and main readback."}
   ],
   "blockers": [
-    {
-      "id": "library-agentbus-write-transport",
-      "scope": "EXTERNAL_PERSISTENCE",
-      "status": "UNAVAILABLE_IN_CURRENT_RUNTIME",
-      "summary": "No write-capable ChatGPT Library AgentBus transport is exposed in this runtime; no such write is claimed."
-    }
+    {"id":"library-agentbus-write-transport","scope":"EXTERNAL_PERSISTENCE","status":"UNAVAILABLE_IN_CURRENT_RUNTIME","summary":"No write-capable ChatGPT Library AgentBus transport is exposed in this runtime; no such write is claimed."}
   ],
   "pending_actions": [
-    {
-      "priority": 1,
-      "action": "Complete V26 canonical-alignment validation, merge and main readback under the current case while valid or a fresh case if expiry requires it."
-    },
-    {
-      "priority": 2,
-      "action": "Keep V25 R11 and earlier records immutable as historical lineage; do not reactivate them through a stale pointer."
-    },
-    {
-      "priority": 3,
-      "action": "Inventory peer projects separately only under project-specific authorization; do not mutate CV Support or share peer project state."
-    }
+    {"priority":1,"action":"Validate the V26 alignment branch, merge under AUTH-20261016-V26-CANONICAL-ALIGNMENT-02 while valid, and read main back."},
+    {"priority":2,"action":"Keep V25 R11 and earlier records immutable as historical lineage; do not reactivate them through stale pointers."},
+    {"priority":3,"action":"Synchronize ChatGPT Project Files/Library bootstrap discovery separately when a writable product surface is available; do not claim that GitHub merge mutates that surface."}
   ],
   "historical_lineage_refs": [
     "PROJECT_MANIFEST_V25_R11_CANDIDATE.json",
     "bootstrap/V25_R11_BOOTSTRAP_ADAPTER.json",
-    "governance/V25_R11_MIGRATION_RECEIPT.json"
+    "governance/V25_R11_MIGRATION_RECEIPT.json",
+    "historical/AGENT_BOOTSTRAP_PRE_V26_CANONICAL_ALIGNMENT.json"
   ],
   "current_refs": [
     "PROJECT_MANIFEST.json",
     "PROJECT_MANIFEST_V26.json",
     "bootstrap/V26_BOOTSTRAP_ADAPTER.json",
     "BOOTSTRAP_ORDER.json",
+    "AGENT_BOOTSTRAP.json",
+    "GLOBAL_AGENT_ENTRYPOINT.json",
+    "UNIVERSAL_AGENT_ENTRYPOINT.md",
+    "governance/PROJECT_CONTEXT_BINDING_POLICY.json",
+    "governance/PROJECT_CONTEXT_BINDING_REGISTRY.json",
     "governance/V26_PROJECT_SEPARATION_POLICY.json",
     "governance/V26_AGENTBUS_LINKAGE_POLICY.json",
     "governance/V26_PROMOTION_RECEIPT.json"
