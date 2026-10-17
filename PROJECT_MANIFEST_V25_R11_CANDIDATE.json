@@ -1,0 +1,37 @@
+{
+  "schema": "intercommunications/v25-r11-project-manifest-overlay/v1",
+  "status": "FORENSIC_IMPLEMENTATION_CANDIDATE",
+  "canonical_promotion": false,
+  "project_id": "intercommunicationsenhancements",
+  "repository": "boberino93-bit/intercommunicationsenhancements",
+  "base_manifest": "PROJECT_MANIFEST.json",
+  "bootstrap_adapter": "bootstrap/V25_R11_BOOTSTRAP_ADAPTER.json",
+  "external_mirror_policy": "governance/V25_R11_EXTERNAL_MIRROR_POLICY.json",
+  "external_persistence_protocol": "protocols/v25_r11_external_persistence.md",
+  "scheduler_posture": "governance/V25_R11_SCHEDULER_POSTURE.json",
+  "startup_document": "START_HERE.md",
+  "candidate_invariants": [
+    "VMBUS_READY_BEFORE_PROJECT_BIND",
+    "PRINCIPAL_CONTEXT_READY_BEFORE_PROJECT_BIND",
+    "PRINCIPAL_CONTEXT_READY_BEFORE_TASK_INTERPRETATION",
+    "EXTERNAL_SERVICES_OPTIONAL_AFTER_STANDALONE_READINESS",
+    "R11_SYNTHESIS_NON_AUTHORITATIVE_AND_REVISABLE",
+    "MIRROR_CONFLICTS_PRESERVED",
+    "SCHEDULER_DISABLED_BY_DEFAULT_EXCEPT_EXPLICIT_VMBUS_DEFRAG_EXCEPTION",
+    "NO_CANONICAL_PROMOTION_FROM_CANDIDATE_BRANCH"
+  ],
+  "legacy_files_preserved": [
+    "BOOTSTRAP_ORDER.json",
+    "AGENT_BOOTSTRAP.json",
+    "PROJECT_MANIFEST.json",
+    "governance/SWARM_MEMORY_PERSISTENCE_POLICY.json",
+    "protocols/external_swarm_memory.md",
+    "protocols/swarm_checkpoint_bus.md"
+  ],
+  "legacy_precedence_on_candidate_branch": "V25_R11_ADAPTER_AND_CANDIDATE_OVERLAYS_PRECEDE_CONFLICTING_LEGACY_BOOTSTRAP_OR_EXTERNAL_PERSISTENCE_SEMANTICS",
+  "artifactory_runtime": {
+    "connector_exposed_in_current_runtime": false,
+    "publication_claimed": false,
+    "state": "ARTIFACTORY_RUNTIME_UNAVAILABLE"
+  }
+}
