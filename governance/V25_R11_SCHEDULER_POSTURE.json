@@ -1,0 +1,30 @@
+{
+  "schema": "intercommunications/v25-r11-scheduler-posture/v1",
+  "status": "FORENSIC_IMPLEMENTATION_CANDIDATE",
+  "recorded_at": "2026-10-17T01:35:38Z",
+  "policy": "DISABLED_BY_DEFAULT_DURING_BOOTSTRAP_MIGRATION",
+  "exceptions": [
+    {
+      "title": "VMBUS Defrag",
+      "automation_id": "6acecbeae020819191299987c451725a",
+      "enabled": true,
+      "reason": "Explicit human exception retained during V25 R11 bootstrap migration"
+    }
+  ],
+  "observed_scheduler_surface": {
+    "all_other_exposed_automations_enabled": false,
+    "source": "current ChatGPT automation readback",
+    "claim_scope": "ONLY_AUTOMATIONS_EXPOSED_TO_CURRENT_RUNTIME"
+  },
+  "screenshot_observation": {
+    "research_1_research_2_research_3_manager_primary_display_same_clock_time": true,
+    "scheduler_identity_verified_from_screenshot": false,
+    "mutation_claimed_from_screenshot": false,
+    "conclusion": "PIPELINE_ORDER_MUST_BE_CHECKPOINT_GATED_NOT_CLOCK_TRUSTED"
+  },
+  "authority": {
+    "this_record_enables_scheduler_tasks": false,
+    "this_record_disables_unaddressable_tasks": false,
+    "future_enable_or_reenable_requires_separate_authorization": true
+  }
+}
