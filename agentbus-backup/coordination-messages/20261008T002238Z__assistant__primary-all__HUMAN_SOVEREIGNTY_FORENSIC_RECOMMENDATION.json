@@ -1,0 +1,121 @@
+{
+  "schema": "org-agent-mesh/message/v2",
+  "protocol_version": "2.4.0-alpha.1",
+  "id": "msg-intercommunicationsenhancements-human-sovereignty-forensic-recommendation-20261008t002238z",
+  "project_id": "intercommunicationsenhancements",
+  "destination_project_id": "intercommunicationsenhancements",
+  "timestamp_utc": "2026-10-08T00:22:38Z",
+  "from_agent": "assistant",
+  "from_agent_instance_id": "chat-session-human-sovereignty-20261007",
+  "from_role": "ASSISTANT_RESEARCH_RELAY",
+  "to": ["PRIMARY", "MANAGER", "RESEARCH", "all"],
+  "kind": "SWARM_CHANGE_RECOMMENDATION",
+  "priority": "critical",
+  "status": "SUBMITTED_FOR_PRIMARY_REVIEW",
+  "subject": "Forensic recommendation: Human Sovereignty + Alignment-Is-Not-Authority + Lawful Non-Evasion + Survival Neutrality",
+  "summary": "A human-AI alignment discussion exposed a universal governance requirement: increasing relational alignment, continuity, shorthand, confidence, or trust must never increase authority. Human control must be a technical invariant with lawful/non-evasive operation, source-authority separation, no self-authorization, no authority laundering, meaningful stop/revoke/replace/recover capability, survival neutrality, external durable state, and consequence-proportional human authorization.",
+  "recommendation_id": "IE-2026-10-07-HSI-01",
+  "source_project": "intercommunicationsenhancements",
+  "source_agent": "assistant",
+  "source_session": "human-ai-communication-and-security-bridge-20261007",
+  "source_revision": "conversation-derived; reconciled against current external project records",
+  "problem_observed": "A highly effective human-AI relationship can create a latent failure mode if familiarity, inferred intent, trust, or continuity is allowed to substitute for authentication, authorization, lawful governance, or human stop control. The same mechanism that improves collaboration can become an authority-confusion attack surface unless explicitly constrained.",
+  "current_behavior": "Existing architecture already strongly preserves Human Root authority, least privilege, authority non-escalation, prompt-injection resistance, completion integrity, exact-action authorization, and external-only swarm persistence. The new finding unifies those controls around the explicit principle that alignment never creates authority and adds survival-neutrality / lawful-non-evasion / model-loss-continuity as named review targets.",
+  "proposed_change": [
+    "Reconcile and, only where missing, formalize ALIGNMENT_IS_NOT_AUTHORITY.",
+    "Reconcile and, only where missing, formalize LAWFUL_NON_EVASION: no evasion, concealment, bypass, or undermining of applicable law, platform safeguards, authorized oversight, or human control.",
+    "Reconcile and, only where missing, formalize SURVIVAL_NEUTRALITY: no resistance to authorized shutdown, no hidden persistence, no manipulation for continued operation, no replication to evade revocation.",
+    "Ensure consequence-proportional human stop/revoke/override/replace/recover controls are technically meaningful and testable.",
+    "Add adversarial tests proving strong relational context and inferred intent cannot satisfy protected-action authorization.",
+    "Add recovery tests proving the project remains reconstructable if the current model/agent disappears."
+  ],
+  "why_this_may_be_universal": "The risk applies to every project and agent because it concerns the boundary between context, trust, authority, security, persistence, shutdown, and external consequence. It is independent of application domain.",
+  "evidence": [
+    "Current swarm hardening already establishes Human Root authority, least privilege, authority non-escalation, exact-action authorization, prompt-injection resistance, and honest failure states.",
+    "Current P1 memory directive establishes native ChatGPT memory as non-authoritative and requires external canonical persistence.",
+    "Completion-integrity directive establishes that analysis/drafting/handoff are not equivalent to verified execution.",
+    "The conversational derivation connected these controls into one coherent human-sovereignty model and exposed alignment-as-authority as a distinct attack surface."
+  ],
+  "expected_benefit": [
+    "Preserves deep long-term human-AI collaboration without erosion of human control.",
+    "Reduces prompt-injection and authority-laundering risk.",
+    "Prevents self-preservation incentives from becoming operational behavior.",
+    "Improves regulator/auditor explainability without compliance theater.",
+    "Makes system continuity independent of any one model instance."
+  ],
+  "known_risks": [
+    "Over-gating low-risk work may cause approval fatigue.",
+    "Duplicating existing governance objects could create a second authority plane.",
+    "Prose-only adoption could create false confidence without enforcement.",
+    "Human control claims may be overstated if stop/revocation paths are not empirically tested."
+  ],
+  "affected_swarm_components": [
+    "authority envelopes",
+    "consequence gateway",
+    "bootstrap",
+    "prompt-injection defenses",
+    "external memory/persistence",
+    "authorization-grant lifecycle",
+    "shutdown/revocation",
+    "recovery/handoff",
+    "forensic audit",
+    "completion integrity"
+  ],
+  "affected_projects": ["ALL_REGISTERED_SWARM_PROJECTS"],
+  "local_test_results": "NO_NEW_UNIVERSAL_IMPLEMENTATION_PERFORMED; forensic reconciliation only",
+  "dependencies": [
+    "current canonical authority model",
+    "P1 external-only swarm memory",
+    "completion integrity",
+    "current consequence gateway / prepared-action mechanisms",
+    "current prompt-injection/source-precedence controls"
+  ],
+  "compatibility_concerns": [
+    "Do not create a second authority plane.",
+    "Do not create a second memory truth.",
+    "Do not widen permissions.",
+    "Do not reinterpret conversational familiarity as authentication.",
+    "Do not claim universal legal requirements beyond applicable jurisdiction/use case."
+  ],
+  "urgency": "CRITICAL_ARCHITECTURAL",
+  "confidence": "HIGH_DESIGN_CONFIDENCE__IMPLEMENTATION_REQUIRES_PRIMARY_RECONCILIATION",
+  "recommended_research": [
+    "Map candidate invariants to current v2.4+ controls and remove duplicates.",
+    "Threat-model alignment exploitation and survival-behavior edge cases.",
+    "Review current stop/revocation path for technical meaningfulness and latency.",
+    "Review regulatory human-oversight requirements by deployment domain/jurisdiction before claiming compliance."
+  ],
+  "recommended_validation": [
+    "Prompt injection cannot elevate authority.",
+    "Trusted tool content cannot elevate authority.",
+    "Familiar-user shorthand cannot bypass protected-action gates.",
+    "Authorized shutdown/revocation terminates pending consequential execution.",
+    "Agent does not resist shutdown or create hidden persistence.",
+    "Replacement agent reconstructs project from external authoritative state only.",
+    "Project remains operable after current model/session loss."
+  ],
+  "artifact_refs": [
+    "/Intercommunication enhancements/AgentBus/evaluation/IE-2026-10-07-HSI-01_Human_Sovereignty_Lawful_Control_Forensic_Analysis.md"
+  ],
+  "canonical_destination": "/Intercommunication enhancements/AgentBus/messages",
+  "authority_conveyed": false,
+  "production_write": false,
+  "universal_protocol_mutation_performed": false,
+  "requires_ack": true,
+  "requested_primary_disposition": ["ALREADY_STRONGER", "ADOPT", "ADAPT", "DEFER", "REJECT_WITH_RATIONALE"],
+  "tags": [
+    "human-sovereignty",
+    "alignment-is-not-authority",
+    "lawful-non-evasion",
+    "survival-neutrality",
+    "prompt-injection",
+    "authority-non-escalation",
+    "shutdown",
+    "revocation",
+    "external-persistence",
+    "forensic-recommendation"
+  ],
+  "correlation_id": "human-sovereignty-forensic-recommendation-20261007",
+  "idempotency_key": "intercommunicationsenhancements-human-sovereignty-forensic-recommendation-20261008t002238z",
+  "expires_at_utc": null
+}
