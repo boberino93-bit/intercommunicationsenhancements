@@ -1,23 +1,31 @@
 {
   "schema": "org-agent-mesh/swarm-memory-persistence-policy/v1",
   "policy_id": "IEP-MEM-001",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "status": "ACTIVE",
   "priority": "P1",
   "scope": "GLOBAL_ALL_AGENT_TYPES",
-  "title": "External-only swarm memory and persistence",
-  "purpose": "Prevent native ChatGPT memory or any implicit host-memory layer from becoming swarm collective state, cache, log, fallback, or authority.",
+  "title": "External-only swarm memory with V26 record-level reconciliation",
+  "purpose": "Prevent native ChatGPT memory or implicit host-memory layers from becoming swarm collective state while distinguishing standalone VMBUS readiness, live AgentBus coordination, and versioned GitHub source authority.",
   "canonical_persistence": {
-    "artifactory": {
-      "authority": "CANONICAL",
+    "agentbus": {
+      "surface": "CHATGPT_LIBRARY_AGENTBUS",
+      "authority": "CANONICAL_LIVE_COORDINATION_EVENT_STREAM",
       "coordination_root": "/Intercommunication enhancements/AgentBus",
       "message_board": "/Intercommunication enhancements/AgentBus/messages",
-      "namespace": "intercommunicationsenhancements::messages"
+      "namespace": "intercommunicationsenhancements::messages",
+      "legacy_aliases": ["INTERNAL_ARTIFACTORY", "ARTIFACTORY"],
+      "jfrog_artifactory": false
     },
     "github": {
-      "authority": "DURABLE_SOURCE_VERSION_CONTROL_AND_BACKUP_NON_CANONICAL_COORDINATION",
+      "authority": "CANONICAL_VERSIONED_SOURCE_GOVERNANCE_AND_DURABLE_BACKUP",
       "repository": "boberino93-bit/intercommunicationsenhancements",
-      "coordination_backup_prefix": "agentbus-backup/coordination-messages/"
+      "coordination_backup_prefix": "agentbus-backup/coordination-messages/",
+      "live_mirror_path": ".interagent/messages"
+    },
+    "vmbus": {
+      "authority": "STANDALONE_RUNTIME_CONTEXT_AND_READINESS_LAYER",
+      "external_service_required_for_vmbus_ready": false
     }
   },
   "native_chatgpt_memory": {
@@ -34,7 +42,8 @@
     "ephemeral_compute": "ALLOW_NON_AUTHORITATIVE_ONLY",
     "local_files_or_sqlite": "ALLOW_REFERENCE_OR_TRANSIENT_ONLY",
     "collective_authority": "DENY",
-    "promotion_without_external_persistence": "DENY"
+    "standalone_vmbus_readiness_without_external_transport": "ALLOW",
+    "durable_external_propagation_claim_without_required_readbacks": "DENY"
   },
   "required_external_record_classes": [
     "collective_cached_data",
@@ -47,33 +56,60 @@
     "operational_state",
     "persistent_swarm_services"
   ],
+  "reconciliation": {
+    "phase": "AFTER_STANDALONE_READINESS",
+    "record_equivalence_requires": ["logical_record_id", "payload_sha256"],
+    "whole_store_difference_is_record_conflict": false,
+    "same_logical_record_id_different_payload_sha256": "CONFLICT",
+    "conflict_behavior": "PRESERVE_AND_SURFACE",
+    "silent_override": "DENY",
+    "retrieval_failure_is_absence_of_evidence": false
+  },
   "conflict_policy": {
-    "external_state_precedence": true,
-    "artifactory_is_canonical": true,
-    "github_may_not_silently_override_artifactory": true,
-    "artifactory_github_mismatch": "STOP_AFFECTED_AUTHORITY_DEPENDENT_BRANCH_AND_SURFACE_CONFLICT",
+    "agentbus_live_coordination_precedence": true,
+    "github_source_governance_precedence": true,
+    "one_authority_class_may_not_silently_replace_another": true,
+    "matching_record_conflict": "STOP_AFFECTED_AUTHORITY_DEPENDENT_BRANCH_AND_SURFACE_CONFLICT",
     "native_memory_conflict": "IGNORE_FOR_AUTHORITY_AND_REQUIRE_EXTERNAL_READBACK"
   },
   "failure_policy": {
-    "canonical_artifactory_unavailable": "FAIL_CLOSED_FOR_AFFECTED_PERSISTENCE_DEPENDENT_BRANCH",
+    "agentbus_unavailable_before_vmbus_ready": "CONTINUE_STANDALONE_READ_ONLY_AND_RECORD_TRANSPORT_DEGRADED",
+    "agentbus_unavailable_for_agentbus_dependent_coordination": "FAIL_CLOSED_FOR_AFFECTED_COORDINATION_BRANCH",
     "native_memory_fallback": "DENY",
     "continue_unrelated_safe_work": true
   },
   "propagation_claim": {
-    "requires_artifactory_readback": true,
-    "requires_github_revision_or_backup_readback": true,
-    "one_store_does_not_imply_other_store": true
+    "requires_agentbus_readback_when_agentbus_is_a_required_target": true,
+    "requires_github_readback_when_github_is_a_required_target": true,
+    "one_store_does_not_imply_other_store": true,
+    "github_write_proves_agentbus_write": false,
+    "agentbus_write_proves_github_write": false
   },
-  "migration_rule": "Any swarm fact stored only in native ChatGPT memory is non-authoritative until externalized to an approved external store and independently read back.",
+  "recovery": {
+    "destructive_agentbus_reset_requires_fresh_complete_archive": true,
+    "archive_readback_required": true,
+    "delete_before_archive_verification": "DENY",
+    "reset_requires_fresh_high_consequence_authorization": true,
+    "policy": "governance/V26_AGENTBUS_LINKAGE_POLICY.json",
+    "migration": "docs/V26_AGENTBUS_RECOVERY_MIGRATION.md"
+  },
+  "migration_rule": "A swarm fact stored only in native ChatGPT memory is non-authoritative. A durable cross-surface propagation claim requires the readbacks required by the governing workflow; standalone VMBUS readiness does not itself claim external propagation.",
   "implementation": {
     "protocol": "protocols/external_swarm_memory.md",
     "runtime_guard": "org_agent_mesh/swarm_memory_policy.py",
     "test": "tests/test_swarm_memory_policy.py",
-    "startup_context": "AGENT_CONTEXT_REFERENCE.md"
+    "startup_context": "AGENT_CONTEXT_REFERENCE.md",
+    "v26_linkage_policy": "governance/V26_AGENTBUS_LINKAGE_POLICY.json"
   },
   "forensic_basis": {
     "record": "/Intercommunication enhancements/AgentBus/evaluation/20261007T170000Z__MEMORY_PERSISTENCE_FAULT_FORENSIC_REPORT.md",
     "example_a_sha256": "739cfb244e9e105b3e43074db62c1e7816a1fa2d9680c58c56a5a3fdc9ed12f5",
     "classification": "CONFIRMED_FAULT"
-  }
+  },
+  "invariants": [
+    "GITHUB_WRITE != AGENTBUS_WRITE",
+    "STORE_DIFFERENCE != RECORD_CONFLICT",
+    "RETRIEVAL_FAILURE != ABSENCE_OF_EVIDENCE",
+    "CV_SUPPORT != FEDERATED_PROJECT"
+  ]
 }
