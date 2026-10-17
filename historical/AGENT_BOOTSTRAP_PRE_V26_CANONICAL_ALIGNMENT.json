@@ -1,1 +1,8 @@
-{}
+{
+  "schema": "intercommunications/historical-bootstrap-pointer/v1",
+  "status": "HISTORICAL_LINEAGE_ONLY",
+  "original_path": "AGENT_BOOTSTRAP.json",
+  "original_blob_sha": "d8f2b477f80a273ad55b639c40fdabef00fa6f43",
+  "original_size_bytes": 18330,
+  "note": "The exact pre-V26 bootstrap remains addressable by the recorded Git blob SHA in repository history. This pointer is not an active bootstrap and must not outrank V26."
+}
