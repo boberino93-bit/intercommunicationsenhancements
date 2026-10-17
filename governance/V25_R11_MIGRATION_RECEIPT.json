@@ -1,0 +1,22 @@
+{
+  "schema": "intercommunications/v25-r11-migration-receipt/v1",
+  "status": "CANDIDATE_BRANCH_COMPLETE",
+  "canonical_promotion": false,
+  "candidate_branch": "candidate/v25-r11-bootstrap-upgrade-20261016",
+  "main_modified": false,
+  "artifactory_runtime": "UNAVAILABLE",
+  "artifactory_write_claimed": false,
+  "github_candidate_files_written": true,
+  "scheduler_posture": {
+    "all_exposed_tasks_disabled_except": "VMBUS Defrag",
+    "vmbus_defrag_enabled": true
+  },
+  "verification_required_before_promotion": [
+    "read_back candidate files",
+    "review branch diff",
+    "validate bootstrap ordering",
+    "validate scheduler state",
+    "obtain separate merge/promotion authorization",
+    "satisfy stronger proof if active governance classifies promotion as high consequence"
+  ]
+}

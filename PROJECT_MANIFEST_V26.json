@@ -1,0 +1,78 @@
+{
+  "schema": "intercommunications/v26-project-manifest/v1",
+  "version": "V26",
+  "status": "AUTHORIZED_CANONICAL_PROMOTION",
+  "canonical_promotion": true,
+  "activation": {
+    "condition": "THIS_FILE_PRESENT_ON_DEFAULT_BRANCH_MAIN_VIA_AUTHORIZED_MERGE",
+    "state_at_record_creation": "PENDING_MAIN_MERGE",
+    "effective_on_main_after_merge": true,
+    "candidate_branch_is_not_itself_canonical": true
+  },
+  "artifact": {
+    "name": "Intercommunication_Enhancements_Herd_AI_BIOS_V26_CONSOLIDATED_PROMOTION_FULL_PRESERVATION_VALIDATED_CANDIDATE.md",
+    "bytes": 108008506,
+    "sha256": "122e73dc7ba01384d799fc508c337081948ae1714f869a318d2ab96cd142d778",
+    "role": "ONE_FILE_MASTER_RUNTIME_AUDIT_BUNDLE",
+    "github_full_artifact_embedded": false,
+    "github_representation": "DIGEST_AND_CANONICAL_BOOTSTRAP_OVERLAY",
+    "artifactory_publication": "PENDING_NO_WRITE_CAPABLE_TRANSPORT_IN_CURRENT_RUNTIME"
+  },
+  "lineage": {
+    "immediate_parent_version": "V25_R11",
+    "immediate_parent_bytes": 107989882,
+    "immediate_parent_sha256": "a71e89a1c9eb0b0ea825e5cb5f304575b26365432c604388a55488e68bb15169",
+    "nested_r10_sha256": "88d912e854748e80aa569107cf048a1c93b18ac15ea564068f7ca2fbe20e93e8",
+    "historical_candidate_records_preserved": true
+  },
+  "bootstrap": {
+    "adapter": "bootstrap/V26_BOOTSTRAP_ADAPTER.json",
+    "order": [
+      "HOST_PLATFORM_POLICY",
+      "V26_ACTIVE_PREFIX",
+      "UNBOUND_READ_ONLY",
+      "INITIALIZE_VALIDATE_EMBEDDED_VMBUS",
+      "VMBUS_READY",
+      "LOAD_R10_CORRECTED_PRINCIPAL_CONTEXT",
+      "LOAD_R11_REVISABLE_MODEL_SYNTHESIS",
+      "LOAD_V26_DIRECT_CHRONOLOGY",
+      "PRINCIPAL_CONTEXT_READY",
+      "PROJECT_BIND",
+      "PROJECT_SCOPED_VMBUS_AND_POLICY",
+      "RUNTIME_CAPABILITY_DISCOVERY",
+      "OPTIONAL_EXTERNAL_MIRROR_RECONCILIATION",
+      "TASK_INTERPRETATION_AND_BOUNDED_EXECUTION"
+    ],
+    "external_service_required_for_standalone_boot": false,
+    "principal_context_conveys_identity_or_authority": false
+  },
+  "project_sharing_boundary": {
+    "policy": "governance/V26_PROJECT_SEPARATION_POLICY.json",
+    "only_shared_coordination_project": "INTERCOMMUNICATION_ENHANCEMENTS",
+    "shared_protocol_implies_shared_project_state": false,
+    "shared_protocol_implies_shared_project_authority": false,
+    "cv_support_federated": false,
+    "cross_project_state_access_default": "DENY"
+  },
+  "external_mirrors": {
+    "required_for_standalone_readiness": false,
+    "reconcile_after_standalone_readiness": true,
+    "equivalence_requires_logical_record_id_and_payload_sha256": true,
+    "conflicts_preserved": true,
+    "github_write_proves_artifactory_write": false
+  },
+  "scheduler": {
+    "state_mutated_by_v26_promotion": false,
+    "pipeline_ordering": "CHECKPOINT_READINESS_AND_FENCING_NOT_SHARED_CLOCK_TIME"
+  },
+  "authorization": {
+    "case_id": "AUTH-20261016-V26-PROMOTION-01",
+    "action_digest": "f9e0acad388f03b3c9b24263844bd5e0d92323420105147159848871237596ba",
+    "external_proof_issue": 195,
+    "registered_github_principal": "boberino93-bit",
+    "scope": "INTERCOMMUNICATION_ENHANCEMENTS_ONLY",
+    "cv_support_mutation": false,
+    "cross_project_mutation": false,
+    "scheduler_mutation": false
+  }
+}

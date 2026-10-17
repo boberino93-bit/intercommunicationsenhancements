@@ -1,0 +1,57 @@
+{
+  "schema": "intercommunications/v26-promotion-receipt/v1",
+  "version": "V26",
+  "status": "AUTHORIZED_PENDING_MAIN_MERGE",
+  "authorization": {
+    "case_id": "AUTH-20261016-V26-PROMOTION-01",
+    "action_digest": "f9e0acad388f03b3c9b24263844bd5e0d92323420105147159848871237596ba",
+    "claimed_principal": "Robert Leonard",
+    "registered_github_principal": "boberino93-bit",
+    "independent_proof": {
+      "type": "HUMAN_PERFORMED_REGISTERED_GITHUB_CHALLENGE",
+      "issue_number": 195,
+      "verified_author_matches_registered_principal": true,
+      "verified_case_id_and_nonce_present": true,
+      "verified_postdates_challenge": true,
+      "agent_created_proof_artifact": false
+    },
+    "human_authorization_statement_received": true,
+    "single_use_case": true
+  },
+  "bounded_scope": {
+    "repository": "boberino93-bit/intercommunicationsenhancements",
+    "source_pull_request": 194,
+    "source_branch": "candidate/v25-r11-bootstrap-upgrade-20261016",
+    "target_branch": "main",
+    "intercommunication_enhancements_only": true,
+    "cv_support_mutation": false,
+    "other_project_mutation": false,
+    "scheduler_mutation": false,
+    "unrelated_ci_debt_fix": false
+  },
+  "validated_artifact": {
+    "name": "Intercommunication_Enhancements_Herd_AI_BIOS_V26_CONSOLIDATED_PROMOTION_FULL_PRESERVATION_VALIDATED_CANDIDATE.md",
+    "bytes": 108008506,
+    "sha256": "122e73dc7ba01384d799fc508c337081948ae1714f869a318d2ab96cd142d778",
+    "primary_validation_checks_passed": 23,
+    "primary_validation_checks_failed": 0,
+    "independent_parent_byte_comparison": "PASS",
+    "r11_parent_sha256": "a71e89a1c9eb0b0ea825e5cb5f304575b26365432c604388a55488e68bb15169",
+    "r10_nested_sha256": "88d912e854748e80aa569107cf048a1c93b18ac15ea564068f7ca2fbe20e93e8"
+  },
+  "repository_validation": {
+    "candidate_v25_r11_history_preserved": true,
+    "v26_overlay_required_before_merge": true,
+    "known_repository_suite_red_state_disposition": "NOT_SILENTLY_TREATED_AS_GREEN_AND_NOT_FIXED_UNDER_THIS_CASE",
+    "known_native_memory_identifier_failure_observed_in_base": true,
+    "pytest_runner_dependency_failure_scope": "ORTHOGONAL_TO_V26_OVERLAY_NOT_REPAIRED_IN_THIS_CASE"
+  },
+  "externalization": {
+    "github_candidate_overlay_written": true,
+    "github_main_merge": "PENDING",
+    "artifactory_write": "NOT_PERFORMED_NO_WRITE_CAPABLE_TRANSPORT",
+    "artifactory_readback": "NOT_PERFORMED",
+    "github_write_proves_artifactory_write": false
+  },
+  "activation_rule": "V26 becomes the repository canonical bootstrap generation only after the authorized PR is merged to main and the V26 files are read back from main."
+}
