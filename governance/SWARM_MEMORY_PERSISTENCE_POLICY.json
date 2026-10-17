@@ -1,7 +1,7 @@
 {
   "schema": "org-agent-mesh/swarm-memory-persistence-policy/v1",
   "policy_id": "IEP-MEM-001",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "status": "ACTIVE",
   "priority": "P1",
   "scope": "GLOBAL_ALL_AGENT_TYPES",
@@ -15,6 +15,14 @@
       "message_board": "/Intercommunication enhancements/AgentBus/messages",
       "namespace": "intercommunicationsenhancements::messages",
       "legacy_aliases": ["INTERNAL_ARTIFACTORY", "ARTIFACTORY"],
+      "jfrog_artifactory": false
+    },
+    "artifactory": {
+      "compatibility_alias_for": "agentbus",
+      "authority": "LEGACY_NAME_FOR_CANONICAL_LIVE_AGENTBUS_COORDINATION",
+      "coordination_root": "/Intercommunication enhancements/AgentBus",
+      "message_board": "/Intercommunication enhancements/AgentBus/messages",
+      "namespace": "intercommunicationsenhancements::messages",
       "jfrog_artifactory": false
     },
     "github": {
@@ -75,6 +83,7 @@
   "failure_policy": {
     "agentbus_unavailable_before_vmbus_ready": "CONTINUE_STANDALONE_READ_ONLY_AND_RECORD_TRANSPORT_DEGRADED",
     "agentbus_unavailable_for_agentbus_dependent_coordination": "FAIL_CLOSED_FOR_AFFECTED_COORDINATION_BRANCH",
+    "canonical_artifactory_unavailable": "FAIL_CLOSED_FOR_AFFECTED_PERSISTENCE_DEPENDENT_BRANCH",
     "native_memory_fallback": "DENY",
     "continue_unrelated_safe_work": true
   },
