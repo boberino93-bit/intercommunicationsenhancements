@@ -1,0 +1,55 @@
+{
+  "schema": "intercommunications/v25-r11-external-mirror-policy/v1",
+  "status": "FORENSIC_IMPLEMENTATION_CANDIDATE",
+  "canonical_promotion": false,
+  "source_revision": "V25_R11",
+  "applies_after": [
+    "VMBUS_READY",
+    "PRINCIPAL_CONTEXT_READY",
+    "PROJECT_CONTEXT_BOUND"
+  ],
+  "bootstrap_dependency": {
+    "github_required": false,
+    "artifactory_required": false,
+    "message_board_required": false,
+    "database_required": false,
+    "object_store_required": false
+  },
+  "standalone_mode": {
+    "allowed": true,
+    "mode": "STANDALONE_READ_ONLY",
+    "unavailable_external_service_behavior": "CONTINUE_STANDALONE_AND_RECORD_TRANSPORT_DEGRADED",
+    "durable_external_commit_claimed": false
+  },
+  "external_mirrors": {
+    "default_authority": "NONCANONICAL_MIRROR_UNLESS_SEPARATELY_PROMOTED",
+    "reconciliation_phase": "AFTER_STANDALONE_READINESS",
+    "equivalence_requires": [
+      "SAME_LOGICAL_RECORD_ID",
+      "SAME_PAYLOAD_SHA256"
+    ],
+    "conflict_behavior": "PRESERVE_CONFLICT_AND_SURFACE",
+    "silent_override": "DENY",
+    "one_store_implies_other_store": false
+  },
+  "artifactory_message_board": {
+    "registered_namespace": "intercommunicationsenhancements::messages",
+    "registered_path": "/Intercommunication enhancements/AgentBus/messages",
+    "candidate_role": "OPTIONAL_EXTERNAL_COORDINATION_MIRROR",
+    "runtime_unavailable_behavior": "ARTIFACTORY_RUNTIME_UNAVAILABLE",
+    "github_mirror_may_claim_artifactory_write": false
+  },
+  "github": {
+    "repository": "boberino93-bit/intercommunicationsenhancements",
+    "candidate_role": "SOURCE_VERSION_CONTROL_AND_OPTIONAL_MIRROR",
+    "coordination_backup_prefix": "agentbus-backup/coordination-messages/",
+    "candidate_branch": "candidate/v25-r11-bootstrap-upgrade-20261016"
+  },
+  "authority_boundaries": [
+    "MIRROR_WRITE_IS_NOT_BOOTSTRAP_AUTHORITY",
+    "MIRROR_WRITE_IS_NOT_PROJECT_BINDING_AUTHORITY",
+    "MIRROR_WRITE_IS_NOT_AUTHENTICATION",
+    "MIRROR_WRITE_IS_NOT_MUTATION_AUTHORIZATION",
+    "PRINCIPAL_CONTEXT_READY_IS_NOT_DURABLE_EXTERNAL_COMMIT"
+  ]
+}
