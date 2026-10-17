@@ -61,7 +61,8 @@
     "allowed_roles": ["RESEARCH", "MANAGER"],
     "mode": "APPEND_ONLY_PROJECT_SCOPED",
     "authority_conveyed": false,
-    "cross_project_write": "DENY"
+    "cross_project_write": "DENY",
+    "all_other_subordinate_durable_mutation": "DENY"
   },
   "roleless_admission_contract": {
     "protocol": "protocols/roleless_agent_admission.md",
@@ -97,7 +98,7 @@
     {"order": 23, "id": "load_swarm_launch_kernel_if_task_requires_swarm", "conditional": "task_classification.swarm_participation == true", "mutation_allowed": false},
     {"order": 24, "id": "acquire_or_validate_bounded_claim_lease_or_fence_before_exclusive_or_mutating_work", "conditional": "exclusive_or_mutating_work_planned == true", "claim_is_mutation_authority": false, "mutation_allowed": false},
     {"order": 25, "id": "prepare_and_surface_case_specific_authorization_link", "paths": ["protocols/actionable_link_delivery.md", "governance/ACTIONABLE_LINK_DELIVERY_POLICY.json", "governance/MUTATION_AUTHORIZATION_POLICY.json"], "conditional": "external_mutation_planned == true && current_valid_single_use_authorization_case_absent == true", "required_state": "PRE_MUTATION_AUTHORIZATION_REQUIRED", "case_specific_prefill_required_when_supported": true, "secret_or_bearer_material_in_url": "DENY", "verification_unavailable_behavior": "SURFACE_SAFE_UNVERIFIED_DIRECT_WITH_DISCLOSURE", "link_open_or_render_is_authorization": false, "mutation_allowed": false},
-    {"order": 26, "id": "evaluate_current_mutation_authorization_envelope", "vmbus_ready_required": true, "principal_context_ready_required": true, "project_context_ready_required": true, "explicit_principal_claim_required": true, "single_use_case_id_required": true, "high_consequence_independent_proof_required": true, "mutation_allowed": false},
+    {"order": 26, "id": "evaluate_current_mutation_authorization_envelope", "vmbus_ready_required": true, "principal_context_ready_required": true, "project_context_ready_required": true, "explicit_principal_claim_required": true, "single_use_case_id_required": true, "high_consequence_independent_proof_required": true, "result_required_before_any_external_side_effect_except_valid_non_authoritative_coordination_publication": true, "mutation_allowed": false},
     {"order": 27, "id": "bind_global_run_role_instance_and_ready_barrier_if_swarm", "conditional": "task_classification.swarm_participation == true && current_single_use_authorization_case_allows_this_write", "additional_guards": ["vmbus_ready", "principal_context_ready", "project_context_ready", "single_use_authorization_case_validation"], "mutation_allowed": true},
     {"order": 28, "id": "execute_task_with_autonomous_continuation_and_per_mutation_scope_validation", "additional_guards": ["vmbus_ready", "principal_context_ready", "project_context_ready", "registered_repository_boundary", "single_use_authorization_case_validation_before_each_protected_external_side_effect", "authorization_case_replay_prevention", "localized_fail_closed"], "mutation_allowed": true},
     {"order": 29, "id": "persist_learning_checkpoint_and_handoff", "path": "protocols/swarm_learning.md", "additional_guards": ["vmbus_ready", "principal_context_ready", "project_context_ready", "single_use_authorization_case_validation_when_protected_write"], "mutation_allowed": true},
