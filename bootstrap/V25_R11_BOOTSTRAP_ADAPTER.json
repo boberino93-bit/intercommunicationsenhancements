@@ -1,0 +1,52 @@
+{
+  "schema": "intercommunications/v25-r11-bootstrap-adapter/v1",
+  "status": "FORENSIC_IMPLEMENTATION_CANDIDATE",
+  "canonical_promotion": false,
+  "source_artifact": {
+    "revision": "V25_R11",
+    "immediate_parent_sha256": "88d912e854748e80aa569107cf048a1c93b18ac15ea564068f7ca2fbe20e93e8",
+    "synthesis_canonical_sha256": "1a6ecf186c5631e8821e8ddfad952504e3e91c76352b138d2cfdf89cd88dac6f"
+  },
+  "governance": {
+    "profile_or_synthesis_is_authority": false,
+    "profile_or_synthesis_is_authentication": false,
+    "synthesis_is_user_assertion": false,
+    "principal_context_ready_is_external_commit": false,
+    "preserve_correction_path": true,
+    "existing_mutation_authorization_policy_still_applies": true
+  },
+  "bootstrap_invariants": [
+    "ENTER_UNBOUND_READ_ONLY_BEFORE_PROJECT_BIND",
+    "INITIALIZE_EMBEDDED_VMBUS_MANDATORILY",
+    "VMBUS_READY_BEFORE_PROJECT_BIND",
+    "LOAD_R10_CORRECTED_PRINCIPAL_CONTEXT_AFTER_VMBUS_READY",
+    "LOAD_R11_MODEL_SYNTHESIS_AS_REVISABLE_HYPOTHESES",
+    "PRINCIPAL_CONTEXT_READY_BEFORE_PROJECT_BIND",
+    "PROJECT_BIND_BEFORE_TASK_INTERPRETATION",
+    "EXTERNAL_SERVICES_NOT_REQUIRED_FOR_STANDALONE_BOOT",
+    "OPTIONAL_EXTERNAL_MIRROR_RECONCILIATION_ONLY_AFTER_STANDALONE_READINESS",
+    "MIRROR_EQUIVALENCE_REQUIRES_LOGICAL_RECORD_ID_AND_PAYLOAD_DIGEST_MATCH",
+    "MIRROR_CONFLICTS_ARE_PRESERVED_NOT_SILENTLY_RESOLVED"
+  ],
+  "sequence": [
+    {"order":0,"id":"enter_unbound_read_only","gate":"UNBOUND_READ_ONLY","external_required":false},
+    {"order":1,"id":"load_r11_active_prefix_and_inherited_vmbus_contract","gate":"VMBUS_CONTRACT_LOADED","external_required":false},
+    {"order":2,"id":"initialize_and_validate_embedded_vmbus","gate":"VMBUS_READY","external_required":false},
+    {"order":3,"id":"verify_and_load_r10_corrected_principal_context","gate":"R10_CONTEXT_LOADED","external_required":false},
+    {"order":4,"id":"verify_and_load_r11_synthesis_extension","gate":"R11_SYNTHESIS_LOADED","external_required":false,"epistemic_class":"MODEL_SYNTHESIS_HYPOTHESIS","revisable":true},
+    {"order":5,"id":"build_principal_context_indexes","gate":"PRINCIPAL_CONTEXT_READY","external_required":false,"indexes":["epistemic","privacy","chronology","synthesis"]},
+    {"order":6,"id":"bind_project_from_host_or_registered_exact_identity","gate":"PROJECT_CONTEXT_BOUND","external_required":false},
+    {"order":7,"id":"bind_vmbus_project_namespace_and_load_project_policy","gate":"PROJECT_NAMESPACE_BOUND","external_required":false},
+    {"order":8,"id":"recover_task_context_and_reconcile_chronology","gate":"TASK_CONTEXT_RECOVERED","external_required":false},
+    {"order":9,"id":"discover_runtime_capabilities","gate":"CAPABILITIES_CLASSIFIED","external_required":false},
+    {"order":10,"id":"optional_external_mirror_reconciliation","gate":"OPTIONAL_MIRRORS_ASSESSED","external_required":false,"unavailable_behavior":"CONTINUE_STANDALONE_WITH_EXPLICIT_DEGRADED_TRANSPORT_STATE"},
+    {"order":11,"id":"interpret_current_task","gate":"TASK_INTERPRETED","external_required":false},
+    {"order":12,"id":"classify_authority_and_execute_bounded_work","gate":"WORK_RUNNING","external_required":false}
+  ],
+  "compatibility": {
+    "legacy_bootstrap_order_file": "BOOTSTRAP_ORDER.json",
+    "legacy_local_bootstrap_file": "AGENT_BOOTSTRAP.json",
+    "application_rule": "THIS_ADAPTER_PRECEDES_LEGACY_PROJECT_BINDING_AND_TASK_INTERPRETATION_ON_THIS_CANDIDATE_BRANCH_ONLY",
+    "legacy_parent_preservation": true
+  }
+}
