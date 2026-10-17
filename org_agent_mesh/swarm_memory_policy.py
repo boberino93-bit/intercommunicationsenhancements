@@ -4,22 +4,22 @@ from dataclasses import dataclass
 from hashlib import sha256
 from typing import Any, Iterable
 
-
-CANONICAL_ARTIFACTORY_BOARD = "/Intercommunication enhancements/AgentBus/messages"
+CANONICAL_AGENTBUS_BOARD = "/Intercommunication enhancements/AgentBus/messages"
+CANONICAL_ARTIFACTORY_BOARD = CANONICAL_AGENTBUS_BOARD  # legacy compatibility alias
 CANONICAL_GITHUB_REPOSITORY = "boberino93-bit/intercommunicationsenhancements"
 GITHUB_COORDINATION_BACKUP_PREFIX = "agentbus-backup/coordination-messages/"
 
 
 class MemoryPolicyViolation(RuntimeError):
-    """A persistence source or authority claim violates IEP-MEM-001."""
+    pass
 
 
 class ExternalPersistenceUnavailable(MemoryPolicyViolation):
-    """Required external authoritative persistence cannot be read."""
+    pass
 
 
 class ExternalPersistenceConflict(MemoryPolicyViolation):
-    """External authoritative records materially disagree."""
+    pass
 
 
 def _normalize(value: str) -> str:
@@ -28,53 +28,21 @@ def _normalize(value: str) -> str:
     return value.strip().lower().replace(" ", "_")
 
 
-_NATIVE_ALIASES = {
-    "native_chatgpt_memory",
-    "chatgpt_memory",
-    "native_memory",
-    "saved_memory",
-    "saved_memories",
-    "memory_recall",
-    "chatgpt_memory_recall",
-    "host_memory",
-}
-
-_ARTIFACTORY_ALIASES = {
-    "artifactory",
-    "agentbus",
-    "internal_artifactory",
-    "canonical_message_board",
-    _normalize(CANONICAL_ARTIFACTORY_BOARD),
-}
-
-_GITHUB_ALIASES = {
-    "github",
-    "github_repository",
-    "github_backup",
-    _normalize(CANONICAL_GITHUB_REPOSITORY),
-}
-
-_LOCAL_ALIASES = {
-    "local",
-    "local_file",
-    "local_filesystem",
-    "filesystem",
-    "sqlite",
-    "process_memory",
-    "session_memory",
-    "test_fixture",
-}
+_NATIVE = {"native_chatgpt_memory", "chatgpt_memory", "native_memory", "saved_memory", "saved_memories", "memory_recall", "chatgpt_memory_recall", "host_memory"}
+_AGENTBUS = {"agentbus", "chatgpt_library_agentbus", "canonical_message_board", "artifactory", "internal_artifactory", _normalize(CANONICAL_AGENTBUS_BOARD)}
+_GITHUB = {"github", "github_repository", "github_backup", _normalize(CANONICAL_GITHUB_REPOSITORY)}
+_LOCAL = {"local", "local_file", "local_filesystem", "filesystem", "sqlite", "process_memory", "session_memory", "test_fixture"}
 
 
 def classify_persistence_source(source: str) -> str:
-    normalized = _normalize(source)
-    if normalized in _NATIVE_ALIASES:
+    value = _normalize(source)
+    if value in _NATIVE:
         return "NATIVE_CHATGPT_MEMORY_DENIED"
-    if normalized in _ARTIFACTORY_ALIASES:
-        return "ARTIFACTORY_CANONICAL"
-    if normalized in _GITHUB_ALIASES:
+    if value in _AGENTBUS:
+        return "AGENTBUS_CANONICAL"
+    if value in _GITHUB:
         return "GITHUB_EXTERNAL_BACKUP"
-    if normalized in _LOCAL_ALIASES:
+    if value in _LOCAL:
         return "LOCAL_NONAUTHORITATIVE"
     return "UNKNOWN"
 
@@ -106,33 +74,17 @@ class PersistenceReceipt:
     reference: str
     readback_verified: bool
     payload_sha256: str | None = None
+    logical_record_id: str | None = None
 
     @classmethod
-    def from_payload(
-        cls,
-        backend: str,
-        reference: str,
-        payload: bytes | str,
-        *,
-        readback_verified: bool,
-    ) -> "PersistenceReceipt":
+    def from_payload(cls, backend: str, reference: str, payload: bytes | str, *, readback_verified: bool, logical_record_id: str | None = None) -> "PersistenceReceipt":
         raw = payload.encode("utf-8") if isinstance(payload, str) else bytes(payload)
-        return cls(
-            backend=backend,
-            reference=reference,
-            readback_verified=bool(readback_verified),
-            payload_sha256=sha256(raw).hexdigest(),
-        )
+        return cls(backend, reference, bool(readback_verified), sha256(raw).hexdigest(), logical_record_id)
 
 
-def validate_external_receipts(
-    receipts: Iterable[PersistenceReceipt],
-    *,
-    require_artifactory: bool = True,
-    require_github: bool = True,
-) -> tuple[PersistenceReceipt, ...]:
+def validate_external_receipts(receipts: Iterable[PersistenceReceipt], *, require_artifactory: bool = True, require_github: bool = True, require_agentbus: bool | None = None) -> tuple[PersistenceReceipt, ...]:
     items = tuple(receipts)
-    classifications: set[str] = set()
+    classes = set()
     for receipt in items:
         if not isinstance(receipt, PersistenceReceipt):
             raise TypeError("receipts must contain PersistenceReceipt values")
@@ -141,37 +93,40 @@ def validate_external_receipts(
             raise MemoryPolicyViolation("PERSISTENCE_RECEIPT_REFERENCE_REQUIRED")
         if not receipt.readback_verified:
             raise MemoryPolicyViolation("EXTERNAL_PERSISTENCE_READBACK_REQUIRED")
-        classifications.add(classification)
-
-    if require_artifactory and "ARTIFACTORY_CANONICAL" not in classifications:
-        raise MemoryPolicyViolation("ARTIFACTORY_READBACK_RECEIPT_REQUIRED")
-    if require_github and "GITHUB_EXTERNAL_BACKUP" not in classifications:
+        classes.add(classification)
+    need_agentbus = require_artifactory if require_agentbus is None else require_agentbus
+    if need_agentbus and "AGENTBUS_CANONICAL" not in classes:
+        raise MemoryPolicyViolation("AGENTBUS_READBACK_RECEIPT_REQUIRED")
+    if require_github and "GITHUB_EXTERNAL_BACKUP" not in classes:
         raise MemoryPolicyViolation("GITHUB_READBACK_RECEIPT_REQUIRED")
     return items
 
 
-def resolve_authoritative_collective_state(
-    *,
-    artifactory_state: Any = None,
-    github_state: Any = None,
-    artifactory_available: bool = True,
-    github_available: bool = True,
-    native_memory_state: Any = None,
-) -> Any:
-    """Resolve swarm state without ever ingesting native ChatGPT memory.
+def _record_identity(state: Any) -> tuple[str, str] | None:
+    if not isinstance(state, dict):
+        return None
+    record_id, digest = state.get("logical_record_id"), state.get("payload_sha256")
+    if not isinstance(record_id, str) or not record_id.strip() or not isinstance(digest, str) or not digest.strip():
+        return None
+    return record_id.strip(), digest.strip().lower()
 
-    Artifactory is the canonical live coordination authority. GitHub may corroborate
-    or back up that state, but a material mismatch is a fail-closed conflict.
-    """
 
+def records_equivalent(left: Any, right: Any) -> bool | None:
+    left_id, right_id = _record_identity(left), _record_identity(right)
+    if left_id is None or right_id is None or left_id[0] != right_id[0]:
+        return None
+    return left_id[1] == right_id[1]
+
+
+def resolve_authoritative_collective_state(*, agentbus_state: Any = None, artifactory_state: Any = None, github_state: Any = None, agentbus_available: bool | None = None, artifactory_available: bool = True, github_available: bool = True, native_memory_state: Any = None, require_agentbus_for_this_branch: bool = True) -> Any:
     if native_memory_state is not None:
         raise MemoryPolicyViolation("NATIVE_CHATGPT_MEMORY_INGESTION_DENIED")
-    if not artifactory_available:
-        raise ExternalPersistenceUnavailable("CANONICAL_ARTIFACTORY_STATE_UNAVAILABLE")
-    if artifactory_state is None:
-        raise ExternalPersistenceUnavailable("CANONICAL_ARTIFACTORY_STATE_MISSING")
-
-    if github_available and github_state is not None and github_state != artifactory_state:
-        raise ExternalPersistenceConflict("ARTIFACTORY_GITHUB_STATE_CONFLICT")
-
-    return artifactory_state
+    available = artifactory_available if agentbus_available is None else agentbus_available
+    board = agentbus_state if agentbus_state is not None else artifactory_state
+    if not available or board is None:
+        if require_agentbus_for_this_branch:
+            raise ExternalPersistenceUnavailable("AGENTBUS_STATE_UNAVAILABLE")
+        return github_state
+    if github_available and github_state is not None and records_equivalent(board, github_state) is False:
+        raise ExternalPersistenceConflict("AGENTBUS_GITHUB_RECORD_CONFLICT")
+    return board

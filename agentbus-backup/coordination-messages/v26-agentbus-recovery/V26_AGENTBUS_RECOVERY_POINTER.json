@@ -1,0 +1,22 @@
+{
+  "schema": "intercommunications/v26-agentbus-recovery-pointer/v1",
+  "project_id": "intercommunicationsenhancements",
+  "authority_conveyed": false,
+  "status": "RECOVERY_PREPARED_AGENTBUS_NOT_MUTATED",
+  "logical_record_id": "INTERCOMMUNICATION_ENHANCEMENTS::AGENTBUS::V26_RECOVERY_POINTER",
+  "agentbus": {
+    "surface": "CHATGPT_LIBRARY_AGENTBUS",
+    "path": "/Intercommunication enhancements/AgentBus/messages",
+    "write_performed": false,
+    "readback_performed": false
+  },
+  "github": {
+    "repository": "boberino93-bit/intercommunicationsenhancements",
+    "base_revision": "e053ee43ec5038303c139f13f44b28bef6e330c1",
+    "repair_branch": "repair/v26-agentbus-linkage-20261016"
+  },
+  "v26_artifact_sha256": "122e73dc7ba01384d799fc508c337081948ae1714f869a318d2ab96cd142d778",
+  "recovery_policy": "governance/V26_AGENTBUS_LINKAGE_POLICY.json",
+  "migration_plan": "docs/V26_AGENTBUS_RECOVERY_MIGRATION.md",
+  "next_required_external_step": "INSPECT_AND_ARCHIVE_LIVE_AGENTBUS_BEFORE_ANY_DESTRUCTIVE_RESET"
+}

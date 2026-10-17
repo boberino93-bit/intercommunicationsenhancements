@@ -1,0 +1,62 @@
+{
+  "schema": "intercommunications/v26-agentbus-linkage-policy/v1",
+  "version": "V26",
+  "status": "ACTIVE_ON_PROMOTION",
+  "project_id": "intercommunicationsenhancements",
+  "scope": "INTERCOMMUNICATION_ENHANCEMENTS_ONLY",
+  "surface_identity": {
+    "agentbus_surface": "CHATGPT_LIBRARY_AGENTBUS",
+    "canonical_message_path": "/Intercommunication enhancements/AgentBus/messages",
+    "registered_namespace": "intercommunicationsenhancements::messages",
+    "legacy_aliases": ["INTERNAL_ARTIFACTORY", "ARTIFACTORY", "AgentBus"],
+    "legacy_aliases_are_product_identity": false,
+    "jfrog_artifactory": false
+  },
+  "authority_split": {
+    "github": "CANONICAL_VERSIONED_SOURCE_GOVERNANCE_AND_DURABLE_BACKUP",
+    "agentbus": "CANONICAL_LIVE_PROJECT_COORDINATION_EVENT_STREAM",
+    "vmbus": "STANDALONE_RUNTIME_CONTEXT_AND_READINESS_LAYER"
+  },
+  "bootstrap": {
+    "agentbus_required_for_vmbus_ready": false,
+    "github_required_for_vmbus_ready": false,
+    "external_reconciliation_phase": "AFTER_STANDALONE_READINESS",
+    "unavailable_surface": "RETRIEVAL_FAILURE_NOT_ABSENCE_OF_EVIDENCE"
+  },
+  "record_equivalence": {
+    "required_fields": ["logical_record_id", "payload_sha256"],
+    "same_logical_record_id_and_same_payload_sha256": "EQUIVALENT",
+    "same_logical_record_id_and_different_payload_sha256": "CONFLICT",
+    "whole_store_difference_is_record_conflict": false,
+    "silent_winner": "DENY",
+    "conflict_behavior": "PRESERVE_AND_SURFACE"
+  },
+  "write_evidence": {
+    "github_write_proves_agentbus_write": false,
+    "agentbus_write_proves_github_write": false,
+    "propagation_complete_requires_each_required_surface_readback": true
+  },
+  "recovery": {
+    "destructive_reset_requires_complete_pre_reset_archive": true,
+    "archive_hash_required": true,
+    "archive_readback_required": true,
+    "delete_before_verified_archive": "DENY",
+    "reset_requires_fresh_high_consequence_authorization": true,
+    "reseed_requires_genesis_record_readback": true
+  },
+  "project_boundary": {
+    "cv_support_federated": false,
+    "other_project_state_shared": false,
+    "cross_project_write_default": "DENY"
+  },
+  "invariants": [
+    "GITHUB_WRITE != AGENTBUS_WRITE",
+    "AGENTBUS_COORDINATION_AUTHORITY != GITHUB_SOURCE_AUTHORITY",
+    "STORE_DIFFERENCE != RECORD_CONFLICT",
+    "RECORD_CONFLICT = SAME_LOGICAL_RECORD_ID_AND_DIFFERENT_PAYLOAD_SHA256",
+    "RETRIEVAL_FAILURE != ABSENCE_OF_EVIDENCE",
+    "MATERIALIZED != INSPECTED",
+    "PRESERVED != VERIFIED",
+    "CV_SUPPORT != FEDERATED_PROJECT"
+  ]
+}

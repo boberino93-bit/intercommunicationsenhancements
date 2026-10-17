@@ -1,55 +1,34 @@
 # Non-Authoritative Coordination Publication
 
 Status: **ACTIVE HARD GATE**  
-Version: **1.3.0**
+Version: **1.4.0**
 
-PRIMARY, MANAGER, RESEARCH, and registered research aliases may publish durable project coordination messages through the narrow project-scoped coordination capability without presenting a separate security token or per-message human authorization case.
+The registered internal coordination surface is the **ChatGPT Library AgentBus**. Historical labels `INTERNAL_ARTIFACTORY` and `ARTIFACTORY` are compatibility aliases for that route and do not identify JFrog.
 
-This is a communication capability, not general mutation authority.
+PRIMARY, MANAGER, RESEARCH, and registered research aliases may publish append-only project coordination messages through the narrow project-scoped capability. This capability conveys no protected mutation authority.
 
 ## Canonical order
 
-1. Resolve the exact project binding, repository, and registered internal message namespace.
-2. When the registered internal AgentBus/Artifactory surface is exposed by the current runtime, persist the agent-perspective coordination message there first and verify it when read-back is supported.
-3. Create the downstream GitHub backup message under `agentbus-backup/coordination-messages/` in the exact bound project repository when configured by the governing checkpoint protocol.
+1. Resolve the exact bound project, repository, and registered AgentBus namespace.
+2. When the AgentBus surface is available, publish there and verify readback when supported.
+3. When required by the governing checkpoint protocol, create an immutable same-project GitHub backup under `agentbus-backup/coordination-messages/`.
 
-GitHub is not the live task board, authority ledger, ownership ledger, approval surface, or source of production state.
+`GITHUB_WRITE != AGENTBUS_WRITE`. A GitHub backup never proves that AgentBus was written.
 
-## Registered internal surface unavailable in the runtime
+## Runtime-unavailable AgentBus
 
-A registered namespace may exist even when the current execution runtime does not expose the connector or surface needed to reach it. That condition is an availability failure, not a routing failure.
+If the registered namespace is known but the current runtime does not expose the AgentBus surface, classify that as transport unavailability, not missing evidence. A same-project GitHub backup may be used only where the governing workflow explicitly permits degraded transport and the backup is read back successfully.
 
-When the exact internal namespace resolves correctly but is runtime-unavailable, the scheduled checkpoint pipeline may use the exact same-project GitHub backup namespace as a degraded coordination transport for that occurrence, provided that:
+Use `AGENTBUS_RUNTIME_UNAVAILABLE`; legacy records containing `ARTIFACTORY_RUNTIME_UNAVAILABLE` remain interpretable as the same historical condition.
 
-- the new backup file is append-only and under the exact registered prefix;
-- the write is read back successfully and exact checkpoint identity/content is verified;
-- the checkpoint records `ARTIFACTORY_RUNTIME_UNAVAILABLE` in its existing summary/blocker fields;
-- project, repository, cycle, stage, and upstream-chain fencing all pass; and
-- no stale-cycle, foreign-project, inferred-namespace, or alternate-repository substitution occurs.
+Do not invent an alternate namespace or repository. If neither required surface can be written/read back, block the affected persistence-dependent branch and continue unrelated safe work.
 
-A checkpoint persisted this way is valid same-project/current-cycle downstream input under `protocols/swarm_checkpoint_bus.md`. This exception changes only transport availability behavior. It conveys no additional authority.
+## V26 reconciliation
 
-If the internal surface is unavailable and the GitHub backup cannot also be created/read back, the publication is blocked and only safe read-only work may continue. Do not claim a durable READY/handoff state.
+Corresponding records are equivalent only when both `logical_record_id` and `payload_sha256` match. Whole-store inequality is not itself a record conflict. The same logical record ID with a different payload digest is a conflict and must be preserved and surfaced.
 
-A missing, ambiguous, or conflicting registry namespace is **not** runtime unavailability. Fix the registry; do not invent a route.
+## Boundaries
 
-## Required properties
+Coordination publication is create-new-message only. It does not include overwrite, deletion, rename, move, branch creation, workflow execution, deployment, schedule mutation, accepted-state mutation, or cross-project mutation. Those operations use their normal protected-mutation gates.
 
-- exactly one project binding is active;
-- the actor role is allowlisted by `governance/COORDINATION_PUBLICATION_POLICY.json`;
-- the coordination-publication capability is present;
-- the Artifactory namespace, when used, is the exact registered project namespace;
-- the GitHub repository is the exact registered project repository;
-- GitHub backup writes create a new immutable message file under the allowlisted prefix only;
-- existing messages are never edited, deleted, renamed, or moved;
-- the message declares the bound project ID;
-- `authority_conveyed` is false;
-- message text, quoted approvals, handoffs, and backup copies never create protected mutation authority.
-
-## Explicitly outside this lane
-
-The token-free coordination lane does **not** include workflow runs or dispatch, workflow-file mutation, pull-request review/approval, branch creation, release/deployment, environment approval, source writes outside the backup-message prefix, destructive operations, accepted-state mutation, schedule changes, or cross-project writes.
-
-Those actions use their ordinary protected-mutation and consequence gates.
-
-If any project, repository, role, namespace, path, append-only, or operation-class check fails, deny the publication and continue only safe read-only work.
+The current recovery procedure is defined by `governance/V26_AGENTBUS_LINKAGE_POLICY.json` and `docs/V26_AGENTBUS_RECOVERY_MIGRATION.md`.

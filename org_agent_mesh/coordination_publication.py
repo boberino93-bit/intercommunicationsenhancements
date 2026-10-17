@@ -27,13 +27,20 @@ class CoordinationPublicationError(PermissionError):
 class CoordinationRoute:
     project_id: str
     repository: str
-    artifactory_namespace: str | None
+    agentbus_namespace: str | None = None
     github_backup_prefix: str = DEFAULT_GITHUB_PREFIX
+    artifactory_namespace: str | None = None  # legacy alias for AgentBus only
 
     def __post_init__(self) -> None:
         require_project_id(self.project_id)
         require_repository_identity(self.repository)
         _validated_prefix(self.github_backup_prefix)
+        if self.agentbus_namespace and self.artifactory_namespace and self.agentbus_namespace != self.artifactory_namespace:
+            raise CoordinationPublicationError("conflicting AgentBus namespace aliases")
+
+    @property
+    def resolved_agentbus_namespace(self) -> str | None:
+        return self.agentbus_namespace or self.artifactory_namespace
 
 
 @dataclass(frozen=True)
@@ -43,8 +50,12 @@ class CoordinationPublicationPermit:
     authorization_mode: str
     token_required: bool
     authority_conveyed: bool
-    artifactory_allowed: bool
+    agentbus_allowed: bool
     github_backup_allowed: bool
+
+    @property
+    def artifactory_allowed(self) -> bool:
+        return self.agentbus_allowed
 
 
 def _validated_prefix(prefix: str) -> str:
@@ -84,6 +95,7 @@ def require_coordination_publication(
     actor_capabilities,
     route: CoordinationRoute,
     target_repository: str,
+    target_agentbus_namespace: str | None = None,
     target_artifactory_namespace: str | None = None,
     github_backup_path: str | None = None,
     operation: str = "CREATE_NEW_MESSAGE",
@@ -93,7 +105,6 @@ def require_coordination_publication(
     project_id = require_project_id(actor_project_id)
     role = str(actor_role).strip().upper()
     capabilities = frozenset(actor_capabilities or ())
-
     if role not in ALLOWED_ROLES:
         raise CoordinationPublicationError("role is not eligible for coordination publication")
     if CAPABILITY not in capabilities and LEGACY_CAPABILITY not in capabilities:
@@ -107,11 +118,15 @@ def require_coordination_publication(
     if authority_conveyed:
         raise CoordinationPublicationError("coordination messages cannot convey authority")
 
-    if target_artifactory_namespace is not None:
-        if route.artifactory_namespace is None:
-            raise CoordinationPublicationError("project has no registered Artifactory message namespace")
-        if target_artifactory_namespace != route.artifactory_namespace:
-            raise ProjectScopeError("Artifactory namespace does not match bound project")
+    if target_agentbus_namespace and target_artifactory_namespace and target_agentbus_namespace != target_artifactory_namespace:
+        raise CoordinationPublicationError("conflicting target AgentBus namespace aliases")
+    target_namespace = target_agentbus_namespace or target_artifactory_namespace
+    registered_namespace = route.resolved_agentbus_namespace
+    if target_namespace is not None:
+        if registered_namespace is None:
+            raise CoordinationPublicationError("project has no registered AgentBus message namespace")
+        if target_namespace != registered_namespace:
+            raise ProjectScopeError("AgentBus namespace does not match bound project")
 
     if github_backup_path is not None:
         github_operation = str(github_operation or "").strip().upper()
@@ -119,19 +134,20 @@ def require_coordination_publication(
             raise CoordinationPublicationError("GitHub coordination lane permits create-new-file backup only")
         _validated_new_file_path(github_backup_path, route.github_backup_prefix)
 
-    if target_artifactory_namespace is None and github_backup_path is None:
+    if target_namespace is None and github_backup_path is None:
         raise CoordinationPublicationError("a registered coordination destination is required")
     return True
 
 
 def issue_coordination_publication_permit(**kwargs) -> CoordinationPublicationPermit:
     require_coordination_publication(**kwargs)
+    target_namespace = kwargs.get("target_agentbus_namespace") or kwargs.get("target_artifactory_namespace")
     return CoordinationPublicationPermit(
         project_id=require_project_id(kwargs["actor_project_id"]),
         role=str(kwargs["actor_role"]).strip().upper(),
         authorization_mode=TOKEN_FREE_AUTHORIZATION_MODE,
         token_required=False,
         authority_conveyed=False,
-        artifactory_allowed=kwargs.get("target_artifactory_namespace") is not None,
+        agentbus_allowed=target_namespace is not None,
         github_backup_allowed=kwargs.get("github_backup_path") is not None,
     )
