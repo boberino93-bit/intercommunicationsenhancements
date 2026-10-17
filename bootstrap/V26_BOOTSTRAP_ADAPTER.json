@@ -1,12 +1,14 @@
 {
   "schema": "intercommunications/v26-bootstrap-adapter/v1",
   "version": "V26",
-  "status": "AUTHORIZED_FOR_CANONICAL_ACTIVATION_ON_MAIN",
-  "activation_condition": "PRESENT_ON_DEFAULT_BRANCH_MAIN_AFTER_AUTHORIZED_MERGE",
+  "status": "CANONICAL_ACTIVE_ON_MAIN",
+  "activation_condition": "SATISFIED_BY_AUTHORIZED_V26_PROMOTION_TO_DEFAULT_BRANCH_MAIN",
+  "canonical_bootstrap_generation": "V26",
+  "active_surface_rule": "V26_IS_CURRENT; V25_R11_AND_EARLIER_ARE_HISTORICAL_LINEAGE_ONLY_UNLESS_EXPLICITLY_REFERENCED_FOR_PROVENANCE_OR_COMPATIBILITY",
   "precedence": [
     "HOST_PLATFORM_POLICY",
     "V26_ACTIVE_PREFIX",
-    "V25_R11_ACTIVE_PREFIX_WHERE_NOT_SUPERSEDED",
+    "V25_R11_HISTORICAL_LINEAGE_WHERE_NOT_SUPERSEDED",
     "V25_R10_CORRECTED_USER_CONTEXT",
     "EARLIER_PRESERVED_LINEAGE"
   ],
@@ -48,6 +50,7 @@
     "INTERCOMMUNICATION_ENHANCEMENTS = ONLY_SHARED_COORDINATION_PROJECT"
   ],
   "project_binding": {
+    "occurs_after_vmbus_ready": true,
     "occurs_after_principal_context_ready": true,
     "project_state_is_namespaced": true,
     "cross_project_state_access_default": "DENY",
@@ -68,5 +71,12 @@
   "v26_artifact": {
     "bytes": 108008506,
     "sha256": "122e73dc7ba01384d799fc508c337081948ae1714f869a318d2ab96cd142d778"
+  },
+  "canonical_alignment": {
+    "case_id": "AUTH-20261016-V26-CANONICAL-ALIGNMENT-01",
+    "scope": "INTERCOMMUNICATION_ENHANCEMENTS_ONLY",
+    "cv_support_mutation": false,
+    "cross_project_mutation": false,
+    "scheduler_mutation": false
   }
 }
